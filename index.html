@@ -1298,7 +1298,9 @@ function admDonnees(){
     </div>
     <h2>Publier sur votre site</h2>
     <p class="aide">Téléchargez le fichier config.json, puis déposez-le dans votre dépôt GitHub, à côté de index.html. Tous les joueurs de votre site recevront alors vos cartes, vos règles et vos images. Refaites-le après chaque série de modifications.</p>
+    <p class="aide">${(() => { const n = Object.values(CARTES).filter(c => c.image).length; return `Cette configuration contient ${n} carte${n>1 ? "s" : ""} avec image.`; })()}${window.claude ? "" : " Si vos images ont été ajoutées sur Claude, faites l’export depuis le prototype sur Claude : elles n’existent pas sur ce site."}</p>
     <div class="adm-actions"><button type="button" class="btn" data-act="config-telecharger">Télécharger config.json</button></div>
+    ${adm.dernierExport ? (e => `<p class="aide" style="color:${e.manquantes ? "var(--danger)" : "var(--cible)"}">Export de ${e.quand} depuis ${e.ou} : ${e.integrees} image${e.integrees>1 ? "s" : ""} intégrée${e.integrees>1 ? "s" : ""} sur ${e.total}${e.manquantes ? `, ${e.manquantes} échec${e.manquantes>1 ? "s" : ""} (${esc(e.raison)})` : ""}.</p>`)(adm.dernierExport) : ""}
     <h2>Valeurs d’origine</h2>
     <p class="aide">Efface toutes vos modifications et restaure les cartes et règles du prototype.</p>
     <div class="adm-actions">${adm.reset
@@ -1489,21 +1491,24 @@ async function transfererImages(){
   renderAdmin();
 }
 
+let raisonEchec = "";
 async function versDataURL(url){
   try {
-    const r = await fetch(url);
-    if(!r.ok) throw new Error("http");
+    const r = await fetch(url, {credentials:"include"});
+    if(!r.ok) throw new Error("réponse " + r.status);
     const b = await r.blob();
-    return await new Promise((ok, ko) => { const f = new FileReader(); f.onload = () => ok(f.result); f.onerror = ko; f.readAsDataURL(b); });
+    const d = await new Promise((ok, ko) => { const f = new FileReader(); f.onload = () => ok(f.result); f.onerror = ko; f.readAsDataURL(b); });
+    return d.replace(/^data:[^;,]*/, m => m.startsWith("data:image/") ? m : "data:image/jpeg");
   } catch(e) {
+    raisonEchec = String(e && e.message || e);
     return await new Promise(ok => {
       const i = new Image();
       i.onload = () => {
         const c = document.createElement("canvas"); c.width = i.naturalWidth; c.height = i.naturalHeight;
         c.getContext("2d").drawImage(i, 0, 0);
-        try { ok(c.toDataURL("image/jpeg", 0.85)); } catch(err) { ok(null); }
+        try { ok(c.toDataURL("image/jpeg", 0.85)); } catch(err) { raisonEchec += " / " + (err && err.name); ok(null); }
       };
-      i.onerror = () => ok(null);
+      i.onerror = () => { raisonEchec += " / image illisible"; ok(null); };
       i.src = url;
     });
   }
@@ -1512,13 +1517,19 @@ async function telechargerConfig(){
   erreur("Préparation du fichier config.json…");
   const cfg = copie(CONFIG);
   cfg.exporte = Date.now();
-  let manquantes = 0;
+  let manquantes = 0, integrees = 0, total = 0;
+  raisonEchec = "";
   for(const c of Object.values(cfg.cartes)){
-    if(c.image && estServeur(c.image)){
+    if(!c.image) continue;
+    total++;
+    if(estServeur(c.image)){
+      erreur(`Préparation des images : ${total}…`);
       const d = await versDataURL(c.image);
-      if(d) c.image = d; else { delete c.image; manquantes++; }
-    }
+      if(d){ c.image = d; integrees++; } else { delete c.image; manquantes++; }
+    } else integrees++;
   }
+  adm.dernierExport = {total, integrees, manquantes, raison:raisonEchec, quand:new Date().toLocaleTimeString("fr-FR"), ou: window.claude ? "le prototype sur Claude" : "votre site"};
+  if(ui.ecran==="admin") renderAdmin();
   const texte = JSON.stringify(cfg);
   CONFIG.exporte = cfg.exporte; sauver();
   const fin = manquantes ? ` ${manquantes} image${manquantes>1 ? "s n’ont" : " n’a"} pas pu être intégrée${manquantes>1 ? "s" : ""}.` : "";
@@ -1822,8 +1833,8 @@ function htmlEnLigne(){
   const retour = `<button type="button" class="btn second" data-act="en-retour">Retour</button>`;
   if(!EN.db && !window.claude) return `<div class="boite" role="dialog" aria-label="Jouer en ligne">
     <h2>Jouer en ligne</h2>
-    <p>Le jeu en ligne arrive bientôt sur ce site. En attendant, jouez à deux sur le même écran ou contre l’ordinateur.</p>
-    <div class="actions">${retour}</div></div>`;
+    ${EN.chargement || !EN.erreurMenu ? `<p class="attente">Connexion au serveur de jeu…</p>` : `<p style="color:var(--danger)">${esc(EN.erreurMenu)}</p>`}
+    <div class="actions">${EN.erreurMenu && !EN.chargement ? `<button type="button" class="btn" data-act="en-ligne">Réessayer</button>` : ""}${retour}</div></div>`;
   if(!EN.db) return `<div class="boite" role="dialog" aria-label="Jouer en ligne">
     <h2>Jouer en ligne</h2>
     <p>Le jeu en ligne n’est pas disponible sur cette page. Il faut être connecté à Claude, et la page doit être partagée avec chaque joueur comme Contributeur ou Éditeur.</p>
@@ -2003,6 +2014,203 @@ async function chargerFichierConfig(){
       if(!S) render();
     }
   } catch(e) { /* pas de config.json : on garde les cartes d’origine */ }
+}
+
+/* ============================================================
+   JEU EN LIGNE SUR LE SITE AUTONOME (Supabase)
+   Même principe que sur Claude : l’hôte fait tourner les règles,
+   l’invité envoie ses actions. Les messages passent par Supabase
+   Realtime ; la partie de l’hôte est sauvegardée dans la table
+   « parties » pour pouvoir la reprendre.
+   ============================================================ */
+const SUPA = {url:"https://vwjgmahvojijrzhviwsb.supabase.co", cle:"sb_publishable_JSOSlATS-TPx6s5icOZk3g_ck9Brlx3",
+              script:"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"};
+if(!window.claude && SUPA.url){
+  let sb = null, canal = null, minuteurs = [];
+  const sessionHote = Math.random().toString(36).slice(2, 10);
+  const ecrireSupa = fileEcriture();
+
+  const chargerScript = src => new Promise((ok, ko) => {
+    const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = ko; document.head.appendChild(s);
+  });
+  async function initSupabase(){
+    if(sb) return true;
+    EN.chargement = true; renderCouche();
+    try {
+      if(!window.supabase) await chargerScript(SUPA.script);
+      sb = window.supabase.createClient(SUPA.url, SUPA.cle);
+      let { data } = await sb.auth.getSession();
+      let session = data && data.session;
+      if(!session){
+        const r = await sb.auth.signInAnonymously();
+        if(r.error) throw r.error;
+        session = r.data.session;
+      }
+      EN.db = "supabase"; EN.monId = session.user.id; EN.erreurMenu = "";
+      return true;
+    } catch(e) {
+      console.warn("Supabase", e); sb = null;
+      EN.erreurMenu = "Connexion au serveur de jeu impossible pour le moment. Vérifiez votre connexion internet, puis réessayez.";
+      return false;
+    } finally { EN.chargement = false; }
+  }
+
+  function fermerCanal(){
+    minuteurs.forEach(m => clearInterval(m)); minuteurs = [];
+    if(canal && sb){ try { sb.removeChannel(canal); } catch(e) {} }
+    canal = null;
+  }
+  function ouvrirCanal(code, gestion){
+    fermerCanal();
+    canal = sb.channel(`partie-${code}`, {config:{broadcast:{self:false}}});
+    for(const [ev, f] of Object.entries(gestion)) canal.on("broadcast", {event:ev}, msg => f((msg && msg.payload) || {}));
+    return new Promise(ok => {
+      const delai = setTimeout(() => ok(false), 10000);
+      canal.subscribe(statut => { if(statut==="SUBSCRIBED"){ clearTimeout(delai); ok(true); } });
+    });
+  }
+  const emettre = (ev, payload) => { if(canal) Promise.resolve(canal.send({type:"broadcast", event:ev, payload})).catch(() => {}); };
+
+  // ----- Hôte
+  function sauverPartie(statut){
+    if(!sb || EN.role!=="hote" || !EN.code) return;
+    const ligne = {code:EN.code, hote:EN.hoteId, invite:EN.inviteId, statut,
+                   etat:S ? JSON.parse(JSON.stringify(S)) : null, config:EN.cfg, maj:new Date().toISOString()};
+    ecrireSupa(async () => { const { error } = await sb.from("parties").upsert(ligne); if(error) throw error; });
+  }
+  function envoyerEtat(avecConfig){
+    if(!enLigne() || EN.role!=="hote") return;
+    emettre("etat", {session:sessionHote, version:EN.version, invite:EN.inviteId, etat:vuePublique(), ...(avecConfig ? {config:EN.cfg} : {})});
+  }
+  function gestionHote(){
+    return {
+      rejoindre: p => {
+        if(!p.id) return;
+        if(!EN.inviteId) demarrerHote(p.id);
+        else if(p.id===EN.inviteId) envoyerEtat(true);
+        else emettre("complet", {id:p.id});
+      },
+      bonjour: p => { if(p.id===EN.inviteId) envoyerEtat(true); },
+      ordres: p => {
+        if(p.id!==EN.inviteId || !enLigne()) return;
+        let fait = false;
+        for(const o of [...(p.ordres || [])].sort((a,b) => a.seq-b.seq)){
+          if(o.seq > (S.seqTraite || 0)){ S.seqTraite = o.seq; executerOrdre(o); fait = true; }
+        }
+        if(fait){ publier(); render(); } else envoyerEtat();
+      }
+    };
+  }
+  const minuteurHote = () => minuteurs.push(setInterval(() => envoyerEtat(), 8000));
+
+  creerPartie = async function(){
+    EN.erreurMenu = "";
+    Object.assign(EN, {code:genererCode(), role:"hote", hoteId:EN.monId, inviteId:null, ecran:"attente", version:0, cfg:configPublique()});
+    renderCouche();
+    const ok = await ouvrirCanal(EN.code, gestionHote());
+    if(!ok){ fermerCanal(); EN.role = null; EN.ecran = "choix"; EN.erreurMenu = "Le serveur de jeu ne répond pas. Réessayez dans un instant."; return renderCouche(); }
+    minuteurHote();
+    sauverPartie("attente");
+  };
+  ecouterOrdres = function(){};
+  publier = function(){
+    if(!enLigne() || EN.role!=="hote") return;
+    EN.version++;
+    envoyerEtat(EN.version===1);
+    sauverPartie(S.vainqueur!==null ? "terminee" : "en_cours");
+  };
+  chargerReprises = async function(){
+    EN.reprises = [];
+    try {
+      const { data } = await sb.from("parties").select("code,invite,etat,config,maj,statut")
+        .eq("hote", EN.monId).eq("statut", "en_cours").order("maj", {ascending:false}).limit(5);
+      EN.reprises = (data || []).filter(d => d.etat).map(d => ({...d, maj:Date.parse(d.maj)}));
+    } catch(e) {}
+    if(EN.ecran==="choix") renderCouche();
+  };
+  reprendre = async function(code){
+    const r = EN.reprises.find(x => x.code===code);
+    if(!r) return;
+    Object.assign(EN, {code, role:"hote", hoteId:EN.monId, inviteId:r.invite, ecran:null, version:0, cfg:r.config || configPublique()});
+    S = JSON.parse(JSON.stringify(r.etat));
+    ui.ecran = "jeu"; Object.assign(ui, {attaquant:null, armeEnAttente:null, choixPierre:null, couvert:false, aiEnCours:false});
+    await ouvrirCanal(code, gestionHote());
+    minuteurHote(); publier(); render();
+  };
+
+  // ----- Invité
+  function appliquerConfigInvite(cfg){
+    const c = copie(cfg);
+    // Les images ne voyagent pas : chaque joueur reprend celles du site (config.json)
+    for(const [k, carte] of Object.entries(c.cartes || {})){
+      if(!carte.image && CONFIG.cartes[k] && CONFIG.cartes[k].image) carte.image = CONFIG.cartes[k].image;
+    }
+    appliquerConfig(c);
+  }
+  function recevoirEtat(p){
+    if(p.config && !EN.cfgRecu){ appliquerConfigInvite(p.config); EN.cfgRecu = true; }
+    if(!EN.cfgRecu){ emettre("bonjour", {id:EN.monId}); return; }
+    if(p.session!==EN.sessionVue){ EN.sessionVue = p.session; EN.versionRecue = 0; }
+    if(p.version <= (EN.versionRecue || 0)) return;
+    EN.versionRecue = p.version;
+    const premier = !S || !enLigne();
+    S = reconstruire(p.etat);
+    EN.ecran = null; ui.ecran = "jeu";
+    if((S.seqTraite || 0) > EN.seqEnvoye) EN.seqEnvoye = S.seqTraite;
+    if(S.refus && S.refus.seq > EN.refusVu){ if(!premier) erreur(S.refus.msg); EN.refusVu = S.refus.seq; }
+    if((S.seqTraite || 0) >= EN.seqEnvoye) EN.enAttente = false;
+    if(S.courant!==1){ ui.attaquant = null; ui.armeEnAttente = null; ui.choixPierre = null; }
+    render();
+  }
+  rejoindre = async function(){
+    EN.erreurMenu = "";
+    const code = (EN.saisie || "").trim().toLowerCase();
+    if(!/^[a-z0-9]{5}$/.test(code)){ EN.erreurMenu = "Le code fait 5 caractères (lettres et chiffres)."; return renderCouche(); }
+    Object.assign(EN, {code, role:"invite", inviteId:EN.monId, hoteId:null, ordres:[], seqEnvoye:0, refusVu:0,
+                       cfgRecu:false, sessionVue:null, versionRecue:0, enAttente:false, ecran:"connexion"});
+    renderCouche();
+    let repondu = false;
+    const echec = msg => { fermerCanal(); EN.role = null; EN.ecran = "choix"; EN.erreurMenu = msg; renderCouche(); };
+    const ok = await ouvrirCanal(code, {
+      etat: p => { if(p.invite!==EN.monId || EN.role!=="invite") return; repondu = true; recevoirEtat(p); },
+      complet: p => { if(p.id===EN.monId && !repondu) echec("Cette partie a déjà deux joueurs."); }
+    });
+    if(!ok) return echec("Le serveur de jeu ne répond pas. Réessayez dans un instant.");
+    emettre("rejoindre", {id:EN.monId});
+    minuteurs.push(setInterval(() => {
+      if(EN.role!=="invite") return;
+      if(!repondu) emettre("rejoindre", {id:EN.monId});
+      else if(EN.enAttente) emettre("ordres", {id:EN.monId, ordres:EN.ordres.filter(o => o.seq > ((S && S.seqTraite) || 0))});
+    }, 2500));
+    setTimeout(() => {
+      if(!repondu && EN.role==="invite" && EN.ecran==="connexion")
+        echec("Aucune partie trouvée avec ce code. Vérifiez-le, et que votre adversaire garde la page de la partie ouverte.");
+    }, 15000);
+  };
+  envoyer = function(cmd){
+    EN.seqEnvoye++;
+    EN.ordres = [...EN.ordres, {seq:EN.seqEnvoye, cmd}].slice(-30);
+    EN.enAttente = true;
+    emettre("ordres", {id:EN.monId, ordres:EN.ordres});
+    return true;
+  };
+
+  // ----- Navigation
+  const quitterBase = quitterEnLigne;
+  quitterEnLigne = function(){ fermerCanal(); quitterBase(); };
+  const actionBase = actionEnLigne;
+  actionEnLigne = function(act, id){
+    if(act==="en-ligne"){
+      EN.ecran = "choix"; EN.erreurMenu = "";
+      initSupabase().then(ok => { if(ok) chargerReprises(); renderCouche(); });
+      return renderCouche();
+    }
+    if(act==="en-annuler"){
+      if(EN.role==="hote" && EN.code && !EN.inviteId && sb){ const c = EN.code; sb.from("parties").delete().eq("code", c).then(() => {}, () => {}); }
+      quitterEnLigne(); EN.ecran = "choix"; if(sb) chargerReprises(); return renderCouche();
+    }
+    return actionBase(act, id);
+  };
 }
 
 chargerConfig();
