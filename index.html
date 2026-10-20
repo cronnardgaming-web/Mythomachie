@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prototype de combat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --table:#e7e0d0; --table-2:#d9cfb9; --zone:#efe9dc;
+  --ink:#2b2416; --ink-2:#615741; --line:#c3b69a; --bronze:#8a5a1f;
+  --parchemin:#fbf7ec; --encre-carte:#2b2416; --bord-carte:#b9a982;
+  --cible:#1f8a5b; --choix:#8a5a1f; --danger:#b3261e;
+  --egy:#d4a017; --egy-ink:#2b2416;
+  --hin:#c8402a; --hin-ink:#ffffff;
+  --nor:#6e7b88; --nor-ink:#ffffff;
+  --gre:#2d5fbf; --gre-ink:#ffffff;
+  --neutre:#9a8b6c; --neutre-ink:#ffffff;
+  --voile:rgba(43,36,22,.55);
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --table:#1c2030; --table-2:#262b3f; --zone:#232838;
+    --ink:#ede6d4; --ink-2:#b5ad99; --line:#3a4058; --bronze:#d9a35a;
+    --parchemin:#f3ead5; --encre-carte:#2b2416; --bord-carte:#8f7f5c;
+    --cible:#4cc38a; --choix:#e0b061; --danger:#ff7a6e;
+    --voile:rgba(8,10,18,.72);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --table:#1c2030; --table-2:#262b3f; --zone:#232838;
+  --ink:#ede6d4; --ink-2:#b5ad99; --line:#3a4058; --bronze:#d9a35a;
+  --parchemin:#f3ead5; --encre-carte:#2b2416; --bord-carte:#8f7f5c;
+  --cible:#4cc38a; --choix:#e0b061; --danger:#ff7a6e;
+  --voile:rgba(8,10,18,.72);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0;height:100%}
+body{background:var(--table);color:var(--ink);font-family:"Alegreya Sans","Gill Sans","Trebuchet MS",sans-serif;font-size:16px;line-height:1.35}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--choix);outline-offset:2px}
+h1,h2{font-family:Cinzel,"Trajan Pro","Times New Roman",serif;font-weight:700;margin:0}
+
+#app{max-width:1280px;margin:0 auto;padding:12px 16px 24px;display:flex;flex-direction:column;gap:12px}
+.entete{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.entete h1{font-size:20px;letter-spacing:.02em}
+.entete .mode,.entete .tour-info{color:var(--ink-2);font-size:15px}
+.entete .tour-info{margin-left:auto}
+.btn-discret{background:none;border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}
+.btn-discret:hover{border-color:var(--bronze)}
+
+.camp{background:var(--zone);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:12px}
+.bandeau{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.portrait{display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;column-gap:10px;align-items:baseline;background:var(--table-2);border:2px solid transparent;border-radius:12px;padding:8px 14px;text-align:left}
+button.portrait{cursor:pointer}
+.portrait .pnom{grid-column:1/3;font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:15px}
+.portrait .ppv{font-family:Cinzel,"Times New Roman",serif;font-size:32px;font-weight:700;line-height:1}
+.portrait .plabel{color:var(--ink-2);font-size:14px}
+.compteurs{display:flex;gap:14px;color:var(--ink-2);font-size:15px}
+.ressources{display:flex;gap:10px}
+.res{background:var(--table-2);border-radius:999px;padding:6px 14px;font-size:15px}
+.res b{font-family:Cinzel,"Times New Roman",serif;font-size:22px;margin-right:4px}
+.res.or b{color:var(--bronze)}
+.fin{margin-left:auto;background:var(--bronze);color:var(--parchemin);border:none;border-radius:10px;padding:12px 20px;font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:16px;cursor:pointer}
+.fin:disabled{opacity:.45;cursor:default}
+
+.rangee{display:flex;gap:10px;min-height:166px;align-items:center;overflow-x:auto;padding:4px}
+.vide{color:var(--ink-2);font-style:italic;padding:0 8px}
+
+.centre{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:12px}
+.marche,.journal{background:var(--zone);border:1px solid var(--line);border-radius:14px;padding:12px}
+.marche h2,.journal h2{font-size:16px;margin-bottom:10px;display:flex;align-items:baseline;gap:12px}
+.reste{font-family:"Alegreya Sans",sans-serif;font-weight:400;color:var(--ink-2);font-size:14px}
+.marche-cartes{display:flex;gap:10px;overflow-x:auto;padding:4px;align-items:flex-start}
+.separateur{width:1px;align-self:stretch;background:var(--line);margin:0 4px;flex:none}
+.journal ol{list-style:none;margin:0;padding:0;font-size:14px;color:var(--ink-2);display:flex;flex-direction:column;gap:6px}
+.journal li:first-child{color:var(--ink)}
+
+/* Cartes : format TCG 63 × 88 mm, illustration 7:9 en pleine largeur */
+.carte,.crea{--fc:var(--neutre);--fci:var(--neutre-ink);--lis:rgba(0,0,0,.4);--gem:transparent;container-type:inline-size;flex:none;aspect-ratio:63/88;position:relative;padding:0;border:none;background:var(--fc);color:#fff;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.28);transition:transform .15s ease, box-shadow .15s ease}
+.carte{--w:160px;width:var(--w);border-radius:8px;cursor:pointer}
+.crea{width:112px;border-radius:6px;cursor:default}
+.cadre{position:absolute;inset:0;padding:4.5cqw;display:flex;flex-direction:column;border-radius:inherit;box-shadow:inset 0 0 0 .7cqw rgba(255,255,255,.2)}
+.art{position:relative;display:block;width:100%;aspect-ratio:7/9;border-radius:2.5cqw;overflow:hidden;background:#2a2418;box-shadow:0 0 0 .9cqw var(--lis)}
+.art.sans-image::before{content:"";position:absolute;inset:0;background:var(--fc);opacity:.45}
+.art.sans-image::after{content:attr(data-sym);position:absolute;inset:0;display:grid;place-items:center;font-size:42cqw;color:rgba(255,255,255,.2)}
+.art .illu{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.nom-bande{position:absolute;left:0;right:0;top:0;z-index:1;padding:2.6cqw 20cqw 8cqw 3.5cqw;text-align:left;background:linear-gradient(rgba(12,9,5,.9),rgba(12,9,5,.6) 55%,rgba(12,9,5,0));font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:7.4cqw;line-height:1.12;color:#fff;text-shadow:0 1px 2px #000;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.carte .texte{position:absolute;left:0;right:0;bottom:0;z-index:1;max-height:64%;overflow:hidden;padding:10cqw 4cqw 6cqw;font-size:6.5cqw;line-height:1.28;color:#fff;background:linear-gradient(to top,rgba(12,9,5,.94),rgba(12,9,5,.84) 70%,rgba(12,9,5,0));text-shadow:0 1px 2px #000}
+.carte .texte .mots-cles{color:#f2d48a;font-weight:700}
+.pied{flex:1;display:flex;align-items:center;justify-content:center;gap:2cqw;min-width:0;padding:0 15cqw;font-size:6.2cqw;letter-spacing:.03em;color:var(--fci);white-space:nowrap}
+.pied .type{overflow:hidden;text-overflow:ellipsis}
+.gemme{flex:none;width:3.6cqw;height:3.6cqw;transform:rotate(45deg);background:var(--gem);box-shadow:0 0 0 .5cqw rgba(0,0,0,.35)}
+.prix{position:absolute;z-index:2;top:2.4cqw;right:2.4cqw;width:16cqw;height:16cqw;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff4c2,#f0c64e 45%,#a8750f);color:#3b2a06;border:.8cqw solid #7a520a;display:grid;place-items:center;font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:8.5cqw;box-shadow:0 1px 3px rgba(0,0,0,.55)}
+.atk,.pv,.dur{position:absolute;z-index:2;bottom:1.6cqw;width:15cqw;height:15cqw;display:grid;place-items:center;font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:8cqw;text-shadow:0 1px 1px rgba(0,0,0,.4)}
+.atk{left:2cqw;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe6b3,#d9a14a 55%,#8a5a1f);color:#2b1a04;border:.7cqw solid #5e3b10}
+.pv,.dur{right:2cqw;padding-bottom:2cqw;clip-path:polygon(0 0,100% 0,100% 58%,50% 100%,0 58%)}
+.pv{background:linear-gradient(#e0705c,#a3291b);color:#fff}
+.pv.blesse{background:linear-gradient(#8f1f14,#4e0d07)}
+.dur{background:linear-gradient(#c5ced6,#6f7c88);color:#1d232a}
+.crea .atk,.crea .pv{width:19cqw;height:19cqw;font-size:10cqw}
+.crea .nom-bande{font-size:9cqw;padding-right:3.5cqw}
+.crea .puces{position:absolute;left:0;right:0;bottom:0;z-index:1;padding:9cqw 3cqw 9cqw;display:flex;flex-wrap:wrap;gap:1.5cqw;justify-content:center;background:linear-gradient(to top,rgba(12,9,5,.85),rgba(12,9,5,0))}
+.puce{font-size:7.5cqw;line-height:1.2;background:rgba(12,9,5,.75);border:1px solid rgba(242,212,138,.55);color:#f2d48a;border-radius:99px;padding:.6cqw 2.6cqw}
+.carte .illimite{position:absolute;z-index:2;left:4.5cqw;top:30%;background:var(--bronze);color:#fff;font-size:5.6cqw;padding:1cqw 3cqw;border-radius:0 2cqw 2cqw 0}
+.r-commune{--gem:#ece6d6}
+.r-rare{--lis:#d9dee4;--gem:#9fc3e6}
+.r-epique{--lis:#b48ae6;--gem:#b48ae6}
+.r-legendaire{--lis:#f2c14e;--gem:#f2c14e;box-shadow:0 0 0 1px #f2c14e,0 0 12px rgba(242,193,78,.55)}
+.main{display:flex;gap:10px;overflow-x:auto;padding:12px 4px 4px;min-height:244px;align-items:flex-start}
+.marche .carte{--w:146px}
+.choix-cartes .carte{--w:130px}
+.adm-apercu .carte{--w:220px}
+.main .carte.jouable:hover,.main .carte.jouable:focus-visible{transform:translateY(-8px)}
+.carte.achetable{box-shadow:0 0 0 3px var(--cible),0 2px 6px rgba(0,0,0,.28)}
+.carte:not(.achetable):not(.jouable){cursor:default}
+.marche .carte:not(.achetable){opacity:.82}
+
+/* Créatures sur le plateau */
+.crea.peut{box-shadow:0 0 0 3px var(--choix);cursor:pointer}
+.crea.choisie{box-shadow:0 0 0 4px var(--choix);transform:translateY(-6px)}
+.crea.cible,.portrait.cible{box-shadow:0 0 0 3px var(--cible);cursor:pointer}
+.portrait.cible{border-color:var(--cible)}
+
+.joues{display:flex;gap:8px;flex-wrap:wrap}
+.joue{display:flex;align-items:center;gap:6px;background:var(--table-2);border-left:5px solid var(--fc,var(--neutre));border-radius:6px;padding:4px 8px;font-size:14px}
+.btn-sac{background:none;border:1px solid var(--bronze);color:var(--ink);border-radius:5px;padding:2px 8px;font-size:13px;cursor:pointer}
+.consigne{color:var(--ink-2);font-size:15px;min-height:22px;display:flex;align-items:center;gap:10px}
+.consigne button{background:none;border:1px solid var(--line);border-radius:6px;padding:3px 10px;cursor:pointer;font-size:14px}
+
+
+/* Administration */
+.onglets{display:flex;gap:4px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.onglet{background:none;border:none;border-bottom:3px solid transparent;padding:10px 14px;cursor:pointer;font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:15px;color:var(--ink-2)}
+.onglet[aria-selected="true"]{border-bottom-color:var(--bronze);color:var(--ink)}
+.adm-cartes{display:grid;grid-template-columns:260px minmax(0,1fr) 240px;gap:16px;align-items:start}
+.adm-liste,.adm-form,.adm-page{background:var(--zone);border:1px solid var(--line);border-radius:14px;padding:14px}
+.adm-page{max-width:900px}
+.adm-page h2,.adm-form h2,.adm-apercu h2{font-size:18px;margin:4px 0 12px}
+.adm-page h2:not(:first-child){margin-top:24px}
+.adm-outils{display:flex;flex-direction:column;gap:8px}
+.adm-compte{color:var(--ink-2);font-size:14px;margin:10px 0 6px}
+.adm-items{list-style:none;margin:0;padding:0;max-height:62vh;overflow:auto}
+.adm-item{width:100%;display:flex;gap:8px;align-items:center;background:none;border:none;border-radius:6px;padding:7px 8px;cursor:pointer;text-align:left;font-size:15px}
+.adm-item:hover{background:var(--table-2)}
+.adm-item.actif{background:var(--table-2);font-weight:700}
+.pastille{width:11px;height:11px;border-radius:50%;background:var(--fc);flex:none;display:inline-block}
+.adm-item-info{margin-left:auto;color:var(--ink-2);font-size:14px}
+.adm-groupe{display:flex;align-items:center;gap:8px;font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:15px;padding:14px 8px 4px;border-bottom:1px solid var(--line)}
+.adm-groupe:first-child{padding-top:4px}
+.adm-sous{font-size:13px;color:var(--ink-2);padding:8px 8px 2px;font-weight:700;letter-spacing:.02em}
+.champs{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px 14px}
+.champs.petits{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+.champ{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--ink-2);min-width:0}
+.champ input,.champ select{min-width:0}
+.champ input,.champ select,.adm-outils input,.adm-outils select,.adm-page textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%}
+.champ input[type=color]{padding:2px;height:36px}
+.adm-page textarea{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;line-height:1.4}
+.adm-form fieldset,.adm-page fieldset{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:14px 0 0}
+.adm-form legend,.adm-page legend{font-family:Cinzel,"Times New Roman",serif;font-weight:700;padding:0 6px;color:var(--ink);display:flex;align-items:center;gap:8px}
+.mots{display:flex;flex-wrap:wrap;gap:8px 18px}
+.mots label{display:flex;gap:6px;align-items:center}
+details.effet{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-top:10px}
+details.effet summary{cursor:pointer;font-family:Cinzel,"Times New Roman",serif;font-weight:700}
+details.effet summary span{font-family:"Alegreya Sans",sans-serif;font-weight:400;color:var(--ink-2);margin-left:8px}
+details.effet .champs{margin-top:10px}
+.aide{color:var(--ink-2);font-size:14px;margin:8px 0 0}
+.adm-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn.danger{background:var(--danger);color:#fff}
+.adm-apercu{position:sticky;top:12px}
+.adm-apercu .carte{cursor:default}
+fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
+.adm-illu{display:block;width:100%;max-width:220px;aspect-ratio:7/9;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+@media (max-width:980px){.adm-cartes{grid-template-columns:1fr}.adm-apercu{position:static}}
+
+/* Bulles d’aide */
+#bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
+#bulle.visible{opacity:1}
+#bulle b{display:block;font-family:Cinzel,"Times New Roman",serif;margin-bottom:3px}
+.aide-mot{text-decoration:underline dotted rgba(242,212,138,.85);text-underline-offset:2px;cursor:help}
+.puce[data-aide]{cursor:help}
+
+/* Jeu en ligne */
+.code-partie{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:40px;font-weight:700;letter-spacing:.18em;background:var(--table-2);border-radius:12px;padding:14px 20px;text-align:center;margin:8px 0 14px;color:var(--ink)}
+.ligne-code{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.ligne-code input{font:inherit;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:20px;letter-spacing:.12em;text-transform:lowercase;width:9ch;flex:none;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.boite h3{font-family:Cinzel,"Times New Roman",serif;font-size:17px;margin:20px 0 8px}
+.attente{display:flex;align-items:center;gap:10px;color:var(--ink-2)}
+.attente::before{content:"";width:12px;height:12px;border-radius:50%;background:var(--cible);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion: reduce){.attente::before{animation:none}}
+
+/* Couches */
+#couche:empty{display:none}
+#couche{position:fixed;inset:0;background:var(--voile);display:grid;place-items:center;padding:24px;z-index:20;overflow:auto}
+.boite{background:var(--zone);color:var(--ink);border:1px solid var(--line);border-radius:16px;max-width:640px;width:100%;padding:28px}
+.boite h2{font-size:26px;margin-bottom:10px}
+.boite p{margin:0 0 16px;color:var(--ink-2)}
+.boite .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.btn{background:var(--bronze);color:var(--parchemin);border:none;border-radius:10px;padding:12px 18px;font-family:Cinzel,"Times New Roman",serif;font-weight:700;cursor:pointer}
+.btn.second{background:none;color:var(--ink);border:1px solid var(--line)}
+.boite details{margin-top:18px;color:var(--ink-2)}
+.boite summary{cursor:pointer;color:var(--ink)}
+.boite ul{padding-left:20px;margin:10px 0 0}
+.boite li{margin-bottom:6px}
+.choix-cartes{display:flex;gap:10px;flex-wrap:wrap;max-height:60vh;overflow:auto;padding:4px;margin-bottom:12px}
+.groupe-titre{width:100%;font-size:14px;color:var(--ink-2)}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--table);padding:10px 16px;border-radius:10px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30;max-width:90vw}
+#toast.visible{opacity:1}
+
+@media (max-width:820px){
+  .centre{grid-template-columns:1fr}
+  .journal ol{max-height:120px;overflow:auto}
+  .fin{margin-left:0}
+}
+@media (prefers-reduced-motion: reduce){
+  *{transition:none!important}
+  .main .carte.jouable:hover,.crea.choisie{transform:none}
+}
+</style>
+</head>
+<body>
+<style id="styles-factions"></style>
+<main id="app"></main>
+<div id="couche"></div>
+<div id="toast" role="status"></div>
+<div id="bulle" role="tooltip"></div>
+
+<script>
+/* ============================================================
+   CONFIGURATION DU JEU
+   Valeurs d’origine. Le panneau d’administration les modifie
+   et enregistre la version modifiée dans ce navigateur.
+   ============================================================ */
+const DEFAUT = {
+  version:2,
+  regles:{pvDepart:30, mainDepart:5, piocheParTour:5, tailleMarche:5, plateauMax:7,
+          tailleDeck:30, copiesMax:2, copiesLegendaire:1, carteBase:"pierre",
+          deckDepart:{piece:7, rubis:1, dague:1, epee:1}},
+  mots:{provocation:"Provocation", rapidite:"Rapidité", resistance:"Résistance", ethere:"Ethéré"},
+  termes:{conjuration:"Conjuration", echo:"Echo", allie:"Allié", sacrifice:"Sacrifice"},
+  factions:{
+    egy:{nom:"Égyptiens", f:"égyptienne", m:"égyptien", sym:"☥", couleur:"#d4a017"},
+    hin:{nom:"Hindous", f:"hindoue", m:"hindou", sym:"✿", couleur:"#c8402a"},
+    nor:{nom:"Nordiques", f:"nordique", m:"nordique", sym:"⚔", couleur:"#6e7b88"},
+    gre:{nom:"Grecs", f:"grecque", m:"grec", sym:"Ω", couleur:"#2d5fbf"}
+  },
+  cartes:{
+    // Deck de départ et carte de base
+    piece:{nom:"Pièce d’or", type:"sort", depart:true, effet:{or:1}},
+    rubis:{nom:"Rubis", type:"sort", depart:true, effet:{or:2}},
+    dague:{nom:"Dague", type:"sort", depart:true, effet:{combat:1}},
+    epee:{nom:"Épée courte", type:"sort", depart:true, effet:{combat:2}},
+    pierre:{nom:"Pierre de feu", type:"sort", base:true, prix:2, effet:{or:2}, choixSacrifice:{combat:3}},
+
+    // Égyptiens : soin, créatures solides, Provocation (17 créatures, 11 sorts, 2 équipements)
+    porteur_jarres:{nom:"Porteur de jarres", type:"creature", rarete:"commune", prix:1, attaque:1, vie:3, conjuration:{soin:1}, faction:"egy"},
+    gardien_temple:{nom:"Gardien du temple", type:"creature", rarete:"commune", prix:2, attaque:1, vie:4, mots:["provocation"], faction:"egy"},
+    scarabee:{nom:"Scarabée sacré", type:"creature", rarete:"commune", prix:2, attaque:2, vie:2, echo:{soin:3}, faction:"egy"},
+    garde_anubis:{nom:"Garde d’Anubis", type:"creature", rarete:"commune", prix:3, attaque:2, vie:4, mots:["provocation"], conjuration:{soin:2}, faction:"egy"},
+    pretresse:{nom:"Prêtresse d’Isis", type:"creature", rarete:"commune", prix:3, attaque:1, vie:3, conjuration:{soin:2}, allie:{or:2}, faction:"egy"},
+    archer_nubie:{nom:"Archer de Nubie", type:"creature", rarete:"commune", prix:4, attaque:4, vie:3, allie:{soin:3}, faction:"egy"},
+    chameau:{nom:"Chameau de guerre", type:"creature", rarete:"commune", prix:4, attaque:3, vie:5, mots:["provocation"], faction:"egy"},
+    sphinx:{nom:"Sphinx des sables", type:"creature", rarete:"commune", prix:5, attaque:3, vie:6, mots:["provocation"], conjuration:{soin:2}, faction:"egy"},
+    embaumeur:{nom:"Embaumeur", type:"creature", rarete:"rare", prix:3, attaque:2, vie:3, echo:{invoque:{id:"momie", n:1}}, faction:"egy"},
+    chat_bastet:{nom:"Chat de Bastet", type:"creature", rarete:"rare", prix:4, attaque:3, vie:4, mots:["resistance"], allie:{soin:3}, faction:"egy"},
+    pretre_thot:{nom:"Prêtre de Thot", type:"creature", rarete:"rare", prix:5, attaque:3, vie:5, conjuration:{soin:3, pioche:1}, faction:"egy"},
+    char_ramses:{nom:"Char de Ramsès", type:"creature", rarete:"rare", prix:5, attaque:5, vie:4, mots:["provocation"], allie:{combat:2}, faction:"egy"},
+    sentinelle:{nom:"Sentinelle de Thèbes", type:"creature", rarete:"rare", prix:6, attaque:3, vie:7, mots:["provocation", "resistance"], faction:"egy"},
+    vizir:{nom:"Grand vizir", type:"creature", rarete:"epique", prix:6, attaque:4, vie:6, conjuration:{renfort:{atk:0, vie:2}, soin:3}, faction:"egy"},
+    colosse:{nom:"Colosse de Memnon", type:"creature", rarete:"epique", prix:7, attaque:5, vie:8, mots:["provocation", "resistance"], faction:"egy"},
+    pretre_osiris:{nom:"Prêtre d’Osiris", type:"creature", rarete:"epique", prix:7, attaque:4, vie:6, conjuration:{soin:3}, echo:{invoque:{id:"momie", n:2}}, faction:"egy"},
+    pharaon:{nom:"Pharaon-Soleil", type:"creature", rarete:"legendaire", prix:8, attaque:6, vie:7, mots:["provocation"], conjuration:{renfort:{atk:1, vie:1}, soin:4}, faction:"egy"},
+    scribe:{nom:"Scribe du Nil", type:"sort", rarete:"commune", prix:1, effet:{or:1, soin:1}, allie:{soin:2}, faction:"egy"},
+    pain_nil:{nom:"Pain du Nil", type:"sort", rarete:"commune", prix:1, effet:{or:1, soin:2}, faction:"egy"},
+    hathor:{nom:"Bénédiction d’Hathor", type:"sort", rarete:"commune", prix:2, effet:{or:1, soin:3}, faction:"egy"},
+    sekhmet:{nom:"Fureur de Sekhmet", type:"sort", rarete:"commune", prix:2, effet:{combat:3}, allie:{soin:2}, faction:"egy"},
+    papyrus:{nom:"Papyrus sacré", type:"sort", rarete:"commune", prix:3, effet:{pioche:1, or:1, soin:2}, faction:"egy"},
+    jugement:{nom:"Jugement d’Anubis", type:"sort", rarete:"rare", prix:3, effet:{combat:4}, allie:{soin:3}, faction:"egy"},
+    benediction:{nom:"Bénédiction de Râ", type:"sort", rarete:"rare", prix:4, effet:{soin:4, pioche:1}, sacrifice:{combat:3}, faction:"egy"},
+    crue:{nom:"Crue du Nil", type:"sort", rarete:"rare", prix:5, effet:{or:2, soin:3, pioche:1}, faction:"egy"},
+    tempete_sable:{nom:"Tempête de sable", type:"sort", rarete:"epique", prix:5, effet:{degatsTous:2, soin:3, combat:2}, faction:"egy"},
+    momification:{nom:"Rituel de momification", type:"sort", rarete:"epique", prix:6, effet:{invoque:{id:"momie", n:2}, soin:4, pioche:1}, faction:"egy"},
+    oeil_ra:{nom:"Œil de Râ", type:"sort", rarete:"legendaire", prix:7, effet:{combat:5, soin:5, pioche:1}, faction:"egy"},
+    khepesh:{nom:"Khépesh", type:"arme", rarete:"commune", prix:2, bonus:2, durabilite:2, faction:"egy"},
+    fleau:{nom:"Fléau du pharaon", type:"arme", rarete:"rare", prix:4, bonus:3, durabilite:3, allie:{soin:2}, faction:"egy"},
+
+    // Hindous : or, achats à bas prix, Ethéré (17 créatures, 11 sorts, 2 équipements)
+    singe_temple:{nom:"Singe du temple", type:"creature", rarete:"commune", prix:1, attaque:2, vie:2, conjuration:{or:1}, faction:"hin"},
+    apsara:{nom:"Apsara voilée", type:"creature", rarete:"commune", prix:2, attaque:3, vie:2, mots:["ethere"], conjuration:{or:1}, faction:"hin"},
+    marchand_epices:{nom:"Marchand d’épices", type:"creature", rarete:"commune", prix:2, attaque:2, vie:3, conjuration:{or:2}, faction:"hin"},
+    cobra:{nom:"Cobra royal", type:"creature", rarete:"commune", prix:3, attaque:3, vie:3, mots:["ethere"], allie:{combat:2}, faction:"hin"},
+    elephant:{nom:"Éléphant de guerre", type:"creature", rarete:"commune", prix:3, attaque:3, vie:5, mots:["provocation"], conjuration:{or:1}, faction:"hin"},
+    yogi:{nom:"Yogi errant", type:"creature", rarete:"commune", prix:4, attaque:4, vie:4, mots:["ethere"], conjuration:{or:2}, faction:"hin"},
+    tigre:{nom:"Tigre du Bengale", type:"creature", rarete:"commune", prix:3, attaque:5, vie:3, mots:["ethere"], faction:"hin"},
+    garde_rajah:{nom:"Garde du rajah", type:"creature", rarete:"commune", prix:4, attaque:5, vie:5, conjuration:{or:2}, faction:"hin"},
+    naga:{nom:"Naga des temples", type:"creature", rarete:"rare", prix:3, attaque:3, vie:3, mots:["ethere"], allie:{or:2}, faction:"hin"},
+    danseuse:{nom:"Danseuse sacrée", type:"creature", rarete:"rare", prix:4, attaque:4, vie:4, mots:["ethere"], conjuration:{or:1}, allie:{or:2}, faction:"hin"},
+    caravanier:{nom:"Caravanier de la soie", type:"creature", rarete:"rare", prix:5, attaque:4, vie:5, conjuration:{or:3, combat:2}, faction:"hin"},
+    rakshasa:{nom:"Rakshasa", type:"creature", rarete:"rare", prix:4, attaque:6, vie:4, mots:["ethere"], echo:{invoque:{id:"esprit", n:1}}, faction:"hin"},
+    elephant_maharaja:{nom:"Éléphant du maharaja", type:"creature", rarete:"rare", prix:6, attaque:5, vie:7, mots:["provocation"], conjuration:{or:2}, faction:"hin"},
+    deva:{nom:"Deva gardien", type:"creature", rarete:"epique", prix:6, attaque:5, vie:6, mots:["ethere"], conjuration:{or:3}, faction:"hin"},
+    roi_nagas:{nom:"Roi des nagas", type:"creature", rarete:"epique", prix:6, attaque:7, vie:6, mots:["ethere"], allie:{combat:3}, faction:"hin"},
+    architecte:{nom:"Architecte céleste", type:"creature", rarete:"epique", prix:7, attaque:5, vie:7, conjuration:{or:3, pioche:1}, faction:"hin"},
+    garuda:{nom:"Garuda", type:"creature", rarete:"legendaire", prix:8, attaque:7, vie:6, mots:["ethere", "rapidite"], conjuration:{or:3, combat:3}, faction:"hin"},
+    marchand:{nom:"Marchand de Varanasi", type:"sort", rarete:"commune", prix:1, effet:{or:2}, allie:{combat:1}, faction:"hin"},
+    epices:{nom:"Épices rares", type:"sort", rarete:"commune", prix:1, effet:{or:1, combat:2}, faction:"hin"},
+    bazar:{nom:"Grand bazar", type:"sort", rarete:"commune", prix:2, effet:{or:2, combat:2}, faction:"hin"},
+    tambours:{nom:"Tambours de guerre", type:"sort", rarete:"commune", prix:2, effet:{combat:3}, allie:{combat:2}, faction:"hin"},
+    offrandes:{nom:"Collecteur d’offrandes", type:"sort", rarete:"commune", prix:3, effet:{or:2, combat:2}, sacrifice:{pioche:2}, faction:"hin"},
+    mantra:{nom:"Mantra de prospérité", type:"sort", rarete:"rare", prix:3, effet:{or:3, pioche:1}, faction:"hin"},
+    don_lakshmi:{nom:"Don de Lakshmi", type:"sort", rarete:"rare", prix:4, effet:{or:3, combat:3}, allie:{combat:2}, faction:"hin"},
+    roue_karma:{nom:"Roue du karma", type:"sort", rarete:"rare", prix:5, effet:{or:3, combat:3, bannir:1}, faction:"hin"},
+    kubera:{nom:"Trésor de Kubera", type:"sort", rarete:"epique", prix:4, effet:{or:4, combat:2, pioche:1}, faction:"hin"},
+    tresor_rajahs:{nom:"Trésor des rajahs", type:"sort", rarete:"epique", prix:6, effet:{or:4, combat:4}, sacrifice:{combat:5}, faction:"hin"},
+    himalaya:{nom:"Trésor de l’Himalaya", type:"sort", rarete:"legendaire", prix:7, effet:{or:5, combat:5, pioche:1}, allie:{combat:3}, faction:"hin"},
+    chakram:{nom:"Chakram", type:"arme", rarete:"commune", prix:2, bonus:2, durabilite:2, allie:{or:1}, faction:"hin"},
+    trident:{nom:"Trident sacré", type:"arme", rarete:"rare", prix:4, bonus:3, durabilite:3, faction:"hin"},
+
+    // Nordiques : combat élevé, Rapidité (17 créatures, 11 sorts, 2 équipements)
+    eclaireur:{nom:"Éclaireur des fjords", type:"creature", rarete:"commune", prix:1, attaque:2, vie:1, mots:["rapidite"], faction:"nor"},
+    berserker:{nom:"Berserker du fjord", type:"creature", rarete:"commune", prix:2, attaque:3, vie:1, mots:["rapidite"], faction:"nor"},
+    porte_bouclier:{nom:"Jeune porte-bouclier", type:"creature", rarete:"commune", prix:2, attaque:2, vie:3, mots:["provocation"], faction:"nor"},
+    loup_neiges:{nom:"Loup des neiges", type:"creature", rarete:"commune", prix:3, attaque:3, vie:2, mots:["rapidite"], allie:{combat:2}, faction:"nor"},
+    skalde:{nom:"Skalde", type:"creature", rarete:"commune", prix:3, attaque:2, vie:3, conjuration:{combat:2}, faction:"nor"},
+    pillard:{nom:"Pillard du drakkar", type:"creature", rarete:"commune", prix:4, attaque:4, vie:3, mots:["rapidite"], faction:"nor"},
+    ours:{nom:"Ours des glaces", type:"creature", rarete:"commune", prix:4, attaque:3, vie:6, mots:["provocation"], faction:"nor"},
+    huscarl:{nom:"Huscarl", type:"creature", rarete:"commune", prix:5, attaque:5, vie:4, mots:["provocation"], faction:"nor"},
+    corbeau:{nom:"Corbeau d’Odin", type:"creature", rarete:"rare", prix:3, attaque:2, vie:2, mots:["rapidite"], conjuration:{pioche:1}, faction:"nor"},
+    valkyrie:{nom:"Valkyrie", type:"creature", rarete:"rare", prix:4, attaque:3, vie:3, mots:["rapidite"], echo:{degatsHasard:2}, faction:"nor"},
+    geant_givre:{nom:"Géant du givre", type:"creature", rarete:"rare", prix:5, attaque:4, vie:6, conjuration:{degatsHasard:3}, faction:"nor"},
+    ulfhednar:{nom:"Ulfhednar", type:"creature", rarete:"rare", prix:5, attaque:6, vie:3, mots:["rapidite"], allie:{combat:2}, faction:"nor"},
+    vierge_bouclier:{nom:"Vierge au bouclier", type:"creature", rarete:"rare", prix:6, attaque:4, vie:6, mots:["provocation", "resistance"], faction:"nor"},
+    jarl:{nom:"Jarl des glaces", type:"creature", rarete:"epique", prix:6, attaque:5, vie:5, mots:["rapidite"], allie:{combat:3}, faction:"nor"},
+    troll:{nom:"Troll des montagnes", type:"creature", rarete:"epique", prix:7, attaque:6, vie:7, mots:["provocation"], echo:{degatsHasard:3}, faction:"nor"},
+    meute_fenrir:{nom:"Meute de Fenrir", type:"creature", rarete:"epique", prix:7, attaque:5, vie:5, mots:["rapidite"], conjuration:{invoque:{id:"loup", n:2}}, faction:"nor"},
+    tempete:{nom:"Fils de la tempête", type:"creature", rarete:"legendaire", prix:8, attaque:7, vie:6, mots:["rapidite"], conjuration:{degatsTous:2}, faction:"nor"},
+    hydromel:{nom:"Corne d’hydromel", type:"sort", rarete:"commune", prix:1, effet:{combat:2}, faction:"nor"},
+    butin:{nom:"Butin de pillage", type:"sort", rarete:"commune", prix:1, effet:{or:2}, faction:"nor"},
+    cri:{nom:"Cri de guerre", type:"sort", rarete:"commune", prix:2, effet:{combat:2}, allie:{combat:2}, faction:"nor"},
+    rune_force:{nom:"Rune de force", type:"sort", rarete:"commune", prix:2, effet:{combat:2, or:1}, faction:"nor"},
+    raid:{nom:"Raid nocturne", type:"sort", rarete:"commune", prix:3, effet:{combat:4}, faction:"nor"},
+    colere_thor:{nom:"Colère de Thor", type:"sort", rarete:"rare", prix:3, effet:{degatsHasard:3, combat:2}, faction:"nor"},
+    fureur:{nom:"Fureur du berserker", type:"sort", rarete:"rare", prix:4, effet:{combat:5}, allie:{combat:2}, faction:"nor"},
+    grand_hiver:{nom:"Grand hiver", type:"sort", rarete:"rare", prix:5, effet:{degatsTous:2, combat:3}, faction:"nor"},
+    festin_valhalla:{nom:"Festin du Valhalla", type:"sort", rarete:"epique", prix:5, effet:{combat:4, or:2, soin:1}, faction:"nor"},
+    corne_heimdall:{nom:"Corne de Heimdall", type:"sort", rarete:"epique", prix:6, effet:{combat:7, pioche:1}, faction:"nor"},
+    ragnarok:{nom:"Ragnarök", type:"sort", rarete:"legendaire", prix:7, effet:{degatsTous:3, combat:5}, faction:"nor"},
+    hache:{nom:"Hache de guerre", type:"arme", rarete:"commune", prix:2, bonus:2, durabilite:2, faction:"nor"},
+    marteau:{nom:"Marteau runique", type:"arme", rarete:"rare", prix:4, bonus:3, durabilite:3, allie:{combat:2}, faction:"nor"},
+
+    // Grecs : pioche, Bannir, Conjuration et Echo (17 créatures, 11 sorts, 2 équipements)
+    messager:{nom:"Messager d’Hermès", type:"creature", rarete:"commune", prix:1, attaque:1, vie:2, conjuration:{pioche:1}, faction:"gre"},
+    satyre:{nom:"Satyre", type:"creature", rarete:"commune", prix:2, attaque:2, vie:2, echo:{pioche:1}, faction:"gre"},
+    archer_crete:{nom:"Archer crétois", type:"creature", rarete:"commune", prix:2, attaque:3, vie:2, faction:"gre"},
+    hoplite:{nom:"Hoplite", type:"creature", rarete:"commune", prix:3, attaque:2, vie:4, echo:{pioche:1}, faction:"gre"},
+    centaure:{nom:"Centaure", type:"creature", rarete:"commune", prix:3, attaque:3, vie:3, allie:{pioche:1}, faction:"gre"},
+    phalangiste:{nom:"Phalangiste", type:"creature", rarete:"commune", prix:4, attaque:3, vie:5, mots:["provocation"], faction:"gre"},
+    harpie:{nom:"Harpie", type:"creature", rarete:"commune", prix:4, attaque:4, vie:2, mots:["rapidite"], echo:{pioche:1}, faction:"gre"},
+    cyclope:{nom:"Cyclope", type:"creature", rarete:"commune", prix:5, attaque:5, vie:6, mots:["provocation"], faction:"gre"},
+    pegase:{nom:"Pégase", type:"creature", rarete:"rare", prix:3, attaque:3, vie:2, mots:["rapidite"], conjuration:{pioche:1}, faction:"gre"},
+    sirene:{nom:"Sirène", type:"creature", rarete:"rare", prix:4, attaque:3, vie:4, conjuration:{pioche:1}, faction:"gre"},
+    minotaure:{nom:"Minotaure", type:"creature", rarete:"rare", prix:5, attaque:5, vie:5, echo:{degatsHasard:3}, faction:"gre"},
+    meduse:{nom:"Méduse", type:"creature", rarete:"rare", prix:5, attaque:3, vie:5, conjuration:{degatsHasard:4}, faction:"gre"},
+    cerbere:{nom:"Cerbère", type:"creature", rarete:"rare", prix:6, attaque:4, vie:6, mots:["provocation"], echo:{pioche:2}, faction:"gre"},
+    heracles:{nom:"Héraclès", type:"creature", rarete:"epique", prix:6, attaque:5, vie:6, conjuration:{bannir:1, pioche:1}, faction:"gre"},
+    talos:{nom:"Talos de bronze", type:"creature", rarete:"epique", prix:7, attaque:5, vie:8, mots:["provocation", "resistance"], faction:"gre"},
+    chimere:{nom:"Chimère", type:"creature", rarete:"epique", prix:7, attaque:5, vie:6, conjuration:{degatsTous:2}, faction:"gre"},
+    hydre:{nom:"Hydre de Lerne", type:"creature", rarete:"legendaire", prix:8, attaque:6, vie:7, conjuration:{pioche:1}, echo:{invoque:{id:"tete", n:2}}, faction:"gre"},
+    oracle:{nom:"Oracle de Delphes", type:"sort", rarete:"commune", prix:1, effet:{pioche:1}, allie:{or:1}, faction:"gre"},
+    amphore:{nom:"Amphore d’huile", type:"sort", rarete:"commune", prix:1, effet:{or:2}, faction:"gre"},
+    philosophe:{nom:"Philosophe d’Athènes", type:"sort", rarete:"commune", prix:2, effet:{combat:1, or:1, bannir:1}, faction:"gre"},
+    javelots:{nom:"Volée de javelots", type:"sort", rarete:"commune", prix:2, effet:{combat:3}, faction:"gre"},
+    symposium:{nom:"Symposium", type:"sort", rarete:"commune", prix:3, effet:{pioche:1, or:1, combat:1}, faction:"gre"},
+    sagesse:{nom:"Sagesse d’Athéna", type:"sort", rarete:"rare", prix:3, effet:{pioche:1, or:2}, allie:{bannir:1}, faction:"gre"},
+    ruse:{nom:"Ruse d’Ulysse", type:"sort", rarete:"rare", prix:4, effet:{pioche:1, combat:3}, faction:"gre"},
+    foudre:{nom:"Foudre de Zeus", type:"sort", rarete:"rare", prix:5, effet:{degatsHasard:4, combat:3}, faction:"gre"},
+    festin_olympe:{nom:"Festin de l’Olympe", type:"sort", rarete:"epique", prix:5, effet:{pioche:1, or:2, combat:2}, faction:"gre"},
+    travaux:{nom:"Travaux d’Héraclès", type:"sort", rarete:"epique", prix:6, effet:{combat:5, bannir:2}, faction:"gre"},
+    pandore:{nom:"Boîte de Pandore", type:"sort", rarete:"legendaire", prix:7, effet:{degatsTous:3, pioche:1, combat:3}, faction:"gre"},
+    glaive:{nom:"Glaive d’hoplite", type:"arme", rarete:"commune", prix:2, bonus:2, durabilite:2, allie:{pioche:1}, faction:"gre"},
+    lance:{nom:"Lance d’Achille", type:"arme", rarete:"rare", prix:4, bonus:3, durabilite:3, faction:"gre"},
+
+    // Jetons (invoqués par d’autres cartes, jamais au marché)
+    momie:{nom:"Momie", type:"creature", faction:"egy", jeton:true, attaque:2, vie:2, mots:["provocation"]},
+    esprit:{nom:"Esprit vengeur", type:"creature", faction:"hin", jeton:true, attaque:2, vie:2, mots:["ethere"]},
+    loup:{nom:"Loup de Fenrir", type:"creature", faction:"nor", jeton:true, attaque:2, vie:1, mots:["rapidite"]},
+    tete:{nom:"Tête d’hydre", type:"creature", faction:"gre", jeton:true, attaque:2, vie:2}
+  }
+};
+const CLE_STOCKAGE = "prototype-combat-config-v1";
+const copie = o => JSON.parse(JSON.stringify(o));
+let CONFIG, CARTES, FACTIONS, MOTS, TERMES, REGLES;
+
+function fusionner(obj){
+  const d = copie(DEFAUT);
+  if(!obj || typeof obj!=="object" || !obj.cartes || !obj.factions) return d;
+  let cartesFinales = obj.cartes;
+  if((obj.version || 1) < d.version){
+    // Nouveau jeu de cartes : on garde les cartes créées dans l’admin et les images déjà ajoutées
+    cartesFinales = copie(d.cartes);
+    for(const [k,c] of Object.entries(obj.cartes)){
+      if(k.startsWith("carte_")) cartesFinales[k] = c;
+      else if(cartesFinales[k] && c.image) cartesFinales[k].image = c.image;
+    }
+  }
+  return {version:d.version, exporte:obj.exporte || 0, cartes:cartesFinales, factions:obj.factions,
+          regles:{...d.regles, ...(obj.regles||{}), deckDepart:{...((obj.regles && obj.regles.deckDepart) || d.regles.deckDepart)}},
+          mots:{...d.mots, ...(obj.mots||{})}, termes:{...d.termes, ...(obj.termes||{})}};
+}
+function chargerConfig(){
+  let brut = null;
+  try { brut = JSON.parse(localStorage.getItem(CLE_STOCKAGE)); } catch(e) { brut = null; }
+  CONFIG = fusionner(brut);
+  appliquerConfig();
+}
+function sauver(){
+  try { localStorage.setItem(CLE_STOCKAGE, JSON.stringify(CONFIG)); return true; } catch(e) { return false; }
+}
+function encre(hex){
+  const n = parseInt((hex||"#888888").slice(1), 16);
+  const r = (n>>16)&255, g = (n>>8)&255, b = n&255;
+  return (0.299*r + 0.587*g + 0.114*b)/255 > 0.6 ? "#2b2416" : "#ffffff";
+}
+function appliquerConfig(cfg){
+  const c = cfg || CONFIG;
+  CARTES = c.cartes; FACTIONS = c.factions; MOTS = c.mots; TERMES = c.termes; REGLES = c.regles;
+  const css = Object.entries(FACTIONS).map(([k,f]) => `.f-${k}{--fc:${f.couleur};--fci:${encre(f.couleur)}}`).join("\n");
+  const el = document.getElementById("styles-factions");
+  if(el) el.textContent = css;
+}
+
+/* ============================================================
+   TEXTES DES CARTES (générés à partir des données)
+   ============================================================ */
+function decrire(e){
+  const p = [];
+  if(e.or) p.push(`+${e.or} or`);
+  if(e.combat) p.push(`+${e.combat} combat`);
+  if(e.soin) p.push(`+${e.soin} soin`);
+  if(e.pioche) p.push(`piochez ${e.pioche} carte${e.pioche>1?"s":""}`);
+  if(e.bannir) p.push(`bannissez ${e.bannir} carte de votre main ou défausse`);
+  if(e.degatsTous) p.push(`${e.degatsTous} dégâts à chaque créature adverse`);
+  if(e.degatsHasard) p.push(`${e.degatsHasard} dégâts à une créature adverse au hasard`);
+  if(e.renfort) p.push(`vos créatures gagnent +${e.renfort.atk}/+${e.renfort.vie}`);
+  if(e.invoque) p.push(`invoque ${e.invoque.n} ${CARTES[e.invoque.id] ? CARTES[e.invoque.id].nom : "?"}`);
+  const s = p.join(", ");
+  if(!s) return "Aucun effet.";
+  return s.charAt(0).toUpperCase() + s.slice(1) + ".";
+}
+function texteCarte(d){
+  const l = [];
+  if(d.type==="creature" && d.mots && d.mots.length) l.push(d.mots.map(m=>MOTS[m] || m).join(", ") + ".");
+  if(d.type==="sort" && d.effet) l.push(decrire(d.effet));
+  if(d.type==="arme") l.push(`Équipe une de vos créatures : +${d.bonus} attaque pendant ${d.durabilite} attaques.`);
+  if(d.type==="creature" && d.conjuration) l.push(TERMES.conjuration + " : " + decrire(d.conjuration));
+  if(d.type==="creature" && d.echo) l.push(TERMES.echo + " : " + decrire(d.echo));
+  if(d.allie) l.push(TERMES.allie + " : " + decrire(d.allie));
+  if(d.sacrifice) l.push(TERMES.sacrifice + " : " + decrire(d.sacrifice));
+  if(d.choixSacrifice) l.push("Ou " + TERMES.sacrifice.toLowerCase() + " : " + decrire(d.choixSacrifice));
+  return l;
+}
+function typeLigne(d){
+  if(d.depart) return "Carte de départ";
+  if(d.base) return "Carte de base";
+  const f = d.faction && FACTIONS[d.faction] ? FACTIONS[d.faction] : null;
+  if(d.type==="creature") return "Créature" + (f ? " " + f.f : "");
+  if(d.type==="arme") return "Arme" + (f ? " " + f.f : "");
+  return "Sort" + (f ? " " + f.m : "");
+}
+
+/* ============================================================
+   MOTEUR DE RÈGLES (aucun affichage ici)
+   ============================================================ */
+let S = null;          // état de la partie
+let compteurUid = 0;
+const uid = () => "c" + (++compteurUid);
+const inst = id => ({uid:uid(), id});
+const def = c => CARTES[c.id];
+
+function melange(a){
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function deckConstruit(){
+  // Prototype : deck de 30 cartes tiré au hasard dans toutes les factions
+  const copies = [];
+  for(const [id,d] of Object.entries(CARTES)){
+    if(d.depart || d.base || d.jeton) continue;
+    const n = d.rarete==="legendaire" ? REGLES.copiesLegendaire : REGLES.copiesMax;
+    for(let i=0;i<n;i++) copies.push(id);
+  }
+  return melange(copies).slice(0, REGLES.tailleDeck);
+}
+function deckDepart(){
+  const ids = [];
+  for(const [id,n] of Object.entries(REGLES.deckDepart)) if(CARTES[id]) for(let i=0;i<n;i++) ids.push(id);
+  return melange(ids.map(inst));
+}
+function nouveauJoueur(nom){
+  return {nom, pv:REGLES.pvDepart, deck:deckDepart(), main:[], defausse:[], bannies:[], plateau:[], joues:[], tour:[], or:0, combat:0};
+}
+function log(t){ if(S) S.journal.push(t); }
+
+function nouvellePartie(mode){
+  compteurUid = 0;
+  S = {mode, joueurs:[nouveauJoueur("Joueur 1"), nouveauJoueur(mode==="ia" ? "Ordinateur" : "Joueur 2")],
+       courant: Math.random()<0.5 ? 0 : 1, tour:1, journal:[], vainqueur:null,
+       marcheDeck:[], marche:[], bannirEnAttente:0};
+  S.marcheDeck = melange([...deckConstruit(), ...deckConstruit()].map(inst));
+  for(let i=0;i<REGLES.tailleMarche && S.marcheDeck.length;i++) S.marche.push(S.marcheDeck.pop());
+  S.joueurs.forEach(j => piocher(j, REGLES.mainDepart, true));
+  S.joueurs[S.courant].plateau.forEach(c => c.peutAttaquer = true);
+  log(`${S.joueurs[S.courant].nom} commence.`);
+}
+
+function piocher(j, n, silencieux){
+  for(let i=0;i<n;i++){
+    if(!j.deck.length){
+      if(!j.defausse.length) return;
+      j.deck = melange(j.defausse); j.defausse = [];
+      if(!silencieux) log(`${j.nom} mélange sa défausse pour reformer son deck.`);
+    }
+    j.main.push(j.deck.pop());
+  }
+}
+
+function creature(c){
+  const d = def(c), mots = d.mots || [];
+  return {uid:c.uid, id:c.id, deg:0, vieMax:d.vie, atk:d.attaque,
+          bouclier:mots.includes("resistance"), peutAttaquer:mots.includes("rapidite"),
+          aAttaque:false, revele:false, arme:null};
+}
+const atkTotal = c => c.atk + (c.arme ? CARTES[c.arme.id].bonus : 0);
+const vieRestante = c => c.vieMax - c.deg;
+const aMot = (c,m) => (CARTES[c.id].mots || []).includes(m);
+const adversaire = i => S.joueurs[1-i];
+
+// Qui peut-on viser ? Les créatures Ethérées non révélées sont intouchables.
+// Il faut détruire toutes les créatures visibles avant de viser le joueur.
+// Parmi les créatures, celles avec Provocation doivent être visées en premier.
+function cibles(i){
+  const opp = adversaire(i);
+  const visibles = opp.plateau.filter(c => !(aMot(c,"ethere") && !c.revele));
+  const prov = visibles.filter(c => aMot(c,"provocation"));
+  return {face: visibles.length===0, creatures: new Set((prov.length ? prov : visibles).map(c => c.uid))};
+}
+function raisonRefus(i, cible){
+  const opp = adversaire(i);
+  if(cible==="face") return "Détruisez d’abord toutes les créatures adverses visibles.";
+  const c = opp.plateau.find(x => x.uid===cible);
+  if(c && aMot(c,"ethere") && !c.revele) return "Cette créature est Ethérée : impossible de la viser tant qu’elle n’a pas attaqué.";
+  return "Une créature avec Provocation doit être visée en premier.";
+}
+
+function blesser(c, n){
+  if(n<=0) return;
+  if(c.bouclier){ c.bouclier = false; return; }
+  c.deg += n;
+}
+
+function appliquer(i, e){
+  if(!e) return;
+  const j = S.joueurs[i], opp = adversaire(i);
+  if(e.or) j.or += e.or;
+  if(e.combat) j.combat += e.combat;
+  if(e.soin) j.pv += e.soin;
+  if(e.pioche) piocher(j, e.pioche);
+  if(e.degatsTous) opp.plateau.forEach(c => blesser(c, e.degatsTous));
+  if(e.degatsHasard && opp.plateau.length){
+    const c = opp.plateau[Math.floor(Math.random()*opp.plateau.length)];
+    blesser(c, e.degatsHasard);
+    log(`${def(c).nom} subit ${e.degatsHasard} dégâts.`);
+  }
+  if(e.renfort) j.plateau.forEach(c => { c.atk += e.renfort.atk; c.vieMax += e.renfort.vie; });
+  if(e.invoque){
+    if(CARTES[e.invoque.id]) for(let k=0;k<e.invoque.n && j.plateau.length<REGLES.plateauMax;k++) j.plateau.push(creature(inst(e.invoque.id)));
+  }
+  if(e.bannir && i===S.courant) S.bannirEnAttente += e.bannir;
+  nettoyer();
+}
+
+// Retire les créatures mortes, les envoie à la défausse et déclenche leur Echo
+function nettoyer(){
+  S.joueurs.forEach((j, idx) => {
+    const morts = j.plateau.filter(c => vieRestante(c) <= 0);
+    if(!morts.length) return;
+    j.plateau = j.plateau.filter(c => vieRestante(c) > 0);
+    morts.forEach(c => {
+      const d = def(c);
+      if(!d.jeton) j.defausse.push({uid:c.uid, id:c.id});
+      if(c.arme) j.defausse.push({uid:c.arme.uid, id:c.arme.id});
+      log(`${d.nom} est détruit${d.jeton ? "e" : ""}.`);
+      if(d.echo){ log(`Echo de ${d.nom}.`); appliquer(idx, d.echo); }
+    });
+  });
+}
+
+function verifierVictoire(){
+  const [a,b] = S.joueurs;
+  if(a.pv<=0 && b.pv<=0) S.vainqueur = "egalite";
+  else if(a.pv<=0) S.vainqueur = b.nom;
+  else if(b.pv<=0) S.vainqueur = a.nom;
+}
+
+function verifierAllies(i){
+  const j = S.joueurs[i];
+  let encore = true;
+  while(encore){
+    encore = false;
+    for(const t of j.tour){
+      const d = CARTES[t.id];
+      if(!d.allie || t.allieFait || !d.faction) continue;
+      if(j.tour.some(o => o!==t && CARTES[o.id].faction===d.faction)){
+        t.allieFait = true; encore = true;
+        log(`Allié : ${d.nom} (${decrire(d.allie)})`);
+        appliquer(i, d.allie);
+      }
+    }
+  }
+}
+
+function jouer(id, opts={}){
+  const i = S.courant, j = S.joueurs[i];
+  const k = j.main.findIndex(c => c.uid===id);
+  if(k<0) return false;
+  const c = j.main[k], d = def(c);
+  if(d.type==="creature" && j.plateau.length>=REGLES.plateauMax) return erreur(`Votre plateau est plein (${REGLES.plateauMax} créatures).`);
+  if(d.type==="arme"){
+    const cible = j.plateau.find(x => x.uid===opts.cible);
+    if(!cible) return erreur("Choisissez une de vos créatures à équiper.");
+    j.main.splice(k,1);
+    if(cible.arme) j.defausse.push({uid:cible.arme.uid, id:cible.arme.id});
+    cible.arme = {uid:c.uid, id:c.id, dur:d.durabilite};
+    log(`${j.nom} équipe ${def(cible).nom} de ${d.nom}.`);
+  } else if(d.type==="creature"){
+    j.main.splice(k,1);
+    j.plateau.push(creature(c));
+    log(`${j.nom} invoque ${d.nom}.`);
+    if(d.conjuration) appliquer(i, d.conjuration);
+  } else {
+    j.main.splice(k,1);
+    if(opts.sacrifierDirect && d.choixSacrifice){
+      j.bannies.push(c);
+      log(`${j.nom} sacrifie ${d.nom} (${decrire(d.choixSacrifice)})`);
+      appliquer(i, d.choixSacrifice);
+    } else {
+      j.joues.push(c);
+      log(`${j.nom} joue ${d.nom}.`);
+      appliquer(i, d.effet);
+    }
+  }
+  j.tour.push({uid:c.uid, id:c.id, allieFait:false});
+  verifierAllies(i);
+  verifierVictoire();
+  return true;
+}
+
+function sacrifier(id){
+  const j = S.joueurs[S.courant];
+  const k = j.joues.findIndex(c => c.uid===id);
+  if(k<0) return;
+  const c = j.joues[k], d = def(c);
+  if(!d.sacrifice) return;
+  j.joues.splice(k,1); j.bannies.push(c);
+  log(`${j.nom} sacrifie ${d.nom} (${decrire(d.sacrifice)})`);
+  appliquer(S.courant, d.sacrifice);
+  verifierVictoire();
+}
+
+function bannir(id){
+  const j = S.joueurs[S.courant];
+  for(const zone of ["main","defausse"]){
+    const k = j[zone].findIndex(c => c.uid===id);
+    if(k>=0){
+      const [c] = j[zone].splice(k,1);
+      j.bannies.push(c);
+      log(`${j.nom} bannit ${def(c).nom}.`);
+      S.bannirEnAttente = Math.max(0, S.bannirEnAttente-1);
+      return;
+    }
+  }
+}
+
+function acheter(k){
+  const j = S.joueurs[S.courant];
+  if(k==="base"){
+    const b = CARTES[REGLES.carteBase];
+    if(!b) return false;
+    if(j.or<(b.prix||0)) return erreur(`Il vous faut ${b.prix} or pour ${b.nom}.`);
+    j.or -= (b.prix||0); j.defausse.push(inst(REGLES.carteBase));
+    log(`${j.nom} achète ${b.nom}.`);
+    return true;
+  }
+  const c = S.marche[k];
+  if(!c) return false;
+  const d = def(c);
+  if(j.or<d.prix) return erreur(`Il vous faut ${d.prix} or pour acheter ${d.nom}.`);
+  j.or -= d.prix; j.defausse.push(c);
+  S.marche.splice(k, 1, ...(S.marcheDeck.length ? [S.marcheDeck.pop()] : []));
+  log(`${j.nom} achète ${d.nom}.`);
+  return true;
+}
+
+function attaquer(idAtt, cible){
+  const i = S.courant, j = S.joueurs[i], opp = adversaire(i);
+  const att = j.plateau.find(x => x.uid===idAtt);
+  if(!att || !att.peutAttaquer || att.aAttaque) return erreur("Cette créature ne peut pas attaquer maintenant.");
+  const t = cibles(i);
+  if(cible==="face"){
+    if(!t.face) return erreur(raisonRefus(i,"face"));
+    opp.pv -= atkTotal(att);
+    log(`${def(att).nom} inflige ${atkTotal(att)} dégâts à ${opp.nom}.`);
+  } else {
+    if(!t.creatures.has(cible)) return erreur(raisonRefus(i,cible));
+    const v = opp.plateau.find(x => x.uid===cible);
+    const a1 = atkTotal(att), a2 = atkTotal(v);
+    blesser(v, a1); blesser(att, a2);
+    log(`${def(att).nom} attaque ${def(v).nom}.`);
+  }
+  att.aAttaque = true; att.revele = true;
+  if(att.arme){
+    att.arme.dur--;
+    if(att.arme.dur<=0){
+      j.defausse.push({uid:att.arme.uid, id:att.arme.id});
+      log(`${CARTES[att.arme.id].nom} se brise.`);
+      att.arme = null;
+    }
+  }
+  nettoyer(); verifierVictoire();
+  return true;
+}
+
+function utiliserCombat(cible){
+  const i = S.courant, j = S.joueurs[i], opp = adversaire(i);
+  if(j.combat<=0) return false;
+  const t = cibles(i);
+  if(cible==="face"){
+    if(!t.face) return erreur(raisonRefus(i,"face"));
+    log(`${j.nom} inflige ${j.combat} dégâts à ${opp.nom}.`);
+    opp.pv -= j.combat; j.combat = 0;
+  } else {
+    if(!t.creatures.has(cible)) return erreur(raisonRefus(i,cible));
+    const v = opp.plateau.find(x => x.uid===cible);
+    if(v.bouclier){
+      v.bouclier = false; j.combat -= 1;
+      log(`${j.nom} brise la Résistance de ${def(v).nom} (1 combat).`);
+    } else {
+      const n = Math.min(j.combat, vieRestante(v));
+      v.deg += n; j.combat -= n;
+      log(`${j.nom} inflige ${n} dégâts à ${def(v).nom}.`);
+    }
+  }
+  nettoyer(); verifierVictoire();
+  return true;
+}
+
+function finTour(){
+  const j = S.joueurs[S.courant];
+  j.defausse.push(...j.main, ...j.joues);
+  j.main = []; j.joues = []; j.tour = []; j.or = 0; j.combat = 0;
+  S.bannirEnAttente = 0;
+  piocher(j, REGLES.piocheParTour);
+  S.courant = 1 - S.courant; S.tour++;
+  const n = S.joueurs[S.courant];
+  n.plateau.forEach(c => { c.peutAttaquer = true; c.aAttaque = false; });
+  log(`Tour de ${n.nom}.`);
+}
+
+/* ============================================================
+   ADVERSAIRE ORDINATEUR (très simple)
+   ============================================================ */
+const pause = ms => new Promise(r => setTimeout(r, ms));
+function iaBannir(j){
+  while(S.bannirEnAttente>0){
+    const c = j.defausse.find(x => def(x).depart) || j.main.find(x => def(x).depart);
+    if(!c){ S.bannirEnAttente = 0; break; }
+    bannir(c.uid);
+  }
+}
+async function tourIA(){
+  ui.aiEnCours = true; render();
+  await pause(700);
+  const i = S.courant, j = S.joueurs[i];
+  let progres = true;
+  while(progres && S.vainqueur===null){
+    progres = false;
+    for(const c of [...j.main]){
+      const d = def(c);
+      if(d.type==="creature" && j.plateau.length<REGLES.plateauMax){ jouer(c.uid); progres = true; break; }
+      if(d.type==="sort"){ jouer(c.uid); progres = true; break; }
+      if(d.type==="arme" && j.plateau.length){
+        const cible = [...j.plateau].sort((a,b) => atkTotal(b)-atkTotal(a))[0];
+        jouer(c.uid, {cible:cible.uid}); progres = true; break;
+      }
+    }
+    if(S.bannirEnAttente>0) iaBannir(j);
+    if(progres){ render(); await pause(420); }
+  }
+  while(S.vainqueur===null){
+    const options = S.marche.map((c,k) => ({k, p:def(c).prix})).filter(o => o.p<=j.or).sort((a,b) => b.p-a.p);
+    if(options.length) acheter(options[0].k);
+    else if(CARTES[REGLES.carteBase] && j.or>=(CARTES[REGLES.carteBase].prix||0) && (CARTES[REGLES.carteBase].prix||0)>0) acheter("base");
+    else break;
+    render(); await pause(420);
+  }
+  for(const c of [...j.plateau]){
+    if(S.vainqueur!==null) break;
+    if(!j.plateau.includes(c) || !c.peutAttaquer || c.aAttaque) continue;
+    const t = cibles(i);
+    let cible = null;
+    if(t.face) cible = "face";
+    else {
+      const cand = adversaire(i).plateau.filter(v => t.creatures.has(v.uid));
+      const tuables = cand.filter(v => !v.bouclier && vieRestante(v)<=atkTotal(c)).sort((a,b) => atkTotal(b)-atkTotal(a));
+      const choix = tuables[0] || cand.sort((a,b) => vieRestante(a)-vieRestante(b))[0];
+      cible = choix ? choix.uid : null;
+    }
+    if(!cible) continue;
+    attaquer(c.uid, cible); render(); await pause(520);
+  }
+  let garde = 30;
+  while(j.combat>0 && S.vainqueur===null && garde--){
+    const t = cibles(i);
+    if(t.face) utiliserCombat("face");
+    else {
+      const cand = adversaire(i).plateau.filter(v => t.creatures.has(v.uid)).sort((a,b) => vieRestante(a)-vieRestante(b));
+      if(!cand.length) break;
+      utiliserCombat(cand[0].uid);
+    }
+    render(); await pause(420);
+  }
+  if(S.vainqueur===null) finTour();
+  ui.aiEnCours = false; render();
+}
+
+/* ============================================================
+   INTERFACE
+   ============================================================ */
+const ui = {ecran:"jeu", attaquant:null, armeEnAttente:null, choixPierre:null, couvert:false, aiEnCours:false, regles:false};
+let minuteToast = null;
+function erreur(msg){
+  if(EN.capture){ EN.refusCapture = msg; return false; }
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("visible");
+  clearTimeout(minuteToast);
+  minuteToast = setTimeout(() => t.classList.remove("visible"), 2600);
+  return false;
+}
+function interactif(){
+  return S && S.vainqueur===null && !ui.couvert && !ui.aiEnCours && (S.mode==="duo" || S.courant===vue()) && !(enLigne() && EN.enAttente);
+}
+const vue = () => S.mode==="ia" ? 0 : S.mode==="enligne" ? (EN.role==="hote" ? 0 : 1) : S.courant;
+const enLigne = () => !!S && S.mode==="enligne";
+const nomAffiche = j => !enLigne() ? j.nom : (j===S.joueurs[vue()] ? "Vous" : "Adversaire");
+
+const NOMS_RARETE = {commune:"Commune", rare:"Rare", epique:"Épique", legendaire:"Légendaire"};
+const TEXTES_AIDE = {
+  provocation:"Les attaques et le combat adverses doivent viser cette créature avant les autres.",
+  rapidite:"Peut attaquer dès le tour où elle est posée.",
+  resistance:"Ignore entièrement les premiers dégâts subis, puis disparaît.",
+  ethere:"Ne peut pas être visée tant qu’elle n’a pas attaqué. Elle ne protège pas son joueur.",
+  conjuration:"Effet déclenché quand la créature arrive en jeu.",
+  echo:"Effet déclenché quand la créature meurt.",
+  allie:"Bonus déclenché si une autre carte de la même faction a été jouée ce tour.",
+  sacrifice:"Retirez la carte de la partie pour obtenir cet effet. Elle ne reviendra plus dans votre deck.",
+  bannir:"Retirez définitivement une carte de votre main ou de votre défausse : votre deck s’allège et vous piochez plus souvent vos meilleures cartes."
+};
+function avecAides(txt){
+  const termes = [...Object.entries(MOTS), ...Object.entries(TERMES)].filter(([k,l]) => l && TEXTES_AIDE[k]).sort((a,b) => b[1].length-a[1].length);
+  const echap = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const motif = new RegExp(`(?<!\\p{L})(${[...termes.map(([,l]) => echap(l)), "bannissez"].join("|")})(?!\\p{L})`, "giu");
+  return txt.replace(motif, m => {
+    const t = termes.find(([,l]) => l.toLowerCase()===m.toLowerCase());
+    const k = t ? t[0] : "bannir";
+    return `<span class="aide-mot" data-aide="${k}" data-titre="${esc(t ? t[1] : "Bannir")}">${m}</span>`;
+  });
+}
+function htmlCarte(c, o={}){
+  const d = def(c), f = d.faction && FACTIONS[d.faction] ? d.faction : "neutre";
+  const sym = f!=="neutre" ? FACTIONS[f].sym : "";
+  const lignes = texteCarte(d);
+  const texte = lignes.map((l,i) => i===0 && d.type==="creature" && d.mots && d.mots.length ? `<span class="mots-cles">${avecAides(l)}</span>` : avecAides(l)).join("<br>");
+  const stats = d.type==="creature"
+    ? `<span class="atk" title="Attaque">${d.attaque}</span><span class="pv" title="Points de vie">${d.vie}</span>`
+    : d.type==="arme"
+      ? `<span class="atk" title="Bonus d’attaque">+${d.bonus}</span><span class="dur" title="Nombre d’attaques">${d.durabilite}</span>` : "";
+  const act = o.act ? `data-act="${o.act}" data-id="${o.id ?? c.uid}"` : "";
+  return `<button type="button" class="carte f-${f} r-${d.rarete || "base"} ${o.classes || ""}" ${act}>
+    <span class="cadre">
+      <span class="art ${d.image ? "" : "sans-image"}" data-sym="${sym}">${d.image ? `<img class="illu" src="${d.image}" alt="">` : ""}<span class="nom-bande">${d.nom}</span>${lignes.length ? `<span class="texte">${texte}</span>` : ""}</span>
+      <span class="pied" title="${typeLigne(d)}"><span aria-hidden="true">${sym}</span><span class="type">${d.depart ? "Départ" : d.base ? "Base" : d.jeton ? "Jeton" : {creature:"Créature", sort:"Sort", arme:"Arme"}[d.type]}</span>${NOMS_RARETE[d.rarete] && !d.depart && !d.base && !d.jeton ? `<span class="gemme" title="${NOMS_RARETE[d.rarete]}"></span>` : ""}</span>
+      ${d.prix!=null && !d.depart ? `<span class="prix" title="Prix en or">${d.prix}</span>` : ""}
+      ${stats}${o.extra || ""}
+    </span></button>`;
+}
+function htmlCrea(c, act, classes){
+  const d = def(c), f = d.faction && FACTIONS[d.faction] ? d.faction : "neutre";
+  const sym = f!=="neutre" ? FACTIONS[f].sym : "";
+  const puces = [];
+  const puce = k => `<span class="puce" data-aide="${k}" data-titre="${esc(MOTS[k])}">${MOTS[k]}</span>`;
+  if(aMot(c,"provocation")) puces.push(puce("provocation"));
+  if(aMot(c,"rapidite")) puces.push(puce("rapidite"));
+  if(c.bouclier) puces.push(puce("resistance"));
+  if(aMot(c,"ethere") && !c.revele) puces.push(puce("ethere"));
+  if(c.arme) puces.push(`<span class="puce">⚔ ${CARTES[c.arme.id].nom} (${c.arme.dur})</span>`);
+  const detail = texteCarte(d).join(" ").replace(/"/g,"");
+  return `<button type="button" class="crea f-${f} r-${d.rarete || "base"} ${classes}" data-act="${act}" data-id="${c.uid}" data-aide="carte" data-titre="${esc(d.nom)}" data-texte="${esc(detail)}">
+    <span class="cadre">
+      <span class="art ${d.image ? "" : "sans-image"}" data-sym="${sym}">${d.image ? `<img class="illu" src="${d.image}" alt="">` : ""}<span class="nom-bande">${d.nom}</span>${puces.length ? `<span class="puces">${puces.join("")}</span>` : ""}</span>
+      <span class="pied"></span>
+      <span class="atk" title="Attaque">${atkTotal(c)}</span><span class="pv ${c.deg>0 ? "blesse" : ""}" title="Points de vie">${vieRestante(c)}</span>
+    </span></button>`;
+}
+function htmlJoue(c, inter){
+  const d = def(c);
+  const sac = d.sacrifice && inter ? `<button type="button" class="btn-sac" data-act="sac" data-id="${c.uid}">Sacrifier : ${decrire(d.sacrifice)}</button>` : "";
+  return `<span class="joue f-${d.faction || "neutre"}" style="border-left-color:var(--fc)">${d.nom}${sac}</span>`;
+}
+function consigne(inter, moi){
+  if(!S || S.vainqueur!==null) return "";
+  if(ui.aiEnCours) return "L’ordinateur joue son tour…";
+  if(!inter && enLigne()) return `<span class="attente">${EN.enAttente ? "Envoi de votre action…" : "Tour de votre adversaire…"}</span>`;
+  if(!inter) return "";
+  if(ui.armeEnAttente) return `Choisissez la créature à équiper. <button type="button" data-act="annuler">Annuler</button>`;
+  if(ui.attaquant){
+    const c = moi.plateau.find(x => x.uid===ui.attaquant);
+    return `Choisissez la cible de ${c ? def(c).nom : "votre créature"} (contour vert). <button type="button" data-act="annuler">Annuler</button>`;
+  }
+  if(moi.combat>0) return "Cliquez sur une cible au contour vert pour y dépenser vos points de combat.";
+  if(moi.main.length) return "Cliquez sur vos cartes pour les jouer, achetez au marché, puis finissez le tour.";
+  return "Achetez au marché, attaquez avec vos créatures, puis finissez le tour.";
+}
+
+function render(){
+  const app = document.getElementById("app");
+  if(ui.ecran==="admin"){ renderAdmin(); return; }
+  if(!S){ app.innerHTML = ""; renderCouche(); return; }
+  const me = vue(), moi = S.joueurs[me], lui = S.joueurs[1-me];
+  const inter = interactif();
+  const t = cibles(me);
+  const visee = inter && (ui.attaquant || moi.combat>0);
+  const classesOwn = c => {
+    if(!inter) return "";
+    if(ui.armeEnAttente) return "cible";
+    let s = "";
+    if(c.peutAttaquer && !c.aAttaque) s += "peut ";
+    if(ui.attaquant===c.uid) s += "choisie";
+    return s;
+  };
+  const vide = txt => `<span class="vide">${txt}</span>`;
+  const base = CARTES[REGLES.carteBase] ? {uid:"base", id:REGLES.carteBase} : null;
+  app.innerHTML = `
+  <header class="entete">
+    <h1>Prototype de combat</h1>
+    <span class="mode">${S.mode==="ia" ? "Contre l’ordinateur" : enLigne() ? `En ligne, partie ${EN.code}` : "Deux joueurs sur cet écran"}</span>
+    <span class="tour-info">Tour ${S.tour}, ${enLigne() ? (S.courant===vue() ? "à vous de jouer" : "tour de l’adversaire") : S.joueurs[S.courant].nom + " joue"}</span>
+    <button type="button" class="btn-discret" data-act="nouvelle">${enLigne() ? "Quitter la partie" : "Nouvelle partie"}</button>
+  </header>
+  <section class="camp" aria-label="Camp de ${lui.nom}">
+    <div class="bandeau">
+      <button type="button" class="portrait ${visee && t.face ? "cible" : ""}" data-act="face" aria-label="Viser ${lui.nom}">
+        <span class="pnom">${nomAffiche(lui)}</span><span class="ppv">${lui.pv}</span><span class="plabel">points de vie</span>
+      </button>
+      <div class="compteurs"><span>Main ${lui.main.length}</span><span>Deck ${lui.deck.length}</span><span>Défausse ${lui.defausse.length}</span></div>
+    </div>
+    <div class="rangee">${lui.plateau.map(c => htmlCrea(c, "enemy", visee && t.creatures.has(c.uid) ? "cible" : "")).join("") || vide("Aucune créature")}</div>
+  </section>
+  <section class="centre">
+    <div class="marche">
+      <h2>Marché commun <span class="reste">${S.marcheDeck.length} cartes en réserve</span></h2>
+      <div class="marche-cartes">
+        ${S.marche.map((c,k) => htmlCarte(c, {act:"marche", id:k, classes: inter && moi.or>=def(c).prix ? "achetable" : ""})).join("")}
+        ${base ? `<div class="separateur" aria-hidden="true"></div>${htmlCarte(base, {act:"base", classes: inter && moi.or>=(def(base).prix||0) ? "achetable" : "", extra:'<span class="illimite">Toujours disponible</span>'})}` : ""}
+      </div>
+    </div>
+    <aside class="journal"><h2>Journal</h2><ol>${S.journal.slice(-8).reverse().map(l => `<li>${l}</li>`).join("")}</ol></aside>
+  </section>
+  <section class="camp" aria-label="Votre camp">
+    <div class="rangee">${moi.plateau.map(c => htmlCrea(c, "own", classesOwn(c))).join("") || vide("Vos créatures apparaîtront ici")}</div>
+    <div class="bandeau">
+      <div class="portrait"><span class="pnom">${nomAffiche(moi)}</span><span class="ppv">${moi.pv}</span><span class="plabel">points de vie</span></div>
+      <div class="ressources"><span class="res or"><b>${moi.or}</b>or</span><span class="res"><b>${moi.combat}</b>combat</span></div>
+      <div class="compteurs"><span>Deck ${moi.deck.length}</span><span>Défausse ${moi.defausse.length}</span><span>Bannies ${moi.bannies.length}</span></div>
+      <div class="joues">${moi.joues.map(c => htmlJoue(c, inter)).join("")}</div>
+      <button type="button" class="fin" data-act="fin" ${inter ? "" : "disabled"}>Finir le tour</button>
+    </div>
+    <div class="consigne">${consigne(inter, moi)}</div>
+    <div class="main" aria-label="Votre main">${moi.main.map(c => htmlCarte(c, {act:"main", classes: inter ? "jouable" : ""})).join("")}</div>
+  </section>`;
+  renderCouche();
+}
+
+function renderCouche(){
+  const couche = document.getElementById("couche");
+  let h = "";
+  const regles = `<details ${ui.regles ? "open" : ""}><summary>Règles en bref</summary><ul>
+    <li>Chaque joueur a ${REGLES.pvDepart} points de vie et commence avec le même deck de départ. On pioche ${REGLES.piocheParTour} cartes par tour.</li>
+    <li>Jouer une carte est gratuit : elle donne de l’or, du combat, du soin ou pose une créature.</li>
+    <li>L’or sert à acheter au marché commun. Une carte achetée arrive dans votre défausse.</li>
+    <li>Le combat et vos créatures frappent l’adversaire. Il faut d’abord détruire toutes ses créatures visibles ; celles avec Provocation passent en premier.</li>
+    <li>Allié : bonus si une autre carte de la même faction a été jouée ce tour.</li>
+    <li>En fin de tour, main et cartes jouées partent à la défausse. Deck vide : la défausse est remélangée.</li></ul></details>`;
+  if(!S){
+    h = `<div class="boite" role="dialog" aria-label="Nouvelle partie">
+      <h2>Prototype de combat</h2>
+      <p>Un premier essai jouable : quatre factions, un marché commun et des créatures sur le plateau. Choisissez un mode pour commencer.</p>
+      <div class="actions">
+        <button type="button" class="btn" data-act="mode-ia">Jouer contre l’ordinateur</button>
+        <button type="button" class="btn second" data-act="mode-duo">Deux joueurs sur cet écran</button>
+        <button type="button" class="btn second" data-act="en-ligne">Jouer en ligne</button>
+        <button type="button" class="btn second" data-act="admin">Administration</button>
+      </div>${regles}</div>`;
+    if(EN.ecran) h = htmlEnLigne();
+  } else if(S.vainqueur!==null){
+    const titre = S.vainqueur==="egalite" ? "Égalité"
+      : enLigne() ? (S.vainqueur===S.joueurs[vue()].nom ? "Victoire !" : "Défaite")
+      : `${S.vainqueur} remporte la partie`;
+    const actions = enLigne() && EN.role==="invite"
+      ? `<p class="attente">En attente d’une revanche lancée par votre adversaire…</p><div class="actions"><button type="button" class="btn second" data-act="nouvelle">Quitter</button></div>`
+      : `<div class="actions"><button type="button" class="btn" data-act="rejouer">${enLigne() ? "Proposer une revanche" : "Rejouer"}</button>
+         <button type="button" class="btn second" data-act="nouvelle">${enLigne() ? "Quitter" : "Changer de mode"}</button></div>`;
+    h = `<div class="boite" role="dialog" aria-label="Fin de partie">
+      <h2>${titre}</h2><p>Partie terminée au tour ${S.tour}.</p>${actions}</div>`;
+  } else if(ui.couvert){
+    const n = S.joueurs[S.courant].nom;
+    h = `<div class="boite" role="dialog" aria-label="Changement de joueur">
+      <h2>Au tour de ${n}</h2><p>Passez l’écran à ${n}. Sa main restera cachée jusqu’à ce qu’il soit prêt.</p>
+      <div class="actions"><button type="button" class="btn" data-act="commencer">Commencer mon tour</button></div></div>`;
+  } else if(ui.choixPierre){
+    const cp = S.joueurs[S.courant].main.find(x => x.uid===ui.choixPierre);
+    const dp = cp ? def(cp) : {nom:"", effet:{}, choixSacrifice:{}};
+    h = `<div class="boite" role="dialog" aria-label="${dp.nom}">
+      <h2>${dp.nom}</h2><p>Jouez-la normalement, ou sacrifiez-la pour un autre effet. Une carte sacrifiée quitte la partie.</p>
+      <div class="actions">
+        <button type="button" class="btn" data-act="pierre-or">Jouer : ${decrire(dp.effet || {})}</button>
+        <button type="button" class="btn second" data-act="pierre-sac">${TERMES.sacrifice} : ${decrire(dp.choixSacrifice || {})}</button>
+        <button type="button" class="btn second" data-act="annuler">Annuler</button>
+      </div></div>`;
+  } else if(S.bannirEnAttente>0 && interactif()){
+    const j = S.joueurs[S.courant];
+    const liste = (titre, zone) => zone.length ? `<span class="groupe-titre">${titre}</span>` + zone.map(c => htmlCarte(c, {act:"ban", classes:"jouable"})).join("") : "";
+    h = `<div class="boite" role="dialog" aria-label="Bannir une carte">
+      <h2>Bannir une carte</h2><p>Choisissez une carte à retirer définitivement de votre deck. Bannir vos cartes de départ les plus faibles rend votre deck plus fort.</p>
+      <div class="choix-cartes">${liste("Votre main", j.main)}${liste("Votre défausse", j.defausse)}</div>
+      <div class="actions"><button type="button" class="btn second" data-act="ban-stop">Ne rien bannir</button></div></div>`;
+  }
+  couche.innerHTML = h;
+}
+
+function apresAction(){
+  if(enLigne() && EN.role==="hote") publier();
+  render();
+  if(S && S.vainqueur===null && S.mode==="ia" && S.courant===1 && !ui.aiEnCours) tourIA();
+}
+
+/* ============================================================
+   PANNEAU D’ADMINISTRATION
+   ============================================================ */
+const adm = {onglet:"cartes", sel:null, recherche:"", filtre:"toutes", tri:"faction", suppr:null, reset:false, ouverts:new Set()};
+const ORDRE_RARETE = [["commune","Communes"],["rare","Rares"],["epique","Épiques"],["legendaire","Légendaires"],["base","Départ et base"],["jeton","Jetons"]];
+const ORDRE_TYPE = {creature:0, sort:1, arme:2};
+const groupeRarete = d => d.jeton ? "jeton" : (d.depart || d.base) ? "base" : (d.rarete || "commune");
+function trierCartes(ids){
+  const fac = Object.keys(FACTIONS);
+  const rangF = d => d.faction && fac.includes(d.faction) ? fac.indexOf(d.faction) : fac.length;
+  const rangR = d => ORDRE_RARETE.findIndex(([k]) => k===groupeRarete(d));
+  const parNom = (a,b) => CARTES[a].nom.localeCompare(CARTES[b].nom, "fr");
+  const parPrix = (a,b) => (CARTES[a].prix ?? 0) - (CARTES[b].prix ?? 0);
+  const parType = (a,b) => (ORDRE_TYPE[CARTES[a].type] ?? 3) - (ORDRE_TYPE[CARTES[b].type] ?? 3);
+  const t = [...ids];
+  if(adm.tri==="nom") return t.sort(parNom);
+  if(adm.tri==="prix") return t.sort((a,b) => parPrix(a,b) || parNom(a,b));
+  if(adm.tri==="creation") return t;
+  return t.sort((a,b) => rangF(CARTES[a])-rangF(CARTES[b]) || rangR(CARTES[a])-rangR(CARTES[b]) || parType(a,b) || parPrix(a,b) || parNom(a,b));
+}
+function listeCartes(ids){
+  const item = id => `<li><button type="button" class="adm-item f-${CARTES[id].faction || "neutre"} ${id===adm.sel ? "actif" : ""}" data-act="carte-sel" data-id="${id}">
+    <span class="pastille"></span><span>${esc(CARTES[id].nom)}</span><span class="adm-item-info">${CARTES[id].prix ?? "–"}</span></button></li>`;
+  if(adm.tri!=="faction") return ids.map(item).join("");
+  let html = "", fCour = null, rCour = null;
+  const compte = test => ids.filter(test).length;
+  for(const id of ids){
+    const d = CARTES[id], f = d.faction && FACTIONS[d.faction] ? d.faction : "", r = groupeRarete(d);
+    if(f!==fCour){
+      fCour = f; rCour = null;
+      const n = compte(x => (CARTES[x].faction && FACTIONS[CARTES[x].faction] ? CARTES[x].faction : "")===f);
+      html += `<li class="adm-groupe f-${f || "neutre"}"><span class="pastille"></span>${f ? esc(FACTIONS[f].nom) : "Sans faction"}<span class="adm-item-info">${n}</span></li>`;
+    }
+    if(r!==rCour){
+      rCour = r;
+      const n = compte(x => (CARTES[x].faction && FACTIONS[CARTES[x].faction] ? CARTES[x].faction : "")===f && groupeRarete(CARTES[x])===r);
+      html += `<li class="adm-sous">${ORDRE_RARETE.find(([k]) => k===r)[1]} (${n})</li>`;
+    }
+    html += item(id);
+  }
+  return html;
+}
+const RARETES = [["commune","Commune"],["rare","Rare"],["epique","Épique"],["legendaire","Légendaire"]];
+const EFFETS = [["or","Or"],["combat","Combat"],["soin","Soin"],["pioche","Cartes piochées"],["bannir","Cartes à bannir"],
+                ["degatsTous","Dégâts à chaque créature adverse"],["degatsHasard","Dégâts à une créature adverse au hasard"]];
+const BLOCS = {
+  effet:"Effet quand on la joue",
+  conjuration:"Conjuration : quand elle arrive en jeu",
+  echo:"Echo : quand elle meurt",
+  allie:"Allié : si une autre carte de la même faction est jouée ce tour",
+  sacrifice:"Sacrifice : en la retirant de la partie après l’avoir jouée",
+  choixSacrifice:"Sacrifice à la place de l’effet : choix au moment de la jouer"
+};
+const BLOCS_PAR_TYPE = {sort:["effet","allie","sacrifice","choixSacrifice"], creature:["conjuration","echo","allie"], arme:["allie"]};
+const AIDE_MOTS = {provocation:"Doit être visée en premier", rapidite:"Peut attaquer dès son arrivée",
+                   resistance:"Ignore les premiers dégâts subis", ethere:"Intouchable tant qu’elle n’a pas attaqué"};
+const AIDE_TERMES = {conjuration:"Effet à l’arrivée en jeu", echo:"Effet à la mort", allie:"Bonus de faction", sacrifice:"Retirer la carte pour un effet"};
+
+const esc = s => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const champTexte = (l, ch, v) => `<label class="champ"><span>${l}</span><input type="text" data-chemin="${ch}" value="${esc(v)}"></label>`;
+const champNombre = (l, ch, v) => `<label class="champ"><span>${l}</span><input type="number" min="0" step="1" data-chemin="${ch}" value="${v ?? 0}"></label>`;
+const champSelect = (l, ch, v, opts) => `<label class="champ"><span>${l}</span><select data-chemin="${ch}">${opts.map(([k,t]) => `<option value="${esc(k)}" ${String(v)===String(k) ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></label>`;
+
+function renderAdmin(){
+  const app = document.getElementById("app");
+  const actif = document.activeElement;
+  let cle = null, pos = null;
+  if(actif && app.contains(actif)){
+    cle = actif.dataset.chemin ? `[data-chemin="${actif.dataset.chemin}"]` : actif.dataset.adm ? `[data-adm="${actif.dataset.adm}"]` : null;
+    try { pos = actif.selectionStart; } catch(e) { pos = null; }
+  }
+  const pages = {cartes:admCartes, regles:admRegles, factions:admFactions, donnees:admDonnees};
+  app.innerHTML = `
+  <header class="entete">
+    <h1>Administration</h1>
+    <span class="mode">Enregistré automatiquement dans ce navigateur. Les changements s’appliquent à la prochaine partie.${window.claude ? "" : " Pour les partager avec vos joueurs, utilisez Sauvegarde, puis Télécharger config.json."}</span>
+    <button type="button" class="btn-discret" data-act="admin-quitter" style="margin-left:auto">Retour au jeu</button>
+  </header>
+  <nav class="onglets" role="tablist">${[["cartes","Cartes"],["regles","Règles"],["factions","Factions"],["donnees","Sauvegarde"]].map(([k,l]) =>
+    `<button type="button" role="tab" class="onglet" aria-selected="${adm.onglet===k}" data-act="onglet" data-id="${k}">${l}</button>`).join("")}</nav>
+  ${pages[adm.onglet]()}`;
+  document.getElementById("couche").innerHTML = "";
+  if(cle){
+    const el = app.querySelector(cle);
+    if(el){ el.focus(); if(pos!=null){ try { el.setSelectionRange(pos,pos); } catch(e) {} } }
+  }
+}
+
+function admCartes(){
+  const tous = Object.keys(CARTES);
+  if(!adm.sel || !CARTES[adm.sel]) adm.sel = tous[0] || null;
+  const ids = tous.filter(id => {
+    const d = CARTES[id];
+    if(adm.filtre==="aucune" && d.faction) return false;
+    if(adm.filtre!=="toutes" && adm.filtre!=="aucune" && d.faction!==adm.filtre) return false;
+    return !adm.recherche || d.nom.toLowerCase().includes(adm.recherche.toLowerCase());
+  });
+  const tries = trierCartes(ids);
+  return `<div class="adm-cartes">
+    <div class="adm-liste">
+      <div class="adm-outils">
+        <input type="search" placeholder="Rechercher une carte" aria-label="Rechercher une carte" value="${esc(adm.recherche)}" data-adm="recherche">
+        <select data-adm="filtre" aria-label="Filtrer par faction">
+          <option value="toutes">Toutes les factions</option>
+          ${Object.entries(FACTIONS).map(([k,f]) => `<option value="${k}" ${adm.filtre===k ? "selected" : ""}>${esc(f.nom)}</option>`).join("")}
+          <option value="aucune" ${adm.filtre==="aucune" ? "selected" : ""}>Sans faction</option>
+        </select>
+        <select data-adm="tri" aria-label="Trier les cartes">
+          ${[["faction","Par faction puis rareté"],["prix","Par prix"],["nom","Par nom"],["creation","Ordre de création"]].map(([k,l]) => `<option value="${k}" ${adm.tri===k ? "selected" : ""}>${l}</option>`).join("")}
+        </select>
+        <button type="button" class="btn" data-act="carte-nouvelle">Nouvelle carte</button>
+      </div>
+      <p class="adm-compte">${ids.length} carte${ids.length>1 ? "s" : ""}, prix à droite</p>
+      <ul class="adm-items">${listeCartes(tries)}</ul>
+    </div>
+    <div class="adm-form">${adm.sel ? formCarte(adm.sel) : "<p>Aucune carte. Créez-en une.</p>"}</div>
+    <div class="adm-apercu"><h2>Aperçu</h2>${adm.sel ? htmlCarte({id:adm.sel, uid:"apercu"}) : ""}</div>
+  </div>`;
+}
+
+function formCarte(id){
+  const d = CARTES[id], p = `cartes.${id}`;
+  const cat = d.depart ? "depart" : d.base ? "base" : d.jeton ? "jeton" : "marche";
+  const creatures = Object.entries(CARTES).filter(([,c]) => c.type==="creature").map(([k,c]) => [k,c.nom]);
+  const blocs = (BLOCS_PAR_TYPE[d.type] || []).map(cle => {
+    const e = d[cle] || {}, pc = `${p}.${cle}`, rempli = Object.keys(e).length>0;
+    const ouvert = rempli || adm.ouverts.has(id+"."+cle);
+    return `<details class="effet" data-bloc="${id}.${cle}" ${ouvert ? "open" : ""}>
+      <summary>${BLOCS[cle]}<span>${rempli ? esc(decrire(e)) : "Aucun effet"}</span></summary>
+      <div class="champs petits">
+        ${EFFETS.map(([k,l]) => champNombre(l, `${pc}.${k}`, e[k] || 0)).join("")}
+        ${champNombre("Renfort : attaque", `${pc}.renfort.atk`, e.renfort ? e.renfort.atk : 0)}
+        ${champNombre("Renfort : vie", `${pc}.renfort.vie`, e.renfort ? e.renfort.vie : 0)}
+        ${champSelect("Invoquer", `${pc}.invoque.id`, e.invoque ? e.invoque.id : "", [["","Rien"], ...creatures])}
+        ${champNombre("Nombre invoqué", `${pc}.invoque.n`, e.invoque ? e.invoque.n : 0)}
+      </div></details>`;
+  }).join("");
+  return `<h2>${esc(d.nom)}</h2>
+    <div class="champs">
+      ${champTexte("Nom", p+".nom", d.nom)}
+      ${champSelect("Type", p+".type", d.type, [["creature","Créature"],["sort","Sort"],["arme","Arme"]])}
+      ${champSelect("Faction", p+".faction", d.faction || "", [["","Aucune"], ...Object.entries(FACTIONS).map(([k,f]) => [k,f.nom])])}
+      ${champSelect("Catégorie", "cat:"+id, cat, [["marche","Achetable au marché"],["depart","Deck de départ"],["base","Carte de base"],["jeton","Jeton (invoqué seulement)"]])}
+      ${champSelect("Rareté", p+".rarete", d.rarete || "commune", RARETES)}
+      ${champNombre("Prix en or", p+".prix", d.prix ?? 0)}
+      ${d.type==="creature" ? champNombre("Attaque", p+".attaque", d.attaque ?? 0) + champNombre("Points de vie", p+".vie", d.vie ?? 1) : ""}
+      ${d.type==="arme" ? champNombre("Bonus d’attaque", p+".bonus", d.bonus ?? 0) + champNombre("Nombre d’attaques", p+".durabilite", d.durabilite ?? 1) : ""}
+    </div>
+    <fieldset data-depot="${id}"><legend>Illustration</legend>
+      ${d.image ? `<img class="adm-illu" src="${d.image}" alt="Illustration de ${esc(d.nom)}">` : `<p class="aide">Aucune image pour cette carte.</p>`}
+      <input type="file" accept="image/*" data-image="${id}" hidden>
+      <div class="adm-actions">
+        <button type="button" class="btn second" data-act="image-choisir" data-id="${id}">${d.image ? "Changer l’image" : "Ajouter une image"}</button>
+        <button type="button" class="btn second" data-act="image-coller" data-id="${id}">Coller l’image copiée</button>
+        ${d.image ? `<button type="button" class="btn second" data-act="image-suppr" data-id="${id}">Retirer l’image</button>` : ""}
+      </div>
+      <p class="aide">Depuis un site : clic droit sur l’image, « Copier l’image », puis Ctrl+V (Cmd+V sur Mac) sur cette page. Vous pouvez aussi glisser un fichier dans ce cadre. Format conseillé : 896 × 1152 pixels (portrait). Une image d’un autre format est recadrée automatiquement. ${ASSETS ? "Les images sont enregistrées sur le serveur du jeu." : "Les images sont enregistrées dans ce navigateur."}</p>
+    </fieldset>
+    ${d.type==="creature" ? `<fieldset><legend>Mots-clés</legend><div class="mots">${Object.entries(MOTS).map(([k,l]) =>
+      `<label title="${esc(AIDE_MOTS[k] || "")}"><input type="checkbox" data-mot="${k}" data-carte="${id}" ${(d.mots || []).includes(k) ? "checked" : ""}> ${esc(l)}</label>`).join("")}</div></fieldset>` : ""}
+    ${blocs}
+    <div class="adm-actions">
+      <button type="button" class="btn second" data-act="carte-dupliquer" data-id="${id}">Dupliquer</button>
+      ${adm.suppr===id
+        ? `<button type="button" class="btn danger" data-act="carte-suppr-ok" data-id="${id}">Confirmer la suppression</button><button type="button" class="btn second" data-act="carte-suppr-non">Annuler</button>`
+        : `<button type="button" class="btn second" data-act="carte-suppr" data-id="${id}">Supprimer</button>`}
+    </div>`;
+}
+
+function admRegles(){
+  const r = REGLES, p = "regles";
+  const depart = Object.entries(CARTES).filter(([,c]) => c.depart);
+  const total = depart.reduce((s,[k]) => s + (r.deckDepart[k] || 0), 0);
+  const bases = Object.entries(CARTES).filter(([,c]) => c.base).map(([k,c]) => [k,c.nom]);
+  return `<div class="adm-page">
+    <h2>Partie</h2>
+    <div class="champs">
+      ${champNombre("Points de vie de départ", p+".pvDepart", r.pvDepart)}
+      ${champNombre("Cartes en main au début", p+".mainDepart", r.mainDepart)}
+      ${champNombre("Cartes piochées par tour", p+".piocheParTour", r.piocheParTour)}
+      ${champNombre("Créatures max sur le plateau", p+".plateauMax", r.plateauMax)}
+    </div>
+    <h2>Marché et decks</h2>
+    <div class="champs">
+      ${champNombre("Cartes visibles au marché", p+".tailleMarche", r.tailleMarche)}
+      ${champNombre("Cartes par deck construit", p+".tailleDeck", r.tailleDeck)}
+      ${champNombre("Exemplaires max d’une carte", p+".copiesMax", r.copiesMax)}
+      ${champNombre("Exemplaires max d’une légendaire", p+".copiesLegendaire", r.copiesLegendaire)}
+      ${champSelect("Carte de base toujours disponible", p+".carteBase", r.carteBase, [["","Aucune"], ...bases])}
+    </div>
+    <h2>Deck de départ</h2>
+    <p class="aide">Total : ${total} carte${total>1 ? "s" : ""}. Pour ajouter une carte ici, passez sa catégorie à « Deck de départ » dans l’onglet Cartes.</p>
+    <div class="champs">${depart.map(([k,c]) => champNombre(c.nom, `${p}.deckDepart.${k}`, r.deckDepart[k] || 0)).join("") || "<p>Aucune carte de départ.</p>"}</div>
+    <h2>Noms des mots-clés</h2>
+    <p class="aide">Le fonctionnement des mots-clés est fixé dans le code. Ici, vous changez le nom affiché sur les cartes.</p>
+    <div class="champs">
+      ${Object.entries(MOTS).map(([k,l]) => champTexte(AIDE_MOTS[k] || k, "mots."+k, l)).join("")}
+      ${Object.entries(TERMES).map(([k,l]) => champTexte(AIDE_TERMES[k] || k, "termes."+k, l)).join("")}
+    </div>
+  </div>`;
+}
+
+function admFactions(){
+  return `<div class="adm-page"><h2>Factions</h2>
+    ${Object.entries(FACTIONS).map(([k,f]) => {
+      const n = Object.values(CARTES).filter(c => c.faction===k).length;
+      return `<fieldset class="f-${k}"><legend><span class="pastille"></span>${esc(f.nom)}</legend>
+        <div class="champs">
+          ${champTexte("Nom", `factions.${k}.nom`, f.nom)}
+          ${champTexte("Adjectif féminin (créature, arme)", `factions.${k}.f`, f.f)}
+          ${champTexte("Adjectif masculin (sort)", `factions.${k}.m`, f.m)}
+          ${champTexte("Symbole", `factions.${k}.sym`, f.sym)}
+          <label class="champ"><span>Couleur</span><input type="color" data-chemin="factions.${k}.couleur" value="${esc(f.couleur)}"></label>
+        </div>
+        <p class="aide">${n} carte${n>1 ? "s" : ""} dans cette faction.${n ? " Changez ou supprimez ces cartes pour pouvoir supprimer la faction." : ""}</p>
+        ${n ? "" : `<div class="adm-actions"><button type="button" class="btn second" data-act="faction-suppr" data-id="${k}">Supprimer la faction</button></div>`}
+      </fieldset>`;}).join("")}
+    <div class="adm-actions"><button type="button" class="btn" data-act="faction-nouvelle">Ajouter une faction</button></div>
+  </div>`;
+}
+
+function admDonnees(){
+  return `<div class="adm-page">
+    <h2>Sauvegarde</h2>
+    <p class="aide">Copiez ce texte pour garder une copie de vos réglages ailleurs. Pour restaurer une sauvegarde, collez-la ici puis cliquez sur Importer.</p>
+    <p class="aide">Taille actuelle des réglages : ${Math.round(JSON.stringify(CONFIG).length/1024)} Ko sur environ 5 000 possibles dans le navigateur.${ASSETS ? " Les images envoyées sur le serveur du jeu ne comptent presque pas : chacune n’occupe qu’une adresse de quelques caractères." : ""}</p>
+    ${(() => { const n = Object.values(CARTES).filter(c => (c.image || "").startsWith("data:")).length;
+      return ASSETS && n ? `<p class="aide">${n} image${n>1 ? "s sont encore stockées" : " est encore stockée"} dans le navigateur.</p><div class="adm-actions"><button type="button" class="btn" data-act="images-transfert">Transférer vers le serveur du jeu</button></div>` : ""; })()}
+    <textarea id="json-config" rows="16" spellcheck="false" aria-label="Configuration du jeu au format JSON">${esc(JSON.stringify(CONFIG, null, 2))}</textarea>
+    <div class="adm-actions">
+      <button type="button" class="btn" data-act="json-copier">Copier</button>
+      <button type="button" class="btn second" data-act="json-importer">Importer le texte collé</button>
+    </div>
+    <h2>Publier sur votre site</h2>
+    <p class="aide">Téléchargez le fichier config.json, puis déposez-le dans votre dépôt GitHub, à côté de index.html. Tous les joueurs de votre site recevront alors vos cartes, vos règles et vos images. Refaites-le après chaque série de modifications.</p>
+    <div class="adm-actions"><button type="button" class="btn" data-act="config-telecharger">Télécharger config.json</button></div>
+    <h2>Valeurs d’origine</h2>
+    <p class="aide">Efface toutes vos modifications et restaure les cartes et règles du prototype.</p>
+    <div class="adm-actions">${adm.reset
+      ? `<button type="button" class="btn danger" data-act="reset-ok">Confirmer la réinitialisation</button><button type="button" class="btn second" data-act="reset-non">Annuler</button>`
+      : `<button type="button" class="btn second" data-act="reset">Réinitialiser</button>`}</div>
+  </div>`;
+}
+
+function nettoyerCarte(c){
+  for(const cle of Object.keys(BLOCS)){
+    const e = c[cle];
+    if(!e) continue;
+    for(const k of Object.keys(e)) if(typeof e[k]==="number" && e[k]<=0) delete e[k];
+    if(e.renfort){
+      if(!e.renfort.atk && !e.renfort.vie) delete e.renfort;
+      else { e.renfort.atk = e.renfort.atk || 0; e.renfort.vie = e.renfort.vie || 0; }
+    }
+    if(e.invoque && (!e.invoque.id || !e.invoque.n)) delete e.invoque;
+    if(!Object.keys(e).length) delete c[cle];
+  }
+}
+
+function majChemin(chemin, brut, nombre){
+  if(chemin.startsWith("cat:")){
+    const c = CARTES[chemin.slice(4)];
+    delete c.depart; delete c.base; delete c.jeton;
+    if(brut!=="marche") c[brut] = true;
+    if(brut==="depart" && REGLES.deckDepart[chemin.slice(4)]==null) REGLES.deckDepart[chemin.slice(4)] = 1;
+  } else {
+    const parts = chemin.split(".");
+    let o = CONFIG;
+    for(let i=0;i<parts.length-1;i++){
+      if(o[parts[i]]==null || typeof o[parts[i]]!=="object") o[parts[i]] = {};
+      o = o[parts[i]];
+    }
+    const k = parts.at(-1);
+    let v = brut;
+    if(nombre){ v = Math.max(0, Math.floor(Number(brut))); if(!Number.isFinite(v)) v = 0; }
+    o[k] = v;
+    if(parts[0]==="cartes"){
+      const c = CARTES[parts[1]];
+      if(k==="faction" && !v) delete c.faction;
+      if(parts.at(-2)==="invoque" && k==="id" && v && !o.n) o.n = 1;
+      if(k==="type"){
+        if(v==="creature"){ c.attaque = c.attaque ?? 1; c.vie = c.vie ?? 1; }
+        if(v==="arme"){ c.bonus = c.bonus ?? 1; c.durabilite = c.durabilite ?? 1; }
+      }
+      nettoyerCarte(c);
+    }
+  }
+  sauver(); appliquerConfig();
+}
+
+function idUnique(prefixe){
+  let n = 1, id;
+  do { id = prefixe + "_" + Date.now().toString(36) + n++; } while(CARTES[id] || FACTIONS[id]);
+  return id;
+}
+
+function actionAdmin(act, id, el){
+  switch(act){
+    case "admin": ui.ecran = "admin"; break;
+    case "admin-quitter": ui.ecran = "jeu"; S = null; break;
+    case "onglet": adm.onglet = id; adm.reset = false; break;
+    case "carte-sel": adm.sel = id; adm.suppr = null; break;
+    case "carte-nouvelle": {
+      const nid = idUnique("carte");
+      const f = adm.filtre!=="toutes" && adm.filtre!=="aucune" ? adm.filtre : Object.keys(FACTIONS)[0];
+      CARTES[nid] = {nom:"Nouvelle carte", type:"sort", prix:2, rarete:"commune", effet:{or:1}};
+      if(f) CARTES[nid].faction = f;
+      adm.sel = nid; adm.recherche = ""; sauver(); break;
+    }
+    case "carte-dupliquer": {
+      const nid = idUnique("carte");
+      CARTES[nid] = copie(CARTES[id]); CARTES[nid].nom += " (copie)";
+      adm.sel = nid; sauver(); break;
+    }
+    case "image-choisir": { const f = document.querySelector(`[data-image="${id}"]`); if(f) f.click(); return; }
+    case "image-suppr": { const u = CARTES[id].image; delete CARTES[id].image; sauver(); liberer(u); erreur("Image retirée."); break; }
+    case "images-transfert": if(ASSETS) transfererImages(); return;
+    case "image-coller": {
+      const repli = () => erreur("Appuyez sur Ctrl+V (Cmd+V sur Mac) pour coller l’image copiée.");
+      if(!navigator.clipboard || !navigator.clipboard.read){ repli(); return; }
+      navigator.clipboard.read().then(async items => {
+        for(const it of items){
+          const type = it.types.find(t => t.startsWith("image/"));
+          if(type){ const blob = await it.getType(type); chargerImage(id, new File([blob], "image", {type})); return; }
+        }
+        erreur("Aucune image copiée : faites un clic droit sur l’image du site, puis « Copier l’image ».");
+      }, repli);
+      return;
+    }
+    case "carte-suppr": adm.suppr = id; break;
+    case "carte-suppr-non": adm.suppr = null; break;
+    case "carte-suppr-ok": {
+      const imgSuppr = CARTES[id].image;
+      delete CARTES[id];
+      liberer(imgSuppr);
+      delete REGLES.deckDepart[id];
+      if(REGLES.carteBase===id) REGLES.carteBase = "";
+      Object.values(CARTES).forEach(c => { for(const cle of Object.keys(BLOCS)) if(c[cle] && c[cle].invoque && c[cle].invoque.id===id) delete c[cle].invoque; nettoyerCarte(c); });
+      adm.suppr = null; adm.sel = null; sauver(); erreur("Carte supprimée."); break;
+    }
+    case "faction-nouvelle": {
+      const nid = idUnique("fac");
+      FACTIONS[nid] = {nom:"Nouvelle faction", f:"nouvelle", m:"nouveau", sym:"✦", couleur:"#7a5c99"};
+      sauver(); appliquerConfig(); break;
+    }
+    case "faction-suppr":
+      if(!Object.values(CARTES).some(c => c.faction===id)){ delete FACTIONS[id]; if(adm.filtre===id) adm.filtre = "toutes"; sauver(); appliquerConfig(); }
+      break;
+    case "json-copier": {
+      const ta = document.getElementById("json-config");
+      const fin = () => { ta.select(); try { document.execCommand("copy"); erreur("Texte copié."); } catch(e) { erreur("Texte sélectionné : copiez-le avec Ctrl+C."); } };
+      if(navigator.clipboard) navigator.clipboard.writeText(ta.value).then(() => erreur("Texte copié."), fin); else fin();
+      return;
+    }
+    case "json-importer": {
+      const ta = document.getElementById("json-config");
+      let obj;
+      try { obj = JSON.parse(ta.value); } catch(e) { return erreur("Ce texte n’est pas une sauvegarde valide : vérifiez qu’il a été collé en entier."); }
+      if(!obj || !obj.cartes || !obj.factions || !obj.regles) return erreur("Il manque les cartes, les factions ou les règles dans ce texte.");
+      CONFIG = fusionner(obj); appliquerConfig(); sauver(); adm.sel = null; erreur("Sauvegarde importée."); break;
+    }
+    case "config-telecharger": telechargerConfig(); return;
+    case "reset": adm.reset = true; break;
+    case "reset-non": adm.reset = false; break;
+    case "reset-ok":
+      CONFIG = copie(DEFAUT); appliquerConfig(); sauver(); adm.reset = false; adm.sel = null; erreur("Valeurs d’origine restaurées."); break;
+    default: return;
+  }
+  render();
+}
+
+document.addEventListener("input", e => {
+  if(ui.ecran!=="admin") return;
+  const el = e.target;
+  if(el.type==="color" || el.type==="checkbox") return;
+  if(el.dataset.adm==="recherche"){ adm.recherche = el.value; return renderAdmin(); }
+  if(el.dataset.adm==="filtre"){ adm.filtre = el.value; return renderAdmin(); }
+  if(el.dataset.adm==="tri"){ adm.tri = el.value; return renderAdmin(); }
+  if(el.dataset.chemin){
+    if(el.type==="number" && el.value==="") return;
+    majChemin(el.dataset.chemin, el.value, el.type==="number");
+    renderAdmin();
+  }
+});
+document.addEventListener("change", e => {
+  if(ui.ecran!=="admin") return;
+  const el = e.target;
+  if(el.type==="color" && el.dataset.chemin){ majChemin(el.dataset.chemin, el.value, false); renderAdmin(); }
+  if(el.type==="file" && el.dataset.image && el.files && el.files[0]) chargerImage(el.dataset.image, el.files[0]);
+  if(el.type==="checkbox" && el.dataset.mot){
+    const c = CARTES[el.dataset.carte];
+    const mots = new Set(c.mots || []);
+    el.checked ? mots.add(el.dataset.mot) : mots.delete(el.dataset.mot);
+    c.mots = [...mots]; if(!c.mots.length) delete c.mots;
+    sauver(); renderAdmin();
+  }
+});
+let ASSETS = null;
+if(window.claude && typeof window.claude.use==="function"){
+  window.claude.use("assets").then(a => { ASSETS = a; if(ui.ecran==="admin") renderAdmin(); }, () => {});
+}
+const estServeur = url => typeof url==="string" && url.includes("/_blob/");
+// Supprime une image du serveur si plus aucune carte ne l’utilise
+function liberer(url){
+  if(!ASSETS || !estServeur(url)) return;
+  if(Object.values(CARTES).some(c => c.image===url)) return;
+  ASSETS.delete(url.split("/_blob/")[1]).catch(() => {});
+}
+function dataVersBlob(data){
+  const [entete, b64] = data.split(",");
+  const type = entete.match(/data:([^;]+)/)[1];
+  const bin = atob(b64), t = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) t[i] = bin.charCodeAt(i);
+  return new Blob([t], {type});
+}
+async function transfererImages(){
+  const ids = Object.keys(CARTES).filter(k => (CARTES[k].image || "").startsWith("data:"));
+  let ok = 0;
+  for(const k of ids){
+    erreur(`Transfert des images : ${ok+1} sur ${ids.length}…`);
+    try { const r = await ASSETS.upload(dataVersBlob(CARTES[k].image)); CARTES[k].image = r.url; ok++; sauver(); }
+    catch(e) { break; }
+  }
+  erreur(ok===ids.length ? `${ok} image${ok>1 ? "s" : ""} transférée${ok>1 ? "s" : ""} sur le serveur du jeu.` : `Transfert interrompu après ${ok} image${ok>1 ? "s" : ""}. Réessayez plus tard.`);
+  renderAdmin();
+}
+
+async function versDataURL(url){
+  try {
+    const r = await fetch(url);
+    if(!r.ok) throw new Error("http");
+    const b = await r.blob();
+    return await new Promise((ok, ko) => { const f = new FileReader(); f.onload = () => ok(f.result); f.onerror = ko; f.readAsDataURL(b); });
+  } catch(e) {
+    return await new Promise(ok => {
+      const i = new Image();
+      i.onload = () => {
+        const c = document.createElement("canvas"); c.width = i.naturalWidth; c.height = i.naturalHeight;
+        c.getContext("2d").drawImage(i, 0, 0);
+        try { ok(c.toDataURL("image/jpeg", 0.85)); } catch(err) { ok(null); }
+      };
+      i.onerror = () => ok(null);
+      i.src = url;
+    });
+  }
+}
+async function telechargerConfig(){
+  erreur("Préparation du fichier config.json…");
+  const cfg = copie(CONFIG);
+  cfg.exporte = Date.now();
+  let manquantes = 0;
+  for(const c of Object.values(cfg.cartes)){
+    if(c.image && estServeur(c.image)){
+      const d = await versDataURL(c.image);
+      if(d) c.image = d; else { delete c.image; manquantes++; }
+    }
+  }
+  const texte = JSON.stringify(cfg);
+  CONFIG.exporte = cfg.exporte; sauver();
+  const fin = manquantes ? ` ${manquantes} image${manquantes>1 ? "s n’ont" : " n’a"} pas pu être intégrée${manquantes>1 ? "s" : ""}.` : "";
+  if(window.claude && typeof window.claude.use==="function"){
+    const dl = await window.claude.use("downloads").catch(() => null);
+    if(!dl) return erreur("Le téléchargement n’est pas disponible sur cette page.");
+    try { await dl.save({filename:"config.json", data:texte}); erreur("Fichier config.json enregistré." + fin); }
+    catch(e) { if(!e || e.code!=="declined") erreur("Le téléchargement a échoué : réessayez dans un instant."); }
+  } else {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([texte], {type:"application/json"}));
+    a.download = "config.json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    erreur("Fichier config.json téléchargé." + fin);
+  }
+}
+
+function chargerImage(id, fichier){
+  if(!fichier.type.startsWith("image/")) return erreur("Ce fichier n’est pas une image : choisissez un PNG, un JPG ou un WebP.");
+  const lecteur = new FileReader();
+  lecteur.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const L = 448, H = 576, cv = document.createElement("canvas");
+      cv.width = L; cv.height = H;
+      const ctx = cv.getContext("2d");
+      ctx.fillStyle = "#fbf7ec"; ctx.fillRect(0, 0, L, H);
+      const r = Math.max(L/img.width, H/img.height), w = img.width*r, h = img.height*r;
+      ctx.drawImage(img, (L-w)/2, (H-h)/2, w, h);
+      const avant = CARTES[id].image;
+      const enLocal = () => {
+        CARTES[id].image = cv.toDataURL("image/jpeg", 0.82);
+        if(sauver()){ liberer(avant); erreur("Image ajoutée."); }
+        else {
+          if(avant) CARTES[id].image = avant; else delete CARTES[id].image;
+          erreur("Mémoire du navigateur pleine : retirez quelques images pour en ajouter d’autres.");
+        }
+        renderAdmin();
+      };
+      if(!ASSETS) return enLocal();
+      erreur("Envoi de l’image…");
+      cv.toBlob(async blob => {
+        try {
+          const r = await ASSETS.upload(blob);
+          CARTES[id].image = r.url; sauver(); liberer(avant);
+          erreur("Image enregistrée sur le serveur du jeu.");
+          renderAdmin();
+        } catch(e) { enLocal(); }
+      }, "image/jpeg", 0.85);
+    };
+    img.onerror = () => erreur("Impossible de lire cette image : essayez un autre fichier.");
+    img.src = lecteur.result;
+  };
+  lecteur.readAsDataURL(fichier);
+}
+
+document.addEventListener("paste", e => {
+  if(ui.ecran!=="admin" || adm.onglet!=="cartes" || !adm.sel) return;
+  const items = [...((e.clipboardData && e.clipboardData.items) || [])];
+  const it = items.find(i => i.kind==="file" && i.type.startsWith("image/"));
+  if(it){ e.preventDefault(); chargerImage(adm.sel, it.getAsFile()); return; }
+  const champ = e.target.closest && e.target.closest("input, textarea");
+  if(!champ) erreur("Le presse-papiers ne contient pas d’image : faites un clic droit sur l’image du site, puis « Copier l’image ».");
+});
+document.addEventListener("dragover", e => {
+  const z = e.target.closest && e.target.closest("[data-depot]");
+  if(z){ e.preventDefault(); z.classList.add("survol"); }
+});
+document.addEventListener("dragleave", e => {
+  const z = e.target.closest && e.target.closest("[data-depot]");
+  if(z && !z.contains(e.relatedTarget)) z.classList.remove("survol");
+});
+document.addEventListener("drop", e => {
+  const z = e.target.closest && e.target.closest("[data-depot]");
+  if(!z) return;
+  e.preventDefault(); z.classList.remove("survol");
+  const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  if(f) chargerImage(z.dataset.depot, f);
+  else erreur("Glissez un fichier image depuis votre ordinateur. Pour une image d’un site, utilisez « Copier l’image » puis Ctrl+V.");
+});
+
+document.addEventListener("toggle", e => {
+  const b = e.target.dataset && e.target.dataset.bloc;
+  if(b){ e.target.open ? adm.ouverts.add(b) : adm.ouverts.delete(b); }
+}, true);
+
+/* ============================================================
+   JEU EN LIGNE (version rapide)
+   L’hôte fait tourner les règles et publie l’état de la partie ;
+   l’invité envoie ses actions, que l’hôte vérifie et applique.
+   ============================================================ */
+const EN = {db:null, monId:null, ecran:null, code:null, role:null, hoteId:null, inviteId:null,
+            desabos:[], ordres:[], seqEnvoye:0, refusVu:0, enAttente:false, capture:false, refusCapture:null,
+            version:0, cfg:null, saisie:"", reprises:[], erreurMenu:""};
+if(window.claude && typeof window.claude.use==="function"){
+  Promise.all([window.claude.use("db"), window.claude.use("user")]).then(async ([db, user]) => {
+    if(!db || !user) return;
+    const id = await user.id();
+    if(id){ EN.db = db; EN.monId = id; }
+    if(!S) renderCouche();
+  }, () => {});
+}
+
+// Une file d’écriture par document : une seule écriture à la fois, la plus récente gagne
+function fileEcriture(){
+  let enCours = false, suivante = null;
+  return fn => {
+    suivante = fn;
+    if(enCours) return;
+    enCours = true;
+    (async () => {
+      while(suivante){ const f = suivante; suivante = null; try { await f(); } catch(e) { console.warn("Écriture refusée", e); } }
+      enCours = false;
+    })();
+  };
+}
+const ecrirePartie = fileEcriture(), ecrirePrive = fileEcriture(), ecrireOrdres = fileEcriture();
+
+const LETTRES = "abcdefghjkmnpqrstuvwxyz23456789";
+const genererCode = () => Array.from({length:5}, () => LETTRES[Math.floor(Math.random()*LETTRES.length)]).join("");
+const refPartie = () => EN.db.doc(`parties/${EN.hoteId}/p/${EN.code}`);
+const refOrdres = () => EN.db.doc(`ordres/${EN.inviteId}/p/${EN.code}`);
+const refPrive = () => EN.db.doc(`data/users/${EN.hoteId}/parties/${EN.code}`);
+
+function configPublique(){
+  const cartes = copie(CONFIG.cartes);
+  Object.values(cartes).forEach(c => { if(c.image && !estServeur(c.image)) delete c.image; });
+  return {cartes, factions:CONFIG.factions, mots:CONFIG.mots, termes:CONFIG.termes, regles:CONFIG.regles};
+}
+// Ce que l’invité a le droit de voir : pas la main de l’hôte, pas l’ordre des decks
+function vuePublique(){
+  const e = JSON.parse(JSON.stringify(S));
+  e.joueurs[0].main = e.joueurs[0].main.length;
+  e.joueurs.forEach(j => { j.deck = j.deck.length; });
+  e.marcheDeck = e.marcheDeck.length;
+  e.journal = e.journal.slice(-12);
+  return e;
+}
+function reconstruire(e){
+  e = JSON.parse(JSON.stringify(e));
+  const vides = n => Array.from({length:n}, () => null);
+  e.joueurs.forEach(j => { if(typeof j.main==="number") j.main = vides(j.main); if(typeof j.deck==="number") j.deck = vides(j.deck); });
+  if(typeof e.marcheDeck==="number") e.marcheDeck = vides(e.marcheDeck);
+  return e;
+}
+
+function publier(){
+  if(!enLigne() || EN.role!=="hote") return;
+  EN.version++;
+  const statut = S.vainqueur!==null ? "terminee" : "en_cours";
+  const corps = {etat:vuePublique(), version:EN.version, statut, hote:EN.hoteId, invite:EN.inviteId, config:EN.cfg, maj:Date.now()};
+  const prive = {etat:JSON.parse(JSON.stringify(S)), code:EN.code, invite:EN.inviteId, statut, config:EN.cfg, maj:Date.now()};
+  const rp = refPartie(), rv = refPrive();
+  ecrirePartie(() => rp.set(corps));
+  ecrirePrive(() => rv.set(prive));
+}
+
+function nettoyerAbonnements(){ EN.desabos.forEach(f => { try { f(); } catch(e) {} }); EN.desabos = []; }
+function quitterEnLigne(){
+  nettoyerAbonnements();
+  if(EN.role==="invite") appliquerConfig();
+  Object.assign(EN, {ecran:null, code:null, role:null, hoteId:null, inviteId:null, ordres:[], seqEnvoye:0, refusVu:0, enAttente:false, cfg:null});
+}
+
+// ----- Hôte
+async function creerPartie(){
+  EN.erreurMenu = "";
+  let code = genererCode();
+  try { if((await EN.db.doc(`salle/${code}`).get()).exists) code = genererCode(); } catch(e) {}
+  Object.assign(EN, {code, role:"hote", hoteId:EN.monId, inviteId:null, ecran:"attente", version:0, cfg:configPublique()});
+  renderCouche();
+  try { await EN.db.doc(`salle/${code}`).set({hote:EN.monId, statut:"attente", cree:Date.now()}); }
+  catch(e) { EN.ecran = "choix"; EN.erreurMenu = "Impossible de créer la partie : vérifiez que la page est partagée avec vous comme Contributeur ou Éditeur."; return renderCouche(); }
+  EN.desabos.push(EN.db.doc(`salle/${code}`).onSnapshot(snap => {
+    const d = snap.exists ? snap.data() : null;
+    if(d && d.invite && !EN.inviteId && EN.role==="hote") demarrerHote(d.invite);
+  }, () => {}));
+}
+function nommerJoueurs(){ S.joueurs[0].nom = "Hôte"; S.joueurs[1].nom = "Invité"; }
+function demarrerHote(inviteId){
+  EN.inviteId = inviteId;
+  nouvellePartie("enligne"); nommerJoueurs();
+  S.seqTraite = 0; S.journal = [`${S.joueurs[S.courant].nom} commence.`];
+  EN.ecran = null; ui.ecran = "jeu";
+  Object.assign(ui, {attaquant:null, armeEnAttente:null, choixPierre:null, couvert:false, aiEnCours:false});
+  ecouterOrdres(); publier(); render();
+}
+function revancheHote(){
+  const seq = S.seqTraite || 0;
+  nouvellePartie("enligne"); nommerJoueurs();
+  S.seqTraite = seq; S.journal = [`Revanche ! ${S.joueurs[S.courant].nom} commence.`];
+  Object.assign(ui, {attaquant:null, armeEnAttente:null, choixPierre:null});
+  publier(); render();
+}
+function ecouterOrdres(){
+  EN.desabos.push(refOrdres().onSnapshot(snap => {
+    if(!snap.exists || !enLigne()) return;
+    const liste = [...(snap.data().ordres || [])].sort((a,b) => a.seq-b.seq);
+    let fait = false;
+    for(const o of liste){
+      if(o.seq > (S.seqTraite || 0)){ S.seqTraite = o.seq; executerOrdre(o); fait = true; }
+    }
+    if(fait){ publier(); render(); }
+  }, () => {}));
+}
+function executerOrdre(o){
+  const c = o.cmd || {};
+  if(S.vainqueur!==null || S.courant!==1){ S.refus = {seq:o.seq, msg:"Ce n’est pas votre tour."}; return; }
+  EN.capture = true; EN.refusCapture = null;
+  try {
+    switch(c.type){
+      case "jouer": jouer(c.id, c.opts || {}); break;
+      case "attaquer": attaquer(c.att, c.cible); break;
+      case "combat": utiliserCombat(c.cible); break;
+      case "acheter": acheter(c.k); break;
+      case "sacrifier": sacrifier(c.id); break;
+      case "bannir": bannir(c.id); break;
+      case "bannirStop": S.bannirEnAttente = 0; break;
+      case "fin": finTour(); break;
+    }
+  } finally { EN.capture = false; }
+  if(EN.refusCapture) S.refus = {seq:o.seq, msg:EN.refusCapture};
+}
+async function chargerReprises(){
+  EN.reprises = [];
+  try {
+    const q = await EN.db.collection(`data/users/${EN.monId}/parties`).where("statut","==","en_cours").limit(5).get();
+    EN.reprises = q.docs.map(d => d.data()).filter(d => d && d.etat).sort((a,b) => b.maj-a.maj);
+  } catch(e) {}
+  if(EN.ecran==="choix") renderCouche();
+}
+function reprendre(code){
+  const r = EN.reprises.find(x => x.code===code);
+  if(!r) return;
+  Object.assign(EN, {code, role:"hote", hoteId:EN.monId, inviteId:r.invite, ecran:null, version:0, cfg:r.config || configPublique()});
+  S = JSON.parse(JSON.stringify(r.etat));
+  ui.ecran = "jeu"; Object.assign(ui, {attaquant:null, armeEnAttente:null, choixPierre:null, couvert:false, aiEnCours:false});
+  ecouterOrdres(); publier(); render();
+}
+
+// ----- Invité
+async function rejoindre(){
+  EN.erreurMenu = "";
+  const code = (EN.saisie || "").trim().toLowerCase();
+  if(!/^[a-z0-9]{5}$/.test(code)){ EN.erreurMenu = "Le code fait 5 caractères (lettres et chiffres)."; return renderCouche(); }
+  EN.ecran = "connexion"; renderCouche();
+  const echec = msg => { EN.ecran = "choix"; EN.erreurMenu = msg; renderCouche(); };
+  let d;
+  try { const s = await EN.db.doc(`salle/${code}`).get(); d = s.exists ? s.data() : null; }
+  catch(e) { return echec("Connexion impossible pour le moment. Réessayez dans un instant."); }
+  if(!d || d.statut==="annulee") return echec("Aucune partie ne correspond à ce code.");
+  if(d.hote===EN.monId) return echec("C’est votre propre partie : votre adversaire doit la rejoindre depuis son compte.");
+  if(d.invite && d.invite!==EN.monId) return echec("Cette partie a déjà deux joueurs.");
+  Object.assign(EN, {code, role:"invite", hoteId:d.hote, inviteId:EN.monId});
+  try {
+    if(!d.invite) await EN.db.doc(`salle/${code}`).update({invite:EN.monId});
+    const o = await refOrdres().get();
+    EN.ordres = o.exists ? [...(o.data().ordres || [])] : [];
+    EN.seqEnvoye = EN.ordres.reduce((m,x) => Math.max(m, x.seq), 0);
+  } catch(e) { EN.role = null; return echec("Impossible de rejoindre : la page doit être partagée avec vous comme Contributeur ou Éditeur."); }
+  let premier = true;
+  EN.desabos.push(refPartie().onSnapshot(snap => {
+    if(!snap.exists || EN.role!=="invite") return;
+    const p = snap.data();
+    if(p.invite!==EN.monId) return;
+    if(p.config) appliquerConfig(p.config);
+    S = reconstruire(p.etat);
+    EN.ecran = null; ui.ecran = "jeu";
+    if(S.refus && S.refus.seq > EN.refusVu){ if(!premier) erreur(S.refus.msg); EN.refusVu = S.refus.seq; }
+    if((S.seqTraite || 0) >= EN.seqEnvoye) EN.enAttente = false;
+    if(S.courant!==1){ ui.attaquant = null; ui.armeEnAttente = null; ui.choixPierre = null; }
+    premier = false;
+    render();
+  }, () => {}));
+}
+function envoyer(cmd){
+  EN.seqEnvoye++;
+  EN.ordres = [...EN.ordres, {seq:EN.seqEnvoye, cmd}].slice(-30);
+  EN.enAttente = true;
+  const data = {ordres:EN.ordres}, ref = refOrdres();
+  ecrireOrdres(() => ref.set(data));
+  return true;
+}
+
+// Les actions passent par le moteur local, ou partent chez l’hôte pour l’invité
+const MOTEUR_LOCAL = {jouer, attaquer, utiliserCombat, acheter, sacrifier, bannir, finTour, bannirStop:() => { S.bannirEnAttente = 0; }};
+const MOTEUR_DISTANT = {
+  jouer:(id, opts={}) => envoyer({type:"jouer", id, opts}),
+  attaquer:(att, cible) => envoyer({type:"attaquer", att, cible}),
+  utiliserCombat:cible => envoyer({type:"combat", cible}),
+  acheter:k => envoyer({type:"acheter", k}),
+  sacrifier:id => envoyer({type:"sacrifier", id}),
+  bannir:id => envoyer({type:"bannir", id}),
+  bannirStop:() => envoyer({type:"bannirStop"}),
+  finTour:() => envoyer({type:"fin"})
+};
+const M = () => enLigne() && EN.role==="invite" ? MOTEUR_DISTANT : MOTEUR_LOCAL;
+
+function htmlEnLigne(){
+  const retour = `<button type="button" class="btn second" data-act="en-retour">Retour</button>`;
+  if(!EN.db && !window.claude) return `<div class="boite" role="dialog" aria-label="Jouer en ligne">
+    <h2>Jouer en ligne</h2>
+    <p>Le jeu en ligne arrive bientôt sur ce site. En attendant, jouez à deux sur le même écran ou contre l’ordinateur.</p>
+    <div class="actions">${retour}</div></div>`;
+  if(!EN.db) return `<div class="boite" role="dialog" aria-label="Jouer en ligne">
+    <h2>Jouer en ligne</h2>
+    <p>Le jeu en ligne n’est pas disponible sur cette page. Il faut être connecté à Claude, et la page doit être partagée avec chaque joueur comme Contributeur ou Éditeur.</p>
+    <div class="actions">${retour}</div></div>`;
+  if(EN.ecran==="attente") return `<div class="boite" role="dialog" aria-label="Partie créée">
+    <h2>Partie créée</h2>
+    <p>Envoyez ce code à votre adversaire. Il ouvre le jeu, choisit « Jouer en ligne » puis « Rejoindre ».</p>
+    <div class="code-partie">${EN.code}</div>
+    <p class="attente">En attente de votre adversaire…</p>
+    <div class="actions"><button type="button" class="btn" data-act="en-copier">Copier le code</button><button type="button" class="btn second" data-act="en-annuler">Annuler</button></div></div>`;
+  if(EN.ecran==="connexion") return `<div class="boite" role="dialog" aria-label="Connexion">
+    <h2>Connexion…</h2><p class="attente">Connexion à la partie ${esc(EN.code || EN.saisie)}, en attente de l’hôte…</p>
+    <div class="actions"><button type="button" class="btn second" data-act="en-annuler">Annuler</button></div></div>`;
+  const reprises = EN.reprises.length ? `<h3>Vos parties en cours</h3><div class="actions">${EN.reprises.map(r =>
+    `<button type="button" class="btn second" data-act="en-reprendre" data-id="${esc(r.code)}">Reprendre la partie ${esc(r.code)}</button>`).join("")}</div>` : "";
+  return `<div class="boite" role="dialog" aria-label="Jouer en ligne">
+    <h2>Jouer en ligne</h2>
+    <p>Chaque joueur joue sur son propre écran. Celui qui crée la partie fait tourner les règles : gardez sa page ouverte jusqu’à la fin.</p>
+    ${EN.erreurMenu ? `<p style="color:var(--danger)">${esc(EN.erreurMenu)}</p>` : ""}
+    <h3>Créer une partie</h3>
+    <div class="actions"><button type="button" class="btn" data-act="en-creer">Créer une partie</button></div>
+    <h3>Rejoindre une partie</h3>
+    <div class="ligne-code"><input type="text" maxlength="5" autocomplete="off" spellcheck="false" placeholder="code" aria-label="Code de la partie" data-en="code" value="${esc(EN.saisie)}">
+      <button type="button" class="btn" data-act="en-rejoindre">Rejoindre</button></div>
+    ${reprises}
+    <div class="actions" style="margin-top:20px">${retour}</div></div>`;
+}
+function actionEnLigne(act, id){
+  switch(act){
+    case "en-ligne": EN.ecran = "choix"; EN.erreurMenu = ""; if(EN.db) chargerReprises(); break;
+    case "en-retour": quitterEnLigne(); break;
+    case "en-creer": creerPartie(); return;
+    case "en-rejoindre": rejoindre(); return;
+    case "en-reprendre": reprendre(id); return;
+    case "en-copier":
+      if(navigator.clipboard) navigator.clipboard.writeText(EN.code).then(() => erreur("Code copié."), () => erreur(`Code : ${EN.code}`));
+      else erreur(`Code : ${EN.code}`);
+      return;
+    case "en-annuler":
+      if(EN.role==="hote" && EN.code && !EN.inviteId) EN.db.doc(`salle/${EN.code}`).set({hote:EN.monId, statut:"annulee", cree:Date.now()}).catch(() => {});
+      quitterEnLigne(); EN.ecran = "choix"; if(EN.db) chargerReprises(); break;
+  }
+  renderCouche();
+}
+document.addEventListener("input", e => {
+  if(e.target.dataset && e.target.dataset.en==="code") EN.saisie = e.target.value;
+});
+document.addEventListener("keydown", e => {
+  if(e.key==="Enter" && e.target.dataset && e.target.dataset.en==="code"){ EN.saisie = e.target.value; rejoindre(); }
+});
+
+/* Bulles d’aide au survol */
+let bulleCible = null;
+function cacherBulle(){ bulleCible = null; document.getElementById("bulle").classList.remove("visible"); }
+document.addEventListener("mouseover", e => {
+  const el = e.target.closest && e.target.closest("[data-aide]");
+  if(el===bulleCible) return;
+  if(!el){ cacherBulle(); return; }
+  bulleCible = el;
+  const b = document.getElementById("bulle");
+  const texte = el.dataset.aide==="carte" ? el.dataset.texte : TEXTES_AIDE[el.dataset.aide];
+  if(!texte){ cacherBulle(); return; }
+  b.innerHTML = `<b>${esc(el.dataset.titre || "")}</b>${esc(texte)}`;
+  const r = el.getBoundingClientRect(), w = b.offsetWidth, hb = b.offsetHeight;
+  let top = r.top - hb - 8; if(top < 8) top = r.bottom + 8;
+  const left = Math.min(Math.max(8, r.left + r.width/2 - w/2), window.innerWidth - w - 8);
+  b.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
+  b.classList.add("visible");
+});
+document.addEventListener("scroll", cacherBulle, true);
+document.addEventListener("pointerdown", cacherBulle, true);
+
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]");
+  if(!el) return;
+  const act = el.dataset.act, id = el.dataset.id;
+  if(act==="mode-ia" || act==="mode-duo"){
+    nouvellePartie(act==="mode-ia" ? "ia" : "duo");
+    Object.assign(ui, {attaquant:null, armeEnAttente:null, choixPierre:null, aiEnCours:false, couvert: act==="mode-duo"});
+    return apresAction();
+  }
+  if(act==="nouvelle"){ if(enLigne() || EN.role) quitterEnLigne(); S = null; ui.couvert = false; ui.aiEnCours = false; return render(); }
+  if(act.startsWith("en-")) return actionEnLigne(act, id);
+  if(ui.ecran==="admin" || act==="admin"){ return actionAdmin(act, id, el); }
+  if(act==="rejouer" && enLigne()){ if(EN.role==="hote") revancheHote(); return; }
+  if(act==="rejouer"){
+    const mode = S.mode;
+    nouvellePartie(mode);
+    Object.assign(ui, {attaquant:null, armeEnAttente:null, choixPierre:null, aiEnCours:false, couvert: mode==="duo"});
+    return apresAction();
+  }
+  if(act==="commencer"){ ui.couvert = false; return render(); }
+  if(!S) return;
+  if(act==="ban"){ M().bannir(id); return apresAction(); }
+  if(act==="ban-stop"){ if(enLigne() && EN.role==="invite") S.bannirEnAttente = 0; M().bannirStop(); return apresAction(); }
+  if(act==="annuler"){ ui.attaquant = null; ui.armeEnAttente = null; ui.choixPierre = null; return render(); }
+  if(act==="pierre-or" || act==="pierre-sac"){
+    M().jouer(ui.choixPierre, {sacrifierDirect: act==="pierre-sac"}); ui.choixPierre = null; return apresAction();
+  }
+  if(!interactif()) return;
+  const j = S.joueurs[S.courant];
+  switch(act){
+    case "main": {
+      const c = j.main.find(x => x.uid===id); if(!c) break;
+      const d = def(c);
+      ui.attaquant = null;
+      if(d.type==="arme"){
+        if(!j.plateau.length) erreur("Posez d’abord une créature à équiper.");
+        else ui.armeEnAttente = id;
+      } else if(d.choixSacrifice) ui.choixPierre = id;
+      else M().jouer(id);
+      break;
+    }
+    case "own": {
+      if(ui.armeEnAttente){ M().jouer(ui.armeEnAttente, {cible:id}); ui.armeEnAttente = null; break; }
+      const c = j.plateau.find(x => x.uid===id); if(!c) break;
+      if(c.peutAttaquer && !c.aAttaque) ui.attaquant = ui.attaquant===id ? null : id;
+      else erreur(c.aAttaque ? "Cette créature a déjà attaqué ce tour." : "Une créature ne peut pas attaquer le tour où elle arrive, sauf avec Rapidité.");
+      break;
+    }
+    case "enemy": case "face": {
+      const cible = act==="face" ? "face" : id;
+      if(ui.attaquant){
+        const t = cibles(S.courant);
+        if(cible==="face" ? !t.face : !t.creatures.has(cible)) erreur(raisonRefus(S.courant, cible));
+        else M().attaquer(ui.attaquant, cible);
+        ui.attaquant = null;
+      }
+      else if(j.combat>0){
+        const t = cibles(S.courant);
+        if(cible==="face" ? !t.face : !t.creatures.has(cible)) erreur(raisonRefus(S.courant, cible));
+        else M().utiliserCombat(cible);
+      }
+      else erreur("Sélectionnez une de vos créatures prêtes, ou gagnez du combat avec vos cartes.");
+      break;
+    }
+    case "marche": {
+      const c = S.marche[Number(id)];
+      if(c && j.or < def(c).prix) erreur(`Il vous faut ${def(c).prix} or pour acheter ${def(c).nom}.`);
+      else M().acheter(Number(id));
+      break;
+    }
+    case "base": {
+      const b = CARTES[REGLES.carteBase];
+      if(b && j.or < (b.prix || 0)) erreur(`Il vous faut ${b.prix} or pour ${b.nom}.`);
+      else M().acheter("base");
+      break;
+    }
+    case "sac": M().sacrifier(id); break;
+    case "fin":
+      ui.attaquant = null; ui.armeEnAttente = null;
+      M().finTour();
+      if(S.mode==="duo") ui.couvert = true;
+      break;
+  }
+  apresAction();
+});
+document.addEventListener("keydown", e => {
+  if(e.key==="Escape" && S && (ui.attaquant || ui.armeEnAttente || ui.choixPierre)){
+    ui.attaquant = null; ui.armeEnAttente = null; ui.choixPierre = null; render();
+  }
+});
+document.addEventListener("toggle", e => { if(e.target.tagName==="DETAILS") ui.regles = e.target.open; }, true);
+
+// Site autonome (GitHub Pages) : un fichier config.json placé à côté du jeu
+// devient la configuration de tous les joueurs.
+async function chargerFichierConfig(){
+  if(window.claude) return;
+  try {
+    const r = await fetch("config.json", {cache:"no-store"});
+    if(!r.ok) return;
+    const fichier = await r.json();
+    let local = null;
+    try { local = JSON.parse(localStorage.getItem(CLE_STOCKAGE)); } catch(e) { local = null; }
+    if(!local || (fichier.exporte || 0) > (local.exporte || 0)){
+      CONFIG = fusionner(fichier); appliquerConfig(); sauver();
+      if(!S) render();
+    }
+  } catch(e) { /* pas de config.json : on garde les cartes d’origine */ }
+}
+
+chargerConfig();
+render();
+chargerFichierConfig();
+</script>
+</body>
+</html>
