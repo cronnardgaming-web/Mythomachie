@@ -12,7 +12,7 @@
   --table:#e7e0d0; --table-2:#d9cfb9; --zone:#efe9dc;
   --ink:#2b2416; --ink-2:#615741; --line:#c3b69a; --bronze:#8a5a1f;
   --parchemin:#fbf7ec; --encre-carte:#2b2416; --bord-carte:#b9a982;
-  --cible:#1f8a5b; --choix:#8a5a1f; --danger:#b3261e;
+  --cible:#1f8a5b; --encre-c:#6a4fb3; --choix:#8a5a1f; --danger:#b3261e;
   --egy:#d4a017; --egy-ink:#2b2416;
   --hin:#c8402a; --hin-ink:#ffffff;
   --nor:#6e7b88; --nor-ink:#ffffff;
@@ -29,7 +29,7 @@
     --table:#1c2030; --table-2:#262b3f; --zone:#232838;
     --ink:#ede6d4; --ink-2:#b5ad99; --line:#3a4058; --bronze:#d9a35a;
     --parchemin:#f3ead5; --encre-carte:#2b2416; --bord-carte:#8f7f5c;
-    --cible:#4cc38a; --choix:#e0b061; --danger:#ff7a6e;
+    --cible:#4cc38a; --encre-c:#b9a2f0; --choix:#e0b061; --danger:#ff7a6e;
     --voile:rgba(8,10,18,.72);
     color-scheme:dark;
   }
@@ -38,7 +38,7 @@
   --table:#1c2030; --table-2:#262b3f; --zone:#232838;
   --ink:#ede6d4; --ink-2:#b5ad99; --line:#3a4058; --bronze:#d9a35a;
   --parchemin:#f3ead5; --encre-carte:#2b2416; --bord-carte:#8f7f5c;
-  --cible:#4cc38a; --choix:#e0b061; --danger:#ff7a6e;
+  --cible:#4cc38a; --encre-c:#b9a2f0; --choix:#e0b061; --danger:#ff7a6e;
   --voile:rgba(8,10,18,.72);
   color-scheme:dark;
 }
@@ -199,6 +199,62 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 @keyframes pulse{50%{opacity:.25}}
 @media (prefers-reduced-motion: reduce){.attente::before{animation:none}}
 
+/* Phase 4 : accueil, collection, decks, boutique */
+.boite-large{max-width:760px}
+.ligne-titre{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.bourse{display:flex;gap:8px}
+.res.encre b{color:var(--encre-c)}
+.quete{background:var(--table-2);border-radius:12px;padding:12px 14px;margin:14px 0 4px}
+.barre{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0}
+.barre span{display:block;height:100%;background:var(--cible)}
+.quete-pied{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--ink-2);font-size:14px;flex-wrap:wrap}
+.ok,.valide{color:var(--cible)}
+.invalide{color:var(--danger)}
+.gain{font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:20px;color:var(--bronze)}
+.filtres{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
+.filtres input,.filtres select,.boite select,.panneau input{font:inherit;font-size:15px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.case{display:flex;align-items:center;gap:6px;color:var(--ink-2)}
+.page-collection{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:16px;align-items:start}
+.page-editeur{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+.grille{display:flex;flex-wrap:wrap;gap:14px;padding:6px}
+.grille .carte{--w:132px}
+.col-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px}
+.col-item.manque .carte{filter:grayscale(1);opacity:.45}
+.col-item.choisie .carte{box-shadow:0 0 0 3px var(--choix)}
+.badge-nb{background:var(--ink);color:var(--table);font-weight:700;font-size:13px;border-radius:99px;padding:1px 10px}
+.col-item.manque .badge-nb{opacity:.5}
+.panneau{position:sticky;top:12px;background:var(--zone);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.panneau .carte{--w:180px;align-self:center;cursor:default}
+.panneau p{margin:0}
+.liste-decks{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.deck-ligne{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:var(--zone);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.deck-ligne .aide{display:flex;align-items:center;gap:6px;margin:2px 0}
+.compteur{font-family:Cinzel,"Times New Roman",serif;font-size:28px;font-weight:700}
+.courbe{display:flex;gap:6px;align-items:flex-end;height:96px}
+.courbe .colonne{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;font-size:12px;color:var(--ink-2);height:100%}
+.courbe .b{width:100%;background:var(--bronze);border-radius:3px 3px 0 0;min-height:2px}
+.factions-deck{display:flex;flex-wrap:wrap;gap:6px}
+.puce-fac{display:inline-flex;align-items:center;gap:5px;font-size:13px;background:var(--table-2);border-radius:99px;padding:3px 9px}
+.liste-deck{list-style:none;margin:0;padding:0;max-height:38vh;overflow:auto}
+.liste-deck button{width:100%;display:flex;align-items:center;gap:8px;background:none;border:none;border-radius:6px;padding:5px 6px;cursor:pointer;text-align:left;font-size:14px}
+.liste-deck button:hover{background:var(--table-2)}
+.prix-mini{width:22px;height:22px;border-radius:50%;background:#f0c64e;color:#3b2a06;display:grid;place-items:center;font-weight:700;font-size:12px;flex:none}
+.x-nb{margin-left:auto;color:var(--ink-2)}
+.boutique .offre{display:flex;gap:20px;align-items:center;background:var(--zone);border:1px solid var(--line);border-radius:14px;padding:16px;flex-wrap:wrap}
+.boutique .offre h2{font-size:20px;margin-bottom:6px}
+.boutique .offre .aide{margin:0 0 12px}
+.paquet-visuel,.dos{width:120px;aspect-ratio:63/88;border-radius:8px;background:linear-gradient(135deg,#8a5a1f,#3b2a14);display:grid;place-items:center;color:#f2d48a;font-family:Cinzel,"Times New Roman",serif;font-size:44px;font-weight:700;box-shadow:inset 0 0 0 4px rgba(242,212,138,.5),0 3px 8px rgba(0,0,0,.3);border:none;flex:none}
+.revelation{display:flex;gap:16px;flex-wrap:wrap;margin:20px 0 6px}
+.revelation .carte{--w:150px;cursor:default}
+.dos{width:150px;cursor:pointer;transition:transform .15s ease}
+.dos:hover,.dos:focus-visible{transform:translateY(-6px)}
+.revele{position:relative;animation:retourner .45s ease}
+@keyframes retourner{from{transform:rotateY(90deg)}to{transform:none}}
+.nouvelle{position:absolute;top:-10px;left:50%;transform:translateX(-50%);white-space:nowrap;background:var(--cible);color:#fff;font-weight:700;font-size:12px;border-radius:99px;padding:3px 8px;z-index:3}
+.btn:disabled{opacity:.45;cursor:default}
+@media (max-width:900px){.page-collection,.page-editeur{grid-template-columns:1fr}.panneau{position:static}}
+@media (prefers-reduced-motion: reduce){.revele{animation:none}.dos{transition:none}}
+
 /* Couches */
 #couche:empty{display:none}
 #couche{position:fixed;inset:0;background:var(--voile);display:grid;place-items:center;padding:24px;z-index:20;overflow:auto}
@@ -236,6 +292,8 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 <div id="bulle" role="tooltip"></div>
 
 <script>
+const NOM_JEU = window.claude ? "Prototype de combat" : "Mythomachie";
+if(!window.claude) document.title = NOM_JEU;
 /* ============================================================
    CONFIGURATION DU JEU
    Valeurs d’origine. Le panneau d’administration les modifie
@@ -511,12 +569,15 @@ function nouveauJoueur(nom){
 }
 function log(t){ if(S) S.journal.push(t); }
 
-function nouvellePartie(mode){
+function nouvellePartie(mode, decks){
   compteurUid = 0;
   S = {mode, joueurs:[nouveauJoueur("Joueur 1"), nouveauJoueur(mode==="ia" ? "Ordinateur" : "Joueur 2")],
        courant: Math.random()<0.5 ? 0 : 1, tour:1, journal:[], vainqueur:null,
        marcheDeck:[], marche:[], bannirEnAttente:0};
-  S.marcheDeck = melange([...deckConstruit(), ...deckConstruit()].map(inst));
+  const listes = decks && decks[0] && decks[1] ? [...decks[0], ...decks[1]] : [...deckConstruit(), ...deckConstruit()];
+  S.marcheDeck = melange(listes.filter(id => CARTES[id]).map(inst));
+  S.idPartie = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  S.stats = [0, 1].map(() => ({creatures:0, sorts:0, achats:0, degats:0}));
   for(let i=0;i<REGLES.tailleMarche && S.marcheDeck.length;i++) S.marche.push(S.marcheDeck.pop());
   S.joueurs.forEach(j => piocher(j, REGLES.mainDepart, true));
   S.joueurs[S.courant].plateau.forEach(c => c.peutAttaquer = true);
@@ -660,6 +721,10 @@ function jouer(id, opts={}){
     }
   }
   j.tour.push({uid:c.uid, id:c.id, allieFait:false});
+  if(S.stats && S.stats[i]){
+    if(d.type==="creature") S.stats[i].creatures++;
+    else if(d.type==="sort" && !d.depart && !d.base) S.stats[i].sorts++;
+  }
   verifierAllies(i);
   verifierVictoire();
   return true;
@@ -698,6 +763,7 @@ function acheter(k){
     if(!b) return false;
     if(j.or<(b.prix||0)) return erreur(`Il vous faut ${b.prix} or pour ${b.nom}.`);
     j.or -= (b.prix||0); j.defausse.push(inst(REGLES.carteBase));
+    if(S.stats && S.stats[S.courant]) S.stats[S.courant].achats++;
     log(`${j.nom} achète ${b.nom}.`);
     return true;
   }
@@ -706,6 +772,7 @@ function acheter(k){
   const d = def(c);
   if(j.or<d.prix) return erreur(`Il vous faut ${d.prix} or pour acheter ${d.nom}.`);
   j.or -= d.prix; j.defausse.push(c);
+  if(S.stats && S.stats[S.courant]) S.stats[S.courant].achats++;
   S.marche.splice(k, 1, ...(S.marcheDeck.length ? [S.marcheDeck.pop()] : []));
   log(`${j.nom} achète ${d.nom}.`);
   return true;
@@ -719,6 +786,7 @@ function attaquer(idAtt, cible){
   if(cible==="face"){
     if(!t.face) return erreur(raisonRefus(i,"face"));
     opp.pv -= atkTotal(att);
+    if(S.stats && S.stats[i]) S.stats[i].degats += atkTotal(att);
     log(`${def(att).nom} inflige ${atkTotal(att)} dégâts à ${opp.nom}.`);
   } else {
     if(!t.creatures.has(cible)) return erreur(raisonRefus(i,cible));
@@ -747,6 +815,7 @@ function utiliserCombat(cible){
   if(cible==="face"){
     if(!t.face) return erreur(raisonRefus(i,"face"));
     log(`${j.nom} inflige ${j.combat} dégâts à ${opp.nom}.`);
+    if(S.stats && S.stats[i]) S.stats[i].degats += j.combat;
     opp.pv -= j.combat; j.combat = 0;
   } else {
     if(!t.creatures.has(cible)) return erreur(raisonRefus(i,cible));
@@ -788,8 +857,15 @@ function iaBannir(j){
   }
 }
 async function tourIA(){
+  const partie = S;
+  try { await tourIAInterne(partie); }
+  catch(e) { if(e!=="partie-quittee") throw e; }
+  finally { if(S===partie || !S) { ui.aiEnCours = false; if(S) render(); } }
+}
+async function tourIAInterne(partie){
+  const pauseIA = async ms => { await pause(ms); if(S!==partie) throw "partie-quittee"; };
   ui.aiEnCours = true; render();
-  await pause(700);
+  await pauseIA(700);
   const i = S.courant, j = S.joueurs[i];
   let progres = true;
   while(progres && S.vainqueur===null){
@@ -804,14 +880,14 @@ async function tourIA(){
       }
     }
     if(S.bannirEnAttente>0) iaBannir(j);
-    if(progres){ render(); await pause(420); }
+    if(progres){ render(); await pauseIA(420); }
   }
   while(S.vainqueur===null){
     const options = S.marche.map((c,k) => ({k, p:def(c).prix})).filter(o => o.p<=j.or).sort((a,b) => b.p-a.p);
     if(options.length) acheter(options[0].k);
     else if(CARTES[REGLES.carteBase] && j.or>=(CARTES[REGLES.carteBase].prix||0) && (CARTES[REGLES.carteBase].prix||0)>0) acheter("base");
     else break;
-    render(); await pause(420);
+    render(); await pauseIA(420);
   }
   for(const c of [...j.plateau]){
     if(S.vainqueur!==null) break;
@@ -826,7 +902,7 @@ async function tourIA(){
       cible = choix ? choix.uid : null;
     }
     if(!cible) continue;
-    attaquer(c.uid, cible); render(); await pause(520);
+    attaquer(c.uid, cible); render(); await pauseIA(520);
   }
   let garde = 30;
   while(j.combat>0 && S.vainqueur===null && garde--){
@@ -837,10 +913,9 @@ async function tourIA(){
       if(!cand.length) break;
       utiliserCombat(cand[0].uid);
     }
-    render(); await pause(420);
+    render(); await pauseIA(420);
   }
   if(S.vainqueur===null) finTour();
-  ui.aiEnCours = false; render();
 }
 
 /* ============================================================
@@ -944,6 +1019,7 @@ function consigne(inter, moi){
 function render(){
   const app = document.getElementById("app");
   if(ui.ecran==="admin"){ renderAdmin(); return; }
+  if(["collection","decks","editeur","boutique"].includes(ui.ecran)){ renderProg(); return; }
   if(!S){ app.innerHTML = ""; renderCouche(); return; }
   const me = vue(), moi = S.joueurs[me], lui = S.joueurs[1-me];
   const inter = interactif();
@@ -961,7 +1037,7 @@ function render(){
   const base = CARTES[REGLES.carteBase] ? {uid:"base", id:REGLES.carteBase} : null;
   app.innerHTML = `
   <header class="entete">
-    <h1>Prototype de combat</h1>
+    <h1>${NOM_JEU}</h1>
     <span class="mode">${S.mode==="ia" ? "Contre l’ordinateur" : enLigne() ? `En ligne, partie ${EN.code}` : "Deux joueurs sur cet écran"}</span>
     <span class="tour-info">Tour ${S.tour}, ${enLigne() ? (S.courant===vue() ? "à vous de jouer" : "tour de l’adversaire") : S.joueurs[S.courant].nom + " joue"}</span>
     <button type="button" class="btn-discret" data-act="nouvelle">${enLigne() ? "Quitter la partie" : "Nouvelle partie"}</button>
@@ -998,6 +1074,7 @@ function render(){
     <div class="main" aria-label="Votre main">${moi.main.map(c => htmlCarte(c, {act:"main", classes: inter ? "jouable" : ""})).join("")}</div>
   </section>`;
   renderCouche();
+  if(S.vainqueur!==null) verifierRecompense();
 }
 
 function renderCouche(){
@@ -1012,7 +1089,7 @@ function renderCouche(){
     <li>En fin de tour, main et cartes jouées partent à la défausse. Deck vide : la défausse est remélangée.</li></ul></details>`;
   if(!S){
     h = `<div class="boite" role="dialog" aria-label="Nouvelle partie">
-      <h2>Prototype de combat</h2>
+      <h2>${NOM_JEU}</h2>
       <p>Un premier essai jouable : quatre factions, un marché commun et des créatures sur le plateau. Choisissez un mode pour commencer.</p>
       <div class="actions">
         <button type="button" class="btn" data-act="mode-ia">Jouer contre l’ordinateur</button>
@@ -1020,6 +1097,7 @@ function renderCouche(){
         <button type="button" class="btn second" data-act="en-ligne">Jouer en ligne</button>
         <button type="button" class="btn second" data-act="admin">Administration</button>
       </div>${regles}</div>`;
+    if(PROG.actif) h = PROG.choixDeck ? htmlChoixDeck() : htmlAccueilProg(regles);
     if(EN.ecran) h = htmlEnLigne();
   } else if(S.vainqueur!==null){
     const titre = S.vainqueur==="egalite" ? "Égalité"
@@ -1030,7 +1108,7 @@ function renderCouche(){
       : `<div class="actions"><button type="button" class="btn" data-act="rejouer">${enLigne() ? "Proposer une revanche" : "Rejouer"}</button>
          <button type="button" class="btn second" data-act="nouvelle">${enLigne() ? "Quitter" : "Changer de mode"}</button></div>`;
     h = `<div class="boite" role="dialog" aria-label="Fin de partie">
-      <h2>${titre}</h2><p>Partie terminée au tour ${S.tour}.</p>${actions}</div>`;
+      <h2>${titre}</h2><p>Partie terminée au tour ${S.tour}.</p>${htmlGainFin()}${actions}</div>`;
   } else if(ui.couvert){
     const n = S.joueurs[S.courant].nom;
     h = `<div class="boite" role="dialog" aria-label="Changement de joueur">
@@ -1134,14 +1212,14 @@ function renderAdmin(){
     cle = actif.dataset.chemin ? `[data-chemin="${actif.dataset.chemin}"]` : actif.dataset.adm ? `[data-adm="${actif.dataset.adm}"]` : null;
     try { pos = actif.selectionStart; } catch(e) { pos = null; }
   }
-  const pages = {cartes:admCartes, regles:admRegles, factions:admFactions, donnees:admDonnees};
+  const pages = {cartes:admCartes, regles:admRegles, factions:admFactions, donnees:admDonnees, serveur:admServeur};
   app.innerHTML = `
   <header class="entete">
     <h1>Administration</h1>
     <span class="mode">Enregistré automatiquement dans ce navigateur. Les changements s’appliquent à la prochaine partie.${window.claude ? "" : " Pour les partager avec vos joueurs, utilisez Sauvegarde, puis Télécharger config.json."}</span>
     <button type="button" class="btn-discret" data-act="admin-quitter" style="margin-left:auto">Retour au jeu</button>
   </header>
-  <nav class="onglets" role="tablist">${[["cartes","Cartes"],["regles","Règles"],["factions","Factions"],["donnees","Sauvegarde"]].map(([k,l]) =>
+  <nav class="onglets" role="tablist">${[["cartes","Cartes"],["regles","Règles"],["factions","Factions"],["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"]] : [])].map(([k,l]) =>
     `<button type="button" role="tab" class="onglet" aria-selected="${adm.onglet===k}" data-act="onglet" data-id="${k}">${l}</button>`).join("")}</nav>
   ${pages[adm.onglet]()}`;
   document.getElementById("couche").innerHTML = "";
@@ -1361,6 +1439,7 @@ function idUnique(prefixe){
 }
 
 function actionAdmin(act, id, el){
+  if(act.startsWith("srv-")){ actionServeur(act); return; }
   switch(act){
     case "admin": ui.ecran = "admin"; break;
     case "admin-quitter": ui.ecran = "jeu"; S = null; break;
@@ -1709,10 +1788,20 @@ async function creerPartie(){
     if(d && d.invite && !EN.inviteId && EN.role==="hote") demarrerHote(d.invite);
   }, () => {}));
 }
+function deckChoisi(){
+  if(!PROG.pret) return null;
+  const v = decksValides(), d = v.find(x => x.id===EN.deckId) || v[0];
+  return d ? [...d.cartes] : null;
+}
+function decksEnLigne(){
+  const ok = a => Array.isArray(a) && a.length>0 && a.every(id => typeof id==="string" && estCollectionnable(CARTES[id]));
+  if(!ok(EN.deckHote) && !ok(EN.deckInvite)) return undefined;
+  return [ok(EN.deckHote) ? EN.deckHote : deckConstruit(), ok(EN.deckInvite) ? EN.deckInvite.slice(0, 60) : deckConstruit()];
+}
 function nommerJoueurs(){ S.joueurs[0].nom = "Hôte"; S.joueurs[1].nom = "Invité"; }
 function demarrerHote(inviteId){
   EN.inviteId = inviteId;
-  nouvellePartie("enligne"); nommerJoueurs();
+  nouvellePartie("enligne", decksEnLigne()); nommerJoueurs();
   S.seqTraite = 0; S.journal = [`${S.joueurs[S.courant].nom} commence.`];
   EN.ecran = null; ui.ecran = "jeu";
   Object.assign(ui, {attaquant:null, armeEnAttente:null, choixPierre:null, couvert:false, aiEnCours:false});
@@ -1720,7 +1809,7 @@ function demarrerHote(inviteId){
 }
 function revancheHote(){
   const seq = S.seqTraite || 0;
-  nouvellePartie("enligne"); nommerJoueurs();
+  nouvellePartie("enligne", decksEnLigne()); nommerJoueurs();
   S.seqTraite = seq; S.journal = [`Revanche ! ${S.joueurs[S.courant].nom} commence.`];
   Object.assign(ui, {attaquant:null, armeEnAttente:null, choixPierre:null});
   publier(); render();
@@ -1854,6 +1943,9 @@ function htmlEnLigne(){
     <h2>Jouer en ligne</h2>
     <p>Chaque joueur joue sur son propre écran. Celui qui crée la partie fait tourner les règles : gardez sa page ouverte jusqu’à la fin.</p>
     ${EN.erreurMenu ? `<p style="color:var(--danger)">${esc(EN.erreurMenu)}</p>` : ""}
+    ${PROG.actif && PROG.pret ? (decksValides().length
+      ? `<label class="champ"><span>Votre deck</span>${selectDeck("deckEnLigne", decksValides().some(d => d.id===EN.deckId) ? EN.deckId : (EN.deckId = decksValides()[0].id))}</label>`
+      : `<p style="color:var(--danger)">Il vous faut un deck complet de ${REGLES.tailleDeck} cartes pour jouer en ligne.</p>`) : ""}
     <h3>Créer une partie</h3>
     <div class="actions"><button type="button" class="btn" data-act="en-creer">Créer une partie</button></div>
     <h3>Rejoindre une partie</h3>
@@ -1919,6 +2011,7 @@ document.addEventListener("click", e => {
   if(act==="nouvelle"){ if(enLigne() || EN.role) quitterEnLigne(); S = null; ui.couvert = false; ui.aiEnCours = false; return render(); }
   if(act.startsWith("en-")) return actionEnLigne(act, id);
   if(ui.ecran==="admin" || act==="admin"){ return actionAdmin(act, id, el); }
+  if(actionProg(act, id)) return;
   if(act==="rejouer" && enLigne()){ if(EN.role==="hote") revancheHote(); return; }
   if(act==="rejouer"){
     const mode = S.mode;
@@ -2032,6 +2125,7 @@ if(!window.claude && SUPA.url){
 
   const chargerScript = src => new Promise((ok, ko) => {
     const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = ko; document.head.appendChild(s);
+    setTimeout(() => ko(new Error("délai dépassé")), 15000);
   });
   async function initSupabase(){
     if(sb) return true;
@@ -2055,6 +2149,7 @@ if(!window.claude && SUPA.url){
     } finally { EN.chargement = false; }
   }
 
+  window.__supa = {init:initSupabase, client:() => sb};
   function fermerCanal(){
     minuteurs.forEach(m => clearInterval(m)); minuteurs = [];
     if(canal && sb){ try { sb.removeChannel(canal); } catch(e) {} }
@@ -2086,7 +2181,7 @@ if(!window.claude && SUPA.url){
     return {
       rejoindre: p => {
         if(!p.id) return;
-        if(!EN.inviteId) demarrerHote(p.id);
+        if(!EN.inviteId){ EN.deckInvite = p.deck || null; demarrerHote(p.id); }
         else if(p.id===EN.inviteId) envoyerEtat(true);
         else emettre("complet", {id:p.id});
       },
@@ -2105,6 +2200,8 @@ if(!window.claude && SUPA.url){
 
   creerPartie = async function(){
     EN.erreurMenu = "";
+    if(PROG.pret && !deckChoisi()) return erreur(`Il vous faut un deck complet de ${REGLES.tailleDeck} cartes pour jouer en ligne.`);
+    EN.deckHote = deckChoisi(); EN.deckInvite = null;
     Object.assign(EN, {code:genererCode(), role:"hote", hoteId:EN.monId, inviteId:null, ecran:"attente", version:0, cfg:configPublique()});
     renderCouche();
     const ok = await ouvrirCanal(EN.code, gestionHote());
@@ -2164,6 +2261,8 @@ if(!window.claude && SUPA.url){
   }
   rejoindre = async function(){
     EN.erreurMenu = "";
+    if(PROG.pret && !deckChoisi()) return erreur(`Il vous faut un deck complet de ${REGLES.tailleDeck} cartes pour jouer en ligne.`);
+    const monDeck = deckChoisi();
     const code = (EN.saisie || "").trim().toLowerCase();
     if(!/^[a-z0-9]{5}$/.test(code)){ EN.erreurMenu = "Le code fait 5 caractères (lettres et chiffres)."; return renderCouche(); }
     Object.assign(EN, {code, role:"invite", inviteId:EN.monId, hoteId:null, ordres:[], seqEnvoye:0, refusVu:0,
@@ -2176,10 +2275,10 @@ if(!window.claude && SUPA.url){
       complet: p => { if(p.id===EN.monId && !repondu) echec("Cette partie a déjà deux joueurs."); }
     });
     if(!ok) return echec("Le serveur de jeu ne répond pas. Réessayez dans un instant.");
-    emettre("rejoindre", {id:EN.monId});
+    emettre("rejoindre", {id:EN.monId, deck:monDeck});
     minuteurs.push(setInterval(() => {
       if(EN.role!=="invite") return;
-      if(!repondu) emettre("rejoindre", {id:EN.monId});
+      if(!repondu) emettre("rejoindre", {id:EN.monId, deck:monDeck});
       else if(EN.enAttente) emettre("ordres", {id:EN.monId, ordres:EN.ordres.filter(o => o.seq > ((S && S.seqTraite) || 0))});
     }, 2500));
     setTimeout(() => {
@@ -2213,9 +2312,458 @@ if(!window.claude && SUPA.url){
   };
 }
 
+/* ============================================================
+   PHASE 4 : COLLECTION, DECKS, BOUTIQUE ET QUÊTES (site autonome)
+   L’or, l’encre, les paquets et la collection sont gérés par Supabase.
+   ============================================================ */
+const PROG = {actif:false, pret:false, erreur:"", profil:null, collection:{}, decks:[], eco:null, admin:false,
+  filtres:{fac:"toutes", rar:"toutes", type:"tous", rech:"", possedees:false}, sel:null, deckEdit:null, supprDeck:null,
+  paquet:null, choixDeck:null, dernierGain:null, ecoEdit:null, bienvenue:false, occupe:false,
+  recompensees:new Set((() => { try { return JSON.parse(localStorage.getItem("parties-recompensees")) || []; } catch(e) { return []; } })())};
+const QUETES = [
+  {texte:"Jouer 10 créatures", cle:"creatures", but:10},
+  {texte:"Acheter 8 cartes au marché", cle:"achats", but:8},
+  {texte:"Infliger 40 dégâts à l’adversaire", cle:"degats", but:40},
+  {texte:"Gagner 2 parties", cle:"victoires", but:2},
+  {texte:"Jouer 3 parties", cle:"parties", but:3},
+  {texte:"Jouer 15 sorts", cle:"sorts", but:15}
+];
+const jourISO = () => new Date().toISOString().slice(0, 10);
+const queteDuJour = () => QUETES[Math.floor(Date.now()/86400000) % QUETES.length];
+function progresQuete(){ try { return JSON.parse(localStorage.getItem("quete-" + jourISO())) || {}; } catch(e) { return {}; } }
+function ajouterProgresQuete(st, victoire){
+  const p = progresQuete();
+  for(const k of ["creatures","achats","degats","sorts"]) p[k] = (p[k] || 0) + ((st && st[k]) || 0);
+  p.parties = (p.parties || 0) + 1;
+  if(victoire) p.victoires = (p.victoires || 0) + 1;
+  try { localStorage.setItem("quete-" + jourISO(), JSON.stringify(p)); } catch(e) {}
+}
+const sbc = () => window.__supa && window.__supa.client();
+async function rpc(nom, args){
+  const { data, error } = await sbc().rpc(nom, args || {});
+  if(error) throw new Error(error.message);
+  return data;
+}
+const estCollectionnable = d => !!d && !d.depart && !d.base && !d.jeton;
+const maxCopies = id => CARTES[id] && CARTES[id].rarete==="legendaire" ? REGLES.copiesLegendaire : REGLES.copiesMax;
+const compter = ids => ids.reduce((m, i) => (m[i] = (m[i] || 0) + 1, m), {});
+function problemesDeck(ids){
+  const p = [], t = REGLES.tailleDeck, n = ids.length;
+  if(n < t) p.push(`Il manque ${t-n} carte${t-n>1 ? "s" : ""}.`);
+  if(n > t) p.push(`Il y a ${n-t} carte${n-t>1 ? "s" : ""} en trop.`);
+  for(const [id, k] of Object.entries(compter(ids))){
+    const d = CARTES[id];
+    if(!estCollectionnable(d)){ p.push(`${d ? d.nom : id} n’est plus disponible.`); continue; }
+    if(k > maxCopies(id)) p.push(`Trop d’exemplaires de ${d.nom} (${k} sur ${maxCopies(id)} autorisés).`);
+    if(k > (PROG.collection[id] || 0)) p.push(`Vous ne possédez que ${PROG.collection[id] || 0} ${d.nom}.`);
+  }
+  return p;
+}
+const decksValides = () => PROG.decks.filter(d => problemesDeck(d.cartes || []).length===0);
+
+async function rafraichir(){
+  const c = sbc();
+  const [p, col, dk, eco, adm] = await Promise.all([
+    c.from("profils").select("*").maybeSingle(),
+    c.from("collection").select("carte,nb"),
+    c.from("decks").select("*").order("maj", {ascending:false}),
+    c.from("economie").select("reglages").maybeSingle(),
+    c.rpc("est_admin")
+  ]);
+  for(const r of [p, col, dk, eco]) if(r.error) throw new Error(r.error.message);
+  PROG.profil = p.data;
+  PROG.collection = Object.fromEntries((col.data || []).filter(r => r.nb > 0).map(r => [r.carte, r.nb]));
+  PROG.decks = dk.data || [];
+  PROG.eco = eco.data ? eco.data.reglages : null;
+  PROG.admin = !!adm.data;
+}
+async function creerDeckDepart(){
+  const ids = [];
+  for(const [id, n] of Object.entries(PROG.collection)) for(let i=0; i<Math.min(n, maxCopies(id)); i++) ids.push(id);
+  const { error } = await sbc().from("decks").insert({nom:"Deck de départ", cartes:ids.slice(0, REGLES.tailleDeck)});
+  if(error) throw new Error(error.message);
+}
+async function chargerProgression(){
+  if(window.claude || !window.__supa) return;
+  PROG.actif = true; PROG.erreur = ""; render();
+  const ok = await window.__supa.init();
+  if(!ok){ PROG.erreur = "Connexion au serveur de jeu impossible. Vérifiez votre connexion internet, puis réessayez."; return render(); }
+  try {
+    const init = await rpc("initialiser_joueur");
+    await rafraichir();
+    if(init && init.nouveau){ await creerDeckDepart(); await rafraichir(); PROG.bienvenue = true; }
+    PROG.pret = true;
+  } catch(e) {
+    PROG.erreur = /function|relation|does not exist|schema cache/i.test(e.message)
+      ? "Le serveur n’est pas encore prêt : exécutez le script supabase-phase4.sql dans Supabase."
+      : e.message;
+  }
+  render();
+}
+async function action(fn, succes){
+  if(PROG.occupe) return;
+  PROG.occupe = true; render();
+  try { const r = await fn(); await rafraichir(); if(succes) erreur(typeof succes==="function" ? succes(r) : succes); }
+  catch(e) { erreur(e.message); }
+  finally { PROG.occupe = false; render(); }
+}
+
+// ----- Fin de partie : or et quête
+async function verifierRecompense(){
+  if(!PROG.pret || !S || S.vainqueur===null || !S.idPartie || S.mode==="duo") return;
+  if(PROG.recompensees.has(S.idPartie)) return;
+  const cle = S.idPartie;
+  PROG.recompensees.add(cle);
+  try { localStorage.setItem("parties-recompensees", JSON.stringify([...PROG.recompensees].slice(-60))); } catch(e) {}
+  const me = vue(), victoire = S.vainqueur===S.joueurs[me].nom;
+  ajouterProgresQuete(S.stats ? S.stats[me] : null, victoire);
+  try { const gain = await rpc("fin_partie", {victoire}); PROG.dernierGain = {cle, gain}; await rafraichir(); }
+  catch(e) { PROG.dernierGain = {cle, gain:0, erreur:e.message}; }
+  if(S && S.idPartie===cle) renderCouche();
+}
+function htmlGainFin(){
+  if(!PROG.actif || !S || S.mode==="duo") return "";
+  const g = PROG.dernierGain;
+  if(!g || g.cle!==S.idPartie) return `<p class="attente">Calcul des récompenses…</p>`;
+  if(g.erreur) return `<p>Récompense indisponible : ${esc(g.erreur)}</p>`;
+  return `<p class="gain">${g.gain ? `+${g.gain} or` : "Plafond d’or du jour atteint : revenez demain pour gagner plus d’or."}</p>`;
+}
+
+// ----- Affichage commun
+const bourse = () => PROG.profil ? `<div class="bourse"><span class="res or"><b>${PROG.profil.pieces_or}</b>or</span><span class="res encre"><b>${PROG.profil.encre}</b>encre</span></div>` : "";
+function htmlQuete(){
+  const q = queteDuJour(), p = progresQuete(), v = Math.min(p[q.cle] || 0, q.but);
+  const faite = PROG.profil && PROG.profil.quete_jour===jourISO();
+  const gain = (PROG.eco && PROG.eco.or_quete) || 40;
+  return `<div class="quete"><div><b>Quête du jour</b> : ${q.texte}</div>
+    <div class="barre" role="progressbar" aria-valuemin="0" aria-valuemax="${q.but}" aria-valuenow="${v}"><span style="width:${100*v/q.but}%"></span></div>
+    <div class="quete-pied">${v} / ${q.but} ${faite ? `<span class="ok">Récompense obtenue</span>` : v>=q.but ? `<button type="button" class="btn" data-act="quete-reclamer">Réclamer ${gain} or</button>` : `<span>Récompense : ${gain} or</span>`}</div></div>`;
+}
+function htmlAccueilProg(regles){
+  if(!PROG.pret) return `<div class="boite" role="dialog" aria-label="${NOM_JEU}"><h2>${NOM_JEU}</h2>
+    ${PROG.erreur ? `<p style="color:var(--danger)">${esc(PROG.erreur)}</p><div class="actions"><button type="button" class="btn" data-act="prog-reessayer">Réessayer</button>
+      <button type="button" class="btn second" data-act="admin">Administration</button></div>
+      <h3>Jouer sans collection</h3><p class="aide">Les decks sont tirés au hasard et les parties ne rapportent pas d’or.</p>
+      <div class="actions"><button type="button" class="btn second" data-act="mode-ia">Contre l’ordinateur</button><button type="button" class="btn second" data-act="mode-duo">Deux joueurs sur cet écran</button><button type="button" class="btn second" data-act="en-ligne">En ligne</button></div>` : `<p class="attente">Chargement de votre collection…</p>`}</div>`;
+  const bienvenue = PROG.bienvenue ? `<p class="gain">Bienvenue ! Vous recevez ${Object.values(PROG.collection).reduce((a,b) => a+b, 0)} cartes et un premier deck pour commencer.</p>` : "";
+  return `<div class="boite boite-large" role="dialog" aria-label="${NOM_JEU}">
+    <div class="ligne-titre"><h2>${NOM_JEU}</h2>${bourse()}</div>
+    ${bienvenue}${htmlQuete()}
+    <h3>Jouer</h3>
+    <div class="actions">
+      <button type="button" class="btn" data-act="jouer-ia">Contre l’ordinateur</button>
+      <button type="button" class="btn" data-act="en-ligne">En ligne</button>
+      <button type="button" class="btn second" data-act="jouer-duo">Deux joueurs sur cet écran</button>
+    </div>
+    <h3>Ma collection</h3>
+    <div class="actions">
+      <button type="button" class="btn second" data-act="prog-collection">Collection</button>
+      <button type="button" class="btn second" data-act="prog-decks">Decks (${PROG.decks.length}/9)</button>
+      <button type="button" class="btn second" data-act="prog-boutique">Boutique</button>
+      <button type="button" class="btn second" data-act="admin">Administration</button>
+    </div>
+    <p class="aide">Votre collection est liée à ce navigateur.</p>
+    ${regles}</div>`;
+}
+function selectDeck(cle, valeur){
+  const v = decksValides();
+  return `<select data-prog="${cle}" aria-label="Choisir un deck">${v.map(d => `<option value="${d.id}" ${d.id===valeur ? "selected" : ""}>${esc(d.nom)}</option>`).join("")}</select>`;
+}
+function htmlChoixDeck(){
+  const c = PROG.choixDeck, v = decksValides();
+  if(!v.length) return `<div class="boite" role="dialog" aria-label="Choisir un deck"><h2>Aucun deck prêt</h2>
+    <p>Il vous faut un deck complet de ${REGLES.tailleDeck} cartes pour jouer.</p>
+    <div class="actions"><button type="button" class="btn" data-act="prog-decks">Mes decks</button><button type="button" class="btn second" data-act="choix-retour">Retour</button></div></div>`;
+  c.d1 = v.some(d => d.id===c.d1) ? c.d1 : v[0].id;
+  c.d2 = v.some(d => d.id===c.d2) ? c.d2 : v[0].id;
+  return `<div class="boite" role="dialog" aria-label="Choisir un deck"><h2>Choisir ${c.mode==="duo" ? "les decks" : "votre deck"}</h2>
+    <p>Les deux decks sont mélangés pour former le marché commun de la partie.</p>
+    <label class="champ"><span>${c.mode==="duo" ? "Joueur 1" : "Votre deck"}</span>${selectDeck("d1", c.d1)}</label>
+    ${c.mode==="duo" ? `<label class="champ" style="margin-top:10px"><span>Joueur 2</span>${selectDeck("d2", c.d2)}</label>` : `<p class="aide">L’ordinateur joue avec un deck tiré au hasard dans toutes les cartes.</p>`}
+    <div class="actions" style="margin-top:16px"><button type="button" class="btn" data-act="choix-lancer">Lancer la partie</button><button type="button" class="btn second" data-act="choix-retour">Retour</button></div></div>`;
+}
+function lancerAvecDecks(){
+  const c = PROG.choixDeck, d1 = PROG.decks.find(d => d.id===c.d1), d2 = PROG.decks.find(d => d.id===c.d2);
+  if(!d1) return;
+  nouvellePartie(c.mode, [d1.cartes, c.mode==="duo" && d2 ? d2.cartes : deckConstruit()]);
+  PROG.choixDeck = null; PROG.bienvenue = false;
+  Object.assign(ui, {ecran:"jeu", attaquant:null, armeEnAttente:null, choixPierre:null, aiEnCours:false, couvert:c.mode==="duo"});
+  apresAction();
+}
+
+// ----- Écrans Collection, Decks, Éditeur, Boutique
+function filtrerCartes(seulementPossedees){
+  const f = PROG.filtres;
+  return trierCartesProg(Object.keys(CARTES).filter(id => {
+    const d = CARTES[id];
+    if(!estCollectionnable(d)) return false;
+    if((seulementPossedees || f.possedees) && !PROG.collection[id]) return false;
+    if(f.fac!=="toutes" && d.faction!==f.fac) return false;
+    if(f.rar!=="toutes" && (d.rarete || "commune")!==f.rar) return false;
+    if(f.type!=="tous" && d.type!==f.type) return false;
+    return !f.rech || d.nom.toLowerCase().includes(f.rech.toLowerCase());
+  }));
+}
+function trierCartesProg(ids){
+  const fac = Object.keys(FACTIONS), rar = ["commune","rare","epique","legendaire"];
+  return ids.sort((a,b) => {
+    const A = CARTES[a], B = CARTES[b];
+    return (fac.indexOf(A.faction) - fac.indexOf(B.faction)) || (rar.indexOf(A.rarete) - rar.indexOf(B.rarete)) || ((A.prix||0) - (B.prix||0)) || A.nom.localeCompare(B.nom, "fr");
+  });
+}
+function htmlFiltres(avecPossedees){
+  const f = PROG.filtres;
+  return `<div class="filtres">
+    <input type="search" placeholder="Rechercher" aria-label="Rechercher une carte" data-prog="rech" value="${esc(f.rech)}">
+    <select data-prog="fac" aria-label="Faction"><option value="toutes">Toutes les factions</option>${Object.entries(FACTIONS).map(([k,x]) => `<option value="${k}" ${f.fac===k ? "selected" : ""}>${esc(x.nom)}</option>`).join("")}</select>
+    <select data-prog="rar" aria-label="Rareté"><option value="toutes">Toutes les raretés</option>${RARETES.map(([k,l]) => `<option value="${k}" ${f.rar===k ? "selected" : ""}>${l}</option>`).join("")}</select>
+    <select data-prog="type" aria-label="Type"><option value="tous">Tous les types</option>${[["creature","Créatures"],["sort","Sorts"],["arme","Armes"]].map(([k,l]) => `<option value="${k}" ${f.type===k ? "selected" : ""}>${l}</option>`).join("")}</select>
+    ${avecPossedees ? `<label class="case"><input type="checkbox" data-prog="possedees" ${f.possedees ? "checked" : ""}> Seulement mes cartes</label>` : ""}
+  </div>`;
+}
+const entete = (titre) => `<header class="entete"><h1>${titre}</h1>${bourse()}<button type="button" class="btn-discret" data-act="prog-accueil" style="margin-left:auto">Retour à l’accueil</button></header>`;
+
+function pageCollection(){
+  const ids = filtrerCartes(false), total = Object.keys(CARTES).filter(id => estCollectionnable(CARTES[id])).length;
+  const possedees = Object.keys(PROG.collection).filter(id => estCollectionnable(CARTES[id])).length;
+  const sel = PROG.sel && CARTES[PROG.sel] ? PROG.sel : null;
+  let panneau = `<p class="aide">Cliquez sur une carte pour la fabriquer ou recycler ses exemplaires en trop.</p>`;
+  if(sel){
+    const d = CARTES[sel], nb = PROG.collection[sel] || 0, mx = maxCopies(sel), r = d.rarete || "commune";
+    const cout = PROG.eco ? PROG.eco.encre_fabrication[r] : 0, gain = PROG.eco ? PROG.eco.encre_recyclage[r] : 0;
+    panneau = `${htmlCarte({id:sel, uid:"sel"})}
+      <p>Vous en possédez <b>${nb}</b>. Un deck peut en contenir ${mx}.</p>
+      <div class="actions">
+        <button type="button" class="btn" data-act="col-fabriquer" data-id="${sel}" ${nb>=mx || !PROG.profil || PROG.profil.encre<cout || PROG.occupe ? "disabled" : ""}>Fabriquer (${cout} encre)</button>
+        ${nb>mx ? `<button type="button" class="btn second" data-act="col-recycler" data-id="${sel}" ${PROG.occupe ? "disabled" : ""}>Recycler 1 exemplaire en trop (+${gain} encre)</button>` : ""}
+      </div>
+      ${nb>=mx ? `<p class="aide">Vous avez déjà le nombre maximum d’exemplaires utiles.</p>` : ""}`;
+  }
+  return `${entete("Collection")}
+    <p class="aide">${possedees} cartes différentes sur ${total}.</p>
+    ${htmlFiltres(true)}
+    <div class="page-collection">
+      <div class="grille">${ids.map(id => {
+        const nb = PROG.collection[id] || 0;
+        return `<div class="col-item ${nb ? "" : "manque"} ${id===sel ? "choisie" : ""}">${htmlCarte({id, uid:id}, {act:"col-sel", id})}<span class="badge-nb">${nb ? "×" + nb : "0"}</span></div>`;
+      }).join("") || `<p class="aide">Aucune carte ne correspond à ces filtres.</p>`}</div>
+      <aside class="panneau">${panneau}</aside>
+    </div>`;
+}
+
+function pageDecks(){
+  return `${entete("Mes decks")}
+    <div class="actions">${PROG.decks.length<9 ? `<button type="button" class="btn" data-act="deck-nouveau">Nouveau deck</button>` : `<p class="aide">Vous avez atteint la limite de 9 decks.</p>`}</div>
+    <div class="liste-decks">${PROG.decks.map(dk => {
+      const pb = problemesDeck(dk.cartes || []);
+      const fac = [...new Set((dk.cartes || []).map(id => CARTES[id] && CARTES[id].faction).filter(Boolean))];
+      return `<div class="deck-ligne">
+        <div><b>${esc(dk.nom)}</b><div class="aide">${(dk.cartes || []).length} / ${REGLES.tailleDeck} cartes ${fac.map(f => `<span class="pastille f-${f}" title="${esc(FACTIONS[f] ? FACTIONS[f].nom : f)}"></span>`).join("")}</div>
+        <div class="${pb.length ? "invalide" : "valide"}">${pb.length ? esc(pb[0]) : "Prêt à jouer"}</div></div>
+        <div class="actions">
+          <button type="button" class="btn second" data-act="deck-modifier" data-id="${dk.id}">Modifier</button>
+          ${PROG.decks.length<9 ? `<button type="button" class="btn second" data-act="deck-dupliquer" data-id="${dk.id}">Dupliquer</button>` : ""}
+          ${PROG.supprDeck===dk.id ? `<button type="button" class="btn danger" data-act="deck-suppr-ok" data-id="${dk.id}">Confirmer</button><button type="button" class="btn second" data-act="deck-suppr-non">Annuler</button>`
+            : `<button type="button" class="btn second" data-act="deck-suppr" data-id="${dk.id}">Supprimer</button>`}
+        </div></div>`;
+    }).join("") || `<p class="aide">Aucun deck pour l’instant.</p>`}</div>`;
+}
+
+function pageEditeur(){
+  const e = PROG.deckEdit, compte = compter(e.cartes), pb = problemesDeck(e.cartes);
+  const ids = filtrerCartes(true);
+  const prix = Array.from({length:8}, (_, i) => e.cartes.filter(id => Math.min(8, Math.max(1, (CARTES[id] && CARTES[id].prix) || 1))===i+1).length);
+  const maxBarre = Math.max(1, ...prix);
+  const parFaction = {};
+  e.cartes.forEach(id => { const f = (CARTES[id] && CARTES[id].faction) || "neutre"; parFaction[f] = (parFaction[f] || 0) + 1; });
+  const lignes = trierCartesProg(Object.keys(compte)).sort((a,b) => ((CARTES[a].prix||0) - (CARTES[b].prix||0)) || CARTES[a].nom.localeCompare(CARTES[b].nom, "fr"));
+  return `${entete("Éditeur de deck")}
+    <div class="page-editeur">
+      <div>
+        ${htmlFiltres(false)}
+        <div class="grille">${ids.map(id => {
+          const reste = Math.min(PROG.collection[id] || 0, maxCopies(id)) - (compte[id] || 0);
+          return `<div class="col-item ${reste>0 ? "" : "manque"}">${htmlCarte({id, uid:id}, {act:"deck-ajouter", id})}<span class="badge-nb">${reste>0 ? "+" + reste : "max"}</span></div>`;
+        }).join("") || `<p class="aide">Aucune carte possédée ne correspond à ces filtres.</p>`}</div>
+      </div>
+      <aside class="panneau panneau-deck">
+        <label class="champ"><span>Nom du deck</span><input type="text" maxlength="40" data-prog="nomDeck" value="${esc(e.nom)}"></label>
+        <div class="compteur ${pb.length ? "invalide" : "valide"}">${e.cartes.length} / ${REGLES.tailleDeck}</div>
+        <div class="courbe" aria-label="Courbe des prix">${prix.map((n, i) => `<div class="colonne"><span class="nb">${n || ""}</span><span class="b" style="height:${Math.round(60*n/maxBarre)}px"></span><span class="x">${i===7 ? "8+" : i+1}</span></div>`).join("")}</div>
+        <div class="factions-deck">${Object.entries(parFaction).map(([f, n]) => `<span class="puce-fac f-${f}"><span class="pastille"></span>${f==="neutre" ? "Neutre" : esc(FACTIONS[f] ? FACTIONS[f].nom : f)} ${n}</span>`).join("")}</div>
+        <p class="${pb.length ? "invalide" : "valide"}">${pb.length ? pb.map(esc).join("<br>") : "Deck prêt à jouer."}</p>
+        <ul class="liste-deck">${lignes.map(id => `<li><button type="button" data-act="deck-retirer" data-id="${id}" title="Retirer une carte"><span class="prix-mini">${CARTES[id].prix ?? "–"}</span><span class="pastille f-${CARTES[id].faction || "neutre"}"></span>${esc(CARTES[id].nom)}<span class="x-nb">×${compte[id]}</span></button></li>`).join("")}</ul>
+        <div class="actions">
+          <button type="button" class="btn" data-act="deck-sauver" ${PROG.occupe ? "disabled" : ""}>Enregistrer</button>
+          <button type="button" class="btn second" data-act="prog-decks">Annuler</button>
+        </div>
+        <p class="aide">Vous pouvez enregistrer un deck incomplet et le terminer plus tard.</p>
+      </aside>
+    </div>`;
+}
+
+function pageBoutique(){
+  const prix = PROG.eco ? PROG.eco.prix_paquet : 100, n = PROG.eco ? PROG.eco.cartes_paquet : 5;
+  const pr = PROG.eco ? PROG.eco.probabilites : {};
+  const pq = PROG.paquet;
+  const contenu = pq ? `<div class="revelation">${pq.cartes.map((id, i) => pq.reveles.has(i)
+      ? `<div class="revele">${htmlCarte({id, uid:"p"+i})}${pq.nouvelles.has(id) ? `<span class="nouvelle">Nouvelle !</span>` : ""}</div>`
+      : `<button type="button" class="dos" data-act="paquet-reveler" data-id="${i}" aria-label="Révéler la carte ${i+1}"><span>${NOM_JEU.charAt(0)}</span></button>`).join("")}</div>
+    <div class="actions">${pq.reveles.size<pq.cartes.length ? `<button type="button" class="btn" data-act="paquet-tout">Tout révéler</button>` : ""}
+      <button type="button" class="btn second" data-act="paquet-fermer">Fermer</button></div>` : "";
+  return `${entete("Boutique")}
+    <div class="boutique">
+      <div class="offre">
+        <div class="paquet-visuel" aria-hidden="true"><span>${NOM_JEU.charAt(0)}</span></div>
+        <div><h2>Paquet de ${n} cartes</h2>
+          <p class="aide">Au moins une carte rare. Chances par carte : commune ${Math.round((pr.commune||0)*100)} %, rare ${Math.round((pr.rare||0)*100)} %, épique ${Math.round((pr.epique||0)*100)} %, légendaire ${Math.round((pr.legendaire||0)*100)} %.</p>
+          <button type="button" class="btn" data-act="paquet-acheter" ${!PROG.profil || PROG.profil.pieces_or<prix || PROG.occupe ? "disabled" : ""}>Acheter pour ${prix} or</button>
+          ${PROG.profil && PROG.profil.pieces_or<prix ? `<p class="aide">Gagnez de l’or en jouant des parties et en réussissant la quête du jour.</p>` : ""}
+        </div>
+      </div>
+      ${contenu}
+    </div>`;
+}
+
+function renderProg(){
+  const app = document.getElementById("app");
+  const actif = document.activeElement;
+  const cle = actif && actif.dataset && actif.dataset.prog ? actif.dataset.prog : null;
+  let pos = null; try { pos = actif.selectionStart; } catch(e) {}
+  const pages = {collection:pageCollection, decks:pageDecks, editeur:pageEditeur, boutique:pageBoutique};
+  app.innerHTML = PROG.pret ? pages[ui.ecran]() : `${entete(NOM_JEU)}<p class="attente">Chargement…</p>`;
+  document.getElementById("couche").innerHTML = "";
+  if(cle){ const el = app.querySelector(`[data-prog="${cle}"]`); if(el){ el.focus(); if(pos!=null) try { el.setSelectionRange(pos, pos); } catch(e) {} } }
+}
+
+function actionProg(act, id){
+  switch(act){
+    case "prog-reessayer": chargerProgression(); return true;
+    case "prog-accueil": ui.ecran = "jeu"; S = null; PROG.paquet = null; PROG.sel = null; break;
+    case "prog-collection": ui.ecran = "collection"; PROG.sel = null; PROG.choixDeck = null; break;
+    case "prog-decks": ui.ecran = "decks"; PROG.deckEdit = null; PROG.supprDeck = null; PROG.choixDeck = null; break;
+    case "prog-boutique": ui.ecran = "boutique"; PROG.paquet = null; break;
+    case "jouer-ia": case "jouer-duo": PROG.choixDeck = {mode: act==="jouer-ia" ? "ia" : "duo"}; break;
+    case "choix-retour": PROG.choixDeck = null; break;
+    case "choix-lancer": lancerAvecDecks(); return true;
+    case "quete-reclamer": action(() => rpc("reclamer_quete"), g => `+${g} or : quête du jour réussie !`); return true;
+    case "col-sel": PROG.sel = id; break;
+    case "col-fabriquer": action(() => rpc("fabriquer", {c:id}), `${CARTES[id].nom} ajoutée à votre collection.`); return true;
+    case "col-recycler": action(() => rpc("recycler", {c:id}), g => `+${g} encre.`); return true;
+    case "deck-nouveau": PROG.deckEdit = {id:null, nom:"Nouveau deck", cartes:[]}; ui.ecran = "editeur"; break;
+    case "deck-modifier": { const d = PROG.decks.find(x => x.id===id); if(d){ PROG.deckEdit = {id:d.id, nom:d.nom, cartes:[...(d.cartes || [])]}; ui.ecran = "editeur"; } break; }
+    case "deck-dupliquer": { const d = PROG.decks.find(x => x.id===id); if(d) action(async () => { const { error } = await sbc().from("decks").insert({nom:d.nom + " (copie)", cartes:d.cartes}); if(error) throw new Error(error.message); }, "Deck dupliqué."); return true; }
+    case "deck-suppr": PROG.supprDeck = id; break;
+    case "deck-suppr-non": PROG.supprDeck = null; break;
+    case "deck-suppr-ok": PROG.supprDeck = null; action(async () => { const { error } = await sbc().from("decks").delete().eq("id", id); if(error) throw new Error(error.message); }, "Deck supprimé."); return true;
+    case "deck-ajouter": {
+      const e = PROG.deckEdit, n = compter(e.cartes)[id] || 0, d = CARTES[id];
+      if(e.cartes.length >= REGLES.tailleDeck) erreur(`Le deck contient déjà ${REGLES.tailleDeck} cartes.`);
+      else if(n >= maxCopies(id)) erreur(d.rarete==="legendaire" ? "Une seule légendaire de chaque sorte par deck." : `${maxCopies(id)} exemplaires au maximum par carte.`);
+      else if(n >= (PROG.collection[id] || 0)) erreur(`Vous ne possédez que ${PROG.collection[id] || 0} ${d.nom}.`);
+      else e.cartes.push(id);
+      break;
+    }
+    case "deck-retirer": { const e = PROG.deckEdit, i = e.cartes.lastIndexOf(id); if(i>=0) e.cartes.splice(i, 1); break; }
+    case "deck-sauver": {
+      const e = PROG.deckEdit, nom = (e.nom || "").trim() || "Deck sans nom";
+      action(async () => {
+        const c = sbc();
+        const r = e.id ? await c.from("decks").update({nom, cartes:e.cartes, maj:new Date().toISOString()}).eq("id", e.id)
+                       : await c.from("decks").insert({nom, cartes:e.cartes});
+        if(r.error) throw new Error(r.error.message);
+        ui.ecran = "decks"; PROG.deckEdit = null;
+      }, "Deck enregistré.");
+      return true;
+    }
+    case "paquet-acheter": {
+      const avant = {...PROG.collection};
+      action(async () => {
+        const cartes = await rpc("ouvrir_paquet");
+        PROG.paquet = {cartes, reveles:new Set(), nouvelles:new Set(cartes.filter(c => !avant[c]))};
+      });
+      return true;
+    }
+    case "paquet-reveler": PROG.paquet && PROG.paquet.reveles.add(Number(id)); break;
+    case "paquet-tout": PROG.paquet && PROG.paquet.cartes.forEach((_, i) => PROG.paquet.reveles.add(i)); break;
+    case "paquet-fermer": PROG.paquet = null; break;
+    default: return false;
+  }
+  render();
+  return true;
+}
+document.addEventListener("input", e => {
+  const el = e.target, k = el.dataset && el.dataset.prog;
+  if(!k) return;
+  if(k==="d1" || k==="d2"){ if(PROG.choixDeck) PROG.choixDeck[k] = el.value; return; }
+  if(k==="deckEnLigne"){ EN.deckId = el.value; return; }
+  if(k==="nomDeck"){ if(PROG.deckEdit) PROG.deckEdit.nom = el.value; return; }
+  if(k==="possedees") return;
+  if(k in PROG.filtres){ PROG.filtres[k] = el.value; renderProg(); }
+});
+document.addEventListener("change", e => {
+  const el = e.target;
+  if(el.dataset && el.dataset.prog==="possedees"){ PROG.filtres.possedees = el.checked; renderProg(); }
+});
+
+// ----- Administration : onglet Serveur
+function admServeur(){
+  if(!PROG.actif) return `<div class="adm-page"><p>Le serveur n’est utilisé que sur votre site GitHub.</p></div>`;
+  if(!PROG.pret) return `<div class="adm-page"><p>${PROG.erreur ? esc(PROG.erreur) : "Connexion au serveur…"}</p></div>`;
+  const id = EN.monId || "";
+  if(!PROG.admin) return `<div class="adm-page"><h2>Accès administrateur</h2>
+    <p class="aide">Pour gérer l’économie et le catalogue, déclarez-vous administrateur une fois. Dans Supabase, ouvrez SQL Editor, collez cette ligne puis cliquez sur Run, et rechargez cette page.</p>
+    <textarea readonly rows="2" id="sql-admin">insert into public.admins (id) values ('${id}') on conflict do nothing;</textarea>
+    <div class="adm-actions"><button type="button" class="btn" data-act="srv-copier">Copier la ligne</button></div>
+    <p class="aide">Ne déclarez que votre propre identifiant. Il est lié à ce navigateur.</p></div>`;
+  const e = PROG.ecoEdit || (PROG.ecoEdit = copie(PROG.eco || {}));
+  const n = (l, ch) => { const v = ch.split(".").reduce((o, k) => o && o[k], e); return `<label class="champ"><span>${l}</span><input type="number" min="0" step="${ch.startsWith("probabilites") ? "0.01" : "1"}" data-eco="${ch}" value="${v ?? 0}"></label>`; };
+  const rar = [["commune","commune"],["rare","rare"],["epique","épique"],["legendaire","légendaire"]];
+  return `<div class="adm-page">
+    <h2>Catalogue du serveur</h2>
+    <p class="aide">Le serveur doit connaître vos cartes et leur rareté pour les paquets, la fabrication et les cartes offertes. Envoyez le catalogue après avoir ajouté, supprimé ou changé la rareté de cartes.</p>
+    <div class="adm-actions"><button type="button" class="btn" data-act="srv-catalogue">Envoyer le catalogue (${Object.keys(CARTES).length} cartes)</button></div>
+    <h2>Économie</h2>
+    <div class="champs">${n("Or offert au départ","or_depart")}${n("Or par victoire","or_victoire")}${n("Or par défaite","or_defaite")}${n("Plafond d’or par jour","plafond_or_jour")}${n("Or de la quête du jour","or_quete")}${n("Prix d’un paquet","prix_paquet")}${n("Cartes par paquet","cartes_paquet")}</div>
+    <h2>Chances par carte dans un paquet</h2>
+    <p class="aide">Entre 0 et 1, le total doit faire 1. Exemple : 0.72 pour 72 %.</p>
+    <div class="champs">${rar.map(([k,l]) => n(l.charAt(0).toUpperCase()+l.slice(1), "probabilites."+k)).join("")}</div>
+    <h2>Cartes offertes à un nouveau joueur</h2>
+    <div class="champs">${rar.map(([k,l]) => n(l.charAt(0).toUpperCase()+l.slice(1), "depart."+k)).join("")}</div>
+    <h2>Encre</h2>
+    <div class="champs">${rar.map(([k,l]) => n(`Recycler une ${l}`, "encre_recyclage."+k)).join("")}${rar.map(([k,l]) => n(`Fabriquer une ${l}`, "encre_fabrication."+k)).join("")}</div>
+    <div class="adm-actions"><button type="button" class="btn" data-act="srv-eco">Enregistrer l’économie</button><button type="button" class="btn second" data-act="srv-eco-annuler">Annuler les changements</button></div>
+    <h2>Tests</h2>
+    <p class="aide">Pour tester la boutique et la fabrication sans jouer des dizaines de parties.</p>
+    <div class="adm-actions"><button type="button" class="btn second" data-act="srv-crediter">Me donner 1 000 or et 1 000 encre</button></div>
+  </div>`;
+}
+async function actionServeur(act){
+  switch(act){
+    case "srv-copier": { const t = document.getElementById("sql-admin"); t.select(); try { await navigator.clipboard.writeText(t.value); erreur("Ligne copiée."); } catch(e) { document.execCommand("copy"); erreur("Ligne copiée."); } return; }
+    case "srv-catalogue": try { const n = await rpc("admin_maj_catalogue", {cartes:CARTES}); erreur(`Catalogue envoyé : ${n} cartes.`); } catch(e) { erreur(e.message); } return;
+    case "srv-eco": {
+      const e = PROG.ecoEdit, s = Object.values(e.probabilites || {}).reduce((a,b) => a + Number(b||0), 0);
+      if(Math.abs(s - 1) > 0.001) return erreur(`Le total des chances fait ${Math.round(s*100)} % : il doit faire 100 %.`);
+      e.copies_max = REGLES.copiesMax; e.copies_legendaire = REGLES.copiesLegendaire;
+      try { await rpc("admin_maj_economie", {r:e}); await rafraichir(); PROG.ecoEdit = null; erreur("Économie enregistrée."); } catch(err) { erreur(err.message); }
+      return renderAdmin();
+    }
+    case "srv-eco-annuler": PROG.ecoEdit = null; return renderAdmin();
+    case "srv-crediter": try { await rpc("admin_crediter", {p_or:1000, p_encre:1000}); await rafraichir(); erreur("+1 000 or et +1 000 encre."); } catch(e) { erreur(e.message); } return;
+  }
+}
+document.addEventListener("input", e => {
+  const el = e.target, ch = el.dataset && el.dataset.eco;
+  if(!ch || !PROG.ecoEdit || el.value==="") return;
+  const parts = ch.split("."); let o = PROG.ecoEdit;
+  for(let i=0; i<parts.length-1; i++){ o[parts[i]] = o[parts[i]] || {}; o = o[parts[i]]; }
+  o[parts.at(-1)] = ch.startsWith("probabilites") ? Number(el.value) : Math.max(0, Math.floor(Number(el.value)));
+});
+
 chargerConfig();
 render();
-chargerFichierConfig();
+chargerFichierConfig().then(chargerProgression);
 </script>
 </body>
 </html>
