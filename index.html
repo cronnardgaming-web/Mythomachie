@@ -519,8 +519,9 @@ function fusionner(obj){
   const d = copie(DEFAUT);
   if(!obj || typeof obj!=="object" || !obj.cartes || !obj.factions) return d;
   let cartesFinales = obj.cartes;
-  if((obj.version || 1) < d.version){
-    // Nouveau jeu de cartes : on garde les cartes créées dans l’admin et les images déjà ajoutées
+  if((obj.version || 1) < 2){
+    // Uniquement pour les configurations de version 1 (avant les 120 cartes) :
+    // on garde les cartes créées dans l’admin et les images déjà ajoutées
     cartesFinales = copie(d.cartes);
     for(const [k,c] of Object.entries(obj.cartes)){
       if(k.startsWith("carte_")) cartesFinales[k] = c;
@@ -530,16 +531,32 @@ function fusionner(obj){
   const reglesObj = {...d.regles, ...(obj.regles||{})};
   // Version 3 : arrivée des héros, 40 points de vie
   if((obj.version || 1) < 3){ if(reglesObj.pvDepart===30) reglesObj.pvDepart = 40; reglesObj.seuilPouvoir = reglesObj.seuilPouvoir || 10; }
-  return {version:d.version, exporte:obj.exporte || 0, cartes:cartesFinales, factions:obj.factions, heros:{...d.heros, ...(obj.heros||{})},
+  return {version:d.version, exporte:obj.exporte || 0, repare:obj.repare || 0, cartes:cartesFinales, factions:obj.factions, heros:{...d.heros, ...(obj.heros||{})},
           regles:{...reglesObj, deckDepart:{...((obj.regles && obj.regles.deckDepart) || d.regles.deckDepart)}},
           mots:{...d.mots, ...(obj.mots||{})}, termes:{...d.termes, ...(obj.termes||{})}};
 }
 function chargerConfig(){
   let brut = null;
   try { brut = JSON.parse(localStorage.getItem(CLE_STOCKAGE)); } catch(e) { brut = null; }
+  if(brut && (brut.version || 1) < DEFAUT.version) sauvegarderAvantChangement(brut);
   CONFIG = fusionner(brut);
   appliquerConfig();
 }
+// Copie de secours de la configuration précédente, avant tout remplacement automatique
+const CLE_SECOURS = CLE_STOCKAGE + "-secours";
+function sauvegarderAvantChangement(ancienne){
+  if(!ancienne) return;
+  try { localStorage.setItem(CLE_SECOURS, JSON.stringify({quand:Date.now(), config:ancienne})); }
+  catch(e) {
+    // Trop lourd avec les images : on garde au moins les cartes et les réglages, sans images
+    try {
+      const sans = JSON.parse(JSON.stringify(ancienne));
+      Object.values(sans.cartes || {}).forEach(c => { if(c.image && c.image.startsWith("data:")) delete c.image; });
+      localStorage.setItem(CLE_SECOURS, JSON.stringify({quand:Date.now(), config:sans, sansImages:true}));
+    } catch(err) {}
+  }
+}
+function lireSecours(){ try { return JSON.parse(localStorage.getItem(CLE_SECOURS)); } catch(e) { return null; } }
 function sauver(){
   try { localStorage.setItem(CLE_STOCKAGE, JSON.stringify(CONFIG)); return true; } catch(e) { return false; }
 }
@@ -1507,6 +1524,9 @@ function admDonnees(){
     <p class="aide">${(() => { const n = Object.values(CARTES).filter(c => c.image).length; return `Cette configuration contient ${n} carte${n>1 ? "s" : ""} avec image.`; })()}${window.claude ? "" : " Si vos images ont été ajoutées sur Claude, faites l’export depuis le prototype sur Claude : elles n’existent pas sur ce site."}</p>
     <div class="adm-actions"><button type="button" class="btn" data-act="config-telecharger">Télécharger config.json</button></div>
     ${adm.dernierExport ? (e => `<p class="aide" style="color:${e.manquantes ? "var(--danger)" : "var(--cible)"}">Export de ${e.quand} depuis ${e.ou} : ${e.integrees} image${e.integrees>1 ? "s" : ""} intégrée${e.integrees>1 ? "s" : ""} sur ${e.total}${e.manquantes ? `, ${e.manquantes} échec${e.manquantes>1 ? "s" : ""} (${esc(e.raison)})` : ""}.</p>`)(adm.dernierExport) : ""}
+    ${(() => { const s = lireSecours(); return s && s.config ? `<h2>Copie de secours</h2>
+      <p class="aide">Copie automatique de votre configuration, faite le ${new Date(s.quand).toLocaleString("fr-FR")} juste avant une mise à jour automatique${s.sansImages ? " (sans les images, trop lourdes pour le navigateur)" : ""}.</p>
+      <div class="adm-actions">${adm.restaurer ? `<button type="button" class="btn danger" data-act="secours-ok">Confirmer la restauration</button><button type="button" class="btn second" data-act="secours-non">Annuler</button>` : `<button type="button" class="btn second" data-act="secours">Restaurer cette copie</button>`}</div>` : ""; })()}
     <h2>Valeurs d’origine</h2>
     <p class="aide">Efface toutes vos modifications et restaure les cartes et règles du prototype.</p>
     <div class="adm-actions">${adm.reset
@@ -1640,6 +1660,18 @@ function actionAdmin(act, id, el){
       CONFIG = fusionner(obj); appliquerConfig(); sauver(); adm.sel = null; erreur("Sauvegarde importée."); break;
     }
     case "config-telecharger": telechargerConfig(); return;
+    case "secours": adm.restaurer = true; break;
+    case "secours-non": adm.restaurer = false; break;
+    case "secours-ok": {
+      const s = lireSecours(); adm.restaurer = false;
+      if(s && s.config){
+        const images = {}; Object.entries(CONFIG.cartes).forEach(([k,c]) => { if(c.image) images[k] = c.image; });
+        CONFIG = fusionner(s.config); CONFIG.repare = 1;
+        if(s.sansImages) Object.entries(images).forEach(([k,img]) => { if(CONFIG.cartes[k] && !CONFIG.cartes[k].image) CONFIG.cartes[k].image = img; });
+        appliquerConfig(); sauver(); adm.sel = null; erreur("Copie de secours restaurée.");
+      }
+      break;
+    }
     case "reset": adm.reset = true; break;
     case "reset-non": adm.reset = false; break;
     case "reset-ok":
@@ -2240,8 +2272,10 @@ async function chargerFichierConfig(){
     const fichier = await r.json();
     let local = null;
     try { local = JSON.parse(localStorage.getItem(CLE_STOCKAGE)); } catch(e) { local = null; }
-    if(!local || (fichier.exporte || 0) > (local.exporte || 0)){
-      CONFIG = fusionner(fichier); appliquerConfig(); sauver();
+    // repare : les navigateurs touchés par l’erreur de mise à jour (héros) rechargent config.json une fois
+    if(!local || (fichier.exporte || 0) > (local.exporte || 0) || !local.repare){
+      sauvegarderAvantChangement(local);
+      CONFIG = fusionner(fichier); CONFIG.repare = 1; appliquerConfig(); sauver();
       if(!S) render();
     }
   } catch(e) { /* pas de config.json : on garde les cartes d’origine */ }
