@@ -254,6 +254,22 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 .nouvelle{position:absolute;top:-10px;left:50%;transform:translateX(-50%);white-space:nowrap;background:var(--cible);color:#fff;font-weight:700;font-size:12px;border-radius:99px;padding:3px 8px;z-index:3}
 .btn:disabled{opacity:.45;cursor:default}
 @media (max-width:900px){.page-collection,.page-editeur{grid-template-columns:1fr}.panneau{position:static}}
+/* Grande vue d’une carte (collection) */
+.zoom-fond{position:fixed;inset:0;display:grid;place-items:center;padding:24px;overflow:auto}
+.zoom{display:flex;gap:28px;align-items:center;justify-content:center;flex-wrap:wrap;max-width:1200px;cursor:default}
+.zoom .carte{--w:min(calc(84vh * 63 / 88), 78vw);cursor:default;box-shadow:0 12px 40px rgba(0,0,0,.45)}
+.zoom.anim .carte{animation:agrandir .25s ease}
+@keyframes agrandir{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+.zoom-info{background:var(--zone);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:22px;width:320px;max-width:90vw;display:flex;flex-direction:column;gap:12px}
+.zoom-info h2{font-size:24px;margin:0}
+.zoom-info p{margin:0}
+.zoom-info .meta{color:var(--ink-2)}
+.zoom-info .actions{margin:0;flex-direction:column;align-items:stretch}
+.zoom-nav{display:flex;gap:8px;justify-content:space-between}
+.zoom-nav .btn{flex:1}
+.zoom-fermer{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:16px;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--zone);color:var(--ink);font-size:24px;line-height:1;cursor:pointer}
+.grille .col-item .carte{cursor:zoom-in}
+@media (prefers-reduced-motion: reduce){.zoom.anim .carte{animation:none}}
 /* Accueil d’un nouveau joueur */
 .boite.boite-bienvenue{max-width:1040px}
 .boite-bienvenue h2{font-size:28px}
@@ -2581,31 +2597,41 @@ const entete = (titre) => `<header class="entete"><h1>${titre}</h1>${bourse()}<b
 function pageCollection(){
   const ids = filtrerCartes(false), total = Object.keys(CARTES).filter(id => estCollectionnable(CARTES[id])).length;
   const possedees = Object.keys(PROG.collection).filter(id => estCollectionnable(CARTES[id])).length;
-  const sel = PROG.sel && CARTES[PROG.sel] ? PROG.sel : null;
-  let panneau = `<p class="aide">Cliquez sur une carte pour la fabriquer ou recycler ses exemplaires en trop.</p>`;
-  if(sel){
-    const d = CARTES[sel], nb = PROG.collection[sel] || 0, mx = maxCopies(sel), r = d.rarete || "commune";
-    const cout = PROG.eco ? PROG.eco.encre_fabrication[r] : 0, gain = PROG.eco ? PROG.eco.encre_recyclage[r] : 0;
-    panneau = `${htmlCarte({id:sel, uid:"sel"})}
-      <p>Vous en possédez <b>${nb}</b>. Un deck peut en contenir ${mx}.</p>
-      <div class="actions">
-        <button type="button" class="btn" data-act="col-fabriquer" data-id="${sel}" ${nb>=mx || !PROG.profil || PROG.profil.encre<cout || PROG.occupe ? "disabled" : ""}>Fabriquer (${cout} encre)</button>
-        ${nb>mx ? `<button type="button" class="btn second" data-act="col-recycler" data-id="${sel}" ${PROG.occupe ? "disabled" : ""}>Recycler 1 exemplaire en trop (+${gain} encre)</button>` : ""}
-      </div>
-      ${nb>=mx ? `<p class="aide">Vous avez déjà le nombre maximum d’exemplaires utiles.</p>` : ""}`;
-  }
   return `${entete("Collection")}
-    <p class="aide">${possedees} cartes différentes sur ${total}.</p>
+    <p class="aide">${possedees} cartes différentes sur ${total}. Cliquez sur une carte pour la voir en grand, la fabriquer ou recycler ses exemplaires en trop.</p>
     ${htmlFiltres(true)}
-    <div class="page-collection">
-      <div class="grille">${ids.map(id => {
-        const nb = PROG.collection[id] || 0;
-        return `<div class="col-item ${nb ? "" : "manque"} ${id===sel ? "choisie" : ""}">${htmlCarte({id, uid:id}, {act:"col-sel", id})}<span class="badge-nb">${nb ? "×" + nb : "0"}</span></div>`;
-      }).join("") || `<p class="aide">Aucune carte ne correspond à ces filtres.</p>`}</div>
-      <aside class="panneau">${panneau}</aside>
-    </div>`;
+    <div class="grille">${ids.map(id => {
+      const nb = PROG.collection[id] || 0;
+      return `<div class="col-item ${nb ? "" : "manque"}">${htmlCarte({id, uid:id}, {act:"col-sel", id})}<span class="badge-nb">${nb ? "×" + nb : "0"}</span></div>`;
+    }).join("") || `<p class="aide">Aucune carte ne correspond à ces filtres.</p>`}</div>`;
 }
-
+function htmlZoom(){
+  const id = PROG.sel, d = CARTES[id];
+  if(!d) return "";
+  const nb = PROG.collection[id] || 0, mx = maxCopies(id), r = d.rarete || "commune";
+  const cout = PROG.eco ? PROG.eco.encre_fabrication[r] : 0, gain = PROG.eco ? PROG.eco.encre_recyclage[r] : 0;
+  const encre = PROG.profil ? PROG.profil.encre : 0;
+  const liste = filtrerCartes(false), pos = liste.indexOf(id);
+  const fac = d.faction && FACTIONS[d.faction] ? FACTIONS[d.faction].nom : "Sans faction";
+  const anim = PROG.zoomAnim; PROG.zoomAnim = false;
+  return `<div class="zoom-fond" data-act="zoom-fermer">
+    <button type="button" class="zoom-fermer" data-act="zoom-fermer" aria-label="Fermer">×</button>
+    <div class="zoom ${anim ? "anim" : ""}" data-act="zoom-rien" role="dialog" aria-label="${esc(d.nom)}">
+      ${htmlCarte({id, uid:"zoom"})}
+      <div class="zoom-info">
+        <h2>${esc(d.nom)}</h2>
+        <p class="meta">${NOMS_RARETE[r]}, ${esc(fac)}</p>
+        <p>Vous en possédez <b>${nb}</b>. Un deck peut en contenir ${mx}.</p>
+        <p class="meta">Votre encre : ${encre}</p>
+        <div class="actions">
+          <button type="button" class="btn" data-act="col-fabriquer" data-id="${id}" ${nb>=mx || encre<cout || PROG.occupe ? "disabled" : ""}>Fabriquer (${cout} encre)</button>
+          ${nb>mx ? `<button type="button" class="btn second" data-act="col-recycler" data-id="${id}" ${PROG.occupe ? "disabled" : ""}>Recycler 1 exemplaire en trop (+${gain} encre)</button>` : ""}
+        </div>
+        ${nb>=mx ? `<p class="meta">Vous avez déjà le nombre maximum d’exemplaires utiles.</p>` : encre<cout ? `<p class="meta">Il vous manque ${cout - encre} encre pour la fabriquer.</p>` : ""}
+        ${liste.length>1 && pos>=0 ? `<div class="zoom-nav"><button type="button" class="btn second" data-act="zoom-prec" aria-label="Carte précédente">←</button><button type="button" class="btn second" data-act="zoom-suiv" aria-label="Carte suivante">→</button></div>` : ""}
+      </div>
+    </div></div>`;
+}
 function pageDecks(){
   return `${entete("Mes decks")}
     <div class="actions">${PROG.decks.length<9 ? `<button type="button" class="btn" data-act="deck-nouveau">Nouveau deck</button>` : `<p class="aide">Vous avez atteint la limite de 9 decks.</p>`}</div>
@@ -2688,15 +2714,15 @@ function renderProg(){
   const pages = {collection:pageCollection, decks:pageDecks, editeur:pageEditeur, boutique:pageBoutique};
   app.innerHTML = PROG.pret ? pages[ui.ecran]() : `${entete(NOM_JEU)}<p class="attente">Chargement…</p>`;
   if(PROG.paquet) PROG.paquet.anim = new Set();
-  document.getElementById("couche").innerHTML = "";
+  document.getElementById("couche").innerHTML = ui.ecran==="collection" && PROG.zoom ? htmlZoom() : "";
   if(cle){ const el = app.querySelector(`[data-prog="${cle}"]`); if(el){ el.focus(); if(pos!=null) try { el.setSelectionRange(pos, pos); } catch(e) {} } }
 }
 
 function actionProg(act, id){
   switch(act){
     case "prog-reessayer": chargerProgression(); return true;
-    case "prog-accueil": ui.ecran = "jeu"; S = null; PROG.paquet = null; PROG.sel = null; break;
-    case "prog-collection": ui.ecran = "collection"; PROG.sel = null; PROG.choixDeck = null; break;
+    case "prog-accueil": ui.ecran = "jeu"; S = null; PROG.paquet = null; PROG.sel = null; PROG.zoom = false; break;
+    case "prog-collection": ui.ecran = "collection"; PROG.sel = null; PROG.zoom = false; PROG.choixDeck = null; break;
     case "prog-decks": ui.ecran = "decks"; PROG.deckEdit = null; PROG.supprDeck = null; PROG.choixDeck = null; break;
     case "prog-boutique": ui.ecran = "boutique"; PROG.paquet = null; break;
     case "jouer-ia": case "jouer-duo": PROG.choixDeck = {mode: act==="jouer-ia" ? "ia" : "duo"}; break;
@@ -2707,7 +2733,14 @@ function actionProg(act, id){
     case "bienvenue-jouer": PROG.accueilEtape = null; PROG.choixDeck = {mode:"ia"}; break;
     case "choix-lancer": lancerAvecDecks(); return true;
     case "quete-reclamer": action(() => rpc("reclamer_quete"), g => `+${g} or : quête du jour réussie !`); return true;
-    case "col-sel": PROG.sel = id; break;
+    case "col-sel": PROG.sel = id; PROG.zoom = true; PROG.zoomAnim = true; break;
+    case "zoom-rien": return true;
+    case "zoom-fermer": PROG.zoom = false; break;
+    case "zoom-prec": case "zoom-suiv": {
+      const l = filtrerCartes(false), i = l.indexOf(PROG.sel);
+      if(l.length) PROG.sel = l[(i + (act==="zoom-suiv" ? 1 : -1) + l.length) % l.length];
+      break;
+    }
     case "col-fabriquer": action(() => rpc("fabriquer", {c:id}), `${CARTES[id].nom} ajoutée à votre collection.`); return true;
     case "col-recycler": action(() => rpc("recycler", {c:id}), g => `+${g} encre.`); return true;
     case "deck-nouveau": PROG.deckEdit = {id:null, nom:"Nouveau deck", cartes:[]}; ui.ecran = "editeur"; break;
@@ -2760,6 +2793,12 @@ document.addEventListener("input", e => {
   if(k==="nomDeck"){ if(PROG.deckEdit) PROG.deckEdit.nom = el.value; return; }
   if(k==="possedees") return;
   if(k in PROG.filtres){ PROG.filtres[k] = el.value; renderProg(); }
+});
+document.addEventListener("keydown", e => {
+  if(!PROG.zoom || ui.ecran!=="collection") return;
+  if(e.key==="Escape") actionProg("zoom-fermer");
+  else if(e.key==="ArrowRight") actionProg("zoom-suiv");
+  else if(e.key==="ArrowLeft") actionProg("zoom-prec");
 });
 document.addEventListener("change", e => {
   const el = e.target;
