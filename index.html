@@ -6,7 +6,7 @@
 <title>Prototype de combat</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --table:#e7e0d0; --table-2:#d9cfb9; --zone:#efe9dc;
@@ -345,6 +345,164 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
   *{transition:none!important}
   .main .carte.jouable:hover,.crea.choisie{transform:none}
 }
+/* ================= REFONTE GRAPHIQUE : la table du Seuil ================= */
+:root{
+  --table:#d3d6ce; --table-2:#c4c8be; --zone:#e7e9e3; --plateau:#c9cdc3; --plateau-2:#bcc1b6;
+  --ink:#1f2626; --ink-2:#4e5956; --line:#a6ada1; --bronze:#8a5a1f; --or:#a8761c;
+  --btn-haut:#c9974a; --btn-bas:#8a5a1f; --btn-texte:#fff8e6; --btn-bord:#6e4615;
+  --voile:rgba(18,24,26,.6); --ombre:rgba(20,26,28,.28);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --table:#141824; --table-2:#1b2130; --zone:#222938; --plateau:#1a2030; --plateau-2:#222a3c;
+    --ink:#efe6d2; --ink-2:#b8b09c; --line:#3a4256; --bronze:#b8873d; --or:#e9cf8e;
+    --btn-haut:#dcb066; --btn-bas:#9a6b2c; --btn-texte:#1c140a; --btn-bord:#5e3f14;
+    --voile:rgba(6,8,14,.72); --ombre:rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --table:#141824; --table-2:#1b2130; --zone:#222938; --plateau:#1a2030; --plateau-2:#222a3c;
+  --ink:#efe6d2; --ink-2:#b8b09c; --line:#3a4256; --bronze:#b8873d; --or:#e9cf8e;
+  --btn-haut:#dcb066; --btn-bas:#9a6b2c; --btn-texte:#1c140a; --btn-bord:#5e3f14;
+  --voile:rgba(6,8,14,.72); --ombre:rgba(0,0,0,.5);
+}
+html{background:var(--table)}
+body{background:radial-gradient(130% 90% at 50% 30%, var(--table-2), var(--table) 72%) fixed;min-height:100%}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.07;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+#app{position:relative;z-index:1}
+
+/* Boutons : plaques de bronze gravées */
+.btn{background:linear-gradient(180deg,var(--btn-haut),var(--btn-bas));color:var(--btn-texte);border:1px solid var(--btn-bord);border-radius:4px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 2px 0 var(--ombre);text-shadow:0 1px 0 rgba(255,255,255,.15);letter-spacing:.02em;transition:filter .12s, transform .08s}
+.btn:hover:not(:disabled){filter:brightness(1.08)}
+.btn:active:not(:disabled){transform:translateY(1px);box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
+.btn.second{background:transparent;color:var(--ink);border:1px solid var(--bronze);box-shadow:none;text-shadow:none}
+.btn.second:hover:not(:disabled){background:color-mix(in srgb, var(--bronze) 12%, transparent);filter:none}
+.btn-discret{border-radius:4px;border-color:var(--line);color:var(--ink-2)}
+
+/* Panneaux : tablettes de pierre à double filet */
+.boite{border-radius:6px;border:1px solid color-mix(in srgb, var(--bronze) 55%, var(--line));
+  box-shadow:inset 0 0 0 5px var(--zone),inset 0 0 0 6px color-mix(in srgb, var(--bronze) 30%, transparent),0 24px 70px var(--ombre)}
+#couche.accueil{background:radial-gradient(90% 70% at 50% 35%, color-mix(in srgb, var(--table-2) 70%, transparent), var(--voile))}
+.logo{display:block;font-family:"Cinzel Decorative",Cinzel,"Trajan Pro","Times New Roman",serif;font-weight:700;font-size:clamp(34px,6vw,54px);letter-spacing:.06em;line-height:1;color:var(--or);
+  text-shadow:0 2px 0 var(--ombre),0 0 28px color-mix(in srgb, var(--or) 30%, transparent);margin:0}
+.sous-logo{display:block;font-family:Cinzel,"Times New Roman",serif;font-size:15px;letter-spacing:.12em;color:var(--ink-2);margin:8px 0 16px}
+.tete-accueil .sous-logo{margin-bottom:0}
+.tete-accueil{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+
+/* Barre du haut pendant une partie */
+.barre-jeu{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:2px 2px 0}
+.logo-mini{font-family:"Cinzel Decorative",Cinzel,serif;font-weight:700;font-size:20px;color:var(--or);letter-spacing:.04em}
+.barre-jeu .mode,.barre-jeu .tour-info{color:var(--ink-2);font-size:15px}
+.barre-jeu .tour-info{margin-left:auto}
+
+/* La table */
+.table-jeu{display:grid;grid-template-columns:minmax(0,1fr) 296px;gap:14px;align-items:start}
+.plateau{position:relative;background:radial-gradient(120% 70% at 50% 50%, var(--plateau-2), var(--plateau));border:1px solid var(--line);border-radius:10px;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--or) 18%, transparent),inset 0 0 60px var(--ombre),0 10px 30px var(--ombre);padding:14px 16px 6px;display:flex;flex-direction:column;gap:6px}
+.camp-adv,.camp-moi{--fc:var(--neutre);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:8px}
+.plateau{--fa:var(--neutre);--fm:var(--neutre);
+  background:radial-gradient(55% 32% at 50% 0%,color-mix(in srgb, var(--fa) 26%, transparent),transparent),
+             radial-gradient(55% 40% at 50% 78%,color-mix(in srgb, var(--fm) 22%, transparent),transparent),
+             radial-gradient(120% 70% at 50% 50%, var(--plateau-2), var(--plateau))}
+.ligne-heros{display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:center;padding-bottom:12px}
+.plateau .rangee{justify-content:center;min-height:166px}
+.plateau .vide{font-family:Cinzel,serif;font-style:normal;letter-spacing:.04em;opacity:.55}
+.axe{position:relative;display:flex;align-items:center;height:30px;margin:2px 0}
+.axe-ligne{flex:1;height:2px;background:linear-gradient(90deg,transparent,var(--or) 30%,var(--or) 70%,transparent);opacity:.55}
+.axe::before{content:"";width:10px;height:10px;transform:rotate(45deg);background:var(--or);position:absolute;left:50%;top:50%;margin:-5px 0 0 -5px;opacity:.8}
+
+/* Médaillons des héros */
+.medaillon-bloc{display:flex;align-items:center;gap:12px}
+.medaillon{--fc:var(--neutre);--p:0;position:relative;width:108px;height:108px;border-radius:50%;border:none;padding:0;background:none;display:grid;place-items:center;flex:none;cursor:default;color:inherit}
+.medaillon .anneau{position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--or) calc(var(--p) * 360deg), color-mix(in srgb, var(--ink) 14%, transparent) 0);
+  -webkit-mask:radial-gradient(circle, transparent 61%, #000 62%);mask:radial-gradient(circle, transparent 61%, #000 62%)}
+.medaillon .visage{width:86px;height:86px;border-radius:50%;display:grid;place-items:center;font-size:40px;color:var(--fci);
+  background:radial-gradient(circle at 38% 32%, color-mix(in srgb, var(--fc) 55%, white), var(--fc) 58%, color-mix(in srgb, var(--fc) 55%, black));
+  box-shadow:inset 0 0 0 3px rgba(0,0,0,.22),inset 0 -8px 18px rgba(0,0,0,.25),0 8px 22px var(--ombre)}
+.medaillon .pv-ecu{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);min-width:46px;height:48px;padding:3px 7px 12px;display:grid;place-items:center;
+  clip-path:polygon(0 0,100% 0,100% 62%,50% 100%,0 62%);background:linear-gradient(#e0705c,#9d2618);color:#fff;font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:21px;text-shadow:0 1px 1px rgba(0,0,0,.5)}
+.medaillon.pret .anneau{filter:drop-shadow(0 0 6px var(--or))}
+.medaillon.cible{cursor:pointer}
+.medaillon.cible .visage{box-shadow:0 0 0 4px var(--cible),0 0 26px var(--cible)}
+button.medaillon[data-act="pouvoir"]{cursor:pointer}
+.plaque{display:flex;flex-direction:column;gap:1px;min-width:118px}
+.plaque b{font-family:Cinzel,"Times New Roman",serif;font-size:18px;color:var(--ink)}
+.plaque .qui{font-size:13px;color:var(--ink-2)}
+.plaque .charge{font-size:13px;color:var(--ink-2)}
+.plaque .charge.ok{color:var(--or);font-weight:700}
+.btn-pouvoir{padding:8px 14px;margin-top:4px;animation:luire 1.8s ease-in-out infinite}
+
+/* Ressources et cartes de l’adversaire */
+.ressources-jeu{display:flex;gap:10px}
+.ressource{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--ink-2)}
+.ressource .jeton{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:21px;box-shadow:0 3px 8px var(--ombre)}
+.ressource.or .jeton{background:radial-gradient(circle at 35% 30%,#fff4c2,#f0c64e 45%,#a8750f);color:#3b2a06;border:2px solid #7a520a}
+.ressource.puissance .jeton{background:radial-gradient(circle at 35% 30%,#f6c0a8,#c7553c 50%,#7d2416);color:#fff;border:2px solid #5c170c;text-shadow:0 1px 1px rgba(0,0,0,.5)}
+.ressource.puissance{cursor:help}
+.piles{display:flex;gap:12px;font-size:13px;color:var(--ink-2)}
+.piles b{font-family:Cinzel,serif;color:var(--ink);font-size:15px;margin-right:3px}
+.main-adverse{display:flex;padding-left:14px}
+.dos-mini{width:26px;height:36px;border-radius:3px;margin-left:-12px;background:linear-gradient(135deg,#8a5a1f,#3b2a14);box-shadow:inset 0 0 0 2px rgba(242,212,138,.45),0 2px 4px var(--ombre)}
+
+/* Bouton de fin de tour : médaillon sur l’axe */
+.fin{position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:3;width:94px;height:94px;border-radius:50%;margin:0;padding:8px;
+  background:radial-gradient(circle at 38% 30%,var(--btn-haut),var(--btn-bas));color:var(--btn-texte);border:2px solid var(--btn-bord);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.3),inset 0 0 0 5px color-mix(in srgb, var(--btn-bas) 70%, transparent),0 6px 16px var(--ombre);font-size:14px;line-height:1.15}
+.fin:not(:disabled):hover{filter:brightness(1.08)}
+.fin:disabled{opacity:.45}
+
+/* Main en éventail */
+.main.eventail{justify-content:center;overflow:visible;padding:26px 30px 46px;min-height:280px;flex-wrap:nowrap}
+.main.eventail .carte{margin:0 var(--chev,-16px);transform:translateY(var(--y,0px)) rotate(var(--r,0deg));transform-origin:50% 130%;transition:transform .16s ease, box-shadow .16s ease}
+.main.eventail .carte.jouable:hover,.main.eventail .carte.jouable:focus-visible{transform:translateY(-34px) scale(1.12);z-index:6}
+.consigne{justify-content:center;text-align:center;min-height:24px}
+
+/* Colonne de droite : marché et journal */
+.cote{display:flex;flex-direction:column;gap:12px;position:sticky;top:10px}
+.cote .marche{padding:12px;border-radius:8px;background:var(--zone)}
+.cote .marche h2{font-size:17px}
+.cote .marche-cartes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;overflow:visible;justify-items:center}
+.cote .marche .carte{--w:128px}
+.cote .journal{border-radius:8px;padding:10px 12px}
+.cote .journal summary{font-family:Cinzel,serif;font-weight:700;cursor:pointer}
+.cote .journal ol{margin-top:8px;max-height:150px;overflow:auto}
+
+/* Animations : réponses aux actions */
+.flottant{position:absolute;left:50%;top:38%;z-index:8;transform:translate(-50%,0);font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:30px;pointer-events:none;
+  -webkit-text-stroke:1px rgba(0,0,0,.55);text-shadow:0 2px 6px rgba(0,0,0,.5);animation:flotter 1.15s ease-out forwards}
+.flottant.degat{color:#ff6b55}
+.flottant.soin{color:#7fe0a0}
+@keyframes flotter{0%{opacity:0;transform:translate(-50%,8px) scale(.7)}15%{opacity:1;transform:translate(-50%,0) scale(1.15)}100%{opacity:0;transform:translate(-50%,-46px) scale(1)}}
+.crea.arrivee{animation:arrivee .4s cubic-bezier(.2,.8,.3,1.25)}
+@keyframes arrivee{from{opacity:0;transform:translateY(-22px) scale(.7)}to{opacity:1;transform:none}}
+.medaillon.touche{animation:secousse .38s ease}
+@keyframes secousse{20%{transform:translateX(-6px) rotate(-3deg)}45%{transform:translateX(5px) rotate(2deg)}70%{transform:translateX(-3px)}100%{transform:none}}
+#banniere{position:fixed;left:0;right:0;top:40%;z-index:25;pointer-events:none;display:flex;justify-content:center;opacity:0}
+#banniere span{font-family:"Cinzel Decorative",Cinzel,serif;font-weight:700;font-size:clamp(30px,5vw,48px);color:var(--or);padding:14px 60px;
+  background:linear-gradient(90deg,transparent,color-mix(in srgb, var(--table) 88%, transparent) 20%,color-mix(in srgb, var(--table) 88%, transparent) 80%,transparent);text-shadow:0 2px 0 var(--ombre)}
+#banniere.montre{animation:banniere 1.5s ease forwards}
+@keyframes banniere{0%{opacity:0;transform:scale(.92)}18%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0}}
+
+@media (max-width:1060px){
+  .table-jeu{grid-template-columns:1fr}
+  .cote{position:static}
+  .cote .marche-cartes{grid-template-columns:repeat(auto-fill,minmax(124px,1fr))}
+}
+@media (max-width:700px){
+  .main.eventail{justify-content:flex-start;overflow-x:auto;padding:20px 8px 8px}
+  .main.eventail .carte{margin:0 4px;transform:none}
+  .fin{position:static;transform:none;width:auto;height:auto;border-radius:6px;padding:10px 16px}
+  .axe{height:auto;flex-direction:column;gap:6px}
+  .medaillon{width:88px;height:88px}.medaillon .visage{width:70px;height:70px;font-size:32px}
+}
+@media (prefers-reduced-motion: reduce){
+  .flottant{animation:none;opacity:1}.crea.arrivee,.medaillon.touche{animation:none}
+  #banniere.montre{animation:none;opacity:1}
+  .main.eventail .carte{transition:none}
+}
+
 </style>
 </head>
 <body>
@@ -353,6 +511,7 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 <div id="couche"></div>
 <div id="toast" role="status"></div>
 <div id="bulle" role="tooltip"></div>
+<div id="banniere" aria-live="polite"><span></span></div>
 
 <script>
 const NOM_JEU = window.claude ? "Prototype de combat" : "Mythomachie";
@@ -1087,7 +1246,7 @@ function htmlCarte(c, o={}){
     : d.type==="arme"
       ? `<span class="atk" title="Bonus d’attaque">+${d.bonus}</span><span class="dur" title="Nombre d’attaques">${d.durabilite}</span>` : "";
   const act = o.act ? `data-act="${o.act}" data-id="${o.id ?? c.uid}"` : "";
-  return `<button type="button" class="carte f-${f} r-${d.rarete || "base"} ${o.classes || ""}" ${act}>
+  return `<button type="button" class="carte f-${f} r-${d.rarete || "base"} ${o.classes || ""}" ${act} ${o.style ? `style="${o.style}"` : ""}>
     <span class="cadre">
       <span class="art ${d.image ? "" : "sans-image"}" data-sym="${sym}">${d.image ? `<img class="illu" src="${d.image}" alt="">` : ""}<span class="nom-bande">${d.nom}</span>${lignes.length ? `<span class="texte">${texte}</span>` : ""}</span>
       <span class="pied" title="${typeLigne(d)}"><span aria-hidden="true">${sym}</span><span class="type">${d.depart ? "Départ" : d.base ? "Base" : d.jeton ? "Jeton" : {creature:"Créature", sort:"Sort", arme:"Arme"}[d.type]}</span>${NOMS_RARETE[d.rarete] && !d.depart && !d.base && !d.jeton ? `<span class="gemme" title="${NOMS_RARETE[d.rarete]}"></span>` : ""}</span>
@@ -1133,25 +1292,28 @@ function consigne(inter, moi){
   return "Achetez au marché, attaquez avec vos créatures, puis finissez le tour.";
 }
 
-function htmlHeros(j, estMoi, inter){
-  const h = heroDe(j), seuil = REGLES.seuilPouvoir || 10, m = Math.min(j.morts || 0, seuil), pret = pouvoirPret(j);
-  const effet = decrire((h.pouvoir && h.pouvoir.effet) || {});
-  return `<div class="heros f-${j.heros || "neutre"}">
-    <span class="heros-sym" aria-hidden="true">${FACTIONS[j.heros] ? FACTIONS[j.heros].sym : "✦"}</span>
-    <span class="heros-txt"><b>${esc(h.nom)}</b><span>${esc(h.titre || "")}</span></span>
-    <span class="pouvoir ${pret ? "pret" : ""}" data-aide="carte" data-titre="${esc(h.pouvoir ? h.pouvoir.nom : "Pouvoir")}" data-texte="${esc(effet + ` Se charge quand ${seuil} créatures ennemies sont mortes.`)}">
-      <span class="pouvoir-nom">${esc(h.pouvoir ? h.pouvoir.nom : "Pouvoir")}</span>
-      <span class="barre"><span style="width:${100*m/seuil}%"></span></span>
-      <span class="pouvoir-etat">${pret ? "Prêt !" : `${m} / ${seuil}`}</span>
-    </span>
-    ${estMoi && pret && inter ? `<button type="button" class="btn btn-pouvoir" data-act="pouvoir">Activer</button>` : ""}
-  </div>`;
+function htmlMedaillon(j, estMoi, inter, cible){
+  const idx = S.joueurs.indexOf(j), h = heroDe(j), seuil = REGLES.seuilPouvoir || 10, m = Math.min(j.morts || 0, seuil), pret = pouvoirPret(j);
+  const pv = h.pouvoir || {nom:"Pouvoir", effet:{}};
+  const aide = `${decrire(pv.effet || {})} Se charge quand ${seuil} créatures ennemies sont mortes.`;
+  const sym = FACTIONS[j.heros] ? FACTIONS[j.heros].sym : "✦";
+  const activable = estMoi && pret && inter;
+  const balise = !estMoi ? "button" : activable ? "button" : "div";
+  const attrs = !estMoi ? `type="button" data-act="face" aria-label="Viser ${esc(h.nom)}, le héros adverse"` : activable ? `type="button" data-act="pouvoir" aria-label="Activer ${esc(pv.nom)}"` : "";
+  return `<div class="medaillon-bloc ${estMoi ? "moi" : "adv"}">
+    <${balise} ${attrs} class="medaillon f-${j.heros || "neutre"} ${pret ? "pret" : ""} ${cible ? "cible" : ""}" data-joueur="${idx}" style="--p:${(m/seuil).toFixed(3)}" data-aide="carte" data-titre="${esc(pv.nom)}" data-texte="${esc(aide)}">
+      <span class="anneau" aria-hidden="true"></span><span class="visage" aria-hidden="true">${sym}</span><span class="pv-ecu" title="Points de vie">${j.pv}</span>
+    </${balise}>
+    <div class="plaque"><b>${esc(h.nom)}</b><span class="qui">${esc(nomAffiche(j))}</span>
+      <span class="charge ${pret ? "ok" : ""}">${pret ? `${esc(pv.nom)} est prêt` : `${esc(pv.nom)} : ${m} / ${seuil}`}</span>
+      ${activable ? `<button type="button" class="btn btn-pouvoir" data-act="pouvoir">Activer</button>` : ""}
+    </div></div>`;
 }
 function render(){
   const app = document.getElementById("app");
-  if(ui.ecran==="admin"){ renderAdmin(); return; }
-  if(["collection","decks","editeur","boutique"].includes(ui.ecran)){ renderProg(); return; }
-  if(!S){ app.innerHTML = ""; renderCouche(); return; }
+  if(ui.ecran==="admin"){ INSTANT = null; renderAdmin(); return; }
+  if(["collection","decks","editeur","boutique"].includes(ui.ecran)){ INSTANT = null; renderProg(); return; }
+  if(!S){ INSTANT = null; app.innerHTML = ""; renderCouche(); return; }
   const me = vue(), moi = S.joueurs[me], lui = S.joueurs[1-me];
   const inter = interactif();
   const t = cibles(me);
@@ -1166,48 +1328,99 @@ function render(){
   };
   const vide = txt => `<span class="vide">${txt}</span>`;
   const base = CARTES[REGLES.carteBase] ? {uid:"base", id:REGLES.carteBase} : null;
+  const n = moi.main.length, milieu = (n-1)/2, pas = Math.min(5, 26/Math.max(n,1)), chev = n>8 ? -34 : n>6 ? -24 : -14;
   app.innerHTML = `
-  <header class="entete">
-    <h1>${NOM_JEU}</h1>
+  <header class="barre-jeu">
+    <span class="logo-mini">${NOM_JEU}</span>
     <span class="mode">${S.mode==="ia" ? "Contre l’ordinateur" : enLigne() ? `En ligne, partie ${EN.code}` : "Deux joueurs sur cet écran"}</span>
-    <span class="tour-info">Tour ${S.tour}, ${enLigne() ? (S.courant===vue() ? "à vous de jouer" : "tour de l’adversaire") : S.joueurs[S.courant].nom + " joue"}</span>
+    <span class="tour-info">Tour ${S.tour}, ${enLigne() || S.mode==="ia" ? (S.courant===me ? "à vous de jouer" : S.mode==="ia" ? "l’ordinateur joue" : "tour de l’adversaire") : S.joueurs[S.courant].nom + " joue"}</span>
     <button type="button" class="btn-discret" data-act="nouvelle">${enLigne() ? "Quitter la partie" : "Nouvelle partie"}</button>
   </header>
-  <section class="camp" aria-label="Camp de ${lui.nom}">
-    <div class="bandeau">
-      <button type="button" class="portrait ${visee && t.face ? "cible" : ""}" data-act="face" aria-label="Viser ${lui.nom}">
-        <span class="pnom">${nomAffiche(lui)}</span><span class="ppv">${lui.pv}</span><span class="plabel">points de vie</span>
-      </button>
-      ${htmlHeros(lui, false, inter)}
-      <div class="compteurs"><span>Main ${lui.main.length}</span><span>Deck ${lui.deck.length}</span><span>Défausse ${lui.defausse.length}</span></div>
-    </div>
-    <div class="rangee">${lui.plateau.map(c => htmlCrea(c, "enemy", visee && t.creatures.has(c.uid) ? "cible" : "")).join("") || vide("Aucune créature")}</div>
-  </section>
-  <section class="centre">
-    <div class="marche">
-      <h2>Marché commun <span class="reste">${S.marcheDeck.length} cartes en réserve</span></h2>
-      <div class="marche-cartes">
-        ${S.marche.map((c,k) => htmlCarte(c, {act:"marche", id:k, classes: inter && moi.or>=def(c).prix ? "achetable" : ""})).join("")}
-        ${base ? `<div class="separateur" aria-hidden="true"></div>${htmlCarte(base, {act:"base", classes: inter && moi.or>=(def(base).prix||0) ? "achetable" : "", extra:'<span class="illimite">Toujours disponible</span>'})}` : ""}
+  <div class="table-jeu">
+    <div class="plateau" style="--fa:${FACTIONS[lui.heros] ? FACTIONS[lui.heros].couleur : "#9a8b6c"};--fm:${FACTIONS[moi.heros] ? FACTIONS[moi.heros].couleur : "#9a8b6c"}">
+      <section class="camp-adv f-${lui.heros || "neutre"}" aria-label="Camp adverse">
+        <div class="ligne-heros">
+          ${htmlMedaillon(lui, false, inter, visee && t.face)}
+          <div class="main-adverse" title="${lui.main.length} cartes en main" aria-label="${lui.main.length} cartes en main">${Array.from({length:Math.min(lui.main.length, 10)}, () => `<span class="dos-mini"></span>`).join("")}</div>
+          <div class="piles"><span><b>${lui.deck.length}</b>deck</span><span><b>${lui.defausse.length}</b>défausse</span></div>
+        </div>
+        <div class="rangee">${lui.plateau.map(c => htmlCrea(c, "enemy", visee && t.creatures.has(c.uid) ? "cible" : "")).join("") || vide("Aucune créature adverse")}</div>
+      </section>
+      <div class="axe"><span class="axe-ligne"></span>
+        <button type="button" class="fin" data-act="fin" ${inter ? "" : "disabled"}>Fin du tour</button>
       </div>
+      <section class="camp-moi f-${moi.heros || "neutre"}" aria-label="Votre camp">
+        <div class="rangee">${moi.plateau.map(c => htmlCrea(c, "own", classesOwn(c))).join("") || vide("Vos créatures apparaîtront ici")}</div>
+        <div class="ligne-heros">
+          ${htmlMedaillon(moi, true, inter, false)}
+          <div class="ressources-jeu">
+            <span class="ressource or"><span class="jeton">${moi.or}</span>or</span>
+            <span class="ressource puissance" data-aide="puissance" data-titre="Puissance"><span class="jeton">${moi.combat}</span>puissance</span>
+          </div>
+          <div class="piles"><span><b>${moi.deck.length}</b>deck</span><span><b>${moi.defausse.length}</b>défausse</span><span><b>${moi.bannies.length}</b>bannies</span></div>
+          <div class="joues">${moi.joues.map(c => htmlJoue(c, inter)).join("")}</div>
+        </div>
+        <div class="consigne">${consigne(inter, moi)}</div>
+      </section>
+      <div class="main eventail" aria-label="Votre main">${moi.main.map((c, i) => htmlCarte(c, {act:"main", classes: inter ? "jouable" : "", style:`--r:${((i-milieu)*pas).toFixed(1)}deg;--y:${(Math.abs(i-milieu)**2*2.2).toFixed(1)}px;--chev:${chev}px`})).join("")}</div>
     </div>
-    <aside class="journal"><h2>Journal</h2><ol>${S.journal.slice(-8).reverse().map(l => `<li>${l}</li>`).join("")}</ol></aside>
-  </section>
-  <section class="camp" aria-label="Votre camp">
-    <div class="rangee">${moi.plateau.map(c => htmlCrea(c, "own", classesOwn(c))).join("") || vide("Vos créatures apparaîtront ici")}</div>
-    <div class="bandeau">
-      <div class="portrait"><span class="pnom">${nomAffiche(moi)}</span><span class="ppv">${moi.pv}</span><span class="plabel">points de vie</span></div>
-      ${htmlHeros(moi, true, inter)}
-      <div class="ressources"><span class="res or"><b>${moi.or}</b>or</span><span class="res puissance" data-aide="puissance" data-titre="Puissance"><b>${moi.combat}</b>puissance</span></div>
-      <div class="compteurs"><span>Deck ${moi.deck.length}</span><span>Défausse ${moi.defausse.length}</span><span>Bannies ${moi.bannies.length}</span></div>
-      <div class="joues">${moi.joues.map(c => htmlJoue(c, inter)).join("")}</div>
-      <button type="button" class="fin" data-act="fin" ${inter ? "" : "disabled"}>Finir le tour</button>
-    </div>
-    <div class="consigne">${consigne(inter, moi)}</div>
-    <div class="main" aria-label="Votre main">${moi.main.map(c => htmlCarte(c, {act:"main", classes: inter ? "jouable" : ""})).join("")}</div>
-  </section>`;
+    <aside class="cote">
+      <section class="marche">
+        <h2>Marché <span class="reste">${S.marcheDeck.length} en réserve</span></h2>
+        <div class="marche-cartes">
+          ${S.marche.map((c,k) => htmlCarte(c, {act:"marche", id:k, classes: inter && moi.or>=def(c).prix ? "achetable" : ""})).join("")}
+          ${base ? htmlCarte(base, {act:"base", classes: inter && moi.or>=(def(base).prix||0) ? "achetable" : "", extra:'<span class="illimite">Toujours disponible</span>'}) : ""}
+        </div>
+      </section>
+      <details class="journal" ${ui.journalFerme ? "" : "open"}><summary>Journal</summary><ol>${S.journal.slice(-10).reverse().map(l => `<li>${l}</li>`).join("")}</ol></details>
+    </aside>
+  </div>`;
   renderCouche();
+  animerChangements();
   if(S.vainqueur!==null) verifierRecompense();
+}
+
+// ----- Animations en réponse aux actions (dégâts, soins, arrivées, début de tour)
+let INSTANT = null;
+function instantane(){
+  return {id:S.idPartie, courant:S.courant, couvert:ui.couvert, pv:S.joueurs.map(j => j.pv),
+          crea:Object.fromEntries(S.joueurs.flatMap(j => j.plateau.map(c => [c.uid, vieRestante(c)])))};
+}
+function flottant(el, d){
+  const s = document.createElement("span");
+  s.className = "flottant " + (d<0 ? "degat" : "soin");
+  s.textContent = (d>0 ? "+" : "") + d;
+  el.appendChild(s);
+  setTimeout(() => s.remove(), 1200);
+}
+function banniereTour(texte){
+  const b = document.getElementById("banniere");
+  if(!b) return;
+  b.firstElementChild.textContent = texte;
+  b.classList.remove("montre"); void b.offsetWidth; b.classList.add("montre");
+  clearTimeout(banniereTour.t); banniereTour.t = setTimeout(() => b.classList.remove("montre"), 1600);
+}
+function animerChangements(){
+  const avant = INSTANT, apres = instantane();
+  INSTANT = apres;
+  const monTour = apres.courant===vue() && S.vainqueur===null && !ui.couvert;
+  const texteTour = S.mode==="duo" ? `Au tour de ${S.joueurs[S.courant].nom}` : "À vous de jouer";
+  if(!avant || avant.id!==apres.id){ if(monTour) banniereTour(texteTour); return; }
+  for(const [uid, v] of Object.entries(apres.crea)){
+    const el = document.querySelector(`.crea[data-id="${uid}"]`);
+    if(!el) continue;
+    if(!(uid in avant.crea)) el.classList.add("arrivee");
+    else if(v!==avant.crea[uid]) flottant(el, v - avant.crea[uid]);
+  }
+  apres.pv.forEach((pv, i) => {
+    const d = pv - avant.pv[i];
+    if(!d) return;
+    const el = document.querySelector(`.medaillon[data-joueur="${i}"]`);
+    if(!el) return;
+    flottant(el, d);
+    if(d<0){ el.classList.remove("touche"); void el.offsetWidth; el.classList.add("touche"); }
+  });
+  if(monTour && (apres.courant!==avant.courant || (avant.couvert && !apres.couvert))) banniereTour(texteTour);
 }
 
 function renderCouche(){
@@ -1223,7 +1436,7 @@ function renderCouche(){
     <li>En fin de tour, main et cartes jouées partent à la défausse. Deck vide : la défausse est remélangée.</li></ul></details>`;
   if(!S){
     h = `<div class="boite" role="dialog" aria-label="Nouvelle partie">
-      <h2>${NOM_JEU}</h2>
+      <h2 class="logo">${NOM_JEU}</h2><span class="sous-logo">Le choc des panthéons</span>
       <p>Un premier essai jouable : quatre factions, un marché commun et des créatures sur le plateau. Choisissez un mode pour commencer.</p>
       <div class="actions">
         <button type="button" class="btn" data-act="mode-ia">Jouer contre l’ordinateur</button>
@@ -1267,6 +1480,7 @@ function renderCouche(){
       <div class="actions"><button type="button" class="btn second" data-act="ban-stop">Ne rien bannir</button></div></div>`;
   }
   couche.innerHTML = h;
+  couche.classList.toggle("accueil", !S && ui.ecran==="jeu");
 }
 
 function apresAction(){
@@ -2276,7 +2490,11 @@ document.addEventListener("keydown", e => {
     ui.attaquant = null; ui.armeEnAttente = null; ui.choixPierre = null; render();
   }
 });
-document.addEventListener("toggle", e => { if(e.target.tagName==="DETAILS") ui.regles = e.target.open; }, true);
+document.addEventListener("toggle", e => {
+  if(e.target.tagName!=="DETAILS") return;
+  if(e.target.classList.contains("journal")) ui.journalFerme = !e.target.open;
+  else ui.regles = e.target.open;
+}, true);
 
 // Site autonome (GitHub Pages) : un fichier config.json placé à côté du jeu
 // devient la configuration de tous les joueurs.
@@ -2647,13 +2865,13 @@ function htmlQuete(){
     <div class="quete-pied">${v} / ${q.but} ${faite ? `<span class="ok">Récompense obtenue</span>` : v>=q.but ? `<button type="button" class="btn" data-act="quete-reclamer">Réclamer ${gain} or</button>` : `<span>Récompense : ${gain} or</span>`}</div></div>`;
 }
 function htmlAccueilProg(regles){
-  if(!PROG.pret) return `<div class="boite" role="dialog" aria-label="${NOM_JEU}"><h2>${NOM_JEU}</h2>
+  if(!PROG.pret) return `<div class="boite" role="dialog" aria-label="${NOM_JEU}"><h2 class="logo">${NOM_JEU}</h2><span class="sous-logo">Le choc des panthéons</span>
     ${PROG.erreur ? `<p style="color:var(--danger)">${esc(PROG.erreur)}</p><div class="actions"><button type="button" class="btn" data-act="prog-reessayer">Réessayer</button></div>
       <h3>Jouer sans collection</h3><p class="aide">Les decks sont tirés au hasard et les parties ne rapportent pas d’or.</p>
       <div class="actions"><button type="button" class="btn second" data-act="mode-ia">Contre l’ordinateur</button><button type="button" class="btn second" data-act="mode-duo">Deux joueurs sur cet écran</button><button type="button" class="btn second" data-act="en-ligne">En ligne</button></div>` : `<p class="attente">Chargement de votre collection…</p>`}</div>`;
   const bienvenue = "";
   return `<div class="boite boite-large" role="dialog" aria-label="${NOM_JEU}">
-    <div class="ligne-titre"><h2>${NOM_JEU}</h2>${bourse()}</div>
+    <div class="tete-accueil"><div><h2 class="logo">${NOM_JEU}</h2><span class="sous-logo">Le choc des panthéons</span></div>${bourse()}</div>
     ${bienvenue}${htmlQuete()}
     <h3>Jouer</h3>
     <div class="actions">
