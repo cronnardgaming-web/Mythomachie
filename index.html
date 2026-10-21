@@ -2193,6 +2193,8 @@ document.addEventListener("click", e => {
   }
   if(act==="nouvelle"){ if(enLigne() || EN.role) quitterEnLigne(); S = null; ui.couvert = false; ui.aiEnCours = false; return render(); }
   if(act.startsWith("en-")) return actionEnLigne(act, id);
+  if(act==="admin" && !accesAdmin()) return erreur("L’administration est réservée à l’administrateur du jeu.");
+  if(ui.ecran==="admin" && !accesAdmin()){ ui.ecran = "jeu"; return render(); }
   if(ui.ecran==="admin" || act==="admin"){ return actionAdmin(act, id, el); }
   if(actionProg(act, id)) return;
   if(act==="rejouer" && enLigne()){ if(EN.role==="hote") revancheHote(); return; }
@@ -2278,12 +2280,14 @@ document.addEventListener("toggle", e => { if(e.target.tagName==="DETAILS") ui.r
 
 // Site autonome (GitHub Pages) : un fichier config.json placé à côté du jeu
 // devient la configuration de tous les joueurs.
+let CONFIG_SITE = null, CONFIG_SITE_PRET = false;
 async function chargerFichierConfig(){
   if(window.claude) return;
   try {
     const r = await fetch("config.json", {cache:"no-store"});
-    if(!r.ok) return;
+    if(!r.ok){ CONFIG_SITE_PRET = true; return; }
     const fichier = await r.json();
+    CONFIG_SITE = fichier; CONFIG_SITE_PRET = true;
     let local = null;
     try { local = JSON.parse(localStorage.getItem(CLE_STOCKAGE)); } catch(e) { local = null; }
     // repare : les navigateurs touchés par l’erreur de mise à jour (héros) rechargent config.json une fois
@@ -2292,7 +2296,7 @@ async function chargerFichierConfig(){
       CONFIG = fusionner(fichier); CONFIG.repare = 1; appliquerConfig(); sauver();
       if(!S) render();
     }
-  } catch(e) { /* pas de config.json : on garde les cartes d’origine */ }
+  } catch(e) { CONFIG_SITE_PRET = true; /* pas de config.json : on garde les cartes d’origine */ }
 }
 
 /* ============================================================
@@ -2530,6 +2534,9 @@ async function rpc(nom, args){
   if(error) throw new Error(error.message);
   return data;
 }
+// Sur le site, l’administration est réservée à l’administrateur déclaré dans Supabase.
+// Tant qu’aucun administrateur n’existe, le premier visiteur peut s’y rendre pour se déclarer.
+const accesAdmin = () => !!window.claude || PROG.admin || PROG.adminExiste===false;
 const estCollectionnable = d => !!d && !d.depart && !d.base && !d.jeton;
 const maxCopies = id => CARTES[id] && CARTES[id].rarete==="legendaire" ? REGLES.copiesLegendaire : REGLES.copiesMax;
 const compter = ids => ids.reduce((m, i) => (m[i] = (m[i] || 0) + 1, m), {});
@@ -2549,12 +2556,13 @@ const decksValides = () => PROG.decks.filter(d => problemesDeck(d.cartes || []).
 
 async function rafraichir(){
   const c = sbc();
-  const [p, col, dk, eco, adm] = await Promise.all([
+  const [p, col, dk, eco, adm, existe] = await Promise.all([
     c.from("profils").select("*").maybeSingle(),
     c.from("collection").select("carte,nb"),
     c.from("decks").select("*").order("maj", {ascending:false}),
     c.from("economie").select("reglages").maybeSingle(),
-    c.rpc("est_admin")
+    c.rpc("est_admin"),
+    c.rpc("admin_existe")
   ]);
   for(const r of [p, col, dk, eco]) if(r.error) throw new Error(r.error.message);
   PROG.profil = p.data;
@@ -2562,6 +2570,14 @@ async function rafraichir(){
   PROG.decks = dk.data || [];
   PROG.eco = eco.data ? eco.data.reglages : null;
   PROG.admin = !!adm.data;
+  PROG.adminExiste = existe.error ? null : !!existe.data;
+  // Les joueurs utilisent toujours les cartes officielles du site, jamais une copie modifiée dans leur navigateur
+  if(!window.claude && !PROG.admin && CONFIG_SITE_PRET){
+    const officielle = CONFIG_SITE ? fusionner(CONFIG_SITE) : copie(DEFAUT);
+    if(JSON.stringify(officielle.cartes)!==JSON.stringify(CONFIG.cartes)) sauvegarderAvantChangement(CONFIG);
+    CONFIG = officielle; CONFIG.repare = 1;
+    appliquerConfig(); sauver();
+  }
 }
 async function creerDeckDepart(){
   const ids = [];
@@ -2632,8 +2648,7 @@ function htmlQuete(){
 }
 function htmlAccueilProg(regles){
   if(!PROG.pret) return `<div class="boite" role="dialog" aria-label="${NOM_JEU}"><h2>${NOM_JEU}</h2>
-    ${PROG.erreur ? `<p style="color:var(--danger)">${esc(PROG.erreur)}</p><div class="actions"><button type="button" class="btn" data-act="prog-reessayer">Réessayer</button>
-      <button type="button" class="btn second" data-act="admin">Administration</button></div>
+    ${PROG.erreur ? `<p style="color:var(--danger)">${esc(PROG.erreur)}</p><div class="actions"><button type="button" class="btn" data-act="prog-reessayer">Réessayer</button></div>
       <h3>Jouer sans collection</h3><p class="aide">Les decks sont tirés au hasard et les parties ne rapportent pas d’or.</p>
       <div class="actions"><button type="button" class="btn second" data-act="mode-ia">Contre l’ordinateur</button><button type="button" class="btn second" data-act="mode-duo">Deux joueurs sur cet écran</button><button type="button" class="btn second" data-act="en-ligne">En ligne</button></div>` : `<p class="attente">Chargement de votre collection…</p>`}</div>`;
   const bienvenue = "";
@@ -2651,7 +2666,7 @@ function htmlAccueilProg(regles){
       <button type="button" class="btn second" data-act="prog-collection">Collection</button>
       <button type="button" class="btn second" data-act="prog-decks">Decks (${PROG.decks.length}/9)</button>
       <button type="button" class="btn second" data-act="prog-boutique">Boutique</button>
-      <button type="button" class="btn second" data-act="admin">Administration</button>
+      ${accesAdmin() ? `<button type="button" class="btn second" data-act="admin">Administration</button>` : ""}
     </div>
     ${htmlCompte()}
     ${regles}</div>`;
