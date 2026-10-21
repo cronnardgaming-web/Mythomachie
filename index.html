@@ -198,6 +198,19 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 .res.puissance{cursor:help}
 @media (prefers-reduced-motion: reduce){.btn-pouvoir{animation:none}}
 
+/* Compte joueur */
+.compte{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;background:var(--table-2);border-radius:12px;padding:12px 14px;margin-top:18px;border-left:5px solid var(--line)}
+.compte p{margin:4px 0 0}
+.boite .compte .actions{margin:0}
+.compte > div:first-child{flex:1 1 300px}
+.compte.alerte{border-left-color:var(--bronze)}
+.compte.ok-compte{border-left-color:var(--cible)}
+.avertissement{background:var(--table-2);border-left:4px solid var(--bronze);padding:8px 12px;border-radius:6px;color:var(--ink)}
+.etapes-liste{margin:0 0 14px;padding-left:22px;color:var(--ink-2)}
+.etapes-liste li{margin-bottom:4px}
+.boite .champ input{font:inherit;font-size:16px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:8px;padding:9px 12px;width:100%}
+.lien{background:none;border:none;padding:0;color:var(--bronze);text-decoration:underline;cursor:pointer;font:inherit}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -343,6 +356,7 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 
 <script>
 const NOM_JEU = window.claude ? "Prototype de combat" : "Mythomachie";
+const HASH_INITIAL = location.hash;  // liens reçus par e-mail (confirmation, mot de passe oublié)
 if(!window.claude) document.title = NOM_JEU;
 /* ============================================================
    CONFIGURATION DU JEU
@@ -1217,7 +1231,7 @@ function renderCouche(){
         <button type="button" class="btn second" data-act="en-ligne">Jouer en ligne</button>
         <button type="button" class="btn second" data-act="admin">Administration</button>
       </div>${regles}</div>`;
-    if(PROG.actif) h = PROG.accueilEtape && PROG.pret ? htmlBienvenue() : PROG.choixDeck ? htmlChoixDeck() : htmlAccueilProg(regles);
+    if(PROG.actif) h = PROG.accueilEtape && PROG.pret ? htmlBienvenue() : PROG.compteVue && PROG.pret ? htmlFormCompte() : PROG.choixDeck ? htmlChoixDeck() : htmlAccueilProg(regles);
     if(EN.ecran) h = htmlEnLigne();
   } else if(S.vainqueur!==null){
     const titre = S.vainqueur==="egalite" ? "Égalité"
@@ -2304,7 +2318,7 @@ if(!window.claude && SUPA.url){
     EN.chargement = true; renderCouche();
     try {
       if(!window.supabase) await chargerScript(SUPA.script);
-      sb = window.supabase.createClient(SUPA.url, SUPA.cle);
+      sb = window.supabase.createClient(SUPA.url, SUPA.cle, {auth:{flowType:"implicit", detectSessionInUrl:true, persistSession:true, autoRefreshToken:true}});
       let { data } = await sb.auth.getSession();
       let session = data && data.session;
       if(!session){
@@ -2561,6 +2575,7 @@ async function chargerProgression(){
   const ok = await window.__supa.init();
   if(!ok){ PROG.erreur = "Connexion au serveur de jeu impossible. Vérifiez votre connexion internet, puis réessayez."; return render(); }
   try {
+    await suiviCompte();
     const init = await rpc("initialiser_joueur");
     await rafraichir();
     if(init && init.nouveau){
@@ -2638,7 +2653,7 @@ function htmlAccueilProg(regles){
       <button type="button" class="btn second" data-act="prog-boutique">Boutique</button>
       <button type="button" class="btn second" data-act="admin">Administration</button>
     </div>
-    <p class="aide">Votre collection est liée à ce navigateur.</p>
+    ${htmlCompte()}
     ${regles}</div>`;
 }
 function htmlBienvenue(){
@@ -2857,6 +2872,7 @@ function renderProg(){
 }
 
 function actionProg(act, id){
+  if(act.startsWith("compte-")) return actionCompte(act);
   switch(act){
     case "prog-reessayer": chargerProgression(); return true;
     case "prog-accueil": ui.ecran = "jeu"; S = null; PROG.paquet = null; PROG.sel = null; PROG.zoom = false; break;
@@ -2997,6 +3013,185 @@ document.addEventListener("input", e => {
   for(let i=0; i<parts.length-1; i++){ o[parts[i]] = o[parts[i]] || {}; o = o[parts[i]]; }
   o[parts.at(-1)] = ch.startsWith("probabilites") ? Number(el.value) : Math.max(0, Math.floor(Number(el.value)));
 });
+
+/* ============================================================
+   COMPTES JOUEURS (site autonome)
+   Un joueur commence en invité (anonyme). Pour garder sa progression
+   et la retrouver ailleurs, il relie une adresse e-mail (confirmée par
+   un lien), puis choisit un mot de passe. Il garde le même identifiant :
+   sa collection, ses decks, son or et son encre restent les mêmes.
+   ============================================================ */
+PROG.user = null; PROG.compteVue = null; PROG.formCompte = {email:"", mdp:"", mdp2:""};
+const urlRetour = () => location.origin + location.pathname;
+async function chargerUtilisateur(){
+  try { const { data } = await sbc().auth.getUser(); PROG.user = data ? data.user : null; } catch(e) { PROG.user = null; }
+}
+function compteEtat(){
+  const u = PROG.user;
+  if(!u) return "inconnu";
+  if(u.email && u.user_metadata && u.user_metadata.mdp) return "complet";
+  if(u.email) return "mdp";
+  if(u.new_email) return "attente";
+  return "invite";
+}
+function traduireErreur(m){
+  const t = String(m || "");
+  if(/invalid login credentials/i.test(t)) return "Adresse e-mail ou mot de passe incorrect.";
+  if(/already (been )?registered|already exists|email_exists/i.test(t)) return "Cette adresse est déjà utilisée par un compte : connectez-vous plutôt avec « J’ai déjà un compte ».";
+  if(/rate limit|too many/i.test(t)) return "Trop d’e-mails envoyés pour le moment : réessayez un peu plus tard.";
+  if(/at least \d+ characters|weak|password should/i.test(t)) return "Mot de passe trop faible : utilisez au moins 8 caractères, avec des lettres et des chiffres.";
+  if(/not confirmed/i.test(t)) return "Confirmez d’abord votre adresse avec le lien reçu par e-mail.";
+  if(/invalid.*email|email.*invalid/i.test(t)) return "Cette adresse e-mail n’est pas valide.";
+  if(/not authorized|address not authorized/i.test(t)) return "Le serveur d’e-mails du jeu n’est pas encore configuré pour cette adresse. Prévenez l’administrateur du jeu.";
+  if(/same.*password|different from the old/i.test(t)) return "Le nouveau mot de passe doit être différent de l’ancien.";
+  return t || "Une erreur est survenue. Réessayez.";
+}
+const emailValide = e => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
+
+function htmlCompte(){
+  const e = compteEtat(), u = PROG.user || {};
+  if(e==="complet") return `<div class="compte ok-compte"><div><b>Connecté : ${esc(u.email)}</b><p class="aide">Votre progression est sauvegardée en ligne et vous suit sur tous vos appareils.</p></div>
+    <div class="actions"><button type="button" class="btn second" data-act="compte-deco">Se déconnecter</button></div></div>`;
+  if(e==="mdp") return `<div class="compte alerte"><div><b>Adresse confirmée : ${esc(u.email)}</b><p class="aide">Dernière étape : choisissez un mot de passe pour pouvoir vous connecter sur un autre appareil.</p></div>
+    <div class="actions"><button type="button" class="btn" data-act="compte-choisir-mdp">Choisir mon mot de passe</button></div></div>`;
+  if(e==="attente") return `<div class="compte alerte"><div><b>Confirmation en attente</b><p class="aide">Un e-mail a été envoyé à <b>${esc(u.new_email)}</b>. Cliquez sur le lien qu’il contient pour confirmer votre adresse (pensez à regarder dans les courriers indésirables).</p></div>
+    <div class="actions"><button type="button" class="btn second" data-act="compte-renvoyer">Renvoyer l’e-mail</button><button type="button" class="btn second" data-act="compte-sauver">Changer d’adresse</button></div></div>`;
+  return `<div class="compte"><div><b>Compte invité</b><p class="aide">Votre progression n’est enregistrée que dans ce navigateur. Sauvegardez-la pour la retrouver sur un autre appareil.</p></div>
+    <div class="actions"><button type="button" class="btn" data-act="compte-sauver">Sauvegarder ma progression</button><button type="button" class="btn second" data-act="compte-connexion">J’ai déjà un compte</button></div></div>`;
+}
+function htmlFormCompte(){
+  const v = PROG.compteVue, f = PROG.formCompte, occ = PROG.occupe ? "disabled" : "";
+  const champ = (cle, label, type, auto) => `<label class="champ"><span>${label}</span><input type="${type}" data-compte="${cle}" autocomplete="${auto}" value="${type==="password" ? "" : esc(f[cle] || "")}"></label>`;
+  const boite = (titre, contenu) => `<div class="boite" role="dialog" aria-label="${titre}"><h2>${titre}</h2>${contenu}</div>`;
+  if(v==="sauver") return boite("Sauvegarder ma progression", `
+    <p>Reliez votre progression à une adresse e-mail : collection, decks, or et encre. Vous pourrez ensuite vous connecter sur n’importe quel appareil.</p>
+    <ol class="etapes-liste"><li>Indiquez votre adresse e-mail.</li><li>Cliquez sur le lien de confirmation reçu par e-mail.</li><li>De retour dans le jeu, choisissez un mot de passe.</li></ol>
+    ${champ("email", "Adresse e-mail", "email", "email")}
+    <div class="actions" style="margin-top:14px"><button type="button" class="btn" data-act="compte-envoyer-lien" ${occ}>Envoyer le lien de confirmation</button><button type="button" class="btn second" data-act="compte-fermer">Annuler</button></div>`);
+  if(v==="connexion"){
+    const aDesCartes = Object.keys(PROG.collection).length > 0 && compteEtat()==="invite";
+    return boite("Se connecter", `
+      ${aDesCartes ? `<p class="avertissement">Sur ce navigateur, la progression actuelle de l’invité sera remplacée par celle de votre compte.</p>` : ""}
+      ${champ("email", "Adresse e-mail", "email", "email")}
+      <div style="height:10px"></div>${champ("mdp", "Mot de passe", "password", "current-password")}
+      <div class="actions" style="margin-top:14px"><button type="button" class="btn" data-act="compte-login" ${occ}>Se connecter</button><button type="button" class="btn second" data-act="compte-fermer">Annuler</button></div>
+      <p class="aide" style="margin-top:12px"><button type="button" class="lien" data-act="compte-oubli">Mot de passe oublié ?</button></p>`);
+  }
+  if(v==="oubli") return boite("Mot de passe oublié", `
+    <p>Indiquez l’adresse de votre compte : vous recevrez un lien pour choisir un nouveau mot de passe.</p>
+    ${champ("email", "Adresse e-mail", "email", "email")}
+    <div class="actions" style="margin-top:14px"><button type="button" class="btn" data-act="compte-envoyer-oubli" ${occ}>Envoyer le lien</button><button type="button" class="btn second" data-act="compte-connexion">Retour</button></div>`);
+  if(v==="mdp") return boite(PROG.recuperation ? "Nouveau mot de passe" : "Choisir un mot de passe", `
+    <p>${PROG.recuperation ? "Choisissez votre nouveau mot de passe." : `Dernière étape pour sauvegarder votre progression sur <b>${esc((PROG.user && PROG.user.email) || "")}</b>.`} Au moins 8 caractères, avec des lettres et des chiffres.</p>
+    ${champ("mdp", "Mot de passe", "password", "new-password")}
+    <div style="height:10px"></div>${champ("mdp2", "Confirmez le mot de passe", "password", "new-password")}
+    <div class="actions" style="margin-top:14px"><button type="button" class="btn" data-act="compte-definir-mdp" ${occ}>Enregistrer</button><button type="button" class="btn second" data-act="compte-fermer">Plus tard</button></div>`);
+  if(v==="info") return boite("Vérifiez vos e-mails", `
+    <p>Un e-mail vient d’être envoyé à <b>${esc(PROG.infoEmail || "")}</b>. Ouvrez-le et cliquez sur le lien : vous reviendrez dans le jeu automatiquement.</p>
+    <p class="aide">Rien reçu après quelques minutes ? Regardez dans les courriers indésirables, puis réessayez.</p>
+    <div class="actions"><button type="button" class="btn" data-act="compte-fermer">Compris</button></div>`);
+  if(v==="deconnexion") return boite("Se déconnecter", `
+    <p>Votre progression reste sauvegardée sur votre compte. Sur cet appareil, le jeu redémarrera avec un nouveau joueur invité, jusqu’à ce que vous vous reconnectiez.</p>
+    <div class="actions"><button type="button" class="btn danger" data-act="compte-deco-ok" ${occ}>Se déconnecter</button><button type="button" class="btn second" data-act="compte-fermer">Annuler</button></div>`);
+  return "";
+}
+async function actionCompteAsync(act){
+  const sb = sbc(), f = PROG.formCompte;
+  const email = (f.email || "").trim().toLowerCase();
+  const tenter = async fn => {
+    PROG.occupe = true; renderCouche();
+    try { await fn(); } catch(e) { erreur(traduireErreur(e && e.message)); }
+    finally { PROG.occupe = false; renderCouche(); }
+  };
+  switch(act){
+    case "compte-envoyer-lien": case "compte-renvoyer": {
+      const adresse = act==="compte-renvoyer" ? (PROG.user && PROG.user.new_email) : email;
+      if(!emailValide(adresse || "")) return erreur("Cette adresse e-mail n’est pas valide.");
+      return tenter(async () => {
+        const { error } = await sb.auth.updateUser({email:adresse}, {emailRedirectTo:urlRetour()});
+        if(error) throw error;
+        await chargerUtilisateur();
+        if(PROG.user && PROG.user.email) PROG.compteVue = "mdp";
+        else { PROG.compteVue = "info"; PROG.infoEmail = adresse; }
+      });
+    }
+    case "compte-login":
+      if(!emailValide(email)) return erreur("Cette adresse e-mail n’est pas valide.");
+      if(!f.mdp) return erreur("Indiquez votre mot de passe.");
+      return tenter(async () => {
+        const { data, error } = await sb.auth.signInWithPassword({email, password:f.mdp});
+        if(error) throw error;
+        EN.monId = data.user.id;
+        await chargerUtilisateur();
+        await rpc("initialiser_joueur");
+        await rafraichir();
+        PROG.compteVue = null; PROG.formCompte = {email:"", mdp:"", mdp2:""};
+        erreur("Connexion réussie : votre progression est chargée.");
+        render();
+      });
+    case "compte-envoyer-oubli":
+      if(!emailValide(email)) return erreur("Cette adresse e-mail n’est pas valide.");
+      return tenter(async () => {
+        const { error } = await sb.auth.resetPasswordForEmail(email, {redirectTo:urlRetour()});
+        if(error) throw error;
+        PROG.compteVue = "info"; PROG.infoEmail = email;
+      });
+    case "compte-definir-mdp":
+      if((f.mdp || "").length < 8 || !/[a-z]/i.test(f.mdp) || !/\d/.test(f.mdp)) return erreur("Utilisez au moins 8 caractères, avec des lettres et des chiffres.");
+      if(f.mdp!==f.mdp2) return erreur("Les deux mots de passe ne sont pas identiques.");
+      return tenter(async () => {
+        const { error } = await sb.auth.updateUser({password:f.mdp, data:{mdp:true}});
+        if(error) throw error;
+        await chargerUtilisateur();
+        PROG.compteVue = null; PROG.recuperation = false; PROG.formCompte = {email:"", mdp:"", mdp2:""};
+        erreur("Mot de passe enregistré : votre progression est sauvegardée en ligne.");
+        render();
+      });
+    case "compte-deco-ok":
+      return tenter(async () => { await sb.auth.signOut(); location.reload(); });
+  }
+}
+function actionCompte(act){
+  switch(act){
+    case "compte-sauver": PROG.compteVue = "sauver"; break;
+    case "compte-connexion": PROG.compteVue = "connexion"; break;
+    case "compte-oubli": PROG.compteVue = "oubli"; break;
+    case "compte-choisir-mdp": PROG.compteVue = "mdp"; break;
+    case "compte-deco": PROG.compteVue = "deconnexion"; break;
+    case "compte-fermer": PROG.compteVue = null; PROG.recuperation = false; break;
+    default: actionCompteAsync(act); return true;
+  }
+  render();
+  return true;
+}
+// Retour depuis un lien reçu par e-mail
+async function suiviCompte(){
+  const sb = sbc();
+  if(typeof sb.auth.onAuthStateChange==="function") sb.auth.onAuthStateChange(ev => {
+    if(ev==="PASSWORD_RECOVERY"){ PROG.recuperation = true; PROG.compteVue = "mdp"; if(!S) render(); }
+  });
+  await chargerUtilisateur();
+  const hsh = new URLSearchParams((HASH_INITIAL || "").replace(/^#/, ""));
+  if(hsh.get("error_description")) erreur("Lien invalide ou expiré : " + hsh.get("error_description").replace(/\+/g, " ") + ". Demandez un nouveau lien.");
+  else if(hsh.get("type")==="recovery"){ PROG.recuperation = true; PROG.compteVue = "mdp"; }
+  else if(/email_change|signup/.test(hsh.get("type") || "") || /confirm/i.test(hsh.get("message") || "")){
+    if(compteEtat()==="mdp") PROG.compteVue = "mdp";
+    erreur("Adresse e-mail confirmée.");
+  }
+  if(HASH_INITIAL) try { history.replaceState(null, "", urlRetour()); } catch(e) {}
+}
+document.addEventListener("input", e => {
+  const k = e.target.dataset && e.target.dataset.compte;
+  if(k) PROG.formCompte[k] = e.target.value;
+});
+document.addEventListener("keydown", e => {
+  const k = e.target.dataset && e.target.dataset.compte;
+  if(e.key!=="Enter" || !k) return;
+  PROG.formCompte[k] = e.target.value;
+  const v = PROG.compteVue;
+  actionCompte(v==="sauver" ? "compte-envoyer-lien" : v==="connexion" ? "compte-login" : v==="oubli" ? "compte-envoyer-oubli" : v==="mdp" ? "compte-definir-mdp" : "");
+});
+
 
 chargerConfig();
 render();
