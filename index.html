@@ -212,6 +212,45 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 .boite .champ input{font:inherit;font-size:16px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:8px;padding:9px 12px;width:100%}
 .lien{background:none;border:none;padding:0;color:var(--bronze);text-decoration:underline;cursor:pointer;font:inherit}
 
+/* Profil, trophées et statistiques */
+.adm-page.adm-stats{max-width:1240px}
+.adm-stats select{font:inherit;font-size:15px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.page-profil{display:flex;flex-direction:column;gap:16px;max-width:1000px}
+.bloc-profil{background:var(--zone);border:1px solid var(--line);border-radius:8px;padding:16px 18px}
+.bloc-profil h2,.adm-stats h2{font-size:19px;margin:0 0 8px}
+.adm-stats h2{margin-top:22px}
+.bloc-profil h3,.adm-stats h3{font-family:Cinzel,serif;font-size:15px;margin:18px 0 8px}
+.ligne-pseudo{display:flex;gap:10px;flex-wrap:wrap}
+.ligne-pseudo input{font:inherit;font-size:17px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:8px 12px;min-width:240px;flex:1 1 240px;max-width:360px}
+.tuiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.tuile{background:var(--table-2);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.tuile b{font-family:Cinzel,"Times New Roman",serif;font-size:24px;color:var(--ink)}
+.tuile span{font-size:13px;color:var(--ink-2)}
+.tableau-defile{overflow-x:auto}
+.tableau{border-collapse:collapse;width:100%;font-size:14px}
+.tableau th,.tableau td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tableau thead th{color:var(--ink-2);font-weight:700}
+.tableau tbody tr:hover{background:color-mix(in srgb, var(--bronze) 8%, transparent)}
+.tableau .tri{background:none;border:none;padding:0;font:inherit;font-weight:700;color:inherit;cursor:pointer}
+.tableau .tri.actif{color:var(--ink)}
+.tableau.duels td,.tableau.duels th{text-align:center}
+.taux-haut{color:var(--danger);font-weight:700}
+.taux-bas{color:#4f86d9;font-weight:700}
+.liste-en-ligne{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.liste-en-ligne li{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--table-2);border-radius:6px;padding:8px 12px}
+.point-vert{width:10px;height:10px;border-radius:50%;background:var(--cible);box-shadow:0 0 0 3px color-mix(in srgb, var(--cible) 25%, transparent)}
+.trophees{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.trophee{display:flex;gap:12px;align-items:flex-start;background:var(--table-2);border-radius:8px;padding:12px}
+.trophee > div{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.trophee .medaille{width:52px;height:52px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:24px;color:#fff;
+  background:radial-gradient(circle at 35% 30%,#8a8f98,#4a4f58);box-shadow:inset 0 0 0 3px rgba(0,0,0,.2);opacity:.45;filter:grayscale(1)}
+.trophee.niveau-1 .medaille{background:radial-gradient(circle at 35% 30%,#f0b88a,#a0602e 60%,#6b3c18);opacity:1;filter:none}
+.trophee.niveau-2 .medaille{background:radial-gradient(circle at 35% 30%,#ffffff,#b9c2cc 55%,#727c88);color:#2a3038;opacity:1;filter:none}
+.trophee.niveau-3 .medaille{background:radial-gradient(circle at 35% 30%,#fff4c2,#f0c64e 45%,#a8750f);color:#3b2a06;opacity:1;filter:none;box-shadow:0 0 14px rgba(240,198,78,.55)}
+.trophee .niveau{font-family:Cinzel,serif;font-weight:700;font-size:13px;color:var(--ink-2)}
+.trophee.niveau-3 .niveau{color:var(--or)}
+.trophee .barre{height:6px;margin:4px 0 0}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -834,7 +873,8 @@ function nouvellePartie(mode, decks){
   S.marcheDeck = melange([...listesJ[0], ...listesJ[1]].filter(id => CARTES[id]).map(inst));
   S.joueurs.forEach((j, k) => { j.heros = choisirHeros(listesJ[k]); j.morts = 0; });
   S.idPartie = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-  S.stats = [0, 1].map(() => ({creatures:0, sorts:0, achats:0, degats:0}));
+  S.stats = [0, 1].map(() => ({creatures:0, sorts:0, achats:0, degats:0, soins:0, pouvoirs:0, jouees:{}, achetees:{}}));
+  S.debut = Date.now();
   for(let i=0;i<REGLES.tailleMarche && S.marcheDeck.length;i++) S.marche.push(S.marcheDeck.pop());
   S.joueurs.forEach(j => piocher(j, REGLES.mainDepart, true));
   S.joueurs[S.courant].plateau.forEach(c => c.peutAttaquer = true);
@@ -856,6 +896,7 @@ function activerPouvoir(){
   const i = S.courant, j = S.joueurs[i], h = heroDe(j);
   if(!pouvoirPret(j)) return erreur(`Le pouvoir de ${h.nom} se charge : ${j.morts || 0} créatures ennemies détruites sur ${REGLES.seuilPouvoir}.`);
   j.morts = 0;
+  if(S.stats && S.stats[i]) S.stats[i].pouvoirs = (S.stats[i].pouvoirs || 0) + 1;
   log(`${h.nom} déchaîne ${h.pouvoir.nom} (${decrire(h.pouvoir.effet || {})})`);
   appliquer(i, h.pouvoir.effet || {});
   verifierVictoire();
@@ -912,7 +953,7 @@ function appliquer(i, e){
   const j = S.joueurs[i], opp = adversaire(i);
   if(e.or) j.or += e.or;
   if(e.combat) j.combat += e.combat;
-  if(e.soin) j.pv += e.soin;
+  if(e.soin){ j.pv += e.soin; if(S.stats && S.stats[i]) S.stats[i].soins = (S.stats[i].soins || 0) + e.soin; }
   if(e.pioche) piocher(j, e.pioche);
   if(e.degatsTous) opp.plateau.forEach(c => blesser(c, e.degatsTous));
   if(e.degatsHasard && opp.plateau.length){
@@ -1001,6 +1042,7 @@ function jouer(id, opts={}){
   }
   j.tour.push({uid:c.uid, id:c.id, allieFait:false});
   if(S.stats && S.stats[i]){
+    if(S.stats[i].jouees) S.stats[i].jouees[c.id] = (S.stats[i].jouees[c.id] || 0) + 1;
     if(d.type==="creature") S.stats[i].creatures++;
     else if(d.type==="sort" && !d.depart && !d.base) S.stats[i].sorts++;
   }
@@ -1042,7 +1084,7 @@ function acheter(k){
     if(!b) return false;
     if(j.or<(b.prix||0)) return erreur(`Il vous faut ${b.prix} or pour ${b.nom}.`);
     j.or -= (b.prix||0); j.defausse.push(inst(REGLES.carteBase));
-    if(S.stats && S.stats[S.courant]) S.stats[S.courant].achats++;
+    if(S.stats && S.stats[S.courant]){ const st = S.stats[S.courant]; st.achats++; if(st.achetees) st.achetees[REGLES.carteBase] = (st.achetees[REGLES.carteBase] || 0) + 1; }
     log(`${j.nom} achète ${b.nom}.`);
     return true;
   }
@@ -1051,7 +1093,7 @@ function acheter(k){
   const d = def(c);
   if(j.or<d.prix) return erreur(`Il vous faut ${d.prix} or pour acheter ${d.nom}.`);
   j.or -= d.prix; j.defausse.push(c);
-  if(S.stats && S.stats[S.courant]) S.stats[S.courant].achats++;
+  if(S.stats && S.stats[S.courant]){ const st = S.stats[S.courant]; st.achats++; if(st.achetees) st.achetees[c.id] = (st.achetees[c.id] || 0) + 1; }
   S.marche.splice(k, 1, ...(S.marcheDeck.length ? [S.marcheDeck.pop()] : []));
   log(`${j.nom} achète ${d.nom}.`);
   return true;
@@ -1218,7 +1260,12 @@ function interactif(){
 }
 const vue = () => S.mode==="ia" ? 0 : S.mode==="enligne" ? (EN.role==="hote" ? 0 : 1) : S.courant;
 const enLigne = () => !!S && S.mode==="enligne";
-const nomAffiche = j => !enLigne() ? j.nom : (j===S.joueurs[vue()] ? "Vous" : "Adversaire");
+function nomAffiche(j){
+  const estMoi = j===S.joueurs[vue()];
+  if(enLigne()) return estMoi ? "Vous" : (j.pseudo || "Adversaire");
+  if(S.mode==="ia" && estMoi && PROG.profil && PROG.profil.pseudo) return PROG.profil.pseudo;
+  return j.nom;
+}
 
 const NOMS_RARETE = {commune:"Commune", rare:"Rare", epique:"Épique", legendaire:"Légendaire"};
 const TEXTES_AIDE = {
@@ -1320,8 +1367,8 @@ function htmlMedaillon(j, estMoi, inter, cible){
 function render(){
   const app = document.getElementById("app");
   if(ui.ecran==="admin"){ INSTANT = null; renderAdmin(); return; }
-  if(["collection","decks","editeur","boutique"].includes(ui.ecran)){ INSTANT = null; renderProg(); return; }
-  if(!S){ INSTANT = null; app.innerHTML = ""; renderCouche(); return; }
+  if(["collection","decks","editeur","boutique","profil"].includes(ui.ecran)){ INSTANT = null; renderProg(); return; }
+  if(!S){ INSTANT = null; app.innerHTML = ""; renderCouche(); if(PROG.pret) signaler(); return; }
   const me = vue(), moi = S.joueurs[me], lui = S.joueurs[1-me];
   const inter = interactif();
   const t = cibles(me);
@@ -1385,6 +1432,7 @@ function render(){
   </div>`;
   renderCouche();
   animerChangements();
+  if(PROG.pret) signaler();
   if(S.vainqueur!==null) verifierRecompense();
 }
 
@@ -1456,7 +1504,7 @@ function renderCouche(){
     if(EN.ecran) h = htmlEnLigne();
   } else if(S.vainqueur!==null){
     const titre = S.vainqueur==="egalite" ? "Égalité"
-      : enLigne() ? (S.vainqueur===S.joueurs[vue()].nom ? "Victoire !" : "Défaite")
+      : enLigne() || S.mode==="ia" ? (S.vainqueur===S.joueurs[vue()].nom ? "Victoire !" : "Défaite")
       : `${S.vainqueur} remporte la partie`;
     const actions = enLigne() && EN.role==="invite"
       ? `<p class="attente">En attente d’une revanche lancée par votre adversaire…</p><div class="actions"><button type="button" class="btn second" data-act="nouvelle">Quitter</button></div>`
@@ -1568,14 +1616,14 @@ function renderAdmin(){
     cle = actif.dataset.chemin ? `[data-chemin="${actif.dataset.chemin}"]` : actif.dataset.adm ? `[data-adm="${actif.dataset.adm}"]` : null;
     try { pos = actif.selectionStart; } catch(e) { pos = null; }
   }
-  const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur};
+  const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:admStats};
   app.innerHTML = `
   <header class="entete">
     <h1>Administration</h1>
     <span class="mode">Enregistré automatiquement dans ce navigateur. Les changements s’appliquent à la prochaine partie.${window.claude ? "" : " Pour les partager avec vos joueurs, utilisez Sauvegarde, puis Télécharger config.json."}</span>
     <button type="button" class="btn-discret" data-act="admin-quitter" style="margin-left:auto">Retour au jeu</button>
   </header>
-  <nav class="onglets" role="tablist">${[["cartes","Cartes"],["regles","Règles"],["heros","Héros"],["factions","Factions"],["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"]] : [])].map(([k,l]) =>
+  <nav class="onglets" role="tablist">${[["cartes","Cartes"],["regles","Règles"],["heros","Héros"],["factions","Factions"],["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"], ["stats","Statistiques"]] : [])].map(([k,l]) =>
     `<button type="button" role="tab" class="onglet" aria-selected="${adm.onglet===k}" data-act="onglet" data-id="${k}">${l}</button>`).join("")}</nav>
   ${pages[adm.onglet]()}`;
   document.getElementById("couche").innerHTML = "";
@@ -1842,6 +1890,12 @@ function idUnique(prefixe){
 
 function actionAdmin(act, id, el){
   if(act.startsWith("srv-")){ actionServeur(act); return; }
+  if(act==="stats-rafraichir"){ chargerAdminStats(); erreur("Actualisation…"); return; }
+  if(act==="stats-tri" || act==="stats-tri-c"){
+    const k = act==="stats-tri" ? "tri" : "triCartes", t = PROG.adminStats[k] || {};
+    PROG.adminStats[k] = {cle:id, sens: t.cle===id ? -t.sens : (["nom","email","rarete","ecran"].includes(id) ? 1 : -1)};
+    return renderAdmin();
+  }
   switch(act){
     case "admin": ui.ecran = "admin"; break;
     case "admin-quitter": ui.ecran = "jeu"; S = null; break;
@@ -2275,7 +2329,11 @@ function decksEnLigne(){
   if(!ok(EN.deckHote) && !ok(EN.deckInvite)) return undefined;
   return [ok(EN.deckHote) ? EN.deckHote : deckConstruit(), ok(EN.deckInvite) ? EN.deckInvite.slice(0, 60) : deckConstruit()];
 }
-function nommerJoueurs(){ S.joueurs[0].nom = "Hôte"; S.joueurs[1].nom = "Invité"; }
+function nommerJoueurs(){
+  S.joueurs[0].nom = "Hôte"; S.joueurs[1].nom = "Invité";
+  S.joueurs[0].pseudo = (PROG.profil && PROG.profil.pseudo) || null;
+  S.joueurs[1].pseudo = typeof EN.pseudoInvite==="string" ? EN.pseudoInvite.slice(0, 20) : null;
+}
 function demarrerHote(inviteId){
   EN.inviteId = inviteId;
   nouvellePartie("enligne", decksEnLigne()); nommerJoueurs();
@@ -2671,7 +2729,7 @@ if(!window.claude && SUPA.url){
     return {
       rejoindre: p => {
         if(!p.id) return;
-        if(!EN.inviteId){ EN.deckInvite = p.deck || null; demarrerHote(p.id); }
+        if(!EN.inviteId){ EN.deckInvite = p.deck || null; EN.pseudoInvite = p.pseudo || null; demarrerHote(p.id); }
         else if(p.id===EN.inviteId) envoyerEtat(true);
         else emettre("complet", {id:p.id});
       },
@@ -2769,10 +2827,11 @@ if(!window.claude && SUPA.url){
       complet: p => { if(p.id===EN.monId && !repondu) echec("Cette partie a déjà deux joueurs."); }
     });
     if(!ok) return echec("Le serveur de jeu ne répond pas. Réessayez dans un instant.");
-    emettre("rejoindre", {id:EN.monId, deck:monDeck});
+    const monPseudo = (PROG.profil && PROG.profil.pseudo) || null;
+    emettre("rejoindre", {id:EN.monId, deck:monDeck, pseudo:monPseudo});
     minuteurs.push(setInterval(() => {
       if(EN.role!=="invite") return;
-      if(!repondu) emettre("rejoindre", {id:EN.monId, deck:monDeck});
+      if(!repondu) emettre("rejoindre", {id:EN.monId, deck:monDeck, pseudo:monPseudo});
       else if(EN.enAttente) emettre("ordres", {id:EN.monId, ordres:EN.ordres.filter(o => o.seq > ((S && S.seqTraite) || 0))});
     }, 2500));
     setTimeout(() => {
@@ -2904,6 +2963,8 @@ async function chargerProgression(){
       PROG.accueilEtape = 1; PROG.accueilAnimer = true;
     }
     PROG.pret = true;
+    demarrerPresence();
+    chargerMesStats(false);
   } catch(e) {
     PROG.erreur = /function|relation|does not exist|schema cache/i.test(e.message)
       ? "Le serveur n’est pas encore prêt : exécutez le script supabase-phase4.sql dans Supabase."
@@ -2928,6 +2989,7 @@ async function verifierRecompense(){
   try { localStorage.setItem("parties-recompensees", JSON.stringify([...PROG.recompensees].slice(-60))); } catch(e) {}
   const me = vue(), victoire = S.vainqueur===S.joueurs[me].nom;
   ajouterProgresQuete(S.stats ? S.stats[me] : null, victoire);
+  enregistrerPartie(me, victoire);
   try { const gain = await rpc("fin_partie", {victoire}); PROG.dernierGain = {cle, gain}; await rafraichir(); }
   catch(e) { PROG.dernierGain = {cle, gain:0, erreur:e.message}; }
   if(S && S.idPartie===cle) renderCouche();
@@ -2937,7 +2999,10 @@ function htmlGainFin(){
   const g = PROG.dernierGain;
   if(!g || g.cle!==S.idPartie) return `<p class="attente">Calcul des récompenses…</p>`;
   if(g.erreur) return `<p>Récompense indisponible : ${esc(g.erreur)}</p>`;
-  return `<p class="gain">${g.gain ? `+${g.gain} or` : "Plafond d’or du jour atteint : revenez demain pour gagner plus d’or."}</p>`;
+  const st = S.stats ? S.stats[vue()] : null;
+  const pl = (n, un, plusieurs) => `${nf(n)} ${(n || 0) > 1 ? plusieurs : un}`;
+  const resume = st ? `<p class="aide">Dans cette partie : ${pl(st.degats, "dégât infligé", "dégâts infligés")}, ${pl(st.soins || 0, "point de vie soigné", "points de vie soignés")}, ${pl(st.creatures, "créature jouée", "créatures jouées")}, ${pl(st.achats, "carte achetée", "cartes achetées")}.</p>` : "";
+  return `<p class="gain">${g.gain ? `+${g.gain} or` : "Plafond d’or du jour atteint : revenez demain pour gagner plus d’or."}</p>${resume}`;
 }
 
 // ----- Affichage commun
@@ -2970,6 +3035,7 @@ function htmlAccueilProg(regles){
       <button type="button" class="btn second" data-act="prog-collection">Collection</button>
       <button type="button" class="btn second" data-act="prog-decks">Decks (${PROG.decks.length}/9)</button>
       <button type="button" class="btn second" data-act="prog-boutique">Boutique</button>
+      <button type="button" class="btn second" data-act="prog-profil">${PROG.profil && PROG.profil.pseudo ? "Mon profil" : "Mon profil (choisir un pseudo)"}</button>
       ${accesAdmin() ? `<button type="button" class="btn second" data-act="admin">Administration</button>` : ""}
     </div>
     ${htmlCompte()}
@@ -3183,8 +3249,9 @@ function renderProg(){
   const actif = document.activeElement;
   const cle = actif && actif.dataset && actif.dataset.prog ? actif.dataset.prog : null;
   let pos = null; try { pos = actif.selectionStart; } catch(e) {}
-  const pages = {collection:pageCollection, decks:pageDecks, editeur:pageEditeur, boutique:pageBoutique};
+  const pages = {collection:pageCollection, decks:pageDecks, editeur:pageEditeur, boutique:pageBoutique, profil:pageProfil};
   app.innerHTML = PROG.pret ? pages[ui.ecran]() : `${entete(NOM_JEU)}<p class="attente">Chargement…</p>`;
+  signaler();
   if(PROG.paquet) PROG.paquet.anim = new Set();
   document.getElementById("couche").innerHTML = ui.ecran==="collection" && PROG.zoom ? htmlZoom() : "";
   if(cle){ const el = app.querySelector(`[data-prog="${cle}"]`); if(el){ el.focus(); if(pos!=null) try { el.setSelectionRange(pos, pos); } catch(e) {} } }
@@ -3198,6 +3265,12 @@ function actionProg(act, id){
     case "prog-collection": ui.ecran = "collection"; PROG.sel = null; PROG.zoom = false; PROG.choixDeck = null; break;
     case "prog-decks": ui.ecran = "decks"; PROG.deckEdit = null; PROG.supprDeck = null; PROG.choixDeck = null; break;
     case "prog-boutique": ui.ecran = "boutique"; PROG.paquet = null; break;
+    case "prog-profil": ui.ecran = "profil"; PROG.formPseudo = null; chargerMesStats(false).then(() => { if(ui.ecran==="profil") renderProg(); }); break;
+    case "pseudo-sauver": {
+      const v = (PROG.formPseudo ?? (PROG.profil && PROG.profil.pseudo) ?? "").trim();
+      action(async () => { await rpc("definir_pseudo", {p:v}); PROG.formPseudo = null; }, "Pseudo enregistré.");
+      return true;
+    }
     case "jouer-ia": case "jouer-duo": PROG.choixDeck = {mode: act==="jouer-ia" ? "ia" : "duo"}; break;
     case "choix-retour": PROG.choixDeck = null; break;
     case "bienvenue-suite": PROG.accueilEtape = Math.min(3, (PROG.accueilEtape || 1) + 1); PROG.accueilAnimer = true; break;
@@ -3264,6 +3337,7 @@ document.addEventListener("input", e => {
   if(k==="d1" || k==="d2"){ if(PROG.choixDeck) PROG.choixDeck[k] = el.value; return; }
   if(k==="deckEnLigne"){ EN.deckId = el.value; return; }
   if(k==="nomDeck"){ if(PROG.deckEdit) PROG.deckEdit.nom = el.value; return; }
+  if(k==="pseudo"){ PROG.formPseudo = el.value; return; }
   if(k==="possedees") return;
   if(k in PROG.filtres){ PROG.filtres[k] = el.value; renderProg(); }
 });
@@ -3511,6 +3585,219 @@ document.addEventListener("keydown", e => {
   actionCompte(v==="sauver" ? "compte-envoyer-lien" : v==="connexion" ? "compte-login" : v==="oubli" ? "compte-envoyer-oubli" : v==="mdp" ? "compte-definir-mdp" : "");
 });
 
+
+/* ============================================================
+   STATISTIQUES, PROFIL, TROPHÉES ET PRÉSENCE (site autonome)
+   ============================================================ */
+PROG.mesStats = null; PROG.adminStats = null; PROG.formPseudo = null;
+const NOMS_ECRANS = {"accueil":"Accueil", "partie-ia":"Partie contre l’ordinateur", "partie-duo":"Partie à deux sur un écran",
+  "partie-enligne":"Partie en ligne", "attente-enligne":"Attente d’un adversaire en ligne", "collection":"Collection", "decks":"Decks", "editeur":"Éditeur de deck",
+  "boutique":"Boutique", "profil":"Profil", "admin":"Administration"};
+function ecranActuel(){
+  if(ui.ecran==="admin") return "admin";
+  if(["collection","decks","editeur","boutique","profil"].includes(ui.ecran)) return ui.ecran;
+  if(S) return "partie-" + S.mode;
+  if(EN.ecran==="attente" || EN.ecran==="connexion") return "attente-enligne";
+  return "accueil";
+}
+// Présence : un signal toutes les 45 secondes, et à chaque changement d’écran
+let dernierEcranSignale = null, minuteurSignal = null;
+function signaler(force){
+  if(!PROG.pret || document.hidden) return;
+  const e = ecranActuel();
+  if(!force && e===dernierEcranSignale) return;
+  dernierEcranSignale = e;
+  clearTimeout(minuteurSignal);
+  minuteurSignal = setTimeout(() => { sbc().rpc("signaler", {e}).then(() => {}, () => {}); }, force ? 0 : 1200);
+}
+function demarrerPresence(){
+  signaler(true);
+  setInterval(() => signaler(true), 45000);
+  document.addEventListener("visibilitychange", () => { if(!document.hidden) signaler(true); });
+}
+
+// ----- Enregistrement d’une partie terminée
+async function enregistrerPartie(me, victoire){
+  const st = (S.stats && S.stats[me]) || {}, moi = S.joueurs[me], lui = S.joueurs[1-me];
+  try {
+    await rpc("enregistrer_partie", {d:{
+      mode:S.mode, victoire, tours:S.tour, duree_s:S.debut ? Math.round((Date.now()-S.debut)/1000) : 0,
+      heros:moi.heros || null, heros_adverse:lui.heros || null,
+      degats:st.degats || 0, soins:st.soins || 0, creatures:st.creatures || 0, sorts:st.sorts || 0,
+      achats:st.achats || 0, pouvoirs:st.pouvoirs || 0, jouees:st.jouees || {}, achetees:st.achetees || {}
+    }});
+    await chargerMesStats(true);
+  } catch(e) { /* les statistiques ne doivent jamais bloquer la partie */ }
+}
+async function chargerMesStats(annoncer){
+  try { PROG.mesStats = await rpc("mes_stats"); } catch(e) { return; }
+  verifierTrophees(annoncer);
+}
+
+// ----- Trophées : trois paliers chacun
+const TROPHEES = [
+  {id:"parties", nom:"Combattant", desc:"Parties jouées", sym:"⚔", paliers:[10, 50, 200], val:s => s.parties},
+  {id:"victoires", nom:"Conquérant", desc:"Victoires", sym:"♛", paliers:[5, 25, 100], val:s => s.victoires},
+  {id:"serie", nom:"Invaincu", desc:"Victoires d’affilée", sym:"✶", paliers:[3, 5, 10], val:s => s.serie_max},
+  {id:"degats", nom:"Fléau", desc:"Dégâts infligés à l’adversaire", sym:"✹", paliers:[500, 3000, 15000], val:s => s.degats},
+  {id:"soins", nom:"Guérisseur", desc:"Points de vie soignés", sym:"✚", paliers:[200, 1500, 6000], val:s => s.soins},
+  {id:"creatures", nom:"Invocateur", desc:"Créatures jouées", sym:"❖", paliers:[50, 300, 1500], val:s => s.creatures},
+  {id:"achats", nom:"Marchand", desc:"Cartes achetées au marché", sym:"⚖", paliers:[50, 300, 1500], val:s => s.achats},
+  {id:"pouvoirs", nom:"Puissance divine", desc:"Pouvoirs de héros utilisés", sym:"☀", paliers:[5, 25, 100], val:s => s.pouvoirs},
+  {id:"pantheons", nom:"Maître des panthéons", desc:"Héros différents avec au moins une victoire", sym:"✦", paliers:[2, 3, 4], val:s => Object.values(s.par_heros || {}).filter(x => x.victoires>0).length},
+  {id:"collection", nom:"Collectionneur", desc:"Cartes différentes possédées", sym:"❦", paliers:[40, 80, 120], val:() => Object.keys(PROG.collection).filter(id => estCollectionnable(CARTES[id])).length}
+];
+const NOMS_PALIERS = ["Bronze", "Argent", "Or"];
+const palierAtteint = (t, s) => t.paliers.filter(p => (t.val(s) || 0) >= p).length;
+function verifierTrophees(annoncer){
+  const s = PROG.mesStats; if(!s || !EN.monId) return;
+  const cle = "trophees-" + EN.monId;
+  let vus = {}; try { vus = JSON.parse(localStorage.getItem(cle)) || {}; } catch(e) {}
+  const nouveaux = [];
+  for(const t of TROPHEES){
+    const n = palierAtteint(t, s);
+    if(n > (vus[t.id] || 0)){ if(vus[t.id]!==undefined || annoncer) nouveaux.push(`${t.nom} (${NOMS_PALIERS[n-1].toLowerCase()})`); vus[t.id] = n; }
+    else if(vus[t.id]===undefined) vus[t.id] = n;
+  }
+  try { localStorage.setItem(cle, JSON.stringify(vus)); } catch(e) {}
+  if(annoncer && nouveaux.length) setTimeout(() => erreur(`Trophée obtenu : ${nouveaux.join(", ")} !`), 900);
+}
+
+// ----- Écran « Mon profil »
+const nf = n => (n || 0).toLocaleString("fr-FR");
+const pct = (v, n) => n ? Math.round(100*v/n) + " %" : "–";
+function pageProfil(){
+  const s = PROG.mesStats, pseudo = PROG.profil && PROG.profil.pseudo;
+  const f = PROG.formPseudo ?? (pseudo || "");
+  const tuile = (v, l) => `<div class="tuile"><b>${v}</b><span>${l}</span></div>`;
+  const heros = s ? Object.entries(FACTIONS).map(([k, fac]) => {
+    const x = (s.par_heros || {})[k] || {parties:0, victoires:0};
+    return `<tr><td><span class="pastille f-${k}"></span> ${esc(heroDe({heros:k}).nom)} <span class="aide">(${esc(fac.nom)})</span></td><td>${nf(x.parties)}</td><td>${nf(x.victoires)}</td><td>${pct(x.victoires, x.parties)}</td></tr>`;
+  }).join("") : "";
+  const trophees = s ? TROPHEES.map(t => {
+    const v = t.val(s) || 0, n = palierAtteint(t, s), prochain = t.paliers[n];
+    const avant = n ? t.paliers[n-1] : 0;
+    return `<div class="trophee niveau-${n}" title="${esc(t.desc)}">
+      <span class="medaille" aria-hidden="true">${t.sym}</span>
+      <div><b>${esc(t.nom)}</b><span class="aide">${esc(t.desc)}</span>
+        <span class="niveau">${n ? NOMS_PALIERS[n-1] : "Pas encore obtenu"}</span>
+        ${prochain ? `<span class="barre"><span style="width:${Math.min(100, 100*(v-avant)/(prochain-avant))}%"></span></span><span class="aide">${nf(v)} / ${nf(prochain)} pour ${NOMS_PALIERS[n].toLowerCase()}</span>` : `<span class="aide">${nf(v)} : palier maximum atteint</span>`}
+      </div></div>`;
+  }).join("") : "";
+  return `${entete("Mon profil")}
+    <div class="page-profil">
+      <section class="bloc-profil">
+        <h2>Pseudo</h2>
+        <p class="aide">Votre adversaire le voit pendant les parties en ligne.</p>
+        <div class="ligne-pseudo"><input type="text" maxlength="20" data-prog="pseudo" value="${esc(f)}" placeholder="Choisissez un pseudo" aria-label="Pseudo">
+          <button type="button" class="btn" data-act="pseudo-sauver" ${PROG.occupe ? "disabled" : ""}>Enregistrer</button></div>
+        ${!pseudo ? `<p class="aide">Vous n’avez pas encore de pseudo.</p>` : ""}
+      </section>
+      ${!s ? `<p class="attente">Chargement de vos statistiques…</p>` : `
+      <section class="bloc-profil">
+        <h2>Statistiques</h2>
+        <div class="tuiles">
+          ${tuile(nf(s.parties), "parties jouées")}${tuile(nf(s.victoires), `victoires (${pct(s.victoires, s.parties)})`)}
+          ${tuile(nf(s.serie_max), "meilleure série de victoires")}${tuile(nf(s.degats), "dégâts infligés")}
+          ${tuile(nf(s.soins), "points de vie soignés")}${tuile(nf(s.creatures), "créatures jouées")}
+          ${tuile(nf(s.achats), "cartes achetées")}${tuile(nf(s.pouvoirs), "pouvoirs utilisés")}
+          ${tuile(`${nf(s.victoires_en_ligne)} / ${nf(s.en_ligne)}`, "victoires en ligne")}
+        </div>
+        <h3>Par héros</h3>
+        <div class="tableau-defile"><table class="tableau"><thead><tr><th>Héros</th><th>Parties</th><th>Victoires</th><th>Taux</th></tr></thead><tbody>${heros}</tbody></table></div>
+        <p class="aide">Les parties à deux sur le même écran ne sont pas comptées.</p>
+      </section>
+      <section class="bloc-profil">
+        <h2>Trophées</h2>
+        <div class="trophees">${trophees}</div>
+      </section>`}
+    </div>`;
+}
+
+// ----- Onglet « Statistiques » de l’administration
+async function chargerAdminStats(){
+  const jours = (PROG.adminStats && PROG.adminStats.jours) || 30;
+  try {
+    const [resume, joueurs, heros, cartes] = await Promise.all([
+      rpc("admin_resume"), rpc("admin_joueurs"), rpc("admin_stats_heros", {p_jours:jours}), rpc("admin_stats_cartes", {p_jours:jours})]);
+    PROG.adminStats = {...(PROG.adminStats || {}), resume, joueurs, heros, cartes, jours, quand:Date.now(), erreur:null};
+  } catch(e) {
+    PROG.adminStats = {...(PROG.adminStats || {}), jours, erreur:/function|does not exist|schema cache/i.test(e.message) ? "Exécutez d’abord le script supabase-stats.sql dans Supabase." : e.message};
+  }
+  if(ui.ecran==="admin" && adm.onglet==="stats") renderAdmin();
+}
+function ilYa(date){
+  if(!date) return "jamais";
+  const s = Math.max(0, Math.round((Date.now() - Date.parse(date))/1000));
+  if(s < 60) return `il y a ${s} s`;
+  if(s < 3600) return `il y a ${Math.round(s/60)} min`;
+  if(s < 86400) return `il y a ${Math.round(s/3600)} h`;
+  return `il y a ${Math.round(s/86400)} j`;
+}
+const nomJoueur = j => j.pseudo || j.email || "Invité " + String(j.id).slice(0, 6);
+function trier(liste, cle, sens){ return [...liste].sort((a,b) => { const x = a[cle] ?? -Infinity, y = b[cle] ?? -Infinity; return (x>y ? 1 : x<y ? -1 : 0) * sens; }); }
+function admStats(){
+  if(!PROG.actif || !PROG.pret) return `<div class="adm-page"><p>Les statistiques sont disponibles sur votre site GitHub.</p></div>`;
+  const A = PROG.adminStats;
+  if(!A || (!A.resume && !A.erreur)){ if(!A || !A.chargement){ PROG.adminStats = {...(A || {}), chargement:true}; chargerAdminStats(); } return `<div class="adm-page"><p class="attente">Chargement des statistiques…</p></div>`; }
+  if(A.erreur) return `<div class="adm-page"><p style="color:var(--danger)">${esc(A.erreur)}</p><div class="adm-actions"><button type="button" class="btn" data-act="stats-rafraichir">Réessayer</button></div></div>`;
+  const r = A.resume, enLigneMaint = A.joueurs.filter(j => j.derniere_vue && Date.now()-Date.parse(j.derniere_vue) < 120000);
+  const tri = A.tri || {cle:"derniere_vue", sens:-1}, triC = A.triCartes || {cle:"jouee", sens:-1};
+  const th = (cle, l, quoi) => { const t = quoi==="c" ? triC : tri; return `<th><button type="button" class="tri ${t.cle===cle ? "actif" : ""}" data-act="stats-tri${quoi==="c" ? "-c" : ""}" data-id="${cle}">${l}${t.cle===cle ? (t.sens>0 ? " ▲" : " ▼") : ""}</button></th>`; };
+  const joueurs = trier(A.joueurs.map(j => ({...j, nom:nomJoueur(j), taux:j.parties ? j.victoires/j.parties : null})), tri.cle, tri.sens);
+  const facs = Object.keys(FACTIONS);
+  const hs = Object.fromEntries((A.heros.heros || []).map(x => [x.heros, x]));
+  const duel = (a, b) => (A.heros.duels || []).find(d => d.heros===a && d.contre===b);
+  const couleurTaux = t => t==null ? "" : t>=0.6 ? "taux-haut" : t<=0.4 ? "taux-bas" : "";
+  const facFiltre = A.facCartes || "toutes";
+  const cartes = trier(A.cartes.filter(c => CARTES[c.carte] && (facFiltre==="toutes" || CARTES[c.carte].faction===facFiltre))
+    .map(c => ({...c, nom:CARTES[c.carte].nom, rarete:CARTES[c.carte].rarete, prix:CARTES[c.carte].prix, taux:c.parties ? c.victoires/c.parties : null})), triC.cle, triC.sens);
+  return `<div class="adm-page adm-stats">
+    <div class="adm-actions" style="margin-top:0;align-items:center">
+      <label class="champ" style="flex-direction:row;align-items:center;gap:8px"><span>Période</span><select data-stats="jours">${[[7,"7 derniers jours"],[30,"30 derniers jours"],[365,"12 derniers mois"]].map(([v,l]) => `<option value="${v}" ${A.jours==v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+      <button type="button" class="btn second" data-act="stats-rafraichir">Actualiser</button>
+      <span class="aide">Mis à jour ${ilYa(new Date(A.quand).toISOString())}. Actualisation automatique toutes les 30 secondes.</span>
+    </div>
+    <h2>Résumé</h2>
+    <div class="tuiles">
+      <div class="tuile"><b>${nf(r.en_ligne)}</b><span>en ligne maintenant</span></div>
+      <div class="tuile"><b>${nf(r.joueurs)}</b><span>joueurs, dont ${nf(r.comptes)} avec un compte</span></div>
+      <div class="tuile"><b>${nf(r.actifs_7j)}</b><span>actifs sur 7 jours</span></div>
+      <div class="tuile"><b>${nf(r.parties_24h)}</b><span>parties sur 24 h (${nf(r.parties_7j)} sur 7 j)</span></div>
+      <div class="tuile"><b>${nf(r.parties_ia)} / ${nf(r.parties_en_ligne)}</b><span>parties contre l’ordinateur / en ligne</span></div>
+      <div class="tuile"><b>${r.tours_moyens!=null ? Number(r.tours_moyens).toLocaleString("fr-FR") : "–"}</b><span>tours par partie, ${r.duree_moyenne_s ? Math.round(r.duree_moyenne_s/60) + " min" : "–"} en moyenne</span></div>
+    </div>
+    <h2>En ligne maintenant</h2>
+    ${enLigneMaint.length ? `<ul class="liste-en-ligne">${enLigneMaint.map(j => `<li><span class="point-vert" aria-hidden="true"></span><b>${esc(nomJoueur(j))}</b><span>${esc(NOMS_ECRANS[j.ecran] || j.ecran || "?")}</span><span class="aide">${ilYa(j.derniere_vue)}</span></li>`).join("")}</ul>` : `<p class="aide">Personne n’est connecté en ce moment.</p>`}
+    <h2>Héros</h2>
+    <div class="tableau-defile"><table class="tableau"><thead><tr><th>Héros</th><th>Parties</th><th>Victoires</th><th>Taux</th><th>Tours moyens</th></tr></thead><tbody>
+      ${facs.map(k => { const x = hs[k] || {parties:0, victoires:0}; const t = x.parties ? x.victoires/x.parties : null;
+        return `<tr><td><span class="pastille f-${k}"></span> ${esc(heroDe({heros:k}).nom)}</td><td>${nf(x.parties)}</td><td>${nf(x.victoires)}</td><td class="${couleurTaux(t)}">${pct(x.victoires, x.parties)}</td><td>${x.tours!=null ? Number(x.tours).toLocaleString("fr-FR") : "–"}</td></tr>`; }).join("")}
+    </tbody></table></div>
+    <h3>Duels (taux de victoire du héros en ligne contre celui en colonne)</h3>
+    <div class="tableau-defile"><table class="tableau duels"><thead><tr><th></th>${facs.map(k => `<th>${esc(heroDe({heros:k}).nom)}</th>`).join("")}</tr></thead><tbody>
+      ${facs.map(a => `<tr><th>${esc(heroDe({heros:a}).nom)}</th>${facs.map(b => { const d = duel(a, b); const t = d && d.parties ? d.victoires/d.parties : null;
+        return `<td class="${couleurTaux(t)}">${d ? `${pct(d.victoires, d.parties)} <span class="aide">(${d.parties})</span>` : "–"}</td>`; }).join("")}</tr>`).join("")}
+    </tbody></table></div>
+    <h2>Cartes</h2>
+    <p class="aide">« % de victoire » : parmi les parties où un joueur a joué cette carte, la part qu’il a gagnées. Vers 50 %, la carte est équilibrée. Au-dessus de 60 % (en rouge), elle est peut-être trop forte ; sous 40 % (en bleu), trop faible. Méfiez-vous des cartes jouées dans moins de 20 parties.</p>
+    <div class="adm-actions" style="margin-top:0"><select data-stats="fac"><option value="toutes">Toutes les factions</option>${facs.map(k => `<option value="${k}" ${facFiltre===k ? "selected" : ""}>${esc(FACTIONS[k].nom)}</option>`).join("")}</select></div>
+    <div class="tableau-defile"><table class="tableau"><thead><tr>${th("nom","Carte","c")}${th("rarete","Rareté","c")}${th("prix","Prix","c")}${th("jouee","Jouée","c")}${th("achetee","Achetée","c")}${th("parties","Parties","c")}${th("taux","% de victoire","c")}</tr></thead><tbody>
+      ${cartes.map(c => `<tr><td><span class="pastille f-${CARTES[c.carte].faction || "neutre"}"></span> ${esc(c.nom)}</td><td>${NOMS_RARETE[c.rarete] || "–"}</td><td>${c.prix ?? "–"}</td><td>${nf(c.jouee)}</td><td>${nf(c.achetee)}</td><td>${nf(c.parties)}</td><td class="${c.parties>=20 ? couleurTaux(c.taux) : ""}">${c.taux==null ? "–" : Math.round(c.taux*100) + " %"}</td></tr>`).join("")}
+    </tbody></table></div>
+    <h2>Joueurs</h2>
+    <div class="tableau-defile"><table class="tableau"><thead><tr>${th("nom","Joueur")}${th("email","Compte")}${th("cree","Inscrit")}${th("derniere_vue","Dernière visite")}${th("ecran","Écran")}${th("parties","Parties")}${th("taux","Victoires")}${th("cartes","Cartes")}${th("pieces_or","Or")}</tr></thead><tbody>
+      ${joueurs.map(j => `<tr><td>${esc(j.nom)}</td><td>${j.email ? esc(j.email) : `<span class="aide">invité</span>`}</td><td>${j.cree ? new Date(j.cree).toLocaleDateString("fr-FR") : "–"}</td><td>${ilYa(j.derniere_vue)}</td><td>${esc(NOMS_ECRANS[j.ecran] || j.ecran || "–")}</td><td>${nf(j.parties)}</td><td>${nf(j.victoires)} (${pct(j.victoires, j.parties)})</td><td>${nf(j.cartes)}</td><td>${nf(j.pieces_or)}</td></tr>`).join("")}
+    </tbody></table></div>
+  </div>`;
+}
+setInterval(() => { if(ui.ecran==="admin" && adm.onglet==="stats" && PROG.pret && !document.hidden) chargerAdminStats(); }, 30000);
+document.addEventListener("change", e => {
+  const k = e.target.dataset && e.target.dataset.stats;
+  if(!k || !PROG.adminStats) return;
+  if(k==="jours"){ PROG.adminStats.jours = Number(e.target.value); chargerAdminStats(); }
+  if(k==="fac"){ PROG.adminStats.facCartes = e.target.value; renderAdmin(); }
+});
 
 chargerConfig();
 render();

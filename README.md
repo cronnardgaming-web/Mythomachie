@@ -60,6 +60,13 @@ Exécutez `supabase-images.sql` une fois dans Supabase, après `supabase-admin.s
 du site (cartes et portraits des héros) y sont stockées en deux versions : haute définition pour la grande vue,
 légère pour les parties. `config.json` ne contient alors que leurs adresses.
 
+## Statistiques, pseudos et trophées
+
+Exécutez `supabase-stats.sql` une fois dans Supabase, après `supabase-admin.sql`. Il ajoute le pseudo des joueurs,
+la présence (qui est en ligne, sur quel écran), l’historique des parties et les statistiques. Les joueurs
+retrouvent leurs chiffres et leurs trophées dans « Mon profil » ; l’administrateur dispose de l’onglet
+« Statistiques » de l’administration (joueurs, héros, duels, cartes).
+
 ## Sécurité
 
 Le dépôt est public : n’y mettez jamais de mot de passe ni la clé « service_role » de Supabase.
