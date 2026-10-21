@@ -182,6 +182,22 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 .adm-illu{display:block;width:100%;max-width:220px;aspect-ratio:7/9;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
 @media (max-width:980px){.adm-cartes{grid-template-columns:1fr}.adm-apercu{position:static}}
 
+/* Héros et pouvoir */
+.heros{--fc:var(--neutre);display:flex;align-items:center;gap:10px;background:var(--table-2);border-radius:12px;padding:6px 12px 6px 6px;border-left:5px solid var(--fc)}
+.heros-sym{width:40px;height:40px;border-radius:50%;background:var(--fc);color:var(--fci);display:grid;place-items:center;font-size:22px;flex:none}
+.heros-txt{display:flex;flex-direction:column;line-height:1.2}
+.heros-txt b{font-family:Cinzel,"Times New Roman",serif;font-size:16px}
+.heros-txt span{font-size:13px;color:var(--ink-2)}
+.pouvoir{display:flex;flex-direction:column;gap:3px;min-width:120px;cursor:help;font-size:13px;color:var(--ink-2)}
+.pouvoir .pouvoir-nom{font-weight:700;color:var(--ink)}
+.pouvoir .barre{height:6px;margin:0}
+.pouvoir.pret .barre span{background:var(--bronze)}
+.pouvoir.pret .pouvoir-etat{color:var(--bronze);font-weight:700}
+.btn-pouvoir{padding:8px 14px;animation:luire 1.6s ease-in-out infinite}
+@keyframes luire{50%{box-shadow:0 0 0 4px rgba(217,163,90,.45)}}
+.res.puissance{cursor:help}
+@media (prefers-reduced-motion: reduce){.btn-pouvoir{animation:none}}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -334,12 +350,18 @@ if(!window.claude) document.title = NOM_JEU;
    et enregistre la version modifiée dans ce navigateur.
    ============================================================ */
 const DEFAUT = {
-  version:2,
-  regles:{pvDepart:30, mainDepart:5, piocheParTour:5, tailleMarche:5, plateauMax:7,
+  version:3,
+  regles:{pvDepart:40, seuilPouvoir:10, mainDepart:5, piocheParTour:5, tailleMarche:5, plateauMax:7,
           tailleDeck:30, copiesMax:2, copiesLegendaire:1, carteBase:"pierre",
           deckDepart:{piece:7, rubis:1, dague:1, epee:1}},
   mots:{provocation:"Provocation", rapidite:"Rapidité", resistance:"Résistance", ethere:"Ethéré"},
   termes:{conjuration:"Conjuration", echo:"Echo", allie:"Allié", sacrifice:"Sacrifice"},
+  heros:{
+    egy:{nom:"Atoum", titre:"Dieu primordial égyptien", pouvoir:{nom:"Souffle de vie", effet:{soin:8, renfort:{atk:0, vie:2}}}},
+    hin:{nom:"Brahma", titre:"Dieu créateur hindou", pouvoir:{nom:"Abondance", effet:{or:6, pioche:2}}},
+    nor:{nom:"Ymir", titre:"Géant primordial nordique", pouvoir:{nom:"Colère du géant", effet:{combat:8}}},
+    gre:{nom:"Chaos", titre:"Abîme primordial grec", pouvoir:{nom:"Abîme originel", effet:{pioche:3, bannir:1}}}
+  },
   factions:{
     egy:{nom:"Égyptiens", f:"égyptienne", m:"égyptien", sym:"☥", couleur:"#d4a017"},
     hin:{nom:"Hindous", f:"hindoue", m:"hindou", sym:"✿", couleur:"#c8402a"},
@@ -491,7 +513,7 @@ const DEFAUT = {
 };
 const CLE_STOCKAGE = "prototype-combat-config-v1";
 const copie = o => JSON.parse(JSON.stringify(o));
-let CONFIG, CARTES, FACTIONS, MOTS, TERMES, REGLES;
+let CONFIG, CARTES, FACTIONS, MOTS, TERMES, REGLES, HEROS;
 
 function fusionner(obj){
   const d = copie(DEFAUT);
@@ -505,8 +527,11 @@ function fusionner(obj){
       else if(cartesFinales[k] && c.image) cartesFinales[k].image = c.image;
     }
   }
-  return {version:d.version, exporte:obj.exporte || 0, cartes:cartesFinales, factions:obj.factions,
-          regles:{...d.regles, ...(obj.regles||{}), deckDepart:{...((obj.regles && obj.regles.deckDepart) || d.regles.deckDepart)}},
+  const reglesObj = {...d.regles, ...(obj.regles||{})};
+  // Version 3 : arrivée des héros, 40 points de vie
+  if((obj.version || 1) < 3){ if(reglesObj.pvDepart===30) reglesObj.pvDepart = 40; reglesObj.seuilPouvoir = reglesObj.seuilPouvoir || 10; }
+  return {version:d.version, exporte:obj.exporte || 0, cartes:cartesFinales, factions:obj.factions, heros:{...d.heros, ...(obj.heros||{})},
+          regles:{...reglesObj, deckDepart:{...((obj.regles && obj.regles.deckDepart) || d.regles.deckDepart)}},
           mots:{...d.mots, ...(obj.mots||{})}, termes:{...d.termes, ...(obj.termes||{})}};
 }
 function chargerConfig(){
@@ -525,7 +550,7 @@ function encre(hex){
 }
 function appliquerConfig(cfg){
   const c = cfg || CONFIG;
-  CARTES = c.cartes; FACTIONS = c.factions; MOTS = c.mots; TERMES = c.termes; REGLES = c.regles;
+  CARTES = c.cartes; FACTIONS = c.factions; MOTS = c.mots; TERMES = c.termes; REGLES = c.regles; HEROS = c.heros || {};
   const css = Object.entries(FACTIONS).map(([k,f]) => `.f-${k}{--fc:${f.couleur};--fci:${encre(f.couleur)}}`).join("\n");
   const el = document.getElementById("styles-factions");
   if(el) el.textContent = css;
@@ -537,14 +562,14 @@ function appliquerConfig(cfg){
 function decrire(e){
   const p = [];
   if(e.or) p.push(`+${e.or} or`);
-  if(e.combat) p.push(`+${e.combat} combat`);
+  if(e.combat) p.push(`+${e.combat} puissance`);
   if(e.soin) p.push(`+${e.soin} soin`);
   if(e.pioche) p.push(`piochez ${e.pioche} carte${e.pioche>1?"s":""}`);
   if(e.bannir) p.push(`bannissez ${e.bannir} carte de votre main ou défausse`);
   if(e.degatsTous) p.push(`${e.degatsTous} dégâts à chaque créature adverse`);
   if(e.degatsHasard) p.push(`${e.degatsHasard} dégâts à une créature adverse au hasard`);
   if(e.renfort) p.push(`vos créatures gagnent +${e.renfort.atk}/+${e.renfort.vie}`);
-  if(e.invoque) p.push(`invoque ${e.invoque.n} ${CARTES[e.invoque.id] ? CARTES[e.invoque.id].nom : "?"}`);
+  if(e.invoque && e.invoque.id && e.invoque.n) p.push(`invoque ${e.invoque.n} ${CARTES[e.invoque.id] ? CARTES[e.invoque.id].nom : "?"}`);
   const s = p.join(", ");
   if(!s) return "Aucun effet.";
   return s.charAt(0).toUpperCase() + s.slice(1) + ".";
@@ -608,14 +633,36 @@ function nouvellePartie(mode, decks){
   S = {mode, joueurs:[nouveauJoueur("Joueur 1"), nouveauJoueur(mode==="ia" ? "Ordinateur" : "Joueur 2")],
        courant: Math.random()<0.5 ? 0 : 1, tour:1, journal:[], vainqueur:null,
        marcheDeck:[], marche:[], bannirEnAttente:0};
-  const listes = decks && decks[0] && decks[1] ? [...decks[0], ...decks[1]] : [...deckConstruit(), ...deckConstruit()];
-  S.marcheDeck = melange(listes.filter(id => CARTES[id]).map(inst));
+  const listesJ = decks && decks[0] && decks[1] ? [decks[0], decks[1]] : [deckConstruit(), deckConstruit()];
+  S.marcheDeck = melange([...listesJ[0], ...listesJ[1]].filter(id => CARTES[id]).map(inst));
+  S.joueurs.forEach((j, k) => { j.heros = choisirHeros(listesJ[k]); j.morts = 0; });
   S.idPartie = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   S.stats = [0, 1].map(() => ({creatures:0, sorts:0, achats:0, degats:0}));
   for(let i=0;i<REGLES.tailleMarche && S.marcheDeck.length;i++) S.marche.push(S.marcheDeck.pop());
   S.joueurs.forEach(j => piocher(j, REGLES.mainDepart, true));
   S.joueurs[S.courant].plateau.forEach(c => c.peutAttaquer = true);
   log(`${S.joueurs[S.courant].nom} commence.`);
+}
+
+// Héros : le dieu primordial du panthéon le plus représenté dans le deck (égalité : au hasard)
+const HEROS_DEFAUT = {nom:"Héros", titre:"", pouvoir:{nom:"Pouvoir", effet:{combat:6}}};
+const heroDe = j => (j && j.heros && HEROS[j.heros]) || HEROS_DEFAUT;
+function choisirHeros(ids){
+  const n = {};
+  (ids || []).forEach(id => { const f = CARTES[id] && CARTES[id].faction; if(f && FACTIONS[f]) n[f] = (n[f] || 0) + 1; });
+  const max = Math.max(0, ...Object.values(n));
+  const egaux = Object.keys(n).filter(f => n[f]===max);
+  return egaux.length ? egaux[Math.floor(Math.random()*egaux.length)] : Object.keys(FACTIONS)[0];
+}
+const pouvoirPret = j => (j.morts || 0) >= (REGLES.seuilPouvoir || 10);
+function activerPouvoir(){
+  const i = S.courant, j = S.joueurs[i], h = heroDe(j);
+  if(!pouvoirPret(j)) return erreur(`Le pouvoir de ${h.nom} se charge : ${j.morts || 0} créatures ennemies détruites sur ${REGLES.seuilPouvoir}.`);
+  j.morts = 0;
+  log(`${h.nom} déchaîne ${h.pouvoir.nom} (${decrire(h.pouvoir.effet || {})})`);
+  appliquer(i, h.pouvoir.effet || {});
+  verifierVictoire();
+  return true;
 }
 
 function piocher(j, n, silencieux){
@@ -695,6 +742,7 @@ function nettoyer(){
       if(!d.jeton) j.defausse.push({uid:c.uid, id:c.id});
       if(c.arme) j.defausse.push({uid:c.arme.uid, id:c.arme.id});
       log(`${d.nom} est détruit${d.jeton ? "e" : ""}.`);
+      const ennemi = S.joueurs[1-idx]; if(ennemi) ennemi.morts = (ennemi.morts || 0) + 1;
       if(d.echo){ log(`Echo de ${d.nom}.`); appliquer(idx, d.echo); }
     });
   });
@@ -848,19 +896,21 @@ function utiliserCombat(cible){
   const t = cibles(i);
   if(cible==="face"){
     if(!t.face) return erreur(raisonRefus(i,"face"));
-    log(`${j.nom} inflige ${j.combat} dégâts à ${opp.nom}.`);
+    log(`${heroDe(j).nom} inflige ${j.combat} dégâts à ${opp.nom}.`);
     if(S.stats && S.stats[i]) S.stats[i].degats += j.combat;
     opp.pv -= j.combat; j.combat = 0;
   } else {
     if(!t.creatures.has(cible)) return erreur(raisonRefus(i,cible));
     const v = opp.plateau.find(x => x.uid===cible);
+    const riposte = atkTotal(v);
+    if(riposte > 0){ j.pv -= riposte; log(`${heroDe(j).nom} subit ${riposte} dégâts de riposte de ${def(v).nom}.`); }
     if(v.bouclier){
       v.bouclier = false; j.combat -= 1;
-      log(`${j.nom} brise la Résistance de ${def(v).nom} (1 combat).`);
+      log(`${heroDe(j).nom} brise la Résistance de ${def(v).nom} (1 puissance).`);
     } else {
       const n = Math.min(j.combat, vieRestante(v));
       v.deg += n; j.combat -= n;
-      log(`${j.nom} inflige ${n} dégâts à ${def(v).nom}.`);
+      log(`${heroDe(j).nom} inflige ${n} dégâts à ${def(v).nom}.`);
     }
   }
   nettoyer(); verifierVictoire();
@@ -901,6 +951,7 @@ async function tourIAInterne(partie){
   ui.aiEnCours = true; render();
   await pauseIA(700);
   const i = S.courant, j = S.joueurs[i];
+  if(pouvoirPret(j)){ activerPouvoir(); if(S.bannirEnAttente>0) iaBannir(j); render(); await pauseIA(600); }
   let progres = true;
   while(progres && S.vainqueur===null){
     progres = false;
@@ -943,7 +994,7 @@ async function tourIAInterne(partie){
     const t = cibles(i);
     if(t.face) utiliserCombat("face");
     else {
-      const cand = adversaire(i).plateau.filter(v => t.creatures.has(v.uid)).sort((a,b) => vieRestante(a)-vieRestante(b));
+      const cand = adversaire(i).plateau.filter(v => t.creatures.has(v.uid) && atkTotal(v) < j.pv).sort((a,b) => vieRestante(a)-vieRestante(b));
       if(!cand.length) break;
       utiliserCombat(cand[0].uid);
     }
@@ -974,7 +1025,8 @@ const nomAffiche = j => !enLigne() ? j.nom : (j===S.joueurs[vue()] ? "Vous" : "A
 
 const NOMS_RARETE = {commune:"Commune", rare:"Rare", epique:"Épique", legendaire:"Légendaire"};
 const TEXTES_AIDE = {
-  provocation:"Les attaques et le combat adverses doivent viser cette créature avant les autres.",
+  provocation:"Les créatures et le héros adverses doivent viser cette créature avant les autres.",
+  puissance:"Les points d’attaque de votre héros pour ce tour. Il frappe l’adversaire, ou une créature : il subit alors la riposte de celle-ci.",
   rapidite:"Peut attaquer dès le tour où elle est posée.",
   resistance:"Ignore entièrement les premiers dégâts subis, puis disparaît.",
   ethere:"Ne peut pas être visée tant qu’elle n’a pas attaqué. Elle ne protège pas son joueur.",
@@ -987,11 +1039,11 @@ const TEXTES_AIDE = {
 function avecAides(txt){
   const termes = [...Object.entries(MOTS), ...Object.entries(TERMES)].filter(([k,l]) => l && TEXTES_AIDE[k]).sort((a,b) => b[1].length-a[1].length);
   const echap = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const motif = new RegExp(`(?<!\\p{L})(${[...termes.map(([,l]) => echap(l)), "bannissez"].join("|")})(?!\\p{L})`, "giu");
+  const motif = new RegExp(`(?<!\\p{L})(${[...termes.map(([,l]) => echap(l)), "bannissez", "puissance"].join("|")})(?!\\p{L})`, "giu");
   return txt.replace(motif, m => {
     const t = termes.find(([,l]) => l.toLowerCase()===m.toLowerCase());
-    const k = t ? t[0] : "bannir";
-    return `<span class="aide-mot" data-aide="${k}" data-titre="${esc(t ? t[1] : "Bannir")}">${m}</span>`;
+    const k = t ? t[0] : (m.toLowerCase()==="puissance" ? "puissance" : "bannir");
+    return `<span class="aide-mot" data-aide="${k}" data-titre="${esc(t ? t[1] : k==="puissance" ? "Puissance" : "Bannir")}">${m}</span>`;
   });
 }
 function htmlCarte(c, o={}){
@@ -1045,11 +1097,25 @@ function consigne(inter, moi){
     const c = moi.plateau.find(x => x.uid===ui.attaquant);
     return `Choisissez la cible de ${c ? def(c).nom : "votre créature"} (contour vert). <button type="button" data-act="annuler">Annuler</button>`;
   }
-  if(moi.combat>0) return "Cliquez sur une cible au contour vert pour y dépenser vos points de combat.";
+  if(moi.combat>0) return `Cliquez sur une cible au contour vert pour que ${heroDe(moi).nom} l’attaque avec votre puissance (une créature riposte).`;
   if(moi.main.length) return "Cliquez sur vos cartes pour les jouer, achetez au marché, puis finissez le tour.";
   return "Achetez au marché, attaquez avec vos créatures, puis finissez le tour.";
 }
 
+function htmlHeros(j, estMoi, inter){
+  const h = heroDe(j), seuil = REGLES.seuilPouvoir || 10, m = Math.min(j.morts || 0, seuil), pret = pouvoirPret(j);
+  const effet = decrire((h.pouvoir && h.pouvoir.effet) || {});
+  return `<div class="heros f-${j.heros || "neutre"}">
+    <span class="heros-sym" aria-hidden="true">${FACTIONS[j.heros] ? FACTIONS[j.heros].sym : "✦"}</span>
+    <span class="heros-txt"><b>${esc(h.nom)}</b><span>${esc(h.titre || "")}</span></span>
+    <span class="pouvoir ${pret ? "pret" : ""}" data-aide="carte" data-titre="${esc(h.pouvoir ? h.pouvoir.nom : "Pouvoir")}" data-texte="${esc(effet + ` Se charge quand ${seuil} créatures ennemies sont mortes.`)}">
+      <span class="pouvoir-nom">${esc(h.pouvoir ? h.pouvoir.nom : "Pouvoir")}</span>
+      <span class="barre"><span style="width:${100*m/seuil}%"></span></span>
+      <span class="pouvoir-etat">${pret ? "Prêt !" : `${m} / ${seuil}`}</span>
+    </span>
+    ${estMoi && pret && inter ? `<button type="button" class="btn btn-pouvoir" data-act="pouvoir">Activer</button>` : ""}
+  </div>`;
+}
 function render(){
   const app = document.getElementById("app");
   if(ui.ecran==="admin"){ renderAdmin(); return; }
@@ -1081,6 +1147,7 @@ function render(){
       <button type="button" class="portrait ${visee && t.face ? "cible" : ""}" data-act="face" aria-label="Viser ${lui.nom}">
         <span class="pnom">${nomAffiche(lui)}</span><span class="ppv">${lui.pv}</span><span class="plabel">points de vie</span>
       </button>
+      ${htmlHeros(lui, false, inter)}
       <div class="compteurs"><span>Main ${lui.main.length}</span><span>Deck ${lui.deck.length}</span><span>Défausse ${lui.defausse.length}</span></div>
     </div>
     <div class="rangee">${lui.plateau.map(c => htmlCrea(c, "enemy", visee && t.creatures.has(c.uid) ? "cible" : "")).join("") || vide("Aucune créature")}</div>
@@ -1099,7 +1166,8 @@ function render(){
     <div class="rangee">${moi.plateau.map(c => htmlCrea(c, "own", classesOwn(c))).join("") || vide("Vos créatures apparaîtront ici")}</div>
     <div class="bandeau">
       <div class="portrait"><span class="pnom">${nomAffiche(moi)}</span><span class="ppv">${moi.pv}</span><span class="plabel">points de vie</span></div>
-      <div class="ressources"><span class="res or"><b>${moi.or}</b>or</span><span class="res"><b>${moi.combat}</b>combat</span></div>
+      ${htmlHeros(moi, true, inter)}
+      <div class="ressources"><span class="res or"><b>${moi.or}</b>or</span><span class="res puissance" data-aide="puissance" data-titre="Puissance"><b>${moi.combat}</b>puissance</span></div>
       <div class="compteurs"><span>Deck ${moi.deck.length}</span><span>Défausse ${moi.defausse.length}</span><span>Bannies ${moi.bannies.length}</span></div>
       <div class="joues">${moi.joues.map(c => htmlJoue(c, inter)).join("")}</div>
       <button type="button" class="fin" data-act="fin" ${inter ? "" : "disabled"}>Finir le tour</button>
@@ -1116,9 +1184,10 @@ function renderCouche(){
   let h = "";
   const regles = `<details ${ui.regles ? "open" : ""}><summary>Règles en bref</summary><ul>
     <li>Chaque joueur a ${REGLES.pvDepart} points de vie et commence avec le même deck de départ. On pioche ${REGLES.piocheParTour} cartes par tour.</li>
-    <li>Jouer une carte est gratuit : elle donne de l’or, du combat, du soin ou pose une créature.</li>
+    <li>Jouer une carte est gratuit : elle donne de l’or, de la puissance, du soin ou pose une créature.</li>
     <li>L’or sert à acheter au marché commun. Une carte achetée arrive dans votre défausse.</li>
-    <li>Le combat et vos créatures frappent l’adversaire. Il faut d’abord détruire toutes ses créatures visibles ; celles avec Provocation passent en premier.</li>
+    <li>Votre héros frappe avec la puissance du tour, vos créatures avec leur attaque. Il faut d’abord détruire toutes les créatures visibles adverses ; celles avec Provocation passent en premier. Un héros qui attaque une créature subit sa riposte.</li>
+    <li>Votre héros est le dieu primordial du panthéon le plus présent dans votre deck. Son pouvoir se charge quand ${REGLES.seuilPouvoir} créatures ennemies sont mortes.</li>
     <li>Allié : bonus si une autre carte de la même faction a été jouée ce tour.</li>
     <li>En fin de tour, main et cartes jouées partent à la défausse. Deck vide : la défausse est remélangée.</li></ul></details>`;
   if(!S){
@@ -1218,7 +1287,7 @@ function listeCartes(ids){
   return html;
 }
 const RARETES = [["commune","Commune"],["rare","Rare"],["epique","Épique"],["legendaire","Légendaire"]];
-const EFFETS = [["or","Or"],["combat","Combat"],["soin","Soin"],["pioche","Cartes piochées"],["bannir","Cartes à bannir"],
+const EFFETS = [["or","Or"],["combat","Puissance"],["soin","Soin"],["pioche","Cartes piochées"],["bannir","Cartes à bannir"],
                 ["degatsTous","Dégâts à chaque créature adverse"],["degatsHasard","Dégâts à une créature adverse au hasard"]];
 const BLOCS = {
   effet:"Effet quand on la joue",
@@ -1246,14 +1315,14 @@ function renderAdmin(){
     cle = actif.dataset.chemin ? `[data-chemin="${actif.dataset.chemin}"]` : actif.dataset.adm ? `[data-adm="${actif.dataset.adm}"]` : null;
     try { pos = actif.selectionStart; } catch(e) { pos = null; }
   }
-  const pages = {cartes:admCartes, regles:admRegles, factions:admFactions, donnees:admDonnees, serveur:admServeur};
+  const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur};
   app.innerHTML = `
   <header class="entete">
     <h1>Administration</h1>
     <span class="mode">Enregistré automatiquement dans ce navigateur. Les changements s’appliquent à la prochaine partie.${window.claude ? "" : " Pour les partager avec vos joueurs, utilisez Sauvegarde, puis Télécharger config.json."}</span>
     <button type="button" class="btn-discret" data-act="admin-quitter" style="margin-left:auto">Retour au jeu</button>
   </header>
-  <nav class="onglets" role="tablist">${[["cartes","Cartes"],["regles","Règles"],["factions","Factions"],["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"]] : [])].map(([k,l]) =>
+  <nav class="onglets" role="tablist">${[["cartes","Cartes"],["regles","Règles"],["heros","Héros"],["factions","Factions"],["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"]] : [])].map(([k,l]) =>
     `<button type="button" role="tab" class="onglet" aria-selected="${adm.onglet===k}" data-act="onglet" data-id="${k}">${l}</button>`).join("")}</nav>
   ${pages[adm.onglet]()}`;
   document.getElementById("couche").innerHTML = "";
@@ -1356,6 +1425,7 @@ function admRegles(){
       ${champNombre("Cartes en main au début", p+".mainDepart", r.mainDepart)}
       ${champNombre("Cartes piochées par tour", p+".piocheParTour", r.piocheParTour)}
       ${champNombre("Créatures max sur le plateau", p+".plateauMax", r.plateauMax)}
+      ${champNombre("Créatures ennemies à détruire pour charger le pouvoir du héros", p+".seuilPouvoir", r.seuilPouvoir || 10)}
     </div>
     <h2>Marché et decks</h2>
     <div class="champs">
@@ -1377,6 +1447,30 @@ function admRegles(){
   </div>`;
 }
 
+function admHeros(){
+  return `<div class="adm-page"><h2>Héros</h2>
+    <p class="aide">Chaque joueur reçoit le héros du panthéon le plus représenté dans son deck (en cas d’égalité, au hasard). Le pouvoir se charge quand ${REGLES.seuilPouvoir || 10} créatures ennemies sont mortes (réglable dans l’onglet Règles), puis se recharge après chaque utilisation.</p>
+    ${Object.entries(FACTIONS).map(([k,f]) => {
+      if(!CONFIG.heros) CONFIG.heros = {};
+      if(!CONFIG.heros[k]) CONFIG.heros[k] = copie(HEROS_DEFAUT);
+      const hr = CONFIG.heros[k], e = (hr.pouvoir && hr.pouvoir.effet) || {}, pc = `heros.${k}.pouvoir.effet`;
+      const creatures = Object.entries(CARTES).filter(([,c]) => c.type==="creature").map(([id,c]) => [id,c.nom]);
+      return `<fieldset class="f-${k}"><legend><span class="pastille"></span>${esc(f.nom)}</legend>
+        <div class="champs">
+          ${champTexte("Nom du héros", `heros.${k}.nom`, hr.nom)}
+          ${champTexte("Titre", `heros.${k}.titre`, hr.titre || "")}
+          ${champTexte("Nom du pouvoir", `heros.${k}.pouvoir.nom`, hr.pouvoir ? hr.pouvoir.nom : "")}
+        </div>
+        <p class="effet-resume" style="margin-top:12px">Pouvoir : ${esc(decrire(e))}</p>
+        <div class="champs petits">
+          ${EFFETS.map(([c,l]) => champNombre(l, `${pc}.${c}`, e[c] || 0)).join("")}
+          ${champNombre("Renfort : attaque", `${pc}.renfort.atk`, e.renfort ? e.renfort.atk : 0)}
+          ${champNombre("Renfort : vie", `${pc}.renfort.vie`, e.renfort ? e.renfort.vie : 0)}
+          ${champSelect("Invoquer", `${pc}.invoque.id`, e.invoque ? e.invoque.id : "", [["","Rien"], ...creatures])}
+          ${champNombre("Nombre invoqué", `${pc}.invoque.n`, e.invoque ? e.invoque.n : 0)}
+        </div></fieldset>`;
+    }).join("")}</div>`;
+}
 function admFactions(){
   return `<div class="adm-page"><h2>Factions</h2>
     ${Object.entries(FACTIONS).map(([k,f]) => {
@@ -1452,6 +1546,11 @@ function majChemin(chemin, brut, nombre){
     let v = brut;
     if(nombre){ v = Math.max(0, Math.floor(Number(brut))); if(!Number.isFinite(v)) v = 0; }
     o[k] = v;
+    if(parts[0]==="heros" && CONFIG.heros[parts[1]] && CONFIG.heros[parts[1]].pouvoir){
+      const pv = CONFIG.heros[parts[1]].pouvoir;
+      if(parts.at(-2)==="invoque" && k==="id" && v && !o.n) o.n = 1;
+      nettoyerCarte(pv); if(!pv.effet) pv.effet = {};
+    }
     if(parts[0]==="cartes"){
       const c = CARTES[parts[1]];
       if(k==="faction" && !v) delete c.faction;
@@ -1520,6 +1619,8 @@ function actionAdmin(act, id, el){
     case "faction-nouvelle": {
       const nid = idUnique("fac");
       FACTIONS[nid] = {nom:"Nouvelle faction", f:"nouvelle", m:"nouveau", sym:"✦", couleur:"#7a5c99"};
+      if(!CONFIG.heros) CONFIG.heros = {};
+      CONFIG.heros[nid] = copie(HEROS_DEFAUT);
       sauver(); appliquerConfig(); break;
     }
     case "faction-suppr":
@@ -1771,7 +1872,7 @@ const refPrive = () => EN.db.doc(`data/users/${EN.hoteId}/parties/${EN.code}`);
 function configPublique(){
   const cartes = copie(CONFIG.cartes);
   Object.values(cartes).forEach(c => { if(c.image && !estServeur(c.image)) delete c.image; });
-  return {cartes, factions:CONFIG.factions, mots:CONFIG.mots, termes:CONFIG.termes, regles:CONFIG.regles};
+  return {cartes, factions:CONFIG.factions, heros:CONFIG.heros, mots:CONFIG.mots, termes:CONFIG.termes, regles:CONFIG.regles};
 }
 // Ce que l’invité a le droit de voir : pas la main de l’hôte, pas l’ordre des decks
 function vuePublique(){
@@ -1873,6 +1974,7 @@ function executerOrdre(o){
       case "bannir": bannir(c.id); break;
       case "bannirStop": S.bannirEnAttente = 0; break;
       case "fin": finTour(); break;
+      case "pouvoir": activerPouvoir(); break;
     }
   } finally { EN.capture = false; }
   if(EN.refusCapture) S.refus = {seq:o.seq, msg:EN.refusCapture};
@@ -1939,7 +2041,7 @@ function envoyer(cmd){
 }
 
 // Les actions passent par le moteur local, ou partent chez l’hôte pour l’invité
-const MOTEUR_LOCAL = {jouer, attaquer, utiliserCombat, acheter, sacrifier, bannir, finTour, bannirStop:() => { S.bannirEnAttente = 0; }};
+const MOTEUR_LOCAL = {jouer, attaquer, utiliserCombat, acheter, sacrifier, bannir, finTour, activerPouvoir, bannirStop:() => { S.bannirEnAttente = 0; }};
 const MOTEUR_DISTANT = {
   jouer:(id, opts={}) => envoyer({type:"jouer", id, opts}),
   attaquer:(att, cible) => envoyer({type:"attaquer", att, cible}),
@@ -1948,7 +2050,8 @@ const MOTEUR_DISTANT = {
   sacrifier:id => envoyer({type:"sacrifier", id}),
   bannir:id => envoyer({type:"bannir", id}),
   bannirStop:() => envoyer({type:"bannirStop"}),
-  finTour:() => envoyer({type:"fin"})
+  finTour:() => envoyer({type:"fin"}),
+  activerPouvoir:() => envoyer({type:"pouvoir"})
 };
 const M = () => enLigne() && EN.role==="invite" ? MOTEUR_DISTANT : MOTEUR_LOCAL;
 
@@ -2095,7 +2198,7 @@ document.addEventListener("click", e => {
         if(cible==="face" ? !t.face : !t.creatures.has(cible)) erreur(raisonRefus(S.courant, cible));
         else M().utiliserCombat(cible);
       }
-      else erreur("Sélectionnez une de vos créatures prêtes, ou gagnez du combat avec vos cartes.");
+      else erreur("Sélectionnez une de vos créatures prêtes, ou gagnez de la puissance avec vos cartes pour que votre héros attaque.");
       break;
     }
     case "marche": {
@@ -2111,6 +2214,7 @@ document.addEventListener("click", e => {
       break;
     }
     case "sac": M().sacrifier(id); break;
+    case "pouvoir": M().activerPouvoir(); break;
     case "fin":
       ui.attaquant = null; ui.armeEnAttente = null;
       M().finTour();
