@@ -53,6 +53,13 @@ Exécutez `supabase-admin.sql` une fois dans Supabase. Ensuite, seul l’adminis
 de `config.json`. Pour ajouter ou retirer un administrateur, modifiez la table `admins` dans Supabase
 (Table Editor).
 
+## Images en haute définition
+
+Exécutez `supabase-images.sql` une fois dans Supabase, après `supabase-admin.sql`. Il crée le dossier public
+« images », où seul l’administrateur peut envoyer des fichiers. Les images ajoutées depuis l’administration
+du site (cartes et portraits des héros) y sont stockées en deux versions : haute définition pour la grande vue,
+légère pour les parties. `config.json` ne contient alors que leurs adresses.
+
 ## Sécurité
 
 Le dépôt est public : n’y mettez jamais de mot de passe ni la clé « service_role » de Supabase.

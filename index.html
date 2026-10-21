@@ -179,6 +179,7 @@ details.effet .champs{margin-top:10px}
 .adm-apercu{position:sticky;top:12px}
 .adm-apercu .carte{cursor:default}
 fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
+.heros-admin{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin:6px 0 14px}
 .adm-illu{display:block;width:100%;max-width:220px;aspect-ratio:7/9;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
 @media (max-width:980px){.adm-cartes{grid-template-columns:1fr}.adm-apercu{position:static}}
 
@@ -424,6 +425,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
 .medaillon .pv-ecu{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);min-width:46px;height:48px;padding:3px 7px 12px;display:grid;place-items:center;
   clip-path:polygon(0 0,100% 0,100% 62%,50% 100%,0 62%);background:linear-gradient(#e0705c,#9d2618);color:#fff;font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:21px;text-shadow:0 1px 1px rgba(0,0,0,.5)}
 .medaillon.pret .anneau{filter:drop-shadow(0 0 6px var(--or))}
+.medaillon .visage.portrait-heros{overflow:hidden;box-shadow:0 0 0 3px var(--fc),inset 0 0 0 3px rgba(0,0,0,.22),0 8px 22px var(--ombre)}
+.medaillon .visage.portrait-heros img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .medaillon.cible{cursor:pointer}
 .medaillon.cible .visage{box-shadow:0 0 0 4px var(--cible),0 0 26px var(--cible)}
 button.medaillon[data-act="pouvoir"]{cursor:pointer}
@@ -731,7 +734,11 @@ function sauvegarderAvantChangement(ancienne){
 }
 function lireSecours(){ try { return JSON.parse(localStorage.getItem(CLE_SECOURS)); } catch(e) { return null; } }
 function sauver(){
-  try { localStorage.setItem(CLE_STOCKAGE, JSON.stringify(CONFIG)); return true; } catch(e) { return false; }
+  try { localStorage.setItem(CLE_STOCKAGE, JSON.stringify(CONFIG)); return true; }
+  catch(e) {
+    // Seule une mémoire réellement pleine est signalée ; un stockage indisponible (navigation privée stricte) n’empêche pas de jouer
+    return !(e && (e.name==="QuotaExceededError" || e.name==="NS_ERROR_DOM_QUOTA_REACHED" || e.code===22));
+  }
 }
 function encre(hex){
   const n = parseInt((hex||"#888888").slice(1), 16);
@@ -1246,9 +1253,10 @@ function htmlCarte(c, o={}){
     : d.type==="arme"
       ? `<span class="atk" title="Bonus d’attaque">+${d.bonus}</span><span class="dur" title="Nombre d’attaques">${d.durabilite}</span>` : "";
   const act = o.act ? `data-act="${o.act}" data-id="${o.id ?? c.uid}"` : "";
+  const srcImg = (o.hd && d.imageHD) || d.image;
   return `<button type="button" class="carte f-${f} r-${d.rarete || "base"} ${o.classes || ""}" ${act} ${o.style ? `style="${o.style}"` : ""}>
     <span class="cadre">
-      <span class="art ${d.image ? "" : "sans-image"}" data-sym="${sym}">${d.image ? `<img class="illu" src="${d.image}" alt="">` : ""}<span class="nom-bande">${d.nom}</span>${lignes.length ? `<span class="texte">${texte}</span>` : ""}</span>
+      <span class="art ${srcImg ? "" : "sans-image"}" data-sym="${sym}">${srcImg ? `<img class="illu" src="${srcImg}" alt="" ${o.hd ? "" : `loading="lazy" decoding="async"`}>` : ""}<span class="nom-bande">${d.nom}</span>${lignes.length ? `<span class="texte">${texte}</span>` : ""}</span>
       <span class="pied" title="${typeLigne(d)}"><span aria-hidden="true">${sym}</span><span class="type">${d.depart ? "Départ" : d.base ? "Base" : d.jeton ? "Jeton" : {creature:"Créature", sort:"Sort", arme:"Arme"}[d.type]}</span>${NOMS_RARETE[d.rarete] && !d.depart && !d.base && !d.jeton ? `<span class="gemme" title="${NOMS_RARETE[d.rarete]}"></span>` : ""}</span>
       ${d.prix!=null && !d.depart ? `<span class="prix" title="Prix en or">${d.prix}</span>` : ""}
       ${stats}${o.extra || ""}
@@ -1302,7 +1310,7 @@ function htmlMedaillon(j, estMoi, inter, cible){
   const attrs = !estMoi ? `type="button" data-act="face" aria-label="Viser ${esc(h.nom)}, le héros adverse"` : activable ? `type="button" data-act="pouvoir" aria-label="Activer ${esc(pv.nom)}"` : "";
   return `<div class="medaillon-bloc ${estMoi ? "moi" : "adv"}">
     <${balise} ${attrs} class="medaillon f-${j.heros || "neutre"} ${pret ? "pret" : ""} ${cible ? "cible" : ""}" data-joueur="${idx}" style="--p:${(m/seuil).toFixed(3)}" data-aide="carte" data-titre="${esc(pv.nom)}" data-texte="${esc(aide)}">
-      <span class="anneau" aria-hidden="true"></span><span class="visage" aria-hidden="true">${sym}</span><span class="pv-ecu" title="Points de vie">${j.pv}</span>
+      <span class="anneau" aria-hidden="true"></span><span class="visage ${h.image ? "portrait-heros" : ""}" aria-hidden="true">${h.image ? `<img src="${h.image}" alt="">` : sym}</span><span class="pv-ecu" title="Points de vie">${j.pv}</span>
     </${balise}>
     <div class="plaque"><b>${esc(h.nom)}</b><span class="qui">${esc(nomAffiche(j))}</span>
       <span class="charge ${pret ? "ok" : ""}">${pret ? `${esc(pv.nom)} est prêt` : `${esc(pv.nom)} : ${m} / ${seuil}`}</span>
@@ -1700,7 +1708,20 @@ function admHeros(){
       if(!CONFIG.heros[k]) CONFIG.heros[k] = copie(HEROS_DEFAUT);
       const hr = CONFIG.heros[k], e = (hr.pouvoir && hr.pouvoir.effet) || {}, pc = `heros.${k}.pouvoir.effet`;
       const creatures = Object.entries(CARTES).filter(([,c]) => c.type==="creature").map(([id,c]) => [id,c.nom]);
-      return `<fieldset class="f-${k}"><legend><span class="pastille"></span>${esc(f.nom)}</legend>
+      const cleImg = `heros:${k}`;
+      return `<fieldset class="f-${k}" data-depot="${cleImg}"><legend><span class="pastille"></span>${esc(f.nom)}</legend>
+        <div class="heros-admin">
+          <div class="medaillon f-${k}" style="--p:1"><span class="anneau"></span><span class="visage ${hr.image ? "portrait-heros" : ""}">${hr.image ? `<img src="${hr.image}" alt="Portrait de ${esc(hr.nom)}">` : f.sym}</span></div>
+          <div>
+            <input type="file" accept="image/*" data-image="${cleImg}" hidden>
+            <div class="adm-actions" style="margin-top:0">
+              <button type="button" class="btn second" data-act="image-choisir" data-id="${cleImg}">${hr.image ? "Changer le portrait" : "Ajouter un portrait"}</button>
+              <button type="button" class="btn second" data-act="image-coller" data-id="${cleImg}">Coller l’image copiée</button>
+              ${hr.image ? `<button type="button" class="btn second" data-act="image-suppr" data-id="${cleImg}">Retirer</button>` : ""}
+            </div>
+            <p class="aide">Vous pouvez aussi glisser une image sur ce cadre. Elle est recadrée en cercle, centrée sur le haut (le visage). Une image carrée d’au moins 600 × 600 pixels donne le meilleur résultat.</p>
+          </div>
+        </div>
         <div class="champs">
           ${champTexte("Nom du héros", `heros.${k}.nom`, hr.nom)}
           ${champTexte("Titre", `heros.${k}.titre`, hr.titre || "")}
@@ -1751,7 +1772,7 @@ function admDonnees(){
     <p class="aide">Téléchargez le fichier config.json, puis déposez-le dans votre dépôt GitHub, à côté de index.html. Tous les joueurs de votre site recevront alors vos cartes, vos règles et vos images. Refaites-le après chaque série de modifications.</p>
     <p class="aide">${(() => { const n = Object.values(CARTES).filter(c => c.image).length; return `Cette configuration contient ${n} carte${n>1 ? "s" : ""} avec image.`; })()}${window.claude ? "" : " Si vos images ont été ajoutées sur Claude, faites l’export depuis le prototype sur Claude : elles n’existent pas sur ce site."}</p>
     <div class="adm-actions"><button type="button" class="btn" data-act="config-telecharger">Télécharger config.json</button></div>
-    ${adm.dernierExport ? (e => `<p class="aide" style="color:${e.manquantes ? "var(--danger)" : "var(--cible)"}">Export de ${e.quand} depuis ${e.ou} : ${e.integrees} image${e.integrees>1 ? "s" : ""} intégrée${e.integrees>1 ? "s" : ""} sur ${e.total}${e.manquantes ? `, ${e.manquantes} échec${e.manquantes>1 ? "s" : ""} (${esc(e.raison)})` : ""}.</p>`)(adm.dernierExport) : ""}
+    ${adm.dernierExport ? (e => `<p class="aide" style="color:${e.manquantes ? "var(--danger)" : "var(--cible)"}">Export de ${e.quand} depuis ${e.ou} : ${e.integrees} image${e.integrees>1 ? "s" : ""} intégrée${e.integrees>1 ? "s" : ""} sur ${e.total}${e.manquantes ? `, ${e.manquantes} échec${e.manquantes>1 ? "s" : ""} (${esc(e.raison)})` : ""}.${e.hdRetirees ? ` Les ${e.hdRetirees} versions haute définition stockées sur Claude ne sont pas incluses : pour les avoir sur votre site, ajoutez les images depuis l’administration de votre site.` : ""}</p>`)(adm.dernierExport) : ""}
     ${(() => { const s = lireSecours(); return s && s.config ? `<h2>Copie de secours</h2>
       <p class="aide">Copie automatique de votre configuration, faite le ${new Date(s.quand).toLocaleString("fr-FR")} juste avant une mise à jour automatique${s.sansImages ? " (sans les images, trop lourdes pour le navigateur)" : ""}.</p>
       <div class="adm-actions">${adm.restaurer ? `<button type="button" class="btn danger" data-act="secours-ok">Confirmer la restauration</button><button type="button" class="btn second" data-act="secours-non">Annuler</button>` : `<button type="button" class="btn second" data-act="secours">Restaurer cette copie</button>`}</div>` : ""; })()}
@@ -1839,7 +1860,10 @@ function actionAdmin(act, id, el){
       adm.sel = nid; sauver(); break;
     }
     case "image-choisir": { const f = document.querySelector(`[data-image="${id}"]`); if(f) f.click(); return; }
-    case "image-suppr": { const u = CARTES[id].image; delete CARTES[id].image; sauver(); liberer(u); erreur("Image retirée."); break; }
+    case "image-suppr": {
+      const cib = cibleImage(id), anciens = [cib.obj.image, cib.obj.imageHD];
+      delete cib.obj.image; delete cib.obj.imageHD; sauver(); anciens.forEach(liberer); erreur("Image retirée."); break;
+    }
     case "images-transfert": if(ASSETS) transfererImages(); return;
     case "image-coller": {
       const repli = () => erreur("Appuyez sur Ctrl+V (Cmd+V sur Mac) pour coller l’image copiée.");
@@ -1941,10 +1965,12 @@ if(window.claude && typeof window.claude.use==="function"){
 }
 const estServeur = url => typeof url==="string" && url.includes("/_blob/");
 // Supprime une image du serveur si plus aucune carte ne l’utilise
+const imageUtilisee = url => Object.values(CARTES).some(c => c.image===url || c.imageHD===url) || Object.values(CONFIG.heros || {}).some(x => x && x.image===url);
 function liberer(url){
-  if(!ASSETS || !estServeur(url)) return;
-  if(Object.values(CARTES).some(c => c.image===url)) return;
-  ASSETS.delete(url.split("/_blob/")[1]).catch(() => {});
+  if(!url || imageUtilisee(url)) return;
+  if(ASSETS && estServeur(url)) ASSETS.delete(url.split("/_blob/")[1]).catch(() => {});
+  else if(surSiteAdmin() && url.includes("/storage/v1/object/public/images/"))
+    sbc().storage.from("images").remove([decodeURIComponent(url.split("/storage/v1/object/public/images/")[1])]).catch(() => {});
 }
 function dataVersBlob(data){
   const [entete, b64] = data.split(",");
@@ -1993,6 +2019,12 @@ async function telechargerConfig(){
   cfg.exporte = Date.now();
   let manquantes = 0, integrees = 0, total = 0;
   raisonEchec = "";
+  // Versions HD stockées sur Claude : trop lourdes pour config.json, elles restent sur Claude
+  let hdRetirees = 0;
+  for(const c of Object.values(cfg.cartes)) if(c.imageHD && estServeur(c.imageHD)){ delete c.imageHD; hdRetirees++; }
+  for(const hr of Object.values(cfg.heros || {})){
+    if(hr && hr.image && estServeur(hr.image)){ const d = await versDataURL(hr.image); if(d) hr.image = d; else delete hr.image; }
+  }
   for(const c of Object.values(cfg.cartes)){
     if(!c.image) continue;
     total++;
@@ -2002,7 +2034,7 @@ async function telechargerConfig(){
       if(d){ c.image = d; integrees++; } else { delete c.image; manquantes++; }
     } else integrees++;
   }
-  adm.dernierExport = {total, integrees, manquantes, raison:raisonEchec, quand:new Date().toLocaleTimeString("fr-FR"), ou: window.claude ? "le prototype sur Claude" : "votre site"};
+  adm.dernierExport = {total, integrees, manquantes, hdRetirees, raison:raisonEchec, quand:new Date().toLocaleTimeString("fr-FR"), ou: window.claude ? "le prototype sur Claude" : "votre site"};
   if(ui.ecran==="admin") renderAdmin();
   const texte = JSON.stringify(cfg);
   CONFIG.exporte = cfg.exporte; sauver();
@@ -2022,38 +2054,85 @@ async function telechargerConfig(){
   }
 }
 
-function chargerImage(id, fichier){
-  if(!fichier.type.startsWith("image/")) return erreur("Ce fichier n’est pas une image : choisissez un PNG, un JPG ou un WebP.");
+// Une image peut appartenir à une carte (« id » ou « carte:id ») ou à un héros (« heros:egy »).
+function cibleImage(cle){
+  const i = String(cle).indexOf(":");
+  const type = i>0 ? cle.slice(0, i) : "carte", id = i>0 ? cle.slice(i+1) : cle;
+  if(type==="heros"){
+    if(!CONFIG.heros) CONFIG.heros = {};
+    if(!CONFIG.heros[id]) CONFIG.heros[id] = copie(HEROS_DEFAUT);
+    return {obj:CONFIG.heros[id], focusY:0.3, formats:[{cle:"image", L:600, H:600, q:0.88, hd:true}]};
+  }
+  // Cartes : une version haute définition (grande vue) et une version légère (jeu), ratio 7:9
+  return {obj:CARTES[id], focusY:0.5, formats:[{cle:"imageHD", L:896, H:1152, q:0.9, hd:true}, {cle:"image", L:448, H:576, q:0.85}]};
+}
+// Recadre au bon ratio sans jamais agrandir, avec une réduction progressive pour garder la netteté
+function recadrer(source, L, H, focusY){
+  const ratio = L/H, sw = source.width, sh = source.height;
+  let cw = sw, ch = sw/ratio;
+  if(ch > sh){ ch = sh; cw = sh*ratio; }
+  const sx = (sw-cw)/2, sy = (sh-ch)*(focusY ?? 0.5);
+  const ow = Math.max(1, Math.round(Math.min(L, cw))), oh = Math.max(1, Math.round(ow/ratio));
+  let src = source, x = sx, y = sy, w = cw, hh = ch;
+  while(w > ow*2){
+    const t = document.createElement("canvas"); t.width = Math.round(w/2); t.height = Math.round(hh/2);
+    const c = t.getContext("2d"); c.imageSmoothingQuality = "high"; c.drawImage(src, x, y, w, hh, 0, 0, t.width, t.height);
+    src = t; x = 0; y = 0; w = t.width; hh = t.height;
+  }
+  const cv = document.createElement("canvas"); cv.width = ow; cv.height = oh;
+  const ctx = cv.getContext("2d"); ctx.imageSmoothingQuality = "high";
+  ctx.fillStyle = "#fbf7ec"; ctx.fillRect(0, 0, ow, oh);
+  ctx.drawImage(src, x, y, w, hh, 0, 0, ow, oh);
+  return cv;
+}
+const surSiteAdmin = () => !window.claude && PROG.admin && sbc() && sbc().storage;
+async function stockerImage(blob, nom){
+  if(ASSETS){ const r = await ASSETS.upload(blob); return r.url; }
+  if(surSiteAdmin()){
+    const st = sbc().storage.from("images");
+    const { error } = await st.upload(nom, blob, {contentType:"image/jpeg", cacheControl:"31536000", upsert:false});
+    if(error) throw new Error(/bucket not found/i.test(error.message) ? "le stockage d’images n’est pas encore créé : exécutez supabase-images.sql dans Supabase" : error.message);
+    return st.getPublicUrl(nom).data.publicUrl;
+  }
+  return null;
+}
+function chargerImage(cle, fichier){
+  if(!fichier || !fichier.type || !fichier.type.startsWith("image/")) return erreur("Ce fichier n’est pas une image : choisissez un PNG, un JPG ou un WebP.");
+  const cib = cibleImage(cle);
+  if(!cib.obj) return;
   const lecteur = new FileReader();
   lecteur.onload = () => {
     const img = new Image();
-    img.onload = () => {
-      const L = 448, H = 576, cv = document.createElement("canvas");
-      cv.width = L; cv.height = H;
-      const ctx = cv.getContext("2d");
-      ctx.fillStyle = "#fbf7ec"; ctx.fillRect(0, 0, L, H);
-      const r = Math.max(L/img.width, H/img.height), w = img.width*r, h = img.height*r;
-      ctx.drawImage(img, (L-w)/2, (H-h)/2, w, h);
-      const avant = CARTES[id].image;
-      const enLocal = () => {
-        CARTES[id].image = cv.toDataURL("image/jpeg", 0.82);
-        if(sauver()){ liberer(avant); erreur("Image ajoutée."); }
-        else {
-          if(avant) CARTES[id].image = avant; else delete CARTES[id].image;
-          erreur("Mémoire du navigateur pleine : retirez quelques images pour en ajouter d’autres.");
+    img.onload = async () => {
+      erreur("Préparation de l’image…");
+      // La version légère est calculée à partir de la version HD (réduction exacte, plus nette)
+      const versions = []; let hd = null;
+      for(const f of cib.formats){
+        const cv = recadrer(f.hd || !hd ? img : hd, f.L, f.H, cib.focusY);
+        if(f.hd) hd = cv;
+        versions.push({cle:f.cle, cv, q:f.q});
+      }
+      const anciens = Object.fromEntries(cib.formats.map(f => [f.cle, cib.obj[f.cle]]));
+      const remettre = () => { for(const [k,v] of Object.entries(anciens)){ if(v) cib.obj[k] = v; else delete cib.obj[k]; } };
+      const distant = !!ASSETS || surSiteAdmin();
+      try {
+        for(const v of versions){
+          if(distant){
+            erreur(`Envoi de l’image${versions.length>1 ? ` (${v.cle==="imageHD" ? "haute définition" : "version jeu"})` : ""}…`);
+            const blob = await new Promise(ok => v.cv.toBlob(ok, "image/jpeg", v.q));
+            cib.obj[v.cle] = await stockerImage(blob, `${String(cle).replace(/[^a-z0-9_-]/gi, "-")}-${v.cle}-${Date.now()}.jpg`);
+          } else cib.obj[v.cle] = v.cv.toDataURL("image/jpeg", v.q);
         }
-        renderAdmin();
-      };
-      if(!ASSETS) return enLocal();
-      erreur("Envoi de l’image…");
-      cv.toBlob(async blob => {
-        try {
-          const r = await ASSETS.upload(blob);
-          CARTES[id].image = r.url; sauver(); liberer(avant);
-          erreur("Image enregistrée sur le serveur du jeu.");
-          renderAdmin();
-        } catch(e) { enLocal(); }
-      }, "image/jpeg", 0.85);
+      } catch(e) { remettre(); erreur("Envoi de l’image impossible : " + (e.message || e) + "."); return renderAdmin(); }
+      let message = distant ? "Image enregistrée sur le serveur, en haute définition." : "Image ajoutée.";
+      if(!sauver()){
+        // Navigateur plein : on garde au moins la version légère
+        if(cib.obj.imageHD && cib.obj.imageHD.startsWith("data:")){ delete cib.obj.imageHD; message = "Image ajoutée, sans la version haute définition : la mémoire du navigateur est pleine."; }
+        if(!sauver()){ remettre(); erreur("Mémoire du navigateur pleine : retirez quelques images pour en ajouter d’autres."); return renderAdmin(); }
+      }
+      Object.values(anciens).forEach(liberer);
+      erreur(message);
+      renderAdmin();
     };
     img.onerror = () => erreur("Impossible de lire cette image : essayez un autre fichier.");
     img.src = lecteur.result;
@@ -2131,8 +2210,11 @@ const refPrive = () => EN.db.doc(`data/users/${EN.hoteId}/parties/${EN.code}`);
 
 function configPublique(){
   const cartes = copie(CONFIG.cartes);
-  Object.values(cartes).forEach(c => { if(c.image && !estServeur(c.image)) delete c.image; });
-  return {cartes, factions:CONFIG.factions, heros:CONFIG.heros, mots:CONFIG.mots, termes:CONFIG.termes, regles:CONFIG.regles};
+  // Les images embarquées (data:) sont trop lourdes pour voyager : l’invité reprend celles de son site
+  const sansData = o => { for(const k of ["image","imageHD"]) if(o[k] && o[k].startsWith("data:")) delete o[k]; };
+  Object.values(cartes).forEach(sansData);
+  const heros = copie(CONFIG.heros || {}); Object.values(heros).forEach(sansData);
+  return {cartes, factions:CONFIG.factions, heros, mots:CONFIG.mots, termes:CONFIG.termes, regles:CONFIG.regles};
 }
 // Ce que l’invité a le droit de voir : pas la main de l’hôte, pas l’ordre des decks
 function vuePublique(){
@@ -2649,6 +2731,10 @@ if(!window.claude && SUPA.url){
     // Les images ne voyagent pas : chaque joueur reprend celles du site (config.json)
     for(const [k, carte] of Object.entries(c.cartes || {})){
       if(!carte.image && CONFIG.cartes[k] && CONFIG.cartes[k].image) carte.image = CONFIG.cartes[k].image;
+      if(!carte.imageHD && CONFIG.cartes[k] && CONFIG.cartes[k].imageHD) carte.imageHD = CONFIG.cartes[k].imageHD;
+    }
+    for(const [k, hr] of Object.entries(c.heros || {})){
+      if(!hr.image && CONFIG.heros && CONFIG.heros[k] && CONFIG.heros[k].image) hr.image = CONFIG.heros[k].image;
     }
     appliquerConfig(c);
   }
@@ -3003,7 +3089,7 @@ function htmlZoom(){
   return `<div class="zoom-fond" data-act="zoom-fermer">
     <button type="button" class="zoom-fermer" data-act="zoom-fermer" aria-label="Fermer">×</button>
     <div class="zoom ${anim ? "anim" : ""}" data-act="zoom-rien" role="dialog" aria-label="${esc(d.nom)}">
-      ${htmlCarte({id, uid:"zoom"})}
+      ${htmlCarte({id, uid:"zoom"}, {hd:true})}
       <div class="zoom-info">
         <h2>${esc(d.nom)}</h2>
         <p class="meta">${NOMS_RARETE[r]}, ${esc(fac)}</p>
