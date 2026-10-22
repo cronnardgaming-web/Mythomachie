@@ -251,6 +251,19 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 .trophee.niveau-3 .niveau{color:var(--or)}
 .trophee .barre{height:6px;margin:4px 0 0}
 
+/* Écran de connexion */
+.boite.porte{max-width:520px}
+.porte-tete{text-align:center;margin-bottom:18px}
+.porte-tete .sous-logo{margin-bottom:0}
+.porte h3{font-family:Cinzel,"Times New Roman",serif;font-size:19px;margin:0 0 10px}
+.onglets-porte{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:16px}
+.onglets-porte button{background:transparent;border:none;padding:11px 8px;font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:15px;color:var(--ink-2);cursor:pointer}
+.onglets-porte button.actif{background:color-mix(in srgb, var(--bronze) 22%, transparent);color:var(--ink);box-shadow:inset 0 -3px 0 var(--bronze)}
+.formulaire{display:flex;flex-direction:column;gap:12px;margin:6px 0 16px}
+.boite.porte .actions{flex-direction:column;align-items:stretch}
+.boite.porte .actions .btn{padding:13px 18px}
+.boite.porte .aide{margin-top:12px}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -1500,7 +1513,7 @@ function renderCouche(){
         <button type="button" class="btn second" data-act="en-ligne">Jouer en ligne</button>
         <button type="button" class="btn second" data-act="admin">Administration</button>
       </div>${regles}</div>`;
-    if(PROG.actif) h = PROG.accueilEtape && PROG.pret ? htmlBienvenue() : PROG.compteVue && PROG.pret ? htmlFormCompte() : PROG.choixDeck ? htmlChoixDeck() : htmlAccueilProg(regles);
+    if(PROG.actif) h = PROG.porte ? htmlPorte() : PROG.accueilEtape && PROG.pret ? htmlBienvenue() : PROG.compteVue && PROG.pret ? htmlFormCompte() : PROG.choixDeck ? htmlChoixDeck() : htmlAccueilProg(regles);
     if(EN.ecran) h = htmlEnLigne();
   } else if(S.vainqueur!==null){
     const titre = S.vainqueur==="egalite" ? "Égalité"
@@ -2681,14 +2694,11 @@ if(!window.claude && SUPA.url){
     try {
       if(!window.supabase) await chargerScript(SUPA.script);
       sb = window.supabase.createClient(SUPA.url, SUPA.cle, {auth:{flowType:"implicit", detectSessionInUrl:true, persistSession:true, autoRefreshToken:true}});
-      let { data } = await sb.auth.getSession();
-      let session = data && data.session;
-      if(!session){
-        const r = await sb.auth.signInAnonymously();
-        if(r.error) throw r.error;
-        session = r.data.session;
-      }
-      EN.db = "supabase"; EN.monId = session.user.id; EN.erreurMenu = "";
+      const { data } = await sb.auth.getSession();
+      const session = data && data.session;
+      // Plus de joueur invité : sans session, le joueur passe par l’écran de connexion
+      if(session){ EN.db = "supabase"; EN.monId = session.user.id; }
+      EN.erreurMenu = "";
       return true;
     } catch(e) {
       console.warn("Supabase", e); sb = null;
@@ -2953,24 +2963,10 @@ async function chargerProgression(){
   PROG.actif = true; PROG.erreur = ""; render();
   const ok = await window.__supa.init();
   if(!ok){ PROG.erreur = "Connexion au serveur de jeu impossible. Vérifiez votre connexion internet, puis réessayez."; return render(); }
-  try {
-    await suiviCompte();
-    const init = await rpc("initialiser_joueur");
-    await rafraichir();
-    if(init && init.nouveau){
-      PROG.cartesOffertes = Object.entries(PROG.collection).flatMap(([id, n]) => Array(n).fill(id));
-      await creerDeckDepart(); await rafraichir();
-      PROG.accueilEtape = 1; PROG.accueilAnimer = true;
-    }
-    PROG.pret = true;
-    demarrerPresence();
-    chargerMesStats(false);
-  } catch(e) {
-    PROG.erreur = /function|relation|does not exist|schema cache/i.test(e.message)
-      ? "Le serveur n’est pas encore prêt : exécutez le script supabase-phase4.sql dans Supabase."
-      : e.message;
-  }
-  render();
+  try { await suiviCompte(); } catch(e) {}
+  // Un lien « mot de passe oublié » ouvre d’abord le choix du nouveau mot de passe
+  if(compteEtat()!=="complet" || PROG.recuperation) return ouvrirPorte();
+  await entrerJeu();
 }
 async function action(fn, succes){
   if(PROG.occupe) return;
@@ -2982,14 +2978,15 @@ async function action(fn, succes){
 
 // ----- Fin de partie : or et quête
 async function verifierRecompense(){
-  if(!PROG.pret || !S || S.vainqueur===null || !S.idPartie || S.mode==="duo") return;
+  if(!PROG.pret || !S || S.vainqueur===null || !S.idPartie) return;
   if(PROG.recompensees.has(S.idPartie)) return;
   const cle = S.idPartie;
   PROG.recompensees.add(cle);
   try { localStorage.setItem("parties-recompensees", JSON.stringify([...PROG.recompensees].slice(-60))); } catch(e) {}
+  enregistrerDuel();
+  if(S.mode==="duo") return;
   const me = vue(), victoire = S.vainqueur===S.joueurs[me].nom;
   ajouterProgresQuete(S.stats ? S.stats[me] : null, victoire);
-  enregistrerPartie(me, victoire);
   try { const gain = await rpc("fin_partie", {victoire}); PROG.dernierGain = {cle, gain}; await rafraichir(); }
   catch(e) { PROG.dernierGain = {cle, gain:0, erreur:e.message}; }
   if(S && S.idPartie===cle) renderCouche();
@@ -3259,6 +3256,7 @@ function renderProg(){
 
 function actionProg(act, id){
   if(act.startsWith("compte-")) return actionCompte(act);
+  if(act.startsWith("porte-")) return actionPorte(act);
   switch(act){
     case "prog-reessayer": chargerProgression(); return true;
     case "prog-accueil": ui.ecran = "jeu"; S = null; PROG.paquet = null; PROG.sel = null; PROG.zoom = false; break;
@@ -3430,7 +3428,7 @@ function compteEtat(){
 function traduireErreur(m){
   const t = String(m || "");
   if(/invalid login credentials/i.test(t)) return "Adresse e-mail ou mot de passe incorrect.";
-  if(/already (been )?registered|already exists|email_exists/i.test(t)) return "Cette adresse est déjà utilisée par un compte : connectez-vous plutôt avec « J’ai déjà un compte ».";
+  if(/already (been )?registered|already exists|email_exists|user_already_exists/i.test(t)) return "Un compte existe déjà avec cette adresse : connectez-vous, ou utilisez « Mot de passe oublié ».";
   if(/rate limit|too many/i.test(t)) return "Trop d’e-mails envoyés pour le moment : réessayez un peu plus tard.";
   if(/at least \d+ characters|weak|password should/i.test(t)) return "Mot de passe trop faible : utilisez au moins 8 caractères, avec des lettres et des chiffres.";
   if(/not confirmed/i.test(t)) return "Confirmez d’abord votre adresse avec le lien reçu par e-mail.";
@@ -3484,7 +3482,7 @@ function htmlFormCompte(){
     <p class="aide">Rien reçu après quelques minutes ? Regardez dans les courriers indésirables, puis réessayez.</p>
     <div class="actions"><button type="button" class="btn" data-act="compte-fermer">Compris</button></div>`);
   if(v==="deconnexion") return boite("Se déconnecter", `
-    <p>Votre progression reste sauvegardée sur votre compte. Sur cet appareil, le jeu redémarrera avec un nouveau joueur invité, jusqu’à ce que vous vous reconnectiez.</p>
+    <p>Votre progression reste sauvegardée sur votre compte. Sur cet appareil, il faudra vous reconnecter pour jouer.</p>
     <div class="actions"><button type="button" class="btn danger" data-act="compte-deco-ok" ${occ}>Se déconnecter</button><button type="button" class="btn second" data-act="compte-fermer">Annuler</button></div>`);
   return "";
 }
@@ -3561,14 +3559,13 @@ function actionCompte(act){
 async function suiviCompte(){
   const sb = sbc();
   if(typeof sb.auth.onAuthStateChange==="function") sb.auth.onAuthStateChange(ev => {
-    if(ev==="PASSWORD_RECOVERY"){ PROG.recuperation = true; PROG.compteVue = "mdp"; if(!S) render(); }
+    if(ev==="PASSWORD_RECOVERY"){ PROG.recuperation = true; if(PROG.pret) PROG.compteVue = "mdp"; else { PROG.porte = true; PROG.porteVue = "mdp"; } if(!S) render(); }
   });
   await chargerUtilisateur();
   const hsh = new URLSearchParams((HASH_INITIAL || "").replace(/^#/, ""));
   if(hsh.get("error_description")) erreur("Lien invalide ou expiré : " + hsh.get("error_description").replace(/\+/g, " ") + ". Demandez un nouveau lien.");
-  else if(hsh.get("type")==="recovery"){ PROG.recuperation = true; PROG.compteVue = "mdp"; }
+  else if(hsh.get("type")==="recovery"){ PROG.recuperation = true; }
   else if(/email_change|signup/.test(hsh.get("type") || "") || /confirm/i.test(hsh.get("message") || "")){
-    if(compteEtat()==="mdp") PROG.compteVue = "mdp";
     erreur("Adresse e-mail confirmée.");
   }
   if(HASH_INITIAL) try { history.replaceState(null, "", urlRetour()); } catch(e) {}
@@ -3581,6 +3578,12 @@ document.addEventListener("keydown", e => {
   const k = e.target.dataset && e.target.dataset.compte;
   if(e.key!=="Enter" || !k) return;
   PROG.formCompte[k] = e.target.value;
+  if(PROG.porte){
+    const pv = PROG.porteVue;
+    const a = {connexion:"porte-login", inscription:"porte-inscrire", oubli:"porte-envoyer-oubli", mdp:"porte-definir-mdp", conversion:"porte-convertir", attente:"porte-convertir"}[pv];
+    if(a) actionPorte(a);
+    return;
+  }
   const v = PROG.compteVue;
   actionCompte(v==="sauver" ? "compte-envoyer-lien" : v==="connexion" ? "compte-login" : v==="oubli" ? "compte-envoyer-oubli" : v==="mdp" ? "compte-definir-mdp" : "");
 });
@@ -3617,17 +3620,29 @@ function demarrerPresence(){
 }
 
 // ----- Enregistrement d’une partie terminée
-async function enregistrerPartie(me, victoire){
-  const st = (S.stats && S.stats[me]) || {}, moi = S.joueurs[me], lui = S.joueurs[1-me];
-  try {
-    await rpc("enregistrer_partie", {d:{
-      mode:S.mode, victoire, tours:S.tour, duree_s:S.debut ? Math.round((Date.now()-S.debut)/1000) : 0,
-      heros:moi.heros || null, heros_adverse:lui.heros || null,
-      degats:st.degats || 0, soins:st.soins || 0, creatures:st.creatures || 0, sorts:st.sorts || 0,
-      achats:st.achats || 0, pouvoirs:st.pouvoirs || 0, jouees:st.jouees || {}, achetees:st.achetees || {}
-    }});
-    await chargerMesStats(true);
-  } catch(e) { /* les statistiques ne doivent jamais bloquer la partie */ }
+// Une partie = deux camps, enregistrés ensemble et une seule fois :
+// contre l’ordinateur, le joueur enregistre son camp et celui de l’ordinateur ;
+// en ligne, l’hôte enregistre les deux joueurs ; à deux sur un écran, les deux camps sont « locaux ».
+async function enregistrerDuel(){
+  if(S.mode==="enligne" && EN.role!=="hote"){
+    // L’invité ne fait rien : l’hôte s’en charge. On rafraîchit ses statistiques un peu plus tard.
+    setTimeout(() => chargerMesStats(true), 2500);
+    return;
+  }
+  const camp = i => {
+    const st = (S.stats && S.stats[i]) || {};
+    return {heros:S.joueurs[i].heros || null, joueur: S.mode==="enligne" && i===1 ? EN.inviteId : null,
+            degats:st.degats || 0, soins:st.soins || 0, creatures:st.creatures || 0, sorts:st.sorts || 0,
+            achats:st.achats || 0, pouvoirs:st.pouvoirs || 0, jouees:st.jouees || {}, achetees:st.achetees || {}};
+  };
+  const nomV = S.vainqueur, v = nomV===S.joueurs[0].nom ? 0 : nomV===S.joueurs[1].nom ? 1 : null;
+  const d = {id_partie:S.idPartie, mode:S.mode, vainqueur:v, tours:S.tour,
+             duree_s:S.debut ? Math.round((Date.now()-S.debut)/1000) : 0, cotes:[camp(0), camp(1)]};
+  for(let essai=0; essai<3; essai++){
+    try { await rpc("enregistrer_duel", {d}); break; }
+    catch(e) { if(/inconnu|identifiant|camp|volumineuses|Connexion/i.test(e.message)) break; await new Promise(r => setTimeout(r, 1500*(essai+1))); }
+  }
+  if(S.mode!=="duo") chargerMesStats(true);
 }
 async function chargerMesStats(annoncer){
   try { PROG.mesStats = await rpc("mes_stats"); } catch(e) { return; }
@@ -3764,7 +3779,9 @@ function admStats(){
       <div class="tuile"><b>${nf(r.joueurs)}</b><span>joueurs, dont ${nf(r.comptes)} avec un compte</span></div>
       <div class="tuile"><b>${nf(r.actifs_7j)}</b><span>actifs sur 7 jours</span></div>
       <div class="tuile"><b>${nf(r.parties_24h)}</b><span>parties sur 24 h (${nf(r.parties_7j)} sur 7 j)</span></div>
-      <div class="tuile"><b>${nf(r.parties_ia)} / ${nf(r.parties_en_ligne)}</b><span>parties contre l’ordinateur / en ligne</span></div>
+      <div class="tuile"><b>${nf(r.parties_ia)} / ${nf(r.parties_en_ligne)} / ${nf(r.parties_duo || 0)}</b><span>parties contre l’ordinateur / en ligne / sur un même écran</span></div>
+      <div class="tuile"><b>${pct(r.ordinateur_victoires || 0, r.ordinateur_parties || 0)}</b><span>de victoires pour l’ordinateur (${nf(r.ordinateur_parties || 0)} parties)</span></div>
+      <div class="tuile"><b>${nf(r.camps_victoires || 0)} / ${nf(r.camps || 0)}</b><span>camps gagnants / camps comptés (toujours la moitié, hors égalités)</span></div>
       <div class="tuile"><b>${r.tours_moyens!=null ? Number(r.tours_moyens).toLocaleString("fr-FR") : "–"}</b><span>tours par partie, ${r.duree_moyenne_s ? Math.round(r.duree_moyenne_s/60) + " min" : "–"} en moyenne</span></div>
     </div>
     <h2>En ligne maintenant</h2>
@@ -3780,7 +3797,8 @@ function admStats(){
         return `<td class="${couleurTaux(t)}">${d ? `${pct(d.victoires, d.parties)} <span class="aide">(${d.parties})</span>` : "–"}</td>`; }).join("")}</tr>`).join("")}
     </tbody></table></div>
     <h2>Cartes</h2>
-    <p class="aide">« % de victoire » : parmi les parties où un joueur a joué cette carte, la part qu’il a gagnées. Vers 50 %, la carte est équilibrée. Au-dessus de 60 % (en rouge), elle est peut-être trop forte ; sous 40 % (en bleu), trop faible. Méfiez-vous des cartes jouées dans moins de 20 parties.</p>
+    <p class="aide">Toutes les parties sont comptées, avec leurs deux camps : joueurs, ordinateur et parties sur un même écran.</p>
+    <p class="aide">« % de victoire » : parmi les parties où un camp a joué cette carte, la part que ce camp a gagnées. Vers 50 %, la carte est équilibrée. Au-dessus de 60 % (en rouge), elle est peut-être trop forte ; sous 40 % (en bleu), trop faible. Méfiez-vous des cartes jouées dans moins de 20 parties.</p>
     <div class="adm-actions" style="margin-top:0"><select data-stats="fac"><option value="toutes">Toutes les factions</option>${facs.map(k => `<option value="${k}" ${facFiltre===k ? "selected" : ""}>${esc(FACTIONS[k].nom)}</option>`).join("")}</select></div>
     <div class="tableau-defile"><table class="tableau"><thead><tr>${th("nom","Carte","c")}${th("rarete","Rareté","c")}${th("prix","Prix","c")}${th("jouee","Jouée","c")}${th("achetee","Achetée","c")}${th("parties","Parties","c")}${th("taux","% de victoire","c")}</tr></thead><tbody>
       ${cartes.map(c => `<tr><td><span class="pastille f-${CARTES[c.carte].faction || "neutre"}"></span> ${esc(c.nom)}</td><td>${NOMS_RARETE[c.rarete] || "–"}</td><td>${c.prix ?? "–"}</td><td>${nf(c.jouee)}</td><td>${nf(c.achetee)}</td><td>${nf(c.parties)}</td><td class="${c.parties>=20 ? couleurTaux(c.taux) : ""}">${c.taux==null ? "–" : Math.round(c.taux*100) + " %"}</td></tr>`).join("")}
@@ -3798,6 +3816,181 @@ document.addEventListener("change", e => {
   if(k==="jours"){ PROG.adminStats.jours = Number(e.target.value); chargerAdminStats(); }
   if(k==="fac"){ PROG.adminStats.facCartes = e.target.value; renderAdmin(); }
 });
+
+/* ============================================================
+   CONNEXION OBLIGATOIRE (site autonome)
+   Chaque joueur se connecte ou crée son compte avant d’entrer.
+   La session reste mémorisée sur l’appareil : pas besoin de se
+   reconnecter tant qu’on ne s’est pas déconnecté.
+   ============================================================ */
+PROG.porte = false; PROG.porteVue = "connexion"; PROG.emailNonConfirme = null;
+let presenceDemarree = false;
+function ouvrirPorte(){
+  const e = compteEtat();
+  PROG.porte = true; PROG.pret = false;
+  PROG.porteVue = PROG.recuperation || e==="mdp" ? "mdp" : e==="attente" ? "attente" : e==="invite" ? "conversion"
+    : ["inscription","oubli","info"].includes(PROG.porteVue) ? PROG.porteVue : "connexion";
+  render();
+}
+async function entrerJeu(){
+  PROG.porte = false; PROG.erreur = ""; render();
+  try {
+    const { data } = await sbc().auth.getSession();
+    const s = data && data.session;
+    if(s){ EN.db = "supabase"; EN.monId = s.user.id; }
+    await chargerUtilisateur();
+    const init = await rpc("initialiser_joueur");
+    await rafraichir();
+    if(init && init.nouveau){
+      PROG.cartesOffertes = Object.entries(PROG.collection).flatMap(([id, n]) => Array(n).fill(id));
+      await creerDeckDepart(); await rafraichir();
+      PROG.accueilEtape = 1; PROG.accueilAnimer = true;
+    }
+    // Pseudo choisi à l’inscription
+    const ps = PROG.user && PROG.user.user_metadata && PROG.user.user_metadata.pseudo;
+    if(ps && PROG.profil && !PROG.profil.pseudo){
+      try { await rpc("definir_pseudo", {p:ps}); await rafraichir(); }
+      catch(e) { setTimeout(() => erreur(`Le pseudo « ${ps} » est déjà pris : choisissez-en un autre dans votre profil.`), 1500); }
+    }
+    PROG.pret = true;
+    if(!presenceDemarree){ presenceDemarree = true; demarrerPresence(); }
+    chargerMesStats(false);
+  } catch(e) {
+    PROG.erreur = /function|relation|does not exist|schema cache/i.test(e.message)
+      ? "Le serveur n’est pas encore prêt : exécutez le script supabase-phase4.sql dans Supabase."
+      : e.message;
+  }
+  render();
+}
+function htmlPorte(){
+  const v = PROG.porteVue, f = PROG.formCompte, occ = PROG.occupe ? "disabled" : "";
+  const champ = (cle, label, type, auto, extra) => `<label class="champ"><span>${label}</span><input type="${type}" data-compte="${cle}" autocomplete="${auto}" value="${type==="password" ? "" : esc(f[cle] || "")}" ${extra || ""}></label>`;
+  const tete = `<div class="porte-tete"><h2 class="logo">${NOM_JEU}</h2><span class="sous-logo">Le choc des panthéons</span></div>`;
+  const onglets = `<div class="onglets-porte" role="tablist">
+    <button type="button" role="tab" aria-selected="${v==="connexion"}" class="${v==="connexion" ? "actif" : ""}" data-act="porte-vue-connexion">Se connecter</button>
+    <button type="button" role="tab" aria-selected="${v==="inscription"}" class="${v==="inscription" ? "actif" : ""}" data-act="porte-vue-inscription">Créer un compte</button></div>`;
+  const boite = contenu => `<div class="boite porte" role="dialog" aria-label="Connexion">${tete}${contenu}</div>`;
+  if(v==="inscription") return boite(`${onglets}
+    <p class="aide">Votre compte garde votre collection, vos decks et votre progression, sur tous vos appareils.</p>
+    <div class="formulaire">
+      ${champ("pseudo", "Pseudo (3 à 20 caractères)", "text", "nickname", 'maxlength="20"')}
+      ${champ("email", "Adresse e-mail", "email", "email")}
+      ${champ("mdp", "Mot de passe (8 caractères minimum, lettres et chiffres)", "password", "new-password")}
+      ${champ("mdp2", "Confirmez le mot de passe", "password", "new-password")}
+    </div>
+    <div class="actions"><button type="button" class="btn" data-act="porte-inscrire" ${occ}>Créer mon compte</button></div>
+    <p class="aide">Un e-mail de confirmation vous sera envoyé. Cliquez sur son lien pour activer votre compte.</p>`);
+  if(v==="oubli") return boite(`<h3>Mot de passe oublié</h3>
+    <p>Indiquez l’adresse de votre compte : vous recevrez un lien pour choisir un nouveau mot de passe.</p>
+    <div class="formulaire">${champ("email", "Adresse e-mail", "email", "email")}</div>
+    <div class="actions"><button type="button" class="btn" data-act="porte-envoyer-oubli" ${occ}>Envoyer le lien</button><button type="button" class="btn second" data-act="porte-vue-connexion">Retour</button></div>`);
+  if(v==="info") return boite(`<h3>Vérifiez vos e-mails</h3>
+    <p>Un e-mail vient d’être envoyé à <b>${esc(PROG.infoEmail || "")}</b>. Ouvrez-le et cliquez sur le lien : vous reviendrez dans le jeu automatiquement.</p>
+    <p class="aide">Rien reçu après quelques minutes ? Regardez dans les courriers indésirables, puis renvoyez l’e-mail.</p>
+    <div class="actions"><button type="button" class="btn second" data-act="porte-renvoyer" ${occ}>Renvoyer l’e-mail</button><button type="button" class="btn second" data-act="porte-vue-connexion">Retour à la connexion</button></div>`);
+  if(v==="mdp") return boite(`<h3>${PROG.recuperation ? "Nouveau mot de passe" : "Dernière étape : votre mot de passe"}</h3>
+    <p>${PROG.recuperation ? "Choisissez votre nouveau mot de passe." : `Votre adresse <b>${esc((PROG.user && PROG.user.email) || "")}</b> est confirmée. Choisissez un mot de passe pour terminer votre compte.`}</p>
+    <div class="formulaire">${champ("mdp", "Mot de passe (8 caractères minimum, lettres et chiffres)", "password", "new-password")}${champ("mdp2", "Confirmez le mot de passe", "password", "new-password")}</div>
+    <div class="actions"><button type="button" class="btn" data-act="porte-definir-mdp" ${occ}>Enregistrer et jouer</button></div>`);
+  if(v==="conversion" || v==="attente"){
+    const u = PROG.user || {};
+    return boite(`<h3>Créez votre compte pour continuer</h3>
+      <p>Le jeu demande maintenant un compte à chaque joueur. Votre progression d’invité sur ce navigateur sera conservée : collection, decks, or et encre.</p>
+      ${v==="attente" ? `<p class="avertissement">Un e-mail de confirmation a été envoyé à <b>${esc(u.new_email || "")}</b>. Cliquez sur son lien pour continuer.</p>` : ""}
+      <div class="formulaire">${champ("email", "Adresse e-mail", "email", "email")}</div>
+      <div class="actions"><button type="button" class="btn" data-act="porte-convertir" ${occ}>${v==="attente" ? "Renvoyer à cette adresse" : "Recevoir le lien de confirmation"}</button>
+        <button type="button" class="btn second" data-act="porte-vue-connexion">J’ai déjà un compte</button></div>
+      <p class="aide">Après avoir cliqué sur le lien reçu, vous choisirez votre mot de passe.</p>`);
+  }
+  // Connexion (vue par défaut)
+  return boite(`${onglets}
+    <div class="formulaire">${champ("email", "Adresse e-mail", "email", "email")}${champ("mdp", "Mot de passe", "password", "current-password")}</div>
+    <div class="actions"><button type="button" class="btn" data-act="porte-login" ${occ}>Se connecter</button></div>
+    ${PROG.emailNonConfirme ? `<p class="avertissement">Votre adresse n’est pas encore confirmée. <button type="button" class="lien" data-act="porte-renvoyer">Renvoyer l’e-mail de confirmation</button></p>` : ""}
+    <p class="aide"><button type="button" class="lien" data-act="porte-vue-oubli">Mot de passe oublié ?</button></p>`);
+}
+function actionPorte(act){
+  const vues = {"porte-vue-connexion":"connexion", "porte-vue-inscription":"inscription", "porte-vue-oubli":"oubli"};
+  if(vues[act]){ PROG.porteVue = vues[act]; PROG.emailNonConfirme = null; render(); return true; }
+  actionPorteAsync(act);
+  return true;
+}
+async function actionPorteAsync(act){
+  const sb = sbc(), f = PROG.formCompte, email = (f.email || "").trim().toLowerCase();
+  const tenter = async fn => {
+    if(PROG.occupe) return;
+    PROG.occupe = true; renderCouche();
+    try { await fn(); } catch(e) { erreur(traduireErreur(e && e.message)); }
+    finally { PROG.occupe = false; if(PROG.porte) renderCouche(); }
+  };
+  const mdpValide = () => {
+    if((f.mdp || "").length < 8 || !/[a-z]/i.test(f.mdp) || !/\d/.test(f.mdp)){ erreur("Utilisez au moins 8 caractères, avec des lettres et des chiffres."); return false; }
+    if(f.mdp!==f.mdp2){ erreur("Les deux mots de passe ne sont pas identiques."); return false; }
+    return true;
+  };
+  switch(act){
+    case "porte-login":
+      if(!emailValide(email)) return erreur("Cette adresse e-mail n’est pas valide.");
+      if(!f.mdp) return erreur("Indiquez votre mot de passe.");
+      return tenter(async () => {
+        const { error } = await sb.auth.signInWithPassword({email, password:f.mdp});
+        if(error){ if(/not confirmed/i.test(error.message)){ PROG.emailNonConfirme = email; PROG.infoEmail = email; } throw error; }
+        PROG.formCompte = {email:"", mdp:"", mdp2:"", pseudo:""}; PROG.emailNonConfirme = null;
+        await entrerJeu();
+      });
+    case "porte-inscrire": {
+      const pseudo = (f.pseudo || "").trim().replace(/\s+/g, " ");
+      if(!/^[\p{L}\p{N} _-]{3,20}$/u.test(pseudo)) return erreur("Le pseudo doit faire de 3 à 20 caractères : lettres, chiffres, espaces, tirets ou soulignés.");
+      if(!emailValide(email)) return erreur("Cette adresse e-mail n’est pas valide.");
+      if(!mdpValide()) return;
+      return tenter(async () => {
+        const { data, error } = await sb.auth.signUp({email, password:f.mdp, options:{emailRedirectTo:urlRetour(), data:{pseudo, mdp:true}}});
+        if(error) throw error;
+        // Supabase ne signale pas toujours une adresse déjà inscrite : il renvoie alors un compte sans identité
+        if(data && data.user && Array.isArray(data.user.identities) && data.user.identities.length===0)
+          throw new Error("already registered");
+        PROG.formCompte = {email:"", mdp:"", mdp2:"", pseudo:""};
+        if(data && data.session) return entrerJeu();
+        PROG.infoEmail = email; PROG.porteVue = "info";
+      });
+    }
+    case "porte-renvoyer": {
+      const adresse = PROG.infoEmail || PROG.emailNonConfirme || email;
+      if(!emailValide(adresse || "")) return erreur("Indiquez d’abord votre adresse e-mail.");
+      return tenter(async () => {
+        const { error } = await sb.auth.resend({type:"signup", email:adresse, options:{emailRedirectTo:urlRetour()}});
+        if(error) throw error;
+        PROG.infoEmail = adresse; PROG.porteVue = "info"; PROG.emailNonConfirme = null;
+        erreur("E-mail de confirmation renvoyé.");
+      });
+    }
+    case "porte-envoyer-oubli":
+      if(!emailValide(email)) return erreur("Cette adresse e-mail n’est pas valide.");
+      return tenter(async () => {
+        const { error } = await sb.auth.resetPasswordForEmail(email, {redirectTo:urlRetour()});
+        if(error) throw error;
+        PROG.infoEmail = email; PROG.porteVue = "info";
+      });
+    case "porte-convertir":
+      if(!emailValide(email)) return erreur("Cette adresse e-mail n’est pas valide.");
+      return tenter(async () => {
+        const { error } = await sb.auth.updateUser({email}, {emailRedirectTo:urlRetour()});
+        if(error) throw error;
+        await chargerUtilisateur();
+        if(compteEtat()==="mdp") PROG.porteVue = "mdp";
+        else { PROG.infoEmail = email; PROG.porteVue = "attente"; erreur("E-mail envoyé : cliquez sur le lien qu’il contient."); }
+      });
+    case "porte-definir-mdp":
+      if(!mdpValide()) return;
+      return tenter(async () => {
+        const { error } = await sb.auth.updateUser({password:f.mdp, data:{mdp:true}});
+        if(error) throw error;
+        PROG.recuperation = false; PROG.formCompte = {email:"", mdp:"", mdp2:"", pseudo:""};
+        await chargerUtilisateur();
+        await entrerJeu();
+      });
+  }
+}
 
 chargerConfig();
 render();

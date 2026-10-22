@@ -67,6 +67,12 @@ la présence (qui est en ligne, sur quel écran), l’historique des parties et 
 retrouvent leurs chiffres et leurs trophées dans « Mon profil » ; l’administrateur dispose de l’onglet
 « Statistiques » de l’administration (joueurs, héros, duels, cartes).
 
+## Statistiques complètes (les deux camps)
+
+`supabase-stats-duels.sql` (à exécuter après `supabase-stats.sql`) enregistre chaque partie avec ses deux camps :
+joueur et ordinateur, hôte et invité en ligne, ou deux camps locaux pour une partie sur un même écran.
+Il y a donc toujours autant de victoires que de défaites. Ce script remet l’historique des parties à zéro.
+
 ## Sécurité
 
 Le dépôt est public : n’y mettez jamais de mot de passe ni la clé « service_role » de Supabase.
