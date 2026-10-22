@@ -583,7 +583,7 @@ const DEFAUT = {
           tailleDeck:30, copiesMax:2, copiesLegendaire:1, carteBase:"pierre",
           deckDepart:{piece:7, rubis:1, dague:1, epee:1}},
   mots:{provocation:"Provocation", rapidite:"Rapidité", resistance:"Résistance", ethere:"Ethéré"},
-  termes:{conjuration:"Conjuration", echo:"Echo", allie:"Allié", sacrifice:"Sacrifice"},
+  termes:{conjuration:"Conjuration", echo:"Echo", allie:"Combo", sacrifice:"Sacrifice"},
   heros:{
     egy:{nom:"Atoum", titre:"Dieu primordial égyptien", pouvoir:{nom:"Souffle de vie", effet:{soin:8, renfort:{atk:0, vie:2}}}},
     hin:{nom:"Brahma", titre:"Dieu créateur hindou", pouvoir:{nom:"Abondance", effet:{or:6, pioche:2}}},
@@ -608,28 +608,28 @@ const DEFAUT = {
     porteur_jarres:{nom:"Porteur de jarres", type:"creature", rarete:"commune", prix:1, attaque:1, vie:3, conjuration:{soin:1}, faction:"egy"},
     gardien_temple:{nom:"Gardien du temple", type:"creature", rarete:"commune", prix:2, attaque:1, vie:4, mots:["provocation"], faction:"egy"},
     scarabee:{nom:"Scarabée sacré", type:"creature", rarete:"commune", prix:2, attaque:2, vie:2, echo:{soin:3}, faction:"egy"},
-    garde_anubis:{nom:"Garde d’Anubis", type:"creature", rarete:"commune", prix:3, attaque:2, vie:4, mots:["provocation"], conjuration:{soin:2}, faction:"egy"},
+    garde_anubis:{nom:"Garde d’Anubis", type:"creature", rarete:"commune", prix:3, attaque:3, vie:4, mots:["provocation"], conjuration:{soin:2}, faction:"egy"},
     pretresse:{nom:"Prêtresse d’Isis", type:"creature", rarete:"commune", prix:3, attaque:1, vie:3, conjuration:{soin:2}, allie:{or:2}, faction:"egy"},
-    archer_nubie:{nom:"Archer de Nubie", type:"creature", rarete:"commune", prix:4, attaque:4, vie:3, allie:{soin:3}, faction:"egy"},
-    chameau:{nom:"Chameau de guerre", type:"creature", rarete:"commune", prix:4, attaque:3, vie:5, mots:["provocation"], faction:"egy"},
-    sphinx:{nom:"Sphinx des sables", type:"creature", rarete:"commune", prix:5, attaque:3, vie:6, mots:["provocation"], conjuration:{soin:2}, faction:"egy"},
+    archer_nubie:{nom:"Archer de Nubie", type:"creature", rarete:"commune", prix:4, attaque:4, vie:3, allie:{combat:2}, faction:"egy"},
+    chameau:{nom:"Chameau de guerre", type:"creature", rarete:"commune", prix:4, attaque:4, vie:5, mots:["provocation"], faction:"egy"},
+    sphinx:{nom:"Sphinx des sables", type:"creature", rarete:"commune", prix:5, attaque:4, vie:6, mots:["provocation"], conjuration:{soin:2}, faction:"egy"},
     embaumeur:{nom:"Embaumeur", type:"creature", rarete:"rare", prix:3, attaque:2, vie:3, echo:{invoque:{id:"momie", n:1}}, faction:"egy"},
     chat_bastet:{nom:"Chat de Bastet", type:"creature", rarete:"rare", prix:4, attaque:3, vie:4, mots:["resistance"], allie:{soin:3}, faction:"egy"},
     pretre_thot:{nom:"Prêtre de Thot", type:"creature", rarete:"rare", prix:5, attaque:3, vie:5, conjuration:{soin:3, pioche:1}, faction:"egy"},
     char_ramses:{nom:"Char de Ramsès", type:"creature", rarete:"rare", prix:5, attaque:5, vie:4, mots:["provocation"], allie:{combat:2}, faction:"egy"},
-    sentinelle:{nom:"Sentinelle de Thèbes", type:"creature", rarete:"rare", prix:6, attaque:3, vie:7, mots:["provocation", "resistance"], faction:"egy"},
+    sentinelle:{nom:"Sentinelle de Thèbes", type:"creature", rarete:"rare", prix:6, attaque:4, vie:7, mots:["provocation", "resistance"], faction:"egy"},
     vizir:{nom:"Grand vizir", type:"creature", rarete:"epique", prix:6, attaque:4, vie:6, conjuration:{renfort:{atk:0, vie:2}, soin:3}, faction:"egy"},
     colosse:{nom:"Colosse de Memnon", type:"creature", rarete:"epique", prix:7, attaque:5, vie:8, mots:["provocation", "resistance"], faction:"egy"},
     pretre_osiris:{nom:"Prêtre d’Osiris", type:"creature", rarete:"epique", prix:7, attaque:4, vie:6, conjuration:{soin:3}, echo:{invoque:{id:"momie", n:2}}, faction:"egy"},
     pharaon:{nom:"Pharaon-Soleil", type:"creature", rarete:"legendaire", prix:8, attaque:6, vie:7, mots:["provocation"], conjuration:{renfort:{atk:1, vie:1}, soin:4}, faction:"egy"},
-    scribe:{nom:"Scribe du Nil", type:"sort", rarete:"commune", prix:1, effet:{or:1, soin:1}, allie:{soin:2}, faction:"egy"},
-    pain_nil:{nom:"Pain du Nil", type:"sort", rarete:"commune", prix:1, effet:{or:1, soin:2}, faction:"egy"},
-    hathor:{nom:"Bénédiction d’Hathor", type:"sort", rarete:"commune", prix:2, effet:{or:1, soin:3}, faction:"egy"},
-    sekhmet:{nom:"Fureur de Sekhmet", type:"sort", rarete:"commune", prix:2, effet:{combat:3}, allie:{soin:2}, faction:"egy"},
-    papyrus:{nom:"Papyrus sacré", type:"sort", rarete:"commune", prix:3, effet:{pioche:1, or:1, soin:2}, faction:"egy"},
-    jugement:{nom:"Jugement d’Anubis", type:"sort", rarete:"rare", prix:3, effet:{combat:4}, allie:{soin:3}, faction:"egy"},
+    scribe:{nom:"Scribe du Nil", type:"sort", rarete:"commune", prix:1, effet:{or:2, soin:1}, allie:{soin:2}, faction:"egy"},
+    pain_nil:{nom:"Pain du Nil", type:"sort", rarete:"commune", prix:1, effet:{or:2, soin:1}, faction:"egy"},
+    hathor:{nom:"Bénédiction d’Hathor", type:"sort", rarete:"commune", prix:2, effet:{or:2, soin:2}, faction:"egy"},
+    sekhmet:{nom:"Fureur de Sekhmet", type:"sort", rarete:"commune", prix:2, effet:{combat:3}, allie:{combat:2}, faction:"egy"},
+    papyrus:{nom:"Papyrus sacré", type:"sort", rarete:"commune", prix:3, effet:{pioche:1, or:2, soin:1}, faction:"egy"},
+    jugement:{nom:"Jugement d’Anubis", type:"sort", rarete:"rare", prix:3, effet:{combat:5}, allie:{soin:3}, faction:"egy"},
     benediction:{nom:"Bénédiction de Râ", type:"sort", rarete:"rare", prix:4, effet:{soin:4, pioche:1}, sacrifice:{combat:3}, faction:"egy"},
-    crue:{nom:"Crue du Nil", type:"sort", rarete:"rare", prix:5, effet:{or:2, soin:3, pioche:1}, faction:"egy"},
+    crue:{nom:"Crue du Nil", type:"sort", rarete:"rare", prix:5, effet:{or:3, soin:2, pioche:1}, faction:"egy"},
     tempete_sable:{nom:"Tempête de sable", type:"sort", rarete:"epique", prix:5, effet:{degatsTous:2, soin:3, combat:2}, faction:"egy"},
     momification:{nom:"Rituel de momification", type:"sort", rarete:"epique", prix:6, effet:{invoque:{id:"momie", n:2}, soin:4, pioche:1}, faction:"egy"},
     oeil_ra:{nom:"Œil de Râ", type:"sort", rarete:"legendaire", prix:7, effet:{combat:5, soin:5, pioche:1}, faction:"egy"},
@@ -743,6 +743,8 @@ const CLE_STOCKAGE = "prototype-combat-config-v1";
 const copie = o => JSON.parse(JSON.stringify(o));
 let CONFIG, CARTES, FACTIONS, MOTS, TERMES, REGLES, HEROS;
 
+// « Allié » s’appelle désormais « Combo » ; un nom personnalisé dans l’administration est conservé
+function renommerTermes(t){ if(t.allie==="Allié") t.allie = "Combo"; return t; }
 function fusionner(obj){
   const d = copie(DEFAUT);
   if(!obj || typeof obj!=="object" || !obj.cartes || !obj.factions) return d;
@@ -761,7 +763,7 @@ function fusionner(obj){
   if((obj.version || 1) < 3){ if(reglesObj.pvDepart===30) reglesObj.pvDepart = 40; reglesObj.seuilPouvoir = reglesObj.seuilPouvoir || 10; }
   return {version:d.version, exporte:obj.exporte || 0, repare:obj.repare || 0, cartes:cartesFinales, factions:obj.factions, heros:{...d.heros, ...(obj.heros||{})},
           regles:{...reglesObj, deckDepart:{...((obj.regles && obj.regles.deckDepart) || d.regles.deckDepart)}},
-          mots:{...d.mots, ...(obj.mots||{})}, termes:{...d.termes, ...(obj.termes||{})}};
+          mots:{...d.mots, ...(obj.mots||{})}, termes:renommerTermes({...d.termes, ...(obj.termes||{})})};
 }
 function chargerConfig(){
   let brut = null;
@@ -1016,7 +1018,7 @@ function verifierAllies(i){
       if(!d.allie || t.allieFait || !d.faction) continue;
       if(j.tour.some(o => o!==t && CARTES[o.id].faction===d.faction)){
         t.allieFait = true; encore = true;
-        log(`Allié : ${d.nom} (${decrire(d.allie)})`);
+        log(`${TERMES.allie || "Combo"} : ${d.nom} (${decrire(d.allie)})`);
         appliquer(i, d.allie);
       }
     }
@@ -1501,7 +1503,7 @@ function renderCouche(){
     <li>L’or sert à acheter au marché commun. Une carte achetée arrive dans votre défausse.</li>
     <li>Votre héros frappe avec la puissance du tour, vos créatures avec leur attaque. Il faut d’abord détruire toutes les créatures visibles adverses ; celles avec Provocation passent en premier. Un héros qui attaque une créature subit sa riposte.</li>
     <li>Votre héros est le dieu primordial du panthéon le plus présent dans votre deck. Son pouvoir se charge quand ${REGLES.seuilPouvoir} créatures ennemies sont mortes.</li>
-    <li>Allié : bonus si une autre carte de la même faction a été jouée ce tour.</li>
+    <li>${TERMES.allie || "Combo"} : bonus si une autre carte de la même faction a été jouée ce tour.</li>
     <li>En fin de tour, main et cartes jouées partent à la défausse. Deck vide : la défausse est remélangée.</li></ul></details>`;
   if(!S){
     h = `<div class="boite" role="dialog" aria-label="Nouvelle partie">
@@ -1607,7 +1609,7 @@ const BLOCS = {
   effet:"Effet quand on la joue",
   conjuration:"Conjuration : quand elle arrive en jeu",
   echo:"Echo : quand elle meurt",
-  allie:"Allié : si une autre carte de la même faction est jouée ce tour",
+  allie:"Combo : si une autre carte de la même faction est jouée ce tour",
   sacrifice:"Sacrifice : en la retirant de la partie après l’avoir jouée",
   choixSacrifice:"Sacrifice à la place de l’effet : choix au moment de la jouer"
 };
