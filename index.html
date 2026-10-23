@@ -264,6 +264,12 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 .boite.porte .actions .btn{padding:13px 18px}
 .boite.porte .aide{margin-top:12px}
 
+/* Icônes des effets */
+.ico-effet{display:inline-block;width:1.3em;height:1.3em;vertical-align:-0.3em;margin-left:.06em;cursor:help;filter:drop-shadow(0 1px 1px rgba(0,0,0,.6))}
+.ico-effet svg{width:100%;height:100%;display:block}
+.effet-part{white-space:nowrap;margin:0 .12em}
+.carte .texte{font-size:7cqw}
+
 /* Symboles des mots-clés */
 .sym-mot{--sym-fond:#f2d48a;display:inline-grid;place-items:center;width:1.45em;height:1.45em;border-radius:50%;background:var(--sym-fond);color:#2b1a04;
   vertical-align:-0.38em;margin:0 .08em;box-shadow:0 0 0 1px rgba(0,0,0,.35),0 1px 2px rgba(0,0,0,.4);cursor:help;text-shadow:none}
@@ -350,7 +356,27 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 .zoom-fond{position:fixed;inset:0;display:grid;place-items:center;padding:24px;overflow:auto}
 .zoom{display:flex;gap:28px;align-items:center;justify-content:center;flex-wrap:wrap;max-width:1200px;cursor:default}
 .zoom .carte{--w:min(calc(84vh * 63 / 88), 78vw);cursor:default;box-shadow:0 12px 40px rgba(0,0,0,.45)}
-.zoom.anim .carte{animation:agrandir .25s ease}
+.zoom.anim .carte,.zoom.anim .carte-ouverte{animation:agrandir .25s ease}
+.carte-ouverte{--fc:var(--neutre);--lis:rgba(0,0,0,.4);width:min(calc((86vh - 210px) * 7 / 9), 78vw);min-width:260px;background:var(--fc);border-radius:12px;padding:10px;
+  box-shadow:0 12px 40px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.2);display:flex;flex-direction:column;gap:8px}
+.carte-ouverte.r-legendaire{box-shadow:0 0 0 2px #f2c14e,0 0 18px rgba(242,193,78,.55),0 12px 40px rgba(0,0,0,.45)}
+.z-illu{position:relative;width:100%;aspect-ratio:7/9;border-radius:6px;overflow:hidden;background:#2a2418;box-shadow:0 0 0 2px var(--lis)}
+.z-illu img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.z-illu.sans-image::before{content:"";position:absolute;inset:0;background:var(--fc);opacity:.45}
+.z-illu.sans-image::after{content:attr(data-sym);position:absolute;inset:0;display:grid;place-items:center;font-size:140px;color:rgba(255,255,255,.2)}
+.z-texte{background:rgba(14,10,6,.93);color:#fff;border-radius:6px;padding:12px 14px;font-size:16px;line-height:1.4;position:relative}
+.z-tete{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.z-tete b{font-family:Cinzel,"Times New Roman",serif;font-size:19px}
+.z-type{color:#d6c9a8;font-size:14px}
+.z-prix{width:30px;height:30px;border-radius:50%;flex:none;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#fff4c2,#f0c64e 45%,#a8750f);color:#3b2a06;border:2px solid #7a520a;font-family:Cinzel,serif;font-weight:700}
+.z-effets{text-align:center}
+.z-effets .symboles{display:inline-flex;gap:.3em}
+.z-stats{display:flex;justify-content:space-between;margin-top:8px}
+.z-atk,.z-pv,.z-dur{min-width:38px;height:38px;display:grid;place-items:center;font-family:Cinzel,serif;font-weight:700;font-size:19px;padding:0 6px}
+.z-atk{border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe6b3,#d9a14a 55%,#8a5a1f);color:#2b1a04;border:2px solid #5e3b10}
+.z-pv,.z-dur{padding-bottom:6px;clip-path:polygon(0 0,100% 0,100% 58%,50% 100%,0 58%)}
+.z-pv{background:linear-gradient(#e0705c,#a3291b);color:#fff}
+.z-dur{background:linear-gradient(#c5ced6,#6f7c88);color:#1d232a}
 @keyframes agrandir{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
 .zoom-info{background:var(--zone);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:22px;width:320px;max-width:90vw;display:flex;flex-direction:column;gap:12px}
 .zoom-info h2{font-size:24px;margin:0}
@@ -1295,6 +1321,9 @@ function nomAffiche(j){
 const NOMS_RARETE = {commune:"Commune", rare:"Rare", epique:"Épique", legendaire:"Légendaire"};
 const TEXTES_AIDE = {
   provocation:"Les créatures et le héros adverses doivent viser cette créature avant les autres.",
+  or:"Sert à acheter des cartes au marché pendant ce tour.",
+  soin:"Rend des points de vie à votre héros.",
+  pioche:"Piochez ce nombre de cartes de votre deck.",
   puissance:"Les points d’attaque de votre héros pour ce tour. Il frappe l’adversaire, ou une créature : il subit alors la riposte de celle-ci.",
   rapidite:"Peut attaquer dès le tour où elle est posée.",
   resistance:"Ignore entièrement les premiers dégâts subis, puis disparaît.",
@@ -1317,6 +1346,15 @@ const SYMBOLES = {
   sacrifice:'<path d="M12 2c1 3.8 5.5 5.6 5.5 11a5.5 5.5 0 0 1-11 0c0-2.8 1.6-4.3 2.7-5.6.3 2.2 1.4 3.3 2.5 3.5C11.4 8.3 11 5.2 12 2z" fill="currentColor"/>',
   bannir:'<circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M6.1 17.9 17.9 6.1" stroke="currentColor" stroke-width="2.6"/>'
 };
+// Icônes des effets courants (en couleur, sans pastille, pour les distinguer des mots-clés)
+const ICONES = {
+  or:'<circle cx="12" cy="12" r="9" fill="#f0c64e" stroke="#7a520a" stroke-width="2"/><circle cx="12" cy="12" r="5" fill="none" stroke="#7a520a" stroke-width="1.6"/>',
+  soin:'<path d="M12 20.5s-7.3-4.5-9-9C1.8 8.3 3.9 5 7.3 5c2 0 3.6 1.1 4.7 2.6C13.1 6.1 14.7 5 16.7 5c3.4 0 5.5 3.3 4.3 6.5-1.7 4.5-9 9-9 9z" fill="#e5564a" stroke="#6e1810" stroke-width="1.3"/>',
+  puissance:'<path d="M20.5 3.5 20 8 9.6 18.4l-4-4L16 4z" fill="#e3e7ec" stroke="#2f343b" stroke-width="1.2" stroke-linejoin="round"/><path d="M4.2 13.2l6.6 6.6M3 20.2l3.4-3.4" stroke="#b8873d" stroke-width="2.4" stroke-linecap="round"/>',
+  pioche:'<rect x="4" y="4.5" width="11" height="15" rx="2" fill="#7fa9d6" stroke="#1d3654" stroke-width="1.3" transform="rotate(-10 9.5 12)"/><rect x="9" y="4" width="11" height="15" rx="2" fill="#cfe1f3" stroke="#1d3654" stroke-width="1.3" transform="rotate(8 14.5 11.5)"/>'
+};
+const NOMS_ICONES = {or:"Or", soin:"Soin", puissance:"Puissance", pioche:"Pioche"};
+const icone = k => `<span class="ico-effet" data-aide="${k}" data-titre="${NOMS_ICONES[k]}" role="img" aria-label="${NOMS_ICONES[k]}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONES[k]}</svg></span>`;
 const nomMot = k => MOTS[k] || TERMES[k] || (k==="bannir" ? "Bannir" : k);
 function symMot(k){
   const nom = nomMot(k);
@@ -1324,8 +1362,21 @@ function symMot(k){
 }
 // Texte d’un effet avec le symbole Bannir à la place de la phrase
 function decrireHTML(e){
-  let t = esc(decrire(e)).replace(/(^|, )bannissez (\d+) carte de votre main ou défausse/gi, (m, debut, n) => `${debut}${symMot("bannir")}\u00a0${n}`);
-  return avecAides(t.replace(/^, /, ""));
+  const p = [];
+  if(e.or) p.push(`+${e.or}${icone("or")}`);
+  if(e.combat) p.push(`+${e.combat}${icone("puissance")}`);
+  if(e.soin) p.push(`+${e.soin}${icone("soin")}`);
+  if(e.pioche) p.push(`+${e.pioche}${icone("pioche")}`);
+  if(e.bannir) p.push(`${symMot("bannir")}\u00a0${e.bannir}`);
+  const mots = [];
+  if(e.degatsTous) mots.push(`${e.degatsTous} dégâts à chaque créature adverse`);
+  if(e.degatsHasard) mots.push(`${e.degatsHasard} dégâts à une créature adverse au hasard`);
+  if(e.renfort) mots.push(`vos créatures gagnent +${e.renfort.atk}/+${e.renfort.vie}`);
+  if(e.invoque && e.invoque.id && e.invoque.n) mots.push(`invoque ${e.invoque.n} ${esc(CARTES[e.invoque.id] ? CARTES[e.invoque.id].nom : "?")}`);
+  const icones = p.map(x => `<span class="effet-part">${x}</span>`).join(" ");
+  const texte = mots.join(", ");
+  if(!icones && !texte) return "Aucun effet.";
+  return [icones, texte ? texte.charAt(0).toUpperCase() + texte.slice(1) + "." : ""].filter(Boolean).join(" ");
 }
 // Lignes de texte d’une carte, avec symboles (version affichée sur les cartes)
 function lignesHTML(d){
@@ -3188,6 +3239,22 @@ function pageCollection(){
       return `<div class="col-item ${nb ? "" : "manque"}">${htmlCarte({id, uid:id}, {act:"col-sel", id})}<span class="badge-nb">${nb ? "×" + nb : "0"}</span></div>`;
     }).join("") || `<p class="aide">Aucune carte ne correspond à ces filtres.</p>`}</div>`;
 }
+// Grande vue : l’illustration seule, puis le texte de la carte en dessous
+function htmlCarteOuverte(d, id){
+  const f = d.faction && FACTIONS[d.faction] ? d.faction : "neutre";
+  const img = d.imageHD || d.image, sym = f!=="neutre" ? FACTIONS[f].sym : "";
+  const lignes = lignesHTML(d);
+  const stats = d.type==="creature" ? `<span class="z-atk" title="Attaque">${d.attaque}</span><span class="z-pv" title="Points de vie">${d.vie}</span>`
+    : d.type==="arme" ? `<span class="z-atk" title="Bonus d’attaque">+${d.bonus}</span><span class="z-dur" title="Nombre d’attaques">${d.durabilite}</span>` : "";
+  return `<div class="carte-ouverte f-${f} r-${d.rarete || "base"}">
+    <div class="z-illu ${img ? "" : "sans-image"}" data-sym="${sym}">${img ? `<img src="${img}" alt="Illustration de ${esc(d.nom)}">` : ""}</div>
+    <div class="z-texte">
+      <div class="z-tete">${d.prix!=null && !d.depart ? `<span class="z-prix" title="Prix en or">${d.prix}</span>` : ""}<b>${esc(d.nom)}</b><span class="z-type">${typeLigne(d)}</span></div>
+      ${lignes.length ? `<div class="z-effets">${lignes.join("<br>")}</div>` : ""}
+      ${stats ? `<div class="z-stats">${stats}</div>` : ""}
+    </div>
+  </div>`;
+}
 function htmlZoom(){
   const id = PROG.sel, d = CARTES[id];
   if(!d) return "";
@@ -3200,7 +3267,7 @@ function htmlZoom(){
   return `<div class="zoom-fond" data-act="zoom-fermer">
     <button type="button" class="zoom-fermer" data-act="zoom-fermer" aria-label="Fermer">×</button>
     <div class="zoom ${anim ? "anim" : ""}" data-act="zoom-rien" role="dialog" aria-label="${esc(d.nom)}">
-      ${htmlCarte({id, uid:"zoom"}, {hd:true})}
+      ${htmlCarteOuverte(d, id)}
       <div class="zoom-info">
         <h2>${esc(d.nom)}</h2>
         <p class="meta">${NOMS_RARETE[r]}, ${esc(fac)}</p>
