@@ -274,6 +274,7 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 .sym-mot{--sym-fond:#f2d48a;display:inline-grid;place-items:center;width:1.45em;height:1.45em;border-radius:50%;background:var(--sym-fond);color:#2b1a04;
   vertical-align:-0.38em;margin:0 .08em;box-shadow:0 0 0 1px rgba(0,0,0,.35),0 1px 2px rgba(0,0,0,.4);cursor:help;text-shadow:none}
 .sym-mot svg{width:72%;height:72%;display:block}
+.sym-mot.sym-faction{background:var(--fc);color:var(--fci);font-size:.95em;line-height:1;box-shadow:0 0 0 1.5px #f2d48a,0 1px 2px rgba(0,0,0,.45)}
 .carte .texte .symboles{display:inline-flex;gap:.25em;justify-content:center;margin-bottom:.15em}
 .carte .texte .symboles .sym-mot{width:1.75em;height:1.75em}
 .crea .puces .sym-mot{width:15cqw;height:15cqw}
@@ -868,7 +869,7 @@ function texteCarte(d){
   if(d.type==="arme") l.push(`Équipe une de vos créatures : +${d.bonus} attaque pendant ${d.durabilite} attaques.`);
   if(d.type==="creature" && d.conjuration) l.push(TERMES.conjuration + " : " + decrire(d.conjuration));
   if(d.type==="creature" && d.echo) l.push(TERMES.echo + " : " + decrire(d.echo));
-  if(d.allie) l.push(TERMES.allie + " : " + decrire(d.allie));
+  if(d.allie){ const fc = factionCombo(d); l.push(`${TERMES.allie}${fc ? ` (${FACTIONS[fc].nom})` : ""} : ${decrire(d.allie)}`); }
   if(d.sacrifice) l.push(TERMES.sacrifice + " : " + decrire(d.sacrifice));
   if(d.choixSacrifice) l.push("Ou " + TERMES.sacrifice.toLowerCase() + " : " + decrire(d.choixSacrifice));
   return l;
@@ -1044,15 +1045,18 @@ function verifierVictoire(){
   else if(b.pv<=0) S.vainqueur = a.nom;
 }
 
+// Faction qui déclenche le combo d’une carte : celle choisie dans l’administration, sinon la sienne.
+// (Plus tard : une carte neutre, ou d’une autre faction, pourra faire combo avec n’importe quelle faction.)
+const factionCombo = d => (d.comboFaction && FACTIONS[d.comboFaction]) ? d.comboFaction : (d.faction && FACTIONS[d.faction] ? d.faction : null);
 function verifierAllies(i){
   const j = S.joueurs[i];
   let encore = true;
   while(encore){
     encore = false;
     for(const t of j.tour){
-      const d = CARTES[t.id];
-      if(!d.allie || t.allieFait || !d.faction) continue;
-      if(j.tour.some(o => o!==t && CARTES[o.id].faction===d.faction)){
+      const d = CARTES[t.id], cible = factionCombo(d);
+      if(!d.allie || t.allieFait || !cible) continue;
+      if(j.tour.some(o => o!==t && CARTES[o.id] && CARTES[o.id].faction===cible)){
         t.allieFait = true; encore = true;
         log(`${TERMES.allie || "Combo"} : ${d.nom} (${decrire(d.allie)})`);
         appliquer(i, d.allie);
@@ -1330,7 +1334,7 @@ const TEXTES_AIDE = {
   ethere:"Ne peut pas être visée tant qu’elle n’a pas attaqué. Elle ne protège pas son joueur.",
   conjuration:"Effet déclenché quand la créature arrive en jeu.",
   echo:"Effet déclenché quand la créature meurt.",
-  allie:"Bonus déclenché si une autre carte de la même faction a été jouée ce tour.",
+  allie:"Bonus déclenché si une autre carte de la faction indiquée par le symbole a été jouée ce tour.",
   sacrifice:"Retirez la carte de la partie pour obtenir cet effet. Elle ne reviendra plus dans votre deck.",
   bannir:"Retirez définitivement une carte de votre main ou de votre défausse : votre deck s’allège et vous piochez plus souvent vos meilleures cartes."
 };
@@ -1355,6 +1359,12 @@ const ICONES = {
 };
 const NOMS_ICONES = {or:"Or", soin:"Soin", puissance:"Puissance", pioche:"Pioche"};
 const icone = k => `<span class="ico-effet" data-aide="${k}" data-titre="${NOMS_ICONES[k]}" role="img" aria-label="${NOMS_ICONES[k]}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONES[k]}</svg></span>`;
+// Symbole du combo : le symbole de la faction à jouer, sur sa couleur
+function symCombo(f){
+  if(!f || !FACTIONS[f]) return symMot("allie");
+  const fac = FACTIONS[f], nom = TERMES.allie || "Combo";
+  return `<span class="sym-mot sym-faction f-${f}" data-aide="carte" data-titre="${esc(nom)} : ${esc(fac.nom)}" data-texte="${esc(`Bonus déclenché si une autre carte ${fac.f} a été jouée ce tour.`)}" role="img" aria-label="${esc(nom)} avec les ${esc(fac.nom)}">${esc(fac.sym)}</span>`;
+}
 const nomMot = k => MOTS[k] || TERMES[k] || (k==="bannir" ? "Bannir" : k);
 function symMot(k){
   const nom = nomMot(k);
@@ -1386,7 +1396,7 @@ function lignesHTML(d){
   if(d.type==="arme") l.push(`Équipe une créature : +${d.bonus} attaque, ${d.durabilite} attaques.`);
   if(d.type==="creature" && d.conjuration) l.push(`${symMot("conjuration")} ${decrireHTML(d.conjuration)}`);
   if(d.type==="creature" && d.echo) l.push(`${symMot("echo")} ${decrireHTML(d.echo)}`);
-  if(d.allie) l.push(`${symMot("allie")} ${decrireHTML(d.allie)}`);
+  if(d.allie) l.push(`${symCombo(factionCombo(d))} ${decrireHTML(d.allie)}`);
   if(d.sacrifice) l.push(`${symMot("sacrifice")} ${decrireHTML(d.sacrifice)}`);
   if(d.choixSacrifice) l.push(`ou ${symMot("sacrifice")} ${decrireHTML(d.choixSacrifice)}`);
   return l;
@@ -1600,7 +1610,8 @@ function renderCouche(){
     <li>Votre héros frappe avec la puissance du tour, vos créatures avec leur attaque. Il faut d’abord détruire toutes les créatures visibles adverses ; celles avec Provocation passent en premier. Un héros qui attaque une créature subit sa riposte.</li>
     <li>Votre héros est le dieu primordial du panthéon le plus présent dans votre deck. Son pouvoir se charge quand ${REGLES.seuilPouvoir} créatures ennemies sont mortes.</li>
     <li>${TERMES.allie || "Combo"} : bonus si une autre carte de la même faction a été jouée ce tour.</li>
-    <li class="legende-symboles">Symboles des mots-clés : ${["provocation","rapidite","resistance","ethere","conjuration","echo","allie","sacrifice","bannir"].map(k => `<span class="legende">${symMot(k)} ${esc(nomMot(k))}</span>`).join("")}</li>
+    <li class="legende-symboles">Symboles des mots-clés : ${["provocation","rapidite","resistance","ethere","conjuration","echo","sacrifice","bannir"].map(k => `<span class="legende">${symMot(k)} ${esc(nomMot(k))}</span>`).join("")}</li>
+    <li class="legende-symboles">${esc(TERMES.allie || "Combo")} : le symbole d’une faction (${Object.keys(FACTIONS).map(f => symCombo(f)).join("")}) indique la faction à jouer dans le même tour pour obtenir le bonus.</li>
     <li>En fin de tour, main et cartes jouées partent à la défausse. Deck vide : la défausse est remélangée.</li></ul></details>`;
   if(!S){
     h = `<div class="boite" role="dialog" aria-label="Nouvelle partie">
@@ -1706,7 +1717,7 @@ const BLOCS = {
   effet:"Effet quand on la joue",
   conjuration:"Conjuration : quand elle arrive en jeu",
   echo:"Echo : quand elle meurt",
-  allie:"Combo : si une autre carte de la même faction est jouée ce tour",
+  allie:"Combo : si une carte de la faction choisie est aussi jouée ce tour",
   sacrifice:"Sacrifice : en la retirant de la partie après l’avoir jouée",
   choixSacrifice:"Sacrifice à la place de l’effet : choix au moment de la jouer"
 };
@@ -1784,8 +1795,10 @@ function formCarte(id){
   const blocs = (BLOCS_PAR_TYPE[d.type] || []).map(cle => {
     const e = d[cle] || {}, pc = `${p}.${cle}`, rempli = Object.keys(e).length>0;
     const ouvert = rempli || adm.ouverts.has(id+"."+cle);
+    const choixCombo = cle==="allie" ? `<div class="champs" style="margin-top:10px">${champSelect("Faction à jouer pour déclencher le combo", `cartes.${id}.comboFaction`, d.comboFaction || "",
+      [["", d.faction && FACTIONS[d.faction] ? `Sa propre faction (${FACTIONS[d.faction].nom})` : "Aucune (carte neutre : choisissez une faction)"], ...Object.entries(FACTIONS).filter(([k]) => k!==d.faction).map(([k,f]) => [k, f.nom])])}</div>` : "";
     return `<details class="effet" data-bloc="${id}.${cle}" ${ouvert ? "open" : ""}>
-      <summary>${BLOCS[cle]}<span>${rempli ? esc(decrire(e)) : "Aucun effet"}</span></summary>
+      <summary>${BLOCS[cle]}<span>${rempli ? esc(decrire(e)) : "Aucun effet"}</span></summary>${choixCombo}
       <div class="champs petits">
         ${EFFETS.map(([k,l]) => champNombre(l, `${pc}.${k}`, e[k] || 0)).join("")}
         ${champNombre("Renfort : attaque", `${pc}.renfort.atk`, e.renfort ? e.renfort.atk : 0)}
@@ -1983,6 +1996,7 @@ function majChemin(chemin, brut, nombre){
     if(parts[0]==="cartes"){
       const c = CARTES[parts[1]];
       if(k==="faction" && !v) delete c.faction;
+      if(k==="comboFaction" && !v) delete c.comboFaction;
       if(parts.at(-2)==="invoque" && k==="id" && v && !o.n) o.n = 1;
       if(k==="type"){
         if(v==="creature"){ c.attaque = c.attaque ?? 1; c.vie = c.vie ?? 1; }
