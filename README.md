@@ -73,6 +73,12 @@ retrouvent leurs chiffres et leurs trophées dans « Mon profil » ; l’adminis
 joueur et ordinateur, hôte et invité en ligne, ou deux camps locaux pour une partie sur un même écran.
 Il y a donc toujours autant de victoires que de défaites. Ce script remet l’historique des parties à zéro.
 
+## Paquets par faction
+
+`supabase-boosters.sql` (à exécuter après `supabase-phase4.sql`) ajoute la faction au catalogue du serveur et permet
+d’acheter, en plus du paquet classique, un paquet par faction (même prix, mêmes chances). Après avoir ajouté des cartes
+ou changé leur faction, renvoyez le catalogue depuis l’administration (onglet Serveur).
+
 ## Sécurité
 
 Le dépôt est public : n’y mettez jamais de mot de passe ni la clé « service_role » de Supabase.

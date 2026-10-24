@@ -386,7 +386,15 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 .liste-deck button:hover{background:var(--table-2)}
 .prix-mini{width:22px;height:22px;border-radius:50%;background:#f0c64e;color:#3b2a06;display:grid;place-items:center;font-weight:700;font-size:12px;flex:none}
 .x-nb{margin-left:auto;color:var(--ink-2)}
-.boutique .offre{display:flex;gap:20px;align-items:center;background:var(--zone);border:1px solid var(--line);border-radius:14px;padding:16px;flex-wrap:wrap}
+.boutique .offres{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:14px}
+.boutique .offre:not([class*="f-"]){--fc:var(--bronze)}
+.boutique .offres .paquet-visuel{width:84px;font-size:34px}
+.boutique .offre{display:flex;flex-direction:column;text-align:center;gap:12px;align-items:center;background:var(--zone);border:1px solid var(--line);border-left:5px solid var(--fc);border-radius:10px;padding:14px}
+.offre-texte{display:flex;flex-direction:column;gap:6px;min-width:0;align-items:center}
+.offre-texte h2{font-size:18px}
+.paquet-visuel.paquet-faction,.dos[class*="f-"]{background:linear-gradient(135deg,color-mix(in srgb, var(--fc) 85%, white 10%),color-mix(in srgb, var(--fc) 55%, black));color:var(--fci)}
+.boutique .ouverture{background:var(--zone);border:1px solid color-mix(in srgb, var(--or) 50%, var(--line));border-radius:10px;padding:14px 16px;margin-top:10px}
+.boutique .ouverture h2{font-size:20px;margin:0}
 .boutique .offre h2{font-size:20px;margin-bottom:6px}
 .boutique .offre .aide{margin:0 0 12px}
 .paquet-visuel,.dos{width:120px;aspect-ratio:63/88;border-radius:8px;background:linear-gradient(135deg,#8a5a1f,#3b2a14);display:grid;place-items:center;color:#f2d48a;font-family:Cinzel,"Times New Roman",serif;font-size:44px;font-weight:700;box-shadow:inset 0 0 0 4px rgba(242,212,138,.5),0 3px 8px rgba(0,0,0,.3);border:none;flex:none}
@@ -3405,23 +3413,27 @@ function pageEditeur(){
 function pageBoutique(){
   const prix = PROG.eco ? PROG.eco.prix_paquet : 100, n = PROG.eco ? PROG.eco.cartes_paquet : 5;
   const pr = PROG.eco ? PROG.eco.probabilites : {};
-  const pq = PROG.paquet;
-  const contenu = pq ? `<div class="revelation">${pq.cartes.map((id, i) => pq.reveles.has(i)
+  const pq = PROG.paquet, manque = !PROG.profil || PROG.profil.pieces_or<prix;
+  const contenu = pq ? `<div class="ouverture">
+    <h2>${esc(pq.titre || "Votre paquet")}</h2>
+    <div class="revelation">${pq.cartes.map((id, i) => pq.reveles.has(i)
       ? `<div class="revele ${pq.anim && pq.anim.has(i) ? "anim" : ""}">${htmlCarte({id, uid:"p"+i})}${pq.nouvelles.has(id) ? `<span class="nouvelle">Nouvelle !</span>` : ""}</div>`
-      : `<button type="button" class="dos" data-act="paquet-reveler" data-id="${i}" aria-label="Révéler la carte ${i+1}"><span>${NOM_JEU.charAt(0)}</span></button>`).join("")}</div>
+      : `<button type="button" class="dos ${pq.faction ? "f-" + pq.faction : ""}" data-act="paquet-reveler" data-id="${i}" aria-label="Révéler la carte ${i+1}"><span>${pq.faction && FACTIONS[pq.faction] ? esc(FACTIONS[pq.faction].sym) : NOM_JEU.charAt(0)}</span></button>`).join("")}</div>
     <div class="actions">${pq.reveles.size<pq.cartes.length ? `<button type="button" class="btn" data-act="paquet-tout">Tout révéler</button>` : ""}
-      <button type="button" class="btn second" data-act="paquet-fermer">Fermer</button></div>` : "";
+      <button type="button" class="btn second" data-act="paquet-fermer">Fermer</button></div></div>` : "";
+  // Un paquet classique (toutes factions) et un paquet par faction, même prix et mêmes chances
+  const offres = [{id:"", nom:"Paquet classique", desc:"Cartes de toutes les factions.", sym:NOM_JEU.charAt(0), f:null},
+    ...Object.entries(FACTIONS).map(([k, f]) => ({id:k, nom:`Paquet ${f.m}`, desc:`Uniquement des cartes ${f.f}s.`.replace(/ss\./, "s."), sym:f.sym, f:k}))];
   return `${entete("Boutique")}
     <div class="boutique">
-      <div class="offre">
-        <div class="paquet-visuel" aria-hidden="true"><span>${NOM_JEU.charAt(0)}</span></div>
-        <div><h2>Paquet de ${n} cartes</h2>
-          <p class="aide">Au moins une carte rare. Chances par carte : commune ${Math.round((pr.commune||0)*100)} %, rare ${Math.round((pr.rare||0)*100)} %, épique ${Math.round((pr.epique||0)*100)} %, légendaire ${Math.round((pr.legendaire||0)*100)} %.</p>
-          <button type="button" class="btn" data-act="paquet-acheter" ${!PROG.profil || PROG.profil.pieces_or<prix || PROG.occupe ? "disabled" : ""}>Acheter pour ${prix} or</button>
-          ${PROG.profil && PROG.profil.pieces_or<prix ? `<p class="aide">Gagnez de l’or en jouant des parties et en réussissant la quête du jour.</p>` : ""}
-        </div>
-      </div>
+      <p class="aide">Chaque paquet contient ${n} cartes, dont au moins une rare. Chances par carte : commune ${Math.round((pr.commune||0)*100)} %, rare ${Math.round((pr.rare||0)*100)} %, épique ${Math.round((pr.epique||0)*100)} %, légendaire ${Math.round((pr.legendaire||0)*100)} %.</p>
+      ${manque ? `<p class="avertissement">Il vous faut ${prix} or pour acheter un paquet. Gagnez de l’or en jouant des parties et en réussissant la quête du jour.</p>` : ""}
       ${contenu}
+      <div class="offres">${offres.map(o => `<div class="offre ${o.f ? "f-" + o.f : ""}">
+        <div class="paquet-visuel ${o.f ? "paquet-faction" : ""}" aria-hidden="true"><span>${esc(o.sym)}</span></div>
+        <div class="offre-texte"><h2>${esc(o.nom)}</h2><p class="aide">${esc(o.desc)}</p>
+          <button type="button" class="btn" data-act="paquet-acheter" data-id="${o.id}" ${manque || PROG.occupe ? "disabled" : ""}>Acheter pour ${prix} or</button></div>
+      </div>`).join("")}</div>
     </div>`;
 }
 
@@ -3499,10 +3511,12 @@ function actionProg(act, id){
       return true;
     }
     case "paquet-acheter": {
-      const avant = {...PROG.collection};
+      const avant = {...PROG.collection}, f = id && FACTIONS[id] ? id : null;
       action(async () => {
-        const cartes = await rpc("ouvrir_paquet");
-        PROG.paquet = {cartes, reveles:new Set(), anim:new Set(), nouvelles:new Set(cartes.filter(c => !avant[c]))};
+        const cartes = await rpc("ouvrir_paquet", f ? {p_faction:f} : {});
+        PROG.paquet = {cartes, faction:f, titre: f ? `Paquet ${FACTIONS[f].m}` : "Paquet classique",
+                       reveles:new Set(), anim:new Set(), nouvelles:new Set(cartes.filter(c => !avant[c]))};
+        try { window.scrollTo({top:0, behavior:"auto"}); } catch(e) {}
       });
       return true;
     }
@@ -4264,7 +4278,7 @@ function pageRegles(){
       <li><b>Cartes offertes :</b> à votre arrivée, vous recevez ${eco.depart ? Object.values(eco.depart).reduce((a,b) => a+b, 0) : 30} cartes pour former votre premier deck, et ${eco.or_depart} or afin d’ouvrir un booster.</li>
       <li><b>Decks :</b> ${R.tailleDeck} cartes, ${R.copiesMax} exemplaires au maximum par carte et ${R.copiesLegendaire} pour une légendaire. Vous pouvez en enregistrer jusqu’à 9.</li>
       <li><b>Or :</b> une victoire rapporte ${eco.or_victoire} or, une défaite ${eco.or_defaite} (au maximum ${eco.plafond_or_jour} or par jour). La quête du jour rapporte ${eco.or_quete} or.</li>
-      <li><b>Boutique :</b> un paquet coûte ${eco.prix_paquet} or et contient ${eco.cartes_paquet} cartes, dont au moins une rare. Chances par carte : commune ${pct(eco.probabilites.commune)}, rare ${pct(eco.probabilites.rare)}, épique ${pct(eco.probabilites.epique)}, légendaire ${pct(eco.probabilites.legendaire)}.</li>
+      <li><b>Boutique :</b> un paquet coûte ${eco.prix_paquet} or et contient ${eco.cartes_paquet} cartes, dont au moins une rare. Le paquet classique mélange toutes les factions ; chaque faction a aussi son paquet, qui ne contient que ses cartes. Chances par carte : commune ${pct(eco.probabilites.commune)}, rare ${pct(eco.probabilites.rare)}, épique ${pct(eco.probabilites.epique)}, légendaire ${pct(eco.probabilites.legendaire)}.</li>
       <li><b>Encre :</b> recyclez vos exemplaires en trop pour obtenir de l’encre (${eco.encre_recyclage.commune} pour une commune, jusqu’à ${eco.encre_recyclage.legendaire} pour une légendaire), et fabriquez les cartes qui vous manquent (de ${eco.encre_fabrication.commune} à ${eco.encre_fabrication.legendaire} encre).</li>
       <li><b>Profil et trophées :</b> choisissez votre pseudo, suivez vos statistiques et débloquez des trophées en bronze, argent et or.</li></ul>`],
     ["enligne", "Jouer en ligne", `<ol><li>Choisissez « En ligne », puis « Créer une partie » : un code de 5 caractères s’affiche.</li>
