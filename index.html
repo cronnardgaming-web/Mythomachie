@@ -281,6 +281,34 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 .legende-symboles{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
 .legende{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
 
+/* Règles du jeu */
+.page-regles{display:grid;grid-template-columns:240px minmax(0,1fr);gap:18px;align-items:start;max-width:1150px}
+.sommaire{position:sticky;top:12px;background:var(--zone);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.sommaire b{font-family:Cinzel,serif}
+.sommaire ol{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:15px}
+.sommaire a{color:var(--ink);text-decoration:none}
+.sommaire a:hover{color:var(--or);text-decoration:underline}
+.corps-regles{display:flex;flex-direction:column;gap:14px}
+.corps-regles section{scroll-margin-top:12px;line-height:1.55}
+.corps-regles ul,.corps-regles ol{padding-left:22px;margin:6px 0}
+.corps-regles li{margin-bottom:6px}
+.corps-regles .tableau td{white-space:normal;vertical-align:middle}
+.corps-regles .sym-mot,.corps-regles .ico-effet{font-size:18px}
+@media (max-width:860px){.page-regles{grid-template-columns:1fr}.sommaire{position:static}}
+
+/* Tutoriel */
+#tuto-panneau{position:fixed;z-index:24;left:16px;top:96px;width:320px;max-width:calc(100vw - 32px);background:var(--zone);color:var(--ink);
+  border:1px solid color-mix(in srgb, var(--or) 60%, var(--line));border-radius:10px;padding:16px 18px;box-shadow:0 14px 40px var(--ombre),inset 0 0 0 4px var(--zone),inset 0 0 0 5px color-mix(in srgb, var(--or) 25%, transparent)}
+#tuto-panneau h2{font-size:20px;margin:4px 0 8px;color:var(--or)}
+#tuto-panneau p{margin:0 0 12px;line-height:1.5;font-size:15px}
+#tuto-panneau .tuto-etape{font-size:13px;color:var(--ink-2);letter-spacing:.04em}
+#tuto-panneau .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tuto-cible{outline:3px solid var(--or);outline-offset:4px;border-radius:10px;animation:tuto-pulse 1.3s ease-in-out infinite;position:relative;z-index:6}
+.medaillon.tuto-cible{border-radius:50%}
+@keyframes tuto-pulse{50%{outline-color:transparent;box-shadow:0 0 22px color-mix(in srgb, var(--or) 60%, transparent)}}
+@media (max-width:1060px){#tuto-panneau{top:auto;bottom:12px;left:12px;right:12px;width:auto}}
+@media (prefers-reduced-motion: reduce){.tuto-cible{animation:none}}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -1488,6 +1516,8 @@ function htmlMedaillon(j, estMoi, inter, cible){
 function render(){
   const app = document.getElementById("app");
   if(ui.ecran==="admin"){ INSTANT = null; renderAdmin(); return; }
+  if(ui.ecran!=="jeu" || !tutoActif()){ const p = document.getElementById("tuto-panneau"); if(p) p.remove(); }
+  if(ui.ecran==="regles"){ INSTANT = null; app.innerHTML = pageRegles(); document.getElementById("couche").innerHTML = ""; document.getElementById("couche").classList.remove("accueil"); return; }
   if(["collection","decks","editeur","boutique","profil"].includes(ui.ecran)){ INSTANT = null; renderProg(); return; }
   if(!S){ INSTANT = null; app.innerHTML = ""; renderCouche(); if(PROG.pret) signaler(); return; }
   const me = vue(), moi = S.joueurs[me], lui = S.joueurs[1-me];
@@ -1551,8 +1581,10 @@ function render(){
       <details class="journal" ${ui.journalFerme ? "" : "open"}><summary>Journal</summary><ol>${S.journal.slice(-10).reverse().map(l => `<li>${l}</li>`).join("")}</ol></details>
     </aside>
   </div>`;
+  if(tutoActif()) avancerTuto();
   renderCouche();
   animerChangements();
+  renderTuto();
   if(PROG.pret) signaler();
   if(S.vainqueur!==null) verifierRecompense();
 }
@@ -1603,16 +1635,7 @@ function animerChangements(){
 function renderCouche(){
   const couche = document.getElementById("couche");
   let h = "";
-  const regles = `<details ${ui.regles ? "open" : ""}><summary>Règles en bref</summary><ul>
-    <li>Chaque joueur a ${REGLES.pvDepart} points de vie et commence avec le même deck de départ. On pioche ${REGLES.piocheParTour} cartes par tour.</li>
-    <li>Jouer une carte est gratuit : elle donne de l’or, de la puissance, du soin ou pose une créature.</li>
-    <li>L’or sert à acheter au marché commun. Une carte achetée arrive dans votre défausse.</li>
-    <li>Votre héros frappe avec la puissance du tour, vos créatures avec leur attaque. Il faut d’abord détruire toutes les créatures visibles adverses ; celles avec Provocation passent en premier. Un héros qui attaque une créature subit sa riposte.</li>
-    <li>Votre héros est le dieu primordial du panthéon le plus présent dans votre deck. Son pouvoir se charge quand ${REGLES.seuilPouvoir} créatures ennemies sont mortes.</li>
-    <li>${TERMES.allie || "Combo"} : bonus si une autre carte de la même faction a été jouée ce tour.</li>
-    <li class="legende-symboles">Symboles des mots-clés : ${["provocation","rapidite","resistance","ethere","conjuration","echo","sacrifice","bannir"].map(k => `<span class="legende">${symMot(k)} ${esc(nomMot(k))}</span>`).join("")}</li>
-    <li class="legende-symboles">${esc(TERMES.allie || "Combo")} : le symbole d’une faction (${Object.keys(FACTIONS).map(f => symCombo(f)).join("")}) indique la faction à jouer dans le même tour pour obtenir le bonus.</li>
-    <li>En fin de tour, main et cartes jouées partent à la défausse. Deck vide : la défausse est remélangée.</li></ul></details>`;
+  const regles = "";
   if(!S){
     h = `<div class="boite" role="dialog" aria-label="Nouvelle partie">
       <h2 class="logo">${NOM_JEU}</h2><span class="sous-logo">Le choc des panthéons</span>
@@ -1620,11 +1643,15 @@ function renderCouche(){
       <div class="actions">
         <button type="button" class="btn" data-act="mode-ia">Jouer contre l’ordinateur</button>
         <button type="button" class="btn second" data-act="mode-duo">Deux joueurs sur cet écran</button>
+        <button type="button" class="btn second" data-act="tuto">Tutoriel</button>
+        <button type="button" class="btn second" data-act="regles">Règles du jeu</button>
         <button type="button" class="btn second" data-act="en-ligne">Jouer en ligne</button>
         <button type="button" class="btn second" data-act="admin">Administration</button>
       </div>${regles}</div>`;
     if(PROG.actif) h = PROG.porte ? htmlPorte() : PROG.accueilEtape && PROG.pret ? htmlBienvenue() : PROG.compteVue && PROG.pret ? htmlFormCompte() : PROG.choixDeck ? htmlChoixDeck() : htmlAccueilProg(regles);
     if(EN.ecran) h = htmlEnLigne();
+  } else if(S.vainqueur!==null && S.tuto){
+    h = htmlFinTuto();
   } else if(S.vainqueur!==null){
     const titre = S.vainqueur==="egalite" ? "Égalité"
       : enLigne() || S.mode==="ia" ? (S.vainqueur===S.joueurs[vue()].nom ? "Victoire !" : "Défaite")
@@ -1665,7 +1692,7 @@ function renderCouche(){
 function apresAction(){
   if(enLigne() && EN.role==="hote") publier();
   render();
-  if(S && S.vainqueur===null && S.mode==="ia" && S.courant===1 && !ui.aiEnCours) tourIA();
+  if(S && S.vainqueur===null && S.mode==="ia" && S.courant===1 && !ui.aiEnCours) (tutoActif() ? tutoTourAdverse() : tourIA());
 }
 
 /* ============================================================
@@ -2673,6 +2700,11 @@ document.addEventListener("click", e => {
   }
   if(act==="nouvelle"){ if(enLigne() || EN.role) quitterEnLigne(); S = null; ui.couvert = false; ui.aiEnCours = false; return render(); }
   if(act.startsWith("en-")) return actionEnLigne(act, id);
+  if(act==="tuto") return lancerTuto();
+  if(act==="regles"){ if(tutoActif()) S = null; ui.ecran = "regles"; window.scrollTo(0, 0); return render(); }
+  if(act==="regles-retour"){ ui.ecran = "jeu"; return render(); }
+  if(act==="tuto-quitter"){ S = null; ui.ecran = "jeu"; const p = document.getElementById("tuto-panneau"); if(p) p.remove(); return render(); }
+  if(act==="tuto-suivant"){ TUTO.etape++; return render(); }
   if(act==="admin" && !accesAdmin()) return erreur("L’administration est réservée à l’administrateur du jeu.");
   if(ui.ecran==="admin" && !accesAdmin()){ ui.ecran = "jeu"; return render(); }
   if(ui.ecran==="admin" || act==="admin"){ return actionAdmin(act, id, el); }
@@ -2693,6 +2725,10 @@ document.addEventListener("click", e => {
     M().jouer(ui.choixPierre, {sacrifierDirect: act==="pierre-sac"}); ui.choixPierre = null; return apresAction();
   }
   if(!interactif()) return;
+  if(tutoActif() && !tutoAutorise(act, id)){
+    const e = etapesTuto()[TUTO.etape];
+    return erreur(e ? `Pour l’instant, suivez l’étape « ${e.titre} » : l’élément à utiliser brille.` : "Suivez les étapes du tutoriel.");
+  }
   const j = S.joueurs[S.courant];
   switch(act){
     case "main": {
@@ -3091,7 +3127,7 @@ async function action(fn, succes){
 
 // ----- Fin de partie : or et quête
 async function verifierRecompense(){
-  if(!PROG.pret || !S || S.vainqueur===null || !S.idPartie) return;
+  if(!PROG.pret || !S || S.vainqueur===null || !S.idPartie || S.tuto) return;
   if(PROG.recompensees.has(S.idPartie)) return;
   const cle = S.idPartie;
   PROG.recompensees.add(cle);
@@ -3129,7 +3165,8 @@ function htmlAccueilProg(regles){
   if(!PROG.pret) return `<div class="boite" role="dialog" aria-label="${NOM_JEU}"><h2 class="logo">${NOM_JEU}</h2><span class="sous-logo">Le choc des panthéons</span>
     ${PROG.erreur ? `<p style="color:var(--danger)">${esc(PROG.erreur)}</p><div class="actions"><button type="button" class="btn" data-act="prog-reessayer">Réessayer</button></div>
       <h3>Jouer sans collection</h3><p class="aide">Les decks sont tirés au hasard et les parties ne rapportent pas d’or.</p>
-      <div class="actions"><button type="button" class="btn second" data-act="mode-ia">Contre l’ordinateur</button><button type="button" class="btn second" data-act="mode-duo">Deux joueurs sur cet écran</button><button type="button" class="btn second" data-act="en-ligne">En ligne</button></div>` : `<p class="attente">Chargement de votre collection…</p>`}</div>`;
+      <div class="actions"><button type="button" class="btn second" data-act="mode-ia">Contre l’ordinateur</button><button type="button" class="btn second" data-act="mode-duo">Deux joueurs sur cet écran</button><button type="button" class="btn second" data-act="en-ligne">En ligne</button></div>
+      <h3>Apprendre</h3><div class="actions"><button type="button" class="btn second" data-act="tuto">Tutoriel</button><button type="button" class="btn second" data-act="regles">Règles du jeu</button></div>` : `<p class="attente">Chargement de votre collection…</p>`}</div>`;
   const bienvenue = "";
   return `<div class="boite boite-large" role="dialog" aria-label="${NOM_JEU}">
     <div class="tete-accueil"><div><h2 class="logo">${NOM_JEU}</h2><span class="sous-logo">Le choc des panthéons</span></div>${bourse()}</div>
@@ -3139,6 +3176,11 @@ function htmlAccueilProg(regles){
       <button type="button" class="btn" data-act="jouer-ia">Contre l’ordinateur</button>
       <button type="button" class="btn" data-act="en-ligne">En ligne</button>
       <button type="button" class="btn second" data-act="jouer-duo">Deux joueurs sur cet écran</button>
+    </div>
+    <h3>Apprendre</h3>
+    <div class="actions">
+      <button type="button" class="btn ${(() => { try { return localStorage.getItem("tuto-fini") ? "second" : ""; } catch(e) { return ""; } })()}" data-act="tuto">Tutoriel</button>
+      <button type="button" class="btn second" data-act="regles">Règles du jeu</button>
     </div>
     <h3>Ma collection</h3>
     <div class="actions">
@@ -3180,7 +3222,8 @@ function htmlBienvenue(){
     <p>Chaque partie rapporte de l’or, et la quête du jour aussi. Vos cartes en trop se recyclent en encre, qui permet de fabriquer celles qui vous manquent.</p>
     <div class="actions">
       ${or>=prix ? `<button type="button" class="btn" data-act="bienvenue-boutique">Ouvrir mon premier paquet</button>` : ""}
-      <button type="button" class="btn ${or>=prix ? "second" : ""}" data-act="bienvenue-jouer">Jouer ma première partie</button>
+      <button type="button" class="btn ${or>=prix ? "second" : ""}" data-act="bienvenue-tuto">Apprendre à jouer (tutoriel)</button>
+      <button type="button" class="btn second" data-act="bienvenue-jouer">Jouer ma première partie</button>
       <button type="button" class="btn second" data-act="bienvenue-fermer">Plus tard</button>
     </div></div>`;
 }
@@ -3404,6 +3447,7 @@ function actionProg(act, id){
     case "bienvenue-fermer": PROG.accueilEtape = null; break;
     case "bienvenue-boutique": PROG.accueilEtape = null; ui.ecran = "boutique"; PROG.paquet = null; break;
     case "bienvenue-jouer": PROG.accueilEtape = null; PROG.choixDeck = {mode:"ia"}; break;
+    case "bienvenue-tuto": PROG.accueilEtape = null; lancerTuto(); return true;
     case "choix-lancer": lancerAvecDecks(); return true;
     case "quete-reclamer": action(() => rpc("reclamer_quete"), g => `+${g} or : quête du jour réussie !`); return true;
     case "col-sel": PROG.sel = id; PROG.zoom = true; PROG.zoomAnim = true; break;
@@ -3724,10 +3768,12 @@ document.addEventListener("keydown", e => {
 PROG.mesStats = null; PROG.adminStats = null; PROG.formPseudo = null;
 const NOMS_ECRANS = {"accueil":"Accueil", "partie-ia":"Partie contre l’ordinateur", "partie-duo":"Partie à deux sur un écran",
   "partie-enligne":"Partie en ligne", "attente-enligne":"Attente d’un adversaire en ligne", "collection":"Collection", "decks":"Decks", "editeur":"Éditeur de deck",
-  "boutique":"Boutique", "profil":"Profil", "admin":"Administration"};
+  "boutique":"Boutique", "profil":"Profil", "admin":"Administration", "tutoriel":"Tutoriel", "regles":"Règles du jeu"};
 function ecranActuel(){
   if(ui.ecran==="admin") return "admin";
   if(["collection","decks","editeur","boutique","profil"].includes(ui.ecran)) return ui.ecran;
+  if(S && S.tuto) return "tutoriel";
+  if(ui.ecran==="regles") return "regles";
   if(S) return "partie-" + S.mode;
   if(EN.ecran==="attente" || EN.ecran==="connexion") return "attente-enligne";
   return "accueil";
@@ -4132,6 +4178,224 @@ async function actionPorteAsync(act){
         await entrerJeu();
       });
   }
+}
+
+/* ============================================================
+   RÈGLES DU JEU (écran dédié)
+   Les chiffres et les héros viennent des réglages : ils restent à jour.
+   ============================================================ */
+function pageRegles(){
+  const R = REGLES, eco = (typeof PROG!=="undefined" && PROG.eco) || {or_depart:100, or_victoire:10, or_defaite:3, plafond_or_jour:100, or_quete:40, prix_paquet:100, cartes_paquet:5,
+    probabilites:{commune:.72, rare:.22, epique:.05, legendaire:.01}, depart:{commune:20, rare:9, epique:1},
+    encre_recyclage:{commune:5, rare:20, epique:100, legendaire:400}, encre_fabrication:{commune:40, rare:100, epique:400, legendaire:1600}};
+  const nbDepart = Object.values(R.deckDepart || {}).reduce((a,b) => a+b, 0);
+  const base = CARTES[R.carteBase];
+  const depart = Object.entries(R.deckDepart || {}).filter(([k,n]) => n>0 && CARTES[k]).map(([k,n]) => `${n} ${esc(CARTES[k].nom)}`).join(", ");
+  const mots = ["provocation","rapidite","resistance","ethere","conjuration","echo","sacrifice","bannir"];
+  const pct = x => Math.round((x || 0)*100) + " %";
+  const sections = [
+    ["but", "Le but du jeu", `<p>Deux héros s’affrontent. Chacun commence avec <b>${R.pvDepart} points de vie</b>. Le premier qui fait tomber le héros adverse à 0 remporte la partie.</p>
+      <p>Pendant la partie, vous ne jouez pas avec un deck figé : vous partez d’un petit deck de départ et vous le renforcez en achetant des cartes au marché.</p>`],
+    ["mise", "La mise en place", `<ul>
+      <li><b>Votre héros</b> est le dieu primordial du panthéon le plus représenté dans le deck que vous avez choisi (en cas d’égalité, il est tiré au sort).</li>
+      <li><b>Votre deck de départ</b> compte ${nbDepart} cartes, identiques pour les deux joueurs : ${depart}.</li>
+      <li><b>Le marché commun</b> est formé des deux decks choisis par les joueurs, mélangés. ${R.tailleMarche} cartes sont visibles${base ? `, plus ${esc(base.nom)}, toujours disponible` : ""}.</li>
+      <li>Chaque joueur pioche ${R.mainDepart} cartes, puis le premier joueur est tiré au sort.</li></ul>`],
+    ["tour", "Le déroulement d’un tour", `<p>Pendant votre tour, vous faites ce que vous voulez, dans l’ordre que vous voulez :</p>
+      <ol><li><b>Jouer vos cartes.</b> C’est gratuit : chaque carte rapporte de l’or, de la puissance, du soin, une pioche ou pose une créature.</li>
+      <li><b>Acheter au marché</b> avec votre or.</li>
+      <li><b>Attaquer</b> avec vos créatures et avec votre héros.</li>
+      <li><b>Activer le pouvoir de votre héros</b>, s’il est chargé.</li></ol>
+      <p>Puis cliquez sur <b>Fin du tour</b> : les cartes jouées et celles restées en main partent à la défausse, l’or et la puissance non utilisés sont perdus, et vous piochez ${R.piocheParTour} nouvelles cartes. Quand votre deck est vide, votre défausse est mélangée pour former un nouveau deck.</p>`],
+    ["ressources", "Les ressources", `<table class="tableau"><tbody>
+      <tr><td>${icone("or")} <b>Or</b></td><td>Sert à acheter des cartes au marché pendant le tour.</td></tr>
+      <tr><td>${icone("puissance")} <b>Puissance</b></td><td>Les points d’attaque de votre héros pour ce tour.</td></tr>
+      <tr><td>${icone("soin")} <b>Soin</b></td><td>Rend des points de vie à votre héros, sans limite.</td></tr>
+      <tr><td>${icone("pioche")} <b>Pioche</b></td><td>Piochez immédiatement ce nombre de cartes.</td></tr></tbody></table>`],
+    ["marche", "Le marché", `<ul>
+      <li>Cliquez sur une carte du marché pour l’acheter avec votre or. Elle va dans votre <b>défausse</b> : vous la piocherez plus tard.</li>
+      <li>L’emplacement libéré est aussitôt rempli par une nouvelle carte.</li>
+      <li>Le marché est <b>commun</b> : votre adversaire peut acheter les cartes de votre deck, et vous les siennes.</li></ul>`],
+    ["combat", "Les créatures et le combat", `<ul>
+      <li>Une créature posée reste sur le plateau jusqu’à sa mort. Elle a une <b>attaque</b> (médaillon doré) et des <b>points de vie</b> (écu rouge). Les dégâts subis restent d’un tour sur l’autre.</li>
+      <li>Une créature ne peut pas attaquer le tour où elle arrive, sauf avec ${symMot("rapidite")} Rapidité. Ensuite, elle attaque une fois par tour.</li>
+      <li>Quand deux créatures se battent, elles s’infligent leurs dégâts <b>en même temps</b>.</li>
+      <li><b>Votre héros</b> attaque avec votre puissance. S’il frappe une créature, il subit sa <b>riposte</b> (l’attaque de la créature). S’il frappe le héros adverse, il ne subit rien.</li>
+      <li><b>Pour viser le héros adverse, il faut d’abord détruire toutes ses créatures visibles.</b> Les créatures avec ${symMot("provocation")} Provocation doivent être visées en premier, et celles avec ${symMot("ethere")} Ethéré ne peuvent pas être visées tant qu’elles n’ont pas attaqué (elles ne protègent pas leur héros).</li>
+      <li>Une <b>arme</b> s’équipe sur une de vos créatures : elle augmente son attaque pour un nombre limité d’attaques.</li>
+      <li>Le plateau d’un joueur ne peut pas contenir plus de ${R.plateauMax} créatures. Une créature détruite part dans la défausse de son propriétaire.</li></ul>`],
+    ["heros", "Les héros et leurs pouvoirs", `<p>Le pouvoir d’un héros se charge à chaque créature ennemie détruite. Après <b>${R.seuilPouvoir || 10} créatures ennemies</b>, il est prêt : cliquez sur votre médaillon pour l’activer. Il se recharge ensuite.</p>
+      <table class="tableau"><thead><tr><th>Panthéon</th><th>Héros</th><th>Pouvoir</th></tr></thead><tbody>
+      ${Object.entries(FACTIONS).map(([k,f]) => { const h = heroDe({heros:k}); return `<tr><td>${symCombo(k)} ${esc(f.nom)}</td><td><b>${esc(h.nom)}</b></td><td>${esc(h.pouvoir ? h.pouvoir.nom : "")} : ${decrireHTML((h.pouvoir && h.pouvoir.effet) || {})}</td></tr>`; }).join("")}
+      </tbody></table>`],
+    ["mots", "Les mots-clés", `<table class="tableau"><tbody>${mots.map(k => `<tr><td>${symMot(k)} <b>${esc(nomMot(k))}</b></td><td>${esc(TEXTES_AIDE[k] || "")}</td></tr>`).join("")}</tbody></table>`],
+    ["combos", "Les combos", `<p>Un effet précédé d’un <b>symbole de faction</b> est un combo : il se déclenche si une <b>autre</b> carte de cette faction est jouée dans le même tour, avant ou après. Une carte ne déclenche jamais son propre combo.</p>
+      <p>${Object.keys(FACTIONS).map(k => `${symCombo(k)} ${esc(FACTIONS[k].nom)}`).join(" &nbsp; ")}</p>`],
+    ["victoire", "Victoire et défaite", `<p>Un héros qui tombe à 0 point de vie perd la partie. Si les deux tombent en même temps, c’est une égalité.</p>`],
+    ["collection", "Collection et progression", `<ul>
+      <li><b>Cartes offertes :</b> à votre arrivée, vous recevez ${eco.depart ? Object.values(eco.depart).reduce((a,b) => a+b, 0) : 30} cartes pour former votre premier deck, et ${eco.or_depart} or afin d’ouvrir un booster.</li>
+      <li><b>Decks :</b> ${R.tailleDeck} cartes, ${R.copiesMax} exemplaires au maximum par carte et ${R.copiesLegendaire} pour une légendaire. Vous pouvez en enregistrer jusqu’à 9.</li>
+      <li><b>Or :</b> une victoire rapporte ${eco.or_victoire} or, une défaite ${eco.or_defaite} (au maximum ${eco.plafond_or_jour} or par jour). La quête du jour rapporte ${eco.or_quete} or.</li>
+      <li><b>Boutique :</b> un paquet coûte ${eco.prix_paquet} or et contient ${eco.cartes_paquet} cartes, dont au moins une rare. Chances par carte : commune ${pct(eco.probabilites.commune)}, rare ${pct(eco.probabilites.rare)}, épique ${pct(eco.probabilites.epique)}, légendaire ${pct(eco.probabilites.legendaire)}.</li>
+      <li><b>Encre :</b> recyclez vos exemplaires en trop pour obtenir de l’encre (${eco.encre_recyclage.commune} pour une commune, jusqu’à ${eco.encre_recyclage.legendaire} pour une légendaire), et fabriquez les cartes qui vous manquent (de ${eco.encre_fabrication.commune} à ${eco.encre_fabrication.legendaire} encre).</li>
+      <li><b>Profil et trophées :</b> choisissez votre pseudo, suivez vos statistiques et débloquez des trophées en bronze, argent et or.</li></ul>`],
+    ["enligne", "Jouer en ligne", `<ol><li>Choisissez « En ligne », puis « Créer une partie » : un code de 5 caractères s’affiche.</li>
+      <li>Envoyez ce code à votre adversaire : il choisit « En ligne », tape le code et clique sur « Rejoindre ».</li>
+      <li>Celui qui a créé la partie fait tourner les règles : il doit garder sa page ouverte jusqu’à la fin.</li></ol>`],
+    ["compte", "Votre compte", `<p>Votre compte garde votre collection, vos decks, votre or, votre encre et vos statistiques, sur tous vos appareils. Vous restez connecté sur votre appareil jusqu’à ce que vous vous déconnectiez. En cas d’oubli, utilisez « Mot de passe oublié » sur l’écran de connexion.</p>`]
+  ];
+  return `<header class="entete"><h1>Règles du jeu</h1>
+      <button type="button" class="btn" data-act="tuto" style="margin-left:auto">Lancer le tutoriel</button>
+      <button type="button" class="btn-discret" data-act="regles-retour">Retour à l’accueil</button></header>
+    <div class="page-regles">
+      <nav class="sommaire" aria-label="Sommaire"><b>Sommaire</b><ol>${sections.map(([id, t]) => `<li><a href="#regle-${id}" data-ancre="regle-${id}">${t}</a></li>`).join("")}</ol></nav>
+      <div class="corps-regles">${sections.map(([id, t, c]) => `<section class="bloc-profil" id="regle-${id}"><h2>${t}</h2>${c}</section>`).join("")}</div>
+    </div>`;
+}
+document.addEventListener("click", e => {
+  const a = e.target.closest && e.target.closest("[data-ancre]");
+  if(!a) return;
+  e.preventDefault();
+  const cible = document.getElementById(a.dataset.ancre);
+  if(cible) cible.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"start"});
+});
+
+/* ============================================================
+   TUTORIEL JOUÉ : un combat scripté en deux tours
+   ============================================================ */
+const TUTO = {etape:0, ids:{}, pvAdverse:7};
+const tutoActif = () => !!(S && S.tuto);
+function lancerTuto(){
+  nouvellePartie("ia");
+  S.tuto = true; S.courant = 0; S.tour = 1;
+  const j = S.joueurs[0], o = S.joueurs[1];
+  j.nom = "Joueur 1"; j.heros = "egy"; o.heros = "nor"; j.morts = 0; o.morts = 0;
+  o.pv = TUTO.pvAdverse;
+  const mk = id => inst(id);
+  const p1 = mk("piece"), p2 = mk("piece"), rb = mk("rubis"), ulf = mk("ulfhednar"), dg = mk("dague");
+  j.main = [p1, p2, rb, ulf, dg];
+  S.marche = ["garde_anubis","apsara","hoplite","valkyrie","oracle"].map(mk);
+  const loup = creature(mk("loup")); o.plateau = [loup]; o.main = [];
+  TUTO.ids = {p1:p1.uid, p2:p2.uid, rb:rb.uid, ulf:ulf.uid, dg:dg.uid, garde:S.marche[0].uid, loup:loup.uid};
+  TUTO.etape = 0;
+  S.journal = ["Tutoriel : à vous de jouer !"];
+  Object.assign(ui, {ecran:"jeu", attaquant:null, armeEnAttente:null, choixPierre:null, couvert:false, aiEnCours:false});
+  if(typeof PROG!=="undefined"){ PROG.choixDeck = null; PROG.accueilEtape = null; }
+  render();
+}
+const moiT = () => S.joueurs[0], luiT = () => S.joueurs[1];
+const enMain = uid => moiT().main.some(c => c.uid===uid);
+const indexMarche = uid => S.marche.findIndex(c => c.uid===uid);
+// Les étapes sont construites au premier usage (les symboles ont besoin de la configuration chargée)
+let ETAPES_CACHE = null;
+const etapesTuto = () => ETAPES_CACHE || (ETAPES_CACHE = [
+  {titre:"Bienvenue !", texte:`Vous incarnez <b>Atoum</b>, dieu primordial égyptien. Votre adversaire, <b>Ymir</b>, n’a que ${TUTO.pvAdverse} points de vie pour ce tutoriel : faites-le tomber à 0 pour gagner.<br><br>Votre héros et ses points de vie sont en bas, ceux de l’adversaire en haut.`,
+    info:true, cible:() => [".medaillon-bloc.moi .medaillon", ".medaillon-bloc.adv .medaillon"]},
+  {titre:"Jouez votre or", texte:`Jouer une carte est <b>gratuit</b>. Cliquez sur vos deux <b>Pièces d’or</b> et sur le <b>Rubis</b> : ils vous donnent de l’or ${icone("or")} pour ce tour.`,
+    cible:() => [TUTO.ids.p1, TUTO.ids.p2, TUTO.ids.rb].filter(enMain).map(u => `.main .carte[data-id="${u}"]`),
+    autorise:(act, id) => act==="main" && [TUTO.ids.p1, TUTO.ids.p2, TUTO.ids.rb].includes(id),
+    fini:() => ![TUTO.ids.p1, TUTO.ids.p2, TUTO.ids.rb].some(enMain)},
+  {titre:"Achetez au marché", texte:`Le <b>marché</b> est à droite. Avec votre or, achetez la <b>Garde d’Anubis</b> (3 ${icone("or")}). Une carte achetée va dans votre <b>défausse</b> : vous la piocherez lors d’un prochain tour.`,
+    cible:() => [`.marche-cartes .carte[data-act="marche"][data-id="${indexMarche(TUTO.ids.garde)}"]`],
+    autorise:(act, id) => act==="marche" && Number(id)===indexMarche(TUTO.ids.garde),
+    fini:() => moiT().defausse.some(c => c.uid===TUTO.ids.garde)},
+  {titre:"Posez une créature", texte:`Cliquez sur <b>Ulfhednar</b> pour le poser sur le plateau. Une créature reste en jeu jusqu’à sa mort. D’habitude, elle ne peut pas attaquer le tour où elle arrive, mais Ulfhednar a ${symMot("rapidite")} <b>Rapidité</b> : il peut attaquer tout de suite.`,
+    cible:() => [`.main .carte[data-id="${TUTO.ids.ulf}"]`],
+    autorise:(act, id) => act==="main" && id===TUTO.ids.ulf,
+    fini:() => moiT().plateau.some(c => c.uid===TUTO.ids.ulf)},
+  {titre:"Attaquez une créature", texte:`Pour viser le héros adverse, il faut d’abord détruire <b>toutes ses créatures visibles</b>. Cliquez sur votre <b>Ulfhednar</b>, puis sur le <b>Loup de Fenrir</b>. Les deux créatures s’infligent leurs dégâts en même temps.`,
+    cible:() => ui.attaquant ? [`.crea[data-act="enemy"][data-id="${TUTO.ids.loup}"]`] : [`.crea[data-act="own"][data-id="${TUTO.ids.ulf}"]`],
+    autorise:(act, id) => (act==="own" && id===TUTO.ids.ulf) || (act==="enemy" && id===TUTO.ids.loup && ui.attaquant===TUTO.ids.ulf),
+    fini:() => !luiT().plateau.some(c => c.uid===TUTO.ids.loup)},
+  {titre:"Gagnez de la puissance", texte:`Jouez la <b>Dague</b> : elle vous donne +1 ${icone("puissance")} <b>puissance</b>. La puissance, ce sont les points d’attaque de votre <b>héros</b> pour ce tour.`,
+    cible:() => [`.main .carte[data-id="${TUTO.ids.dg}"]`],
+    autorise:(act, id) => act==="main" && id===TUTO.ids.dg,
+    fini:() => !enMain(TUTO.ids.dg)},
+  {titre:"Votre héros attaque", texte:`L’adversaire n’a plus de créature : cliquez sur le <b>médaillon d’Ymir</b> pour que votre héros le frappe avec votre puissance.`,
+    cible:() => [".medaillon-bloc.adv .medaillon"],
+    autorise:(act) => act==="face",
+    fini:() => luiT().pv < TUTO.pvAdverse},
+  {titre:"Finissez votre tour", texte:`Cliquez sur <b>Fin du tour</b>. Vos cartes jouées et celles restées en main partent à la défausse, l’or et la puissance restants sont perdus, et vous piochez 5 nouvelles cartes.`,
+    cible:() => [".fin"],
+    autorise:(act) => act==="fin",
+    fini:() => S.courant===1 || S.tour>=3},
+  {titre:"Les combos", texte:`L’adversaire a posé un <b>Jeune porte-bouclier</b>. À vous !<br><br>Le Scribe du Nil a un effet précédé du symbole ${symCombo("egy")} : c’est un <b>combo</b>. Il se déclenche si une <b>autre</b> carte égyptienne est jouée dans le même tour. Jouez le <b>Scribe du Nil</b>, puis le <b>Pain du Nil</b>.`,
+    cible:() => [TUTO.ids.scribe, TUTO.ids.pain].filter(enMain).map(u => `.main .carte[data-id="${u}"]`),
+    autorise:(act, id) => act==="main" && [TUTO.ids.scribe, TUTO.ids.pain].includes(id),
+    fini:() => moiT().tour.some(t => t.uid===TUTO.ids.scribe && t.allieFait)},
+  {titre:"Le pouvoir de votre héros", texte:`Le pouvoir d’un héros se charge à chaque créature ennemie détruite. Pour ce tutoriel, celui d’Atoum est déjà prêt : son anneau doré est plein. Cliquez sur votre <b>médaillon</b> (ou sur « Activer ») pour déclencher <b>Souffle de vie</b>.`,
+    cible:() => ['[data-act="pouvoir"]'],
+    autorise:(act) => act==="pouvoir",
+    fini:() => (moiT().morts || 0)===0 && TUTO.pouvoirPret},
+  {titre:"Préparez l’assaut", texte:`Jouez la <b>Fureur de Sekhmet</b> et le <b>Jugement d’Anubis</b> pour gagner beaucoup de ${icone("puissance")} puissance. Remarquez leurs combos ${symCombo("egy")} : ils se déclenchent grâce à vos autres cartes égyptiennes.`,
+    cible:() => [TUTO.ids.sekhmet, TUTO.ids.jugement].filter(enMain).map(u => `.main .carte[data-id="${u}"]`),
+    autorise:(act, id) => act==="main" && [TUTO.ids.sekhmet, TUTO.ids.jugement].includes(id),
+    fini:() => ![TUTO.ids.sekhmet, TUTO.ids.jugement].some(enMain)},
+  {titre:"Détruisez le défenseur", texte:`Le porte-bouclier a ${symMot("provocation")} <b>Provocation</b> : il doit être détruit en premier. Cliquez dessus pour que votre héros l’attaque avec sa puissance. Attention : un héros qui frappe une créature subit sa <b>riposte</b>.`,
+    cible:() => [`.crea[data-act="enemy"][data-id="${TUTO.ids.bouclier}"]`],
+    autorise:(act, id) => act==="enemy" && id===TUTO.ids.bouclier && !ui.attaquant,
+    fini:() => !luiT().plateau.some(c => c.uid===TUTO.ids.bouclier)},
+  {titre:"Le coup final", texte:`La voie est libre ! Cliquez sur le <b>médaillon d’Ymir</b> pour frapper avec la puissance qu’il vous reste.`,
+    cible:() => [".medaillon-bloc.adv .medaillon"],
+    autorise:(act) => act==="face",
+    fini:() => S.vainqueur!==null}
+]);
+// Tour de l’adversaire, scripté
+async function tutoTourAdverse(){
+  ui.aiEnCours = true; render();
+  await new Promise(r => setTimeout(r, 900));
+  if(!tutoActif()) return;
+  const o = luiT();
+  const pb = inst("porte_bouclier"); o.main = [pb];
+  jouer(pb.uid);
+  TUTO.ids.bouclier = pb.uid;
+  render();
+  await new Promise(r => setTimeout(r, 900));
+  if(!tutoActif()) return;
+  finTour();
+  // Votre deuxième tour : une main préparée et un pouvoir chargé
+  const j = moiT();
+  const sc = inst("scribe"), pn = inst("pain_nil"), sk = inst("sekhmet"), jg = inst("jugement");
+  j.main = [sc, pn, sk, jg];
+  Object.assign(TUTO.ids, {scribe:sc.uid, pain:pn.uid, sekhmet:sk.uid, jugement:jg.uid});
+  j.morts = REGLES.seuilPouvoir || 10; TUTO.pouvoirPret = true;
+  ui.aiEnCours = false; render();
+}
+function tutoAutorise(act, id){
+  const e = etapesTuto()[TUTO.etape];
+  if(!e || e.info) return false;
+  return !!(e.autorise && e.autorise(act, id));
+}
+function renderTuto(){
+  let p = document.getElementById("tuto-panneau");
+  if(!tutoActif() || S.vainqueur!==null){ if(p) p.remove(); return; }
+  if(!p){ p = document.createElement("aside"); p.id = "tuto-panneau"; p.setAttribute("aria-live", "polite"); document.body.appendChild(p); }
+  const e = etapesTuto()[TUTO.etape];
+  if(!e) return;
+  p.innerHTML = `<div class="tuto-etape">Tutoriel, étape ${TUTO.etape+1} sur ${etapesTuto().length}</div>
+    <h2>${e.titre}</h2><p>${e.texte}</p>
+    <div class="actions">${e.info ? `<button type="button" class="btn" data-act="tuto-suivant">Continuer</button>` : ""}
+      <button type="button" class="btn-discret" data-act="tuto-quitter">Quitter le tutoriel</button></div>`;
+  document.querySelectorAll(".tuto-cible").forEach(x => x.classList.remove("tuto-cible"));
+  if(!ui.aiEnCours) (e.cible ? e.cible() : []).forEach(sel => document.querySelectorAll(sel).forEach(x => x.classList.add("tuto-cible")));
+}
+function avancerTuto(){
+  let e = etapesTuto()[TUTO.etape], n = 0;
+  while(e && !e.info && e.fini && e.fini() && n++ < 20){ TUTO.etape++; e = etapesTuto()[TUTO.etape]; }
+}
+function htmlFinTuto(){
+  try { localStorage.setItem("tuto-fini", "1"); } catch(e) {}
+  return `<div class="boite" role="dialog" aria-label="Tutoriel terminé">
+    <h2 class="logo" style="font-size:34px">Victoire !</h2>
+    <p class="intro">Vous connaissez maintenant l’essentiel :</p>
+    <ul class="etapes-liste">
+      <li>jouer ses cartes et acheter au marché avec son or ;</li>
+      <li>poser des créatures et attaquer, en détruisant d’abord les défenseurs ;</li>
+      <li>attaquer avec son héros grâce à la puissance ;</li>
+      <li>déclencher des combos et le pouvoir de son héros.</li></ul>
+    <p>Les règles complètes (mots-clés, héros, collection…) sont dans le menu « Règles du jeu ».</p>
+    <div class="actions"><button type="button" class="btn" data-act="tuto-quitter">Retour à l’accueil</button>
+      <button type="button" class="btn second" data-act="regles">Lire les règles</button></div></div>`;
 }
 
 chargerConfig();
