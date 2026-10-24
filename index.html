@@ -350,7 +350,7 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 .pile.petite .pile-nom{display:none}
 .pile-bannies{font-size:12px}
 .piles-adverses{display:flex;gap:16px;align-items:flex-start}
-.fx-pulse{animation:fx-pulse .45s ease}
+.fx-pulse{animation:fx-pulse .9s ease}
 @keyframes fx-pulse{40%{transform:scale(1.12);filter:brightness(1.3)}}
 @media (max-width:700px){.zone-main{grid-template-columns:1fr}.zone-main .pile{display:none}}
 
@@ -359,6 +359,10 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 .fx-objet{position:absolute;left:0;top:0;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}
 .fx-objet svg{width:100%;height:100%;display:block}
 .fx-carte{position:absolute;left:0;top:0;transform-origin:center}
+.fx-attaquant{position:absolute;z-index:2;filter:drop-shadow(0 10px 18px rgba(0,0,0,.55))}
+.fx-attaquant > .crea{width:100%;height:100%;margin:0}
+.champ-res{width:110px;font:inherit;font-size:15px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+.actions-res{display:flex;gap:8px;align-items:center}
 .fx-carte .carte{--w:100%;width:100%}
 .fx-eclat{position:absolute;width:120px;height:120px;border-radius:50%;pointer-events:none}
 .fx-eclat.impact{background:radial-gradient(circle,rgba(255,255,255,.95) 0,rgba(255,226,140,.85) 25%,rgba(255,160,60,.35) 50%,transparent 70%)}
@@ -457,7 +461,7 @@ body.sans-animations *,body.sans-animations *::before,body.sans-animations *::af
 .dos{width:150px;cursor:pointer;transition:transform .15s ease}
 .dos:hover,.dos:focus-visible{transform:translateY(-6px)}
 .revele{position:relative}
-.revele.anim{animation:retourner .45s ease}
+.revele.anim{animation:retourner .9s ease}
 @keyframes retourner{from{transform:rotateY(90deg)}to{transform:none}}
 .nouvelle{position:absolute;top:-10px;left:50%;transform:translateX(-50%);white-space:nowrap;background:var(--cible);color:#fff;font-weight:700;font-size:12px;border-radius:99px;padding:3px 8px;z-index:3}
 .btn:disabled{opacity:.45;cursor:default}
@@ -672,18 +676,18 @@ button.medaillon[data-act="pouvoir"]{cursor:pointer}
 
 /* Animations : réponses aux actions */
 .flottant{position:absolute;left:50%;top:38%;z-index:8;transform:translate(-50%,0);font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:30px;pointer-events:none;
-  -webkit-text-stroke:1px rgba(0,0,0,.55);text-shadow:0 2px 6px rgba(0,0,0,.5);animation:flotter 1.15s ease-out forwards}
+  -webkit-text-stroke:1px rgba(0,0,0,.55);text-shadow:0 2px 6px rgba(0,0,0,.5);animation:flotter 2.3s ease-out forwards}
 .flottant.degat{color:#ff6b55}
 .flottant.soin{color:#7fe0a0}
 @keyframes flotter{0%{opacity:0;transform:translate(-50%,8px) scale(.7)}15%{opacity:1;transform:translate(-50%,0) scale(1.15)}100%{opacity:0;transform:translate(-50%,-46px) scale(1)}}
-.crea.arrivee{animation:arrivee .4s cubic-bezier(.2,.8,.3,1.25)}
+.crea.arrivee{animation:arrivee .8s cubic-bezier(.2,.8,.3,1.25)}
 @keyframes arrivee{from{opacity:0;transform:translateY(-22px) scale(.7)}to{opacity:1;transform:none}}
-.medaillon.touche{animation:secousse .38s ease}
+.medaillon.touche{animation:secousse .76s ease}
 @keyframes secousse{20%{transform:translateX(-6px) rotate(-3deg)}45%{transform:translateX(5px) rotate(2deg)}70%{transform:translateX(-3px)}100%{transform:none}}
 #banniere{position:fixed;left:0;right:0;top:40%;z-index:25;pointer-events:none;display:flex;justify-content:center;opacity:0}
 #banniere span{font-family:"Cinzel Decorative",Cinzel,serif;font-weight:700;font-size:clamp(30px,5vw,48px);color:var(--or);padding:14px 60px;
   background:linear-gradient(90deg,transparent,color-mix(in srgb, var(--table) 88%, transparent) 20%,color-mix(in srgb, var(--table) 88%, transparent) 80%,transparent);text-shadow:0 2px 0 var(--ombre)}
-#banniere.montre{animation:banniere 1.5s ease forwards}
+#banniere.montre{animation:banniere 3s ease forwards}
 @keyframes banniere{0%{opacity:0;transform:scale(.92)}18%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0}}
 
 @media (max-width:1060px){
@@ -1725,7 +1729,7 @@ function instantane(){
           crea:Object.fromEntries(S.joueurs.flatMap(j => j.plateau.map(c => [c.uid, vieRestante(c)])))};
 }
 function flottant(el, d){
-  if(d<0 && fxPossible()) return setTimeout(() => { if(document.body.contains(el)) flottantImmediat(el, d); }, 300);
+  if(d<0 && fxPossible()) return setTimeout(() => { if(document.body.contains(el)) flottantImmediat(el, d); }, 300*FX_LENT);
   flottantImmediat(el, d);
 }
 function flottantImmediat(el, d){
@@ -1733,14 +1737,14 @@ function flottantImmediat(el, d){
   s.className = "flottant " + (d<0 ? "degat" : "soin");
   s.textContent = (d>0 ? "+" : "") + d;
   el.appendChild(s);
-  setTimeout(() => s.remove(), 1200);
+  setTimeout(() => s.remove(), 1200*FX_LENT);
 }
 function banniereTour(texte){
   const b = document.getElementById("banniere");
   if(!b) return;
   b.firstElementChild.textContent = texte;
   b.classList.remove("montre"); void b.offsetWidth; b.classList.add("montre");
-  clearTimeout(banniereTour.t); banniereTour.t = setTimeout(() => b.classList.remove("montre"), 1600);
+  clearTimeout(banniereTour.t); banniereTour.t = setTimeout(() => b.classList.remove("montre"), 1600*FX_LENT);
 }
 function animerChangements(){
   const avant = INSTANT, apres = instantane();
@@ -1787,7 +1791,7 @@ function renderCouche(){
   } else if(S.vainqueur!==null && niveauAnim()>0 && ui.finVue!==S.idPartie){
     // Laisse le temps de voir le médaillon du vaincu voler en éclats
     const id = S.idPartie;
-    if(!ui.finAttente){ ui.finAttente = true; setTimeout(() => { ui.finAttente = false; ui.finVue = id; if(S && S.idPartie===id) renderCouche(); }, 1300); }
+    if(!ui.finAttente){ ui.finAttente = true; setTimeout(() => { ui.finAttente = false; ui.finVue = id; if(S && S.idPartie===id) renderCouche(); }, 1300*FX_LENT); }
   } else if(S.vainqueur!==null && S.tuto){
     h = htmlFinTuto();
   } else if(S.vainqueur!==null){
@@ -2184,6 +2188,28 @@ function actionAdmin(act, id, el){
   if(act.startsWith("mus-")){ actionMusiques(act, id); return; }
   if(act==="son"){ basculerSon(); return renderAdmin(); }
   if(act==="stats-rafraichir"){ chargerAdminStats(); erreur("Actualisation…"); return; }
+  if(act==="stats-res"){
+    const j = PROG.adminStats.joueurs.find(x => x.id===id); if(!j) return;
+    PROG.adminStats.edition = id; PROG.adminStats.formRes = {or:j.pieces_or || 0, encre:j.encre || 0};
+    return renderAdmin();
+  }
+  if(act==="stats-res-annuler"){ PROG.adminStats.edition = null; return renderAdmin(); }
+  if(act==="stats-res-ok"){
+    const f = PROG.adminStats.formRes, o = Number(f.or), e = Number(f.encre);
+    if(!Number.isInteger(o) || !Number.isInteger(e) || o<0 || e<0) return erreur("L’or et l’encre doivent être des nombres entiers positifs.");
+    (async () => {
+      try {
+        await rpc("admin_modifier_ressources", {p_joueur:id, p_or:o, p_encre:e});
+        PROG.adminStats.edition = null;
+        if(id===EN.monId) await rafraichir();
+        await chargerAdminStats();
+        erreur(`Enregistré : ${nf(o)} or et ${nf(e)} encre.`);
+      } catch(err) {
+        erreur(/function|does not exist|schema cache/i.test(err.message) ? "Exécutez d’abord le script supabase-admin-joueurs.sql dans Supabase." : err.message);
+      }
+    })();
+    return;
+  }
   if(act==="stats-tri" || act==="stats-tri-c"){
     const k = act==="stats-tri" ? "tri" : "triCartes", t = PROG.adminStats[k] || {};
     PROG.adminStats[k] = {cle:id, sens: t.cle===id ? -t.sens : (["nom","email","rarete","ecran"].includes(id) ? 1 : -1)};
@@ -4057,7 +4083,7 @@ function pageProfil(){
 
 // ----- Onglet « Statistiques » de l’administration
 // Filtre des comptes invités (sans adresse e-mail), mémorisé dans le navigateur
-const sansInvites = () => { try { return localStorage.getItem("stats-sans-invites")==="1"; } catch(e) { return false; } };
+const sansInvites = () => true;
 const estInvite = j => !j.email;
 async function chargerAdminStats(){
   const jours = (PROG.adminStats && PROG.adminStats.jours) || 30;
@@ -4087,8 +4113,9 @@ function admStats(){
   const A = PROG.adminStats;
   if(!A || (!A.resume && !A.erreur)){ if(!A || !A.chargement){ PROG.adminStats = {...(A || {}), chargement:true}; chargerAdminStats(); } return `<div class="adm-page"><p class="attente">Chargement des statistiques…</p></div>`; }
   if(A.erreur) return `<div class="adm-page"><p style="color:var(--danger)">${esc(A.erreur)}</p><div class="adm-actions"><button type="button" class="btn" data-act="stats-rafraichir">Réessayer</button></div></div>`;
-  const filtre = sansInvites(), visibles = filtre ? A.joueurs.filter(j => !estInvite(j)) : A.joueurs;
-  const nbInvites = A.joueurs.filter(estInvite).length;
+  // Les comptes invités (sans e-mail) ne participent à aucune statistique : ils sont retirés partout
+  const visibles = A.joueurs.filter(j => !estInvite(j));
+  const actifs7j = visibles.filter(j => j.derniere_vue && Date.now()-Date.parse(j.derniere_vue) < 7*86400000).length;
   const r = A.resume, enLigneMaint = visibles.filter(j => j.derniere_vue && Date.now()-Date.parse(j.derniere_vue) < 120000);
   const tri = A.tri || {cle:"derniere_vue", sens:-1}, triC = A.triCartes || {cle:"jouee", sens:-1};
   const th = (cle, l, quoi) => { const t = quoi==="c" ? triC : tri; return `<th><button type="button" class="tri ${t.cle===cle ? "actif" : ""}" data-act="stats-tri${quoi==="c" ? "-c" : ""}" data-id="${cle}">${l}${t.cle===cle ? (t.sens>0 ? " ▲" : " ▼") : ""}</button></th>`; };
@@ -4104,15 +4131,15 @@ function admStats(){
     <div class="adm-actions" style="margin-top:0;align-items:center">
       <label class="champ" style="flex-direction:row;align-items:center;gap:8px"><span>Période</span><select data-stats="jours">${[[7,"7 derniers jours"],[30,"30 derniers jours"],[365,"12 derniers mois"]].map(([v,l]) => `<option value="${v}" ${A.jours==v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
       <button type="button" class="btn second" data-act="stats-rafraichir">Actualiser</button>
-      <label class="case"><input type="checkbox" data-stats="invites" ${filtre ? "checked" : ""}> Masquer les comptes invités (sans e-mail, ${nf(nbInvites)} au total)</label>
+
       <span class="aide">Mis à jour ${ilYa(new Date(A.quand).toISOString())}. Actualisation automatique toutes les 30 secondes.</span>
     </div>
-    ${filtre ? `<p class="avertissement">Comptes invités masqués : ils n’apparaissent plus dans les listes de joueurs, et les parties auxquelles ils ont participé sont retirées des tableaux des héros et des cartes. Le résumé, lui, compte toujours tout le monde.</p>` : ""}
+
     <h2>Résumé</h2>
     <div class="tuiles">
-      <div class="tuile"><b>${nf(r.en_ligne)}</b><span>en ligne maintenant</span></div>
-      <div class="tuile"><b>${nf(r.joueurs)}</b><span>joueurs, dont ${nf(r.comptes)} avec un compte</span></div>
-      <div class="tuile"><b>${nf(r.actifs_7j)}</b><span>actifs sur 7 jours</span></div>
+      <div class="tuile"><b>${nf(enLigneMaint.length)}</b><span>en ligne maintenant</span></div>
+      <div class="tuile"><b>${nf(visibles.length)}</b><span>joueurs inscrits</span></div>
+      <div class="tuile"><b>${nf(actifs7j)}</b><span>actifs sur 7 jours</span></div>
       <div class="tuile"><b>${nf(r.parties_24h)}</b><span>parties sur 24 h (${nf(r.parties_7j)} sur 7 j)</span></div>
       <div class="tuile"><b>${nf(r.parties_ia)} / ${nf(r.parties_en_ligne)} / ${nf(r.parties_duo || 0)}</b><span>parties contre l’ordinateur / en ligne / sur un même écran</span></div>
       <div class="tuile"><b>${pct(r.ordinateur_victoires || 0, r.ordinateur_parties || 0)}</b><span>de victoires pour l’ordinateur (${nf(r.ordinateur_parties || 0)} parties)</span></div>
@@ -4139,12 +4166,20 @@ function admStats(){
       ${cartes.map(c => `<tr><td><span class="pastille f-${CARTES[c.carte].faction || "neutre"}"></span> ${esc(c.nom)}</td><td>${NOMS_RARETE[c.rarete] || "–"}</td><td>${c.prix ?? "–"}</td><td>${nf(c.jouee)}</td><td>${nf(c.achetee)}</td><td>${nf(c.parties)}</td><td class="${c.parties>=20 ? couleurTaux(c.taux) : ""}">${c.taux==null ? "–" : Math.round(c.taux*100) + " %"}</td></tr>`).join("")}
     </tbody></table></div>
     <h2>Joueurs</h2>
-    <div class="tableau-defile"><table class="tableau"><thead><tr>${th("nom","Joueur")}${th("email","Compte")}${th("cree","Inscrit")}${th("derniere_vue","Dernière visite")}${th("ecran","Écran")}${th("parties","Parties")}${th("taux","Victoires")}${th("cartes","Cartes")}${th("pieces_or","Or")}</tr></thead><tbody>
-      ${joueurs.map(j => `<tr><td>${esc(j.nom)}</td><td>${j.email ? esc(j.email) : `<span class="aide">invité</span>`}</td><td>${j.cree ? new Date(j.cree).toLocaleDateString("fr-FR") : "–"}</td><td>${ilYa(j.derniere_vue)}</td><td>${esc(NOMS_ECRANS[j.ecran] || j.ecran || "–")}</td><td>${nf(j.parties)}</td><td>${nf(j.victoires)} (${pct(j.victoires, j.parties)})</td><td>${nf(j.cartes)}</td><td>${nf(j.pieces_or)}</td></tr>`).join("")}
+    <div class="tableau-defile"><table class="tableau"><thead><tr>${th("nom","Joueur")}${th("email","Compte")}${th("cree","Inscrit")}${th("derniere_vue","Dernière visite")}${th("ecran","Écran")}${th("parties","Parties")}${th("taux","Victoires")}${th("cartes","Cartes")}${th("pieces_or","Or")}${th("encre","Encre")}<th></th></tr></thead><tbody>
+      ${joueurs.map(j => `<tr><td>${esc(j.nom)}</td><td>${j.email ? esc(j.email) : `<span class="aide">invité</span>`}</td><td>${j.cree ? new Date(j.cree).toLocaleDateString("fr-FR") : "–"}</td><td>${ilYa(j.derniere_vue)}</td><td>${esc(NOMS_ECRANS[j.ecran] || j.ecran || "–")}</td><td>${nf(j.parties)}</td><td>${nf(j.victoires)} (${pct(j.victoires, j.parties)})</td><td>${nf(j.cartes)}</td>${A.edition===j.id
+        ? `<td><input type="number" min="0" step="1" class="champ-res" data-stats-res="or" value="${A.formRes.or}" aria-label="Or de ${esc(j.nom)}"></td>
+           <td><input type="number" min="0" step="1" class="champ-res" data-stats-res="encre" value="${A.formRes.encre}" aria-label="Encre de ${esc(j.nom)}"></td>
+           <td class="actions-res"><button type="button" class="btn" data-act="stats-res-ok" data-id="${j.id}">Enregistrer</button><button type="button" class="btn-discret" data-act="stats-res-annuler">Annuler</button></td>`
+        : `<td>${nf(j.pieces_or)}</td><td>${nf(j.encre)}</td><td><button type="button" class="btn-discret" data-act="stats-res" data-id="${j.id}">Modifier</button></td>`}</tr>`).join("")}
     </tbody></table></div>
   </div>`;
 }
-setInterval(() => { if(ui.ecran==="admin" && adm.onglet==="stats" && PROG.pret && !document.hidden) chargerAdminStats(); }, 30000);
+setInterval(() => { if(ui.ecran==="admin" && adm.onglet==="stats" && PROG.pret && !document.hidden && !(PROG.adminStats && PROG.adminStats.edition)) chargerAdminStats(); }, 30000);
+document.addEventListener("input", e => {
+  const k = e.target.dataset && e.target.dataset.statsRes;
+  if(k && PROG.adminStats && PROG.adminStats.formRes) PROG.adminStats.formRes[k] = e.target.value;
+});
 document.addEventListener("change", e => {
   const k = e.target.dataset && e.target.dataset.stats;
   if(!k || !PROG.adminStats) return;
@@ -4761,6 +4796,13 @@ async function actionMusiques(act, id){
    a réduit les animations dans son système.
    ============================================================ */
 let POS_AVANT = {}, FX_VU = {id:null, n:0};
+// Toutes les animations du jeu durent deux fois plus longtemps (réglage central)
+const FX_LENT = 2;
+if(typeof Element!=="undefined" && Element.prototype.animate && !Element.prototype.animate.__lent){
+  const animateOrigine = Element.prototype.animate;
+  Element.prototype.animate = function(k, o){ const a = animateOrigine.call(this, k, o); try { a.playbackRate = 1/FX_LENT; } catch(e) {} return a; };
+  Element.prototype.animate.__lent = true;
+}
 const fxPossible = () => niveauAnim() > 0;
 function calqueFx(){
   let c = document.getElementById("fx");
@@ -4841,7 +4883,7 @@ function animerEvenement(ev){
         const mil = {x:(de.x+a.x)/2 + (k-(n-1)/2)*26, y:Math.min(de.y, a.y) - 50 - Math.random()*30};
         voler(icoVolante(ev.t==="or" ? "or" : "puissance", ev.t==="or" ? 26 : 30), de, a, 560, k*70, {milieu:mil, e0:.6, e1:1.2, e2:.7});
       }
-      setTimeout(() => pulser(jeton), 560 + (n-1)*70);
+      setTimeout(() => pulser(jeton), (560 + (n-1)*70)*FX_LENT);
       break;
     }
     case "soin": {
@@ -4856,7 +4898,7 @@ function animerEvenement(ev){
       clone.style.width = av.r.width + "px"; clone.style.marginLeft = -av.r.width/2 + "px"; clone.style.marginTop = -av.r.height/2 + "px";
       clone.innerHTML = av.html;
       voler(clone, centre(av.r), centre(rp), 600, 0, {e0:1, e2:rp.width/av.r.width, o2:1});
-      setTimeout(() => pulser(pile.closest(".pile")), 600);
+      setTimeout(() => pulser(pile.closest(".pile")), (600)*FX_LENT);
       break;
     }
     case "attaque": {
@@ -4865,10 +4907,16 @@ function animerEvenement(ev){
       const ra = att ? att.getBoundingClientRect() : (POS_AVANT[ev.att] || {}).r; if(!ra) return;
       const c0 = centre(ra), dx = (pt.x - c0.x)*.78, dy = (pt.y - c0.y)*.78;
       if(att){
-        att.style.zIndex = 8;
-        att.animate([{transform:"translate(0,0)"}, {transform:`translate(${dx*-.08}px,${dy*-.08}px) scale(1.04)`, offset:.25},
-          {transform:`translate(${dx}px,${dy}px) scale(1.08)`, offset:.55}, {transform:"translate(0,0)"}], {duration:560, easing:"ease-in-out"})
-          .finished.then(() => { att.style.zIndex = ""; }, () => {});
+        // Une copie vole sur le calque d’effets, au premier plan : elle passe toujours au-dessus du défenseur
+        const copie = document.createElement("div"); copie.className = "fx-attaquant";
+        copie.style.left = ra.left + "px"; copie.style.top = ra.top + "px"; copie.style.width = ra.width + "px"; copie.style.height = ra.height + "px";
+        copie.innerHTML = att.outerHTML;
+        calqueFx().appendChild(copie);
+        ATTAQUANTS_CACHES.add(ev.att); att.style.visibility = "hidden";
+        const fin = () => { copie.remove(); ATTAQUANTS_CACHES.delete(ev.att); const vrai = document.querySelector(`.crea[data-id="${ev.att}"]`); if(vrai) vrai.style.visibility = ""; };
+        copie.animate([{transform:"translate(0,0)"}, {transform:`translate(${dx*-.08}px,${dy*-.08}px) scale(1.04)`, offset:.25},
+          {transform:`translate(${dx}px,${dy}px) scale(1.1)`, offset:.55}, {transform:"translate(0,0)"}], {duration:560, easing:"ease-in-out"})
+          .finished.then(fin, fin);
       } else if(POS_AVANT[ev.att]){
         const clone = document.createElement("div"); clone.className = "fx-carte";
         clone.style.width = ra.width + "px"; clone.style.marginLeft = -ra.width/2 + "px"; clone.style.marginTop = -ra.height/2 + "px";
@@ -4888,8 +4936,11 @@ function animerEvenement(ev){
     }
   }
 }
+const ATTAQUANTS_CACHES = new Set();
 function jouerEffets(){
   if(!S) return;
+  // Une créature en plein vol reste masquée même si le plateau est réaffiché
+  ATTAQUANTS_CACHES.forEach(u => { const el = document.querySelector(`.crea[data-id="${u}"]`); if(el) el.style.visibility = "hidden"; });
   const evts = S.evt || [];
   const dernier = evts.length ? evts[evts.length-1].n : 0;
   if(FX_VU.id!==S.idPartie){ FX_VU = {id:S.idPartie, n:dernier}; return; }
@@ -4969,14 +5020,14 @@ function animerEvenement2(ev, niveau){
       if(niveau<2) return;
       const de = pileRect(ev.j, "defausse") || pileRect(ev.j, "deck"), a = pileRect(ev.j, "deck"); if(!de || !a) return;
       for(let k=0; k<Math.min(ev.n || 4, 6); k++) voler(dosVolant(a.width), centre(de), centre(a), 420, k*55, {milieu:{x:(de.left+a.left)/2 + de.width/2, y:Math.min(de.top, a.top) - 60}, e0:.9, e1:1, e2:1, o2:.8});
-      setTimeout(() => pulser(document.querySelector(`.pile-deck[data-joueur="${ev.j}"]`)), 420 + 5*55);
+      setTimeout(() => pulser(document.querySelector(`.pile-deck[data-joueur="${ev.j}"]`)), (420 + 5*55)*FX_LENT);
       break;
     }
     case "defausse": {
       if(niveau<2) return;
       const a = pileRect(ev.j, "defausse"); if(!a) return;
       (ev.uids || []).forEach((u, k) => { const cl = cloneCarte(u); if(cl) voler(cl.el, cl.c, centre(a), 460, k*45, {e0:1, e2:a.width/cl.r.width, o2:.95}); });
-      setTimeout(() => pulser(document.querySelector(`.pile-defausse[data-joueur="${ev.j}"]`)), 460 + (ev.uids || []).length*45);
+      setTimeout(() => pulser(document.querySelector(`.pile-defausse[data-joueur="${ev.j}"]`)), (460 + (ev.uids || []).length*45)*FX_LENT);
       break;
     }
     case "mort": {

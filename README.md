@@ -79,6 +79,11 @@ Il y a donc toujours autant de victoires que de défaites. Ce script remet l’h
 d’acheter, en plus du paquet classique, un paquet par faction (même prix, mêmes chances). Après avoir ajouté des cartes
 ou changé leur faction, renvoyez le catalogue depuis l’administration (onglet Serveur).
 
+## Modifier l’or et l’encre d’un joueur
+
+`supabase-admin-joueurs.sql` permet à l’administrateur de corriger l’or et l’encre d’un joueur depuis l’onglet
+« Statistiques » de l’administration (bouton « Modifier » dans la liste des joueurs).
+
 ## Sécurité
 
 Le dépôt est public : n’y mettez jamais de mot de passe ni la clé « service_role » de Supabase.
