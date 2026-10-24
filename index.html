@@ -4085,16 +4085,28 @@ function pageProfil(){
 // Filtre des comptes invités (sans adresse e-mail), mémorisé dans le navigateur
 const sansInvites = () => true;
 const estInvite = j => !j.email;
+// Message précis quand une fonction du serveur manque : laquelle, et quel script l’apporte
+const SCRIPTS_FONCTIONS = {admin_resume:"supabase-stats.sql puis supabase-stats-duels.sql", admin_joueurs:"supabase-stats.sql",
+  admin_stats_heros:"supabase-stats.sql", admin_stats_cartes:"supabase-stats.sql", mes_stats:"supabase-stats.sql",
+  enregistrer_duel:"supabase-stats-duels.sql", admin_modifier_ressources:"supabase-admin-joueurs.sql",
+  ouvrir_paquet:"supabase-boosters.sql", est_admin:"supabase-phase4.sql", admin_existe:"supabase-admin.sql"};
+function messageScriptManquant(msg){
+  const t = String(msg || "");
+  if(!/function|does not exist|schema cache/i.test(t)) return t;
+  const m = t.match(/function\s+(?:public\.)?(\w+)/i);
+  const nom = m ? m[1] : null, script = nom && SCRIPTS_FONCTIONS[nom];
+  return script ? `Il manque la fonction « ${nom} » sur le serveur : exécutez ${script} dans Supabase (SQL Editor, puis Run). Détail : ${t}`
+                : `Une fonction manque sur le serveur. Détail : ${t}`;
+}
 async function chargerAdminStats(){
   const jours = (PROG.adminStats && PROG.adminStats.jours) || 30;
   try {
     const [resume, joueurs, heros, cartes] = await Promise.all([
       rpc("admin_resume"), rpc("admin_joueurs"),
-      rpc("admin_stats_heros", sansInvites() ? {p_jours:jours, p_sans_invites:true} : {p_jours:jours}),
-      rpc("admin_stats_cartes", sansInvites() ? {p_jours:jours, p_sans_invites:true} : {p_jours:jours})]);
+      rpc("admin_stats_heros", {p_jours:jours}), rpc("admin_stats_cartes", {p_jours:jours})]);
     PROG.adminStats = {...(PROG.adminStats || {}), resume, joueurs, heros, cartes, jours, quand:Date.now(), erreur:null};
   } catch(e) {
-    PROG.adminStats = {...(PROG.adminStats || {}), jours, erreur:/function|does not exist|schema cache/i.test(e.message) ? "Exécutez d’abord le script supabase-stats.sql dans Supabase." : e.message};
+    PROG.adminStats = {...(PROG.adminStats || {}), jours, erreur:messageScriptManquant(e.message)};
   }
   if(ui.ecran==="admin" && adm.onglet==="stats") renderAdmin();
 }
