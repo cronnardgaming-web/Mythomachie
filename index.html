@@ -328,6 +328,60 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 .titre-credit{font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:17px;color:var(--ink)}
 .artiste-credit{color:var(--ink-2)}
 
+/* Piles de cartes */
+.zone-main{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:end;gap:18px}
+.zone-main .main.eventail{padding-left:44px;padding-right:44px}
+.zone-main .pile{position:relative;z-index:7}
+.pile{display:flex;flex-direction:column;align-items:center;gap:6px;padding-bottom:30px}
+.pile-tas{position:relative;width:84px;aspect-ratio:63/88}
+.pile.petite{padding-bottom:0}
+.pile.petite .pile-tas{width:46px}
+.dos-pile{position:absolute;inset:0;border-radius:6px;transform:translate(calc(var(--i) * -3px), calc(var(--i) * -3px));
+  background:linear-gradient(135deg,#8a5a1f,#3b2a14);box-shadow:inset 0 0 0 3px rgba(242,212,138,.45),0 2px 5px var(--ombre);display:grid;place-items:center;color:#f2d48a;font-family:Cinzel,serif;font-weight:700;font-size:26px}
+.pile.petite .dos-pile{font-size:15px;box-shadow:inset 0 0 0 2px rgba(242,212,138,.45),0 1px 3px var(--ombre)}
+.dos-pile:not(:last-of-type) span{opacity:0}
+.pile-vide{position:absolute;inset:0;border-radius:6px;border:2px dashed var(--line)}
+.pile-tas .carte{--w:84px;position:absolute;inset:0;cursor:default;pointer-events:none}
+.pile.petite .pile-tas .carte{--w:46px}
+.pile-nb{position:absolute;right:-10px;bottom:-10px;z-index:3;min-width:30px;height:30px;padding:0 7px;border-radius:99px;display:grid;place-items:center;
+  font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:15px;color:#3b2a06;background:radial-gradient(circle at 35% 30%,#fff4c2,#f0c64e 45%,#a8750f);border:2px solid #7a520a;box-shadow:0 2px 5px var(--ombre)}
+.pile.petite .pile-nb{min-width:22px;height:22px;font-size:12px;right:-8px;bottom:-8px;padding:0 5px}
+.pile-nom{font-size:12px;color:var(--ink-2);letter-spacing:.04em;display:flex;align-items:center;gap:6px}
+.pile.petite .pile-nom{display:none}
+.pile-bannies{font-size:12px}
+.piles-adverses{display:flex;gap:16px;align-items:flex-start}
+.fx-pulse{animation:fx-pulse .45s ease}
+@keyframes fx-pulse{40%{transform:scale(1.12);filter:brightness(1.3)}}
+@media (max-width:700px){.zone-main{grid-template-columns:1fr}.zone-main .pile{display:none}}
+
+/* Calque d’animations */
+#fx{position:fixed;inset:0;pointer-events:none;z-index:28;overflow:hidden}
+.fx-objet{position:absolute;left:0;top:0;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}
+.fx-objet svg{width:100%;height:100%;display:block}
+.fx-carte{position:absolute;left:0;top:0;transform-origin:center}
+.fx-carte .carte{--w:100%;width:100%}
+.fx-eclat{position:absolute;width:120px;height:120px;border-radius:50%;pointer-events:none}
+.fx-eclat.impact{background:radial-gradient(circle,rgba(255,255,255,.95) 0,rgba(255,226,140,.85) 25%,rgba(255,160,60,.35) 50%,transparent 70%)}
+.fx-eclat.soin{width:150px;height:150px;background:radial-gradient(circle,rgba(220,255,225,.9) 0,rgba(110,220,140,.7) 30%,rgba(60,180,100,.25) 55%,transparent 72%)}
+.fx-particule-soin{position:absolute;color:#7fe0a0;font-family:Cinzel,serif;font-weight:700;font-size:24px;text-shadow:0 0 6px rgba(60,180,100,.9)}
+@media (prefers-reduced-motion: reduce){.fx-pulse{animation:none}}
+.fx-dos{position:absolute;left:0;top:0;aspect-ratio:63/88;border-radius:6px;background:linear-gradient(135deg,#8a5a1f,#3b2a14);box-shadow:inset 0 0 0 3px rgba(242,212,138,.45),0 4px 10px rgba(0,0,0,.4);display:grid;place-items:center;color:#f2d48a;font-family:Cinzel,serif;font-weight:700;font-size:26px}
+.fx-symbole{position:absolute;font-size:34px;pointer-events:none}
+.fx-symbole .sym-mot{width:1.4em;height:1.4em}
+.fx-eclat.poussiere{background:radial-gradient(circle,rgba(200,200,210,.7) 0,rgba(140,140,150,.35) 40%,transparent 70%)}
+.fx-eclat.feu{width:150px;height:150px;background:radial-gradient(circle,rgba(255,240,180,.95) 0,rgba(255,150,40,.85) 25%,rgba(200,50,10,.4) 50%,transparent 70%)}
+.fx-eclat.or{width:90px;height:90px;background:radial-gradient(circle,rgba(255,250,220,.95) 0,rgba(240,198,78,.7) 35%,transparent 70%)}
+.fx-eclat.bouclier{width:130px;height:130px;background:radial-gradient(circle,transparent 45%,rgba(200,230,255,.95) 50%,rgba(120,180,255,.5) 58%,transparent 66%)}
+.fx-eclat.pouvoir{width:220px;height:220px;background:radial-gradient(circle,rgba(255,250,220,.9) 0,rgba(242,193,78,.75) 25%,rgba(242,193,78,.25) 50%,transparent 70%)}
+.fx-rayon{position:absolute;width:6px;height:110px;border-radius:3px;background:linear-gradient(to top,rgba(242,193,78,0),rgba(255,236,170,.95));transform-origin:50% 100%}
+.fx-onde{position:absolute;height:14px;border-radius:99px;transform-origin:0 50%;background:linear-gradient(90deg,rgba(255,200,120,0),rgba(255,226,160,.95) 50%,rgba(255,200,120,0));box-shadow:0 0 22px rgba(255,190,90,.8)}
+.fx-eclat-medaillon{position:absolute;width:16px;height:16px;background:linear-gradient(135deg,#d9dde3,#6f7780);clip-path:polygon(50% 0,100% 40%,70% 100%,10% 80%,0 30%)}
+body.sans-animations *,body.sans-animations *::before,body.sans-animations *::after{animation:none!important;transition:none!important}
+.reglages-joueur{display:flex;gap:22px;align-items:center;flex-wrap:wrap;margin-top:14px;color:var(--ink-2)}
+.reglages-joueur .reglage-son{display:flex;align-items:center;gap:10px;margin:0}
+.reglage-anim{display:flex;align-items:center;gap:8px}
+.reglage-anim select{font:inherit;font-size:15px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -985,22 +1039,27 @@ const pouvoirPret = j => (j.morts || 0) >= (REGLES.seuilPouvoir || 10);
 function activerPouvoir(){
   const i = S.courant, j = S.joueurs[i], h = heroDe(j);
   if(!pouvoirPret(j)) return erreur(`Le pouvoir de ${h.nom} se charge : ${j.morts || 0} créatures ennemies détruites sur ${REGLES.seuilPouvoir}.`);
+  fxEvt({t:"pouvoir", j:i});
   j.morts = 0;
   if(S.stats && S.stats[i]) S.stats[i].pouvoirs = (S.stats[i].pouvoirs || 0) + 1;
   log(`${h.nom} déchaîne ${h.pouvoir.nom} (${decrire(h.pouvoir.effet || {})})`);
-  appliquer(i, h.pouvoir.effet || {});
+  appliquer(i, h.pouvoir.effet || {}, "heros");
   verifierVictoire();
   return true;
 }
 
 function piocher(j, n, silencieux){
+  const idx = S ? S.joueurs.indexOf(j) : -1;
   for(let i=0;i<n;i++){
     if(!j.deck.length){
       if(!j.defausse.length) return;
+      if(idx>=0) fxEvt({t:"melange", j:idx, n:j.defausse.length});
       j.deck = melange(j.defausse); j.defausse = [];
       if(!silencieux) log(`${j.nom} mélange sa défausse pour reformer son deck.`);
     }
-    j.main.push(j.deck.pop());
+    const c = j.deck.pop();
+    j.main.push(c);
+    if(idx>=0 && c) fxEvt({t:"pioche", j:idx, uid:c.uid});
   }
 }
 
@@ -1034,20 +1093,31 @@ function raisonRefus(i, cible){
 
 function blesser(c, n){
   if(n<=0) return;
-  if(c.bouclier){ c.bouclier = false; return; }
+  if(c.bouclier){ c.bouclier = false; if(S) fxEvt({t:"bouclier", uid:c.uid}); return; }
   c.deg += n;
 }
 
-function appliquer(i, e){
+// Événements pour les animations (gardés dans l’état : ils voyagent aussi en ligne)
+function fxEvt(o){
+  if(!S.evt) S.evt = [];
+  S.evtN = (S.evtN || 0) + 1;
+  S.evt.push({n:S.evtN, ...o});
+  if(S.evt.length > 60) S.evt.splice(0, S.evt.length - 60);
+}
+function appliquer(i, e, src){
   if(!e) return;
   const j = S.joueurs[i], opp = adversaire(i);
+  if(e.or) fxEvt({t:"or", j:i, v:e.or, src});
+  if(e.combat) fxEvt({t:"puissance", j:i, v:e.combat, src});
+  if(e.soin) fxEvt({t:"soin", j:i, v:e.soin, src});
   if(e.or) j.or += e.or;
   if(e.combat) j.combat += e.combat;
   if(e.soin){ j.pv += e.soin; if(S.stats && S.stats[i]) S.stats[i].soins = (S.stats[i].soins || 0) + e.soin; }
   if(e.pioche) piocher(j, e.pioche);
-  if(e.degatsTous) opp.plateau.forEach(c => blesser(c, e.degatsTous));
+  if(e.degatsTous && opp.plateau.length){ fxEvt({t:"onde", j:i, cote:1-i, src, uids:opp.plateau.map(c => c.uid)}); opp.plateau.forEach(c => blesser(c, e.degatsTous)); }
   if(e.degatsHasard && opp.plateau.length){
     const c = opp.plateau[Math.floor(Math.random()*opp.plateau.length)];
+    fxEvt({t:"eclair", j:i, src, cible:c.uid});
     blesser(c, e.degatsHasard);
     log(`${def(c).nom} subit ${e.degatsHasard} dégâts.`);
   }
@@ -1070,6 +1140,7 @@ function nettoyer(){
       if(!d.jeton) j.defausse.push({uid:c.uid, id:c.id});
       if(c.arme) j.defausse.push({uid:c.arme.uid, id:c.arme.id});
       log(`${d.nom} est détruit${d.jeton ? "e" : ""}.`);
+      fxEvt({t:"mort", j:idx, uid:c.uid});
       const ennemi = S.joueurs[1-idx]; if(ennemi) ennemi.morts = (ennemi.morts || 0) + 1;
       if(d.echo){ log(`Echo de ${d.nom}.`); appliquer(idx, d.echo); }
     });
@@ -1078,9 +1149,11 @@ function nettoyer(){
 
 function verifierVictoire(){
   const [a,b] = S.joueurs;
+  const avant = S.vainqueur;
   if(a.pv<=0 && b.pv<=0) S.vainqueur = "egalite";
   else if(a.pv<=0) S.vainqueur = b.nom;
   else if(b.pv<=0) S.vainqueur = a.nom;
+  if(avant===null && S.vainqueur!==null && S.vainqueur!=="egalite") fxEvt({t:"fin", perdant: a.pv<=0 ? 0 : 1});
 }
 
 // Faction qui déclenche le combo d’une carte : celle choisie dans l’administration, sinon la sienne.
@@ -1096,8 +1169,9 @@ function verifierAllies(i){
       if(!d.allie || t.allieFait || !cible) continue;
       if(j.tour.some(o => o!==t && CARTES[o.id] && CARTES[o.id].faction===cible)){
         t.allieFait = true; encore = true;
+        fxEvt({t:"combo", j:i, src:t.uid, faction:cible});
         log(`${TERMES.allie || "Combo"} : ${d.nom} (${decrire(d.allie)})`);
-        appliquer(i, d.allie);
+        appliquer(i, d.allie, t.uid);
       }
     }
   }
@@ -1115,22 +1189,24 @@ function jouer(id, opts={}){
     j.main.splice(k,1);
     if(cible.arme) j.defausse.push({uid:cible.arme.uid, id:cible.arme.id});
     cible.arme = {uid:c.uid, id:c.id, dur:d.durabilite};
+    fxEvt({t:"arme", j:i, src:c.uid, cible:cible.uid});
     log(`${j.nom} équipe ${def(cible).nom} de ${d.nom}.`);
   } else if(d.type==="creature"){
     j.main.splice(k,1);
     j.plateau.push(creature(c));
     log(`${j.nom} invoque ${d.nom}.`);
-    if(d.conjuration) appliquer(i, d.conjuration);
+    if(d.conjuration) appliquer(i, d.conjuration, c.uid);
   } else {
     j.main.splice(k,1);
     if(opts.sacrifierDirect && d.choixSacrifice){
       j.bannies.push(c);
+      fxEvt({t:"sacrifice", j:i, uid:c.uid});
       log(`${j.nom} sacrifie ${d.nom} (${decrire(d.choixSacrifice)})`);
-      appliquer(i, d.choixSacrifice);
+      appliquer(i, d.choixSacrifice, c.uid);
     } else {
       j.joues.push(c);
       log(`${j.nom} joue ${d.nom}.`);
-      appliquer(i, d.effet);
+      appliquer(i, d.effet, c.uid);
     }
   }
   j.tour.push({uid:c.uid, id:c.id, allieFait:false});
@@ -1151,8 +1227,9 @@ function sacrifier(id){
   const c = j.joues[k], d = def(c);
   if(!d.sacrifice) return;
   j.joues.splice(k,1); j.bannies.push(c);
+  fxEvt({t:"sacrifice", j:S.courant, uid:c.uid});
   log(`${j.nom} sacrifie ${d.nom} (${decrire(d.sacrifice)})`);
-  appliquer(S.courant, d.sacrifice);
+  appliquer(S.courant, d.sacrifice, c.uid);
   verifierVictoire();
 }
 
@@ -1163,6 +1240,7 @@ function bannir(id){
     if(k>=0){
       const [c] = j[zone].splice(k,1);
       j.bannies.push(c);
+      fxEvt({t:"bannir", j:S.courant, uid:c.uid});
       log(`${j.nom} bannit ${def(c).nom}.`);
       S.bannirEnAttente = Math.max(0, S.bannirEnAttente-1);
       return;
@@ -1177,6 +1255,7 @@ function acheter(k){
     if(!b) return false;
     if(j.or<(b.prix||0)) return erreur(`Il vous faut ${b.prix} or pour ${b.nom}.`);
     j.or -= (b.prix||0); j.defausse.push(inst(REGLES.carteBase));
+    fxEvt({t:"achat", j:S.courant, src:"base"});
     if(S.stats && S.stats[S.courant]){ const st = S.stats[S.courant]; st.achats++; if(st.achetees) st.achetees[REGLES.carteBase] = (st.achetees[REGLES.carteBase] || 0) + 1; }
     log(`${j.nom} achète ${b.nom}.`);
     return true;
@@ -1186,13 +1265,16 @@ function acheter(k){
   const d = def(c);
   if(j.or<d.prix) return erreur(`Il vous faut ${d.prix} or pour acheter ${d.nom}.`);
   j.or -= d.prix; j.defausse.push(c);
+  fxEvt({t:"achat", j:S.courant, src:c.uid});
   if(S.stats && S.stats[S.courant]){ const st = S.stats[S.courant]; st.achats++; if(st.achetees) st.achetees[c.id] = (st.achetees[c.id] || 0) + 1; }
   S.marche.splice(k, 1, ...(S.marcheDeck.length ? [S.marcheDeck.pop()] : []));
+  if(S.marche[k]) fxEvt({t:"marche", uid:S.marche[k].uid});
   log(`${j.nom} achète ${d.nom}.`);
   return true;
 }
 
 function attaquer(idAtt, cible){
+  const evAvant = S.evtN || 0;
   const i = S.courant, j = S.joueurs[i], opp = adversaire(i);
   const att = j.plateau.find(x => x.uid===idAtt);
   if(!att || !att.peutAttaquer || att.aAttaque) return erreur("Cette créature ne peut pas attaquer maintenant.");
@@ -1210,6 +1292,7 @@ function attaquer(idAtt, cible){
     log(`${def(att).nom} attaque ${def(v).nom}.`);
   }
   att.aAttaque = true; att.revele = true;
+  fxEvt({t:"attaque", j:i, att:idAtt, cible});
   if(att.arme){
     att.arme.dur--;
     if(att.arme.dur<=0){
@@ -1223,9 +1306,11 @@ function attaquer(idAtt, cible){
 }
 
 function utiliserCombat(cible){
+  const evAvant = S.evtN || 0;
   const i = S.courant, j = S.joueurs[i], opp = adversaire(i);
   if(j.combat<=0) return false;
   const t = cibles(i);
+  if(cible==="face" ? t.face : t.creatures.has(cible)) fxEvt({t:"frappe", j:i, cible});
   if(cible==="face"){
     if(!t.face) return erreur(raisonRefus(i,"face"));
     log(`${heroDe(j).nom} inflige ${j.combat} dégâts à ${opp.nom}.`);
@@ -1251,6 +1336,8 @@ function utiliserCombat(cible){
 
 function finTour(){
   const j = S.joueurs[S.courant];
+  const aDefausser = [...j.main, ...j.joues].map(c => c.uid);
+  if(aDefausser.length) fxEvt({t:"defausse", j:S.courant, uids:aDefausser});
   j.defausse.push(...j.main, ...j.joues);
   j.main = []; j.joues = []; j.tour = []; j.or = 0; j.combat = 0;
   S.bannirEnAttente = 0;
@@ -1458,7 +1545,7 @@ function htmlCarte(c, o={}){
     ? `<span class="atk" title="Attaque">${d.attaque}</span><span class="pv" title="Points de vie">${d.vie}</span>`
     : d.type==="arme"
       ? `<span class="atk" title="Bonus d’attaque">+${d.bonus}</span><span class="dur" title="Nombre d’attaques">${d.durabilite}</span>` : "";
-  const act = o.act ? `data-act="${o.act}" data-id="${o.id ?? c.uid}"` : "";
+  const act = (o.act ? `data-act="${o.act}" data-id="${o.id ?? c.uid}"` : "") + (c.uid ? ` data-uid="${c.uid}"` : "");
   const srcImg = (o.hd && d.imageHD) || d.image;
   return `<button type="button" class="carte f-${f} r-${d.rarete || "base"} ${o.classes || ""}" ${act} ${o.style ? `style="${o.style}"` : ""}>
     <span class="cadre">
@@ -1489,7 +1576,7 @@ function htmlCrea(c, act, classes){
 function htmlJoue(c, inter){
   const d = def(c);
   const sac = d.sacrifice && inter ? `<button type="button" class="btn-sac" data-act="sac" data-id="${c.uid}">Sacrifier : ${decrire(d.sacrifice)}</button>` : "";
-  return `<span class="joue f-${d.faction || "neutre"}" style="border-left-color:var(--fc)">${d.nom}${sac}</span>`;
+  return `<span class="joue f-${d.faction || "neutre"}" data-uid="${c.uid}" style="border-left-color:var(--fc)">${d.nom}${sac}</span>`;
 }
 function consigne(inter, moi){
   if(!S || S.vainqueur!==null) return "";
@@ -1506,6 +1593,32 @@ function consigne(inter, moi){
   return "Achetez au marché, attaquez avec vos créatures, puis finissez le tour.";
 }
 
+// Piles : le deck (dos de cartes) et la défausse (dernière carte visible), avec un compteur
+// Resserre l’éventail pour que la main tienne entre le deck et la défausse
+function ajusterEventail(){
+  const m = document.querySelector(".zone-main .main.eventail");
+  if(!m) return;
+  const cartes = m.querySelectorAll(".carte"), n = cartes.length;
+  if(!n) return;
+  const cs = getComputedStyle(m), dispo = m.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0);
+  const w = cartes[0].getBoundingClientRect().width || 160;
+  const chev = Math.min(-6, (dispo - n*w) / (2*n));
+  m.style.setProperty("--chev", chev.toFixed(1) + "px");
+}
+addEventListener("resize", () => { if(S) ajusterEventail(); });
+function htmlPile(j, type, petite){
+  const idx = S.joueurs.indexOf(j);
+  if(type==="deck"){
+    const n = j.deck.length, couches = n>20 ? 4 : n>10 ? 3 : n>3 ? 2 : n>0 ? 1 : 0;
+    return `<div class="pile pile-deck ${petite ? "petite" : ""}" data-joueur="${idx}" title="Deck : ${n} carte${n>1 ? "s" : ""}">
+      <div class="pile-tas">${couches ? Array.from({length:couches}, (_, k) => `<span class="dos-pile" style="--i:${k}"><span>${NOM_JEU.charAt(0)}</span></span>`).join("") : `<span class="pile-vide"></span>`}<span class="pile-nb">${n}</span></div>
+      <span class="pile-nom">Deck</span></div>`;
+  }
+  const n = j.defausse.length, haut = j.defausse[n-1];
+  return `<div class="pile pile-defausse ${petite ? "petite" : ""}" data-joueur="${idx}" title="Défausse : ${n} carte${n>1 ? "s" : ""}${haut && CARTES[haut.id] ? `, dessus : ${esc(CARTES[haut.id].nom)}` : ""}">
+    <div class="pile-tas">${haut && CARTES[haut.id] ? htmlCarte({id:haut.id}) : `<span class="pile-vide"></span>`}<span class="pile-nb">${n}</span></div>
+    <span class="pile-nom">Défausse${!petite && j.bannies.length ? ` <span class="pile-bannies" title="Cartes bannies : ${j.bannies.length}">${symMot("bannir")}\u00a0${j.bannies.length}</span>` : ""}</span></div>`;
+}
 function htmlMedaillon(j, estMoi, inter, cible){
   const idx = S.joueurs.indexOf(j), h = heroDe(j), seuil = REGLES.seuilPouvoir || 10, m = Math.min(j.morts || 0, seuil), pret = pouvoirPret(j);
   const pv = h.pouvoir || {nom:"Pouvoir", effet:{}};
@@ -1546,6 +1659,7 @@ function render(){
   };
   const vide = txt => `<span class="vide">${txt}</span>`;
   const base = CARTES[REGLES.carteBase] ? {uid:"base", id:REGLES.carteBase} : null;
+  memoriserPositions();
   const n = moi.main.length, milieu = (n-1)/2, pas = Math.min(5, 26/Math.max(n,1)), chev = n>8 ? -34 : n>6 ? -24 : -14;
   app.innerHTML = `
   <header class="barre-jeu">
@@ -1561,7 +1675,7 @@ function render(){
         <div class="ligne-heros">
           ${htmlMedaillon(lui, false, inter, visee && t.face)}
           <div class="main-adverse" title="${lui.main.length} cartes en main" aria-label="${lui.main.length} cartes en main">${Array.from({length:Math.min(lui.main.length, 10)}, () => `<span class="dos-mini"></span>`).join("")}</div>
-          <div class="piles"><span><b>${lui.deck.length}</b>deck</span><span><b>${lui.defausse.length}</b>défausse</span></div>
+          <div class="piles-adverses">${htmlPile(lui, "deck", true)}${htmlPile(lui, "defausse", true)}</div>
         </div>
         <div class="rangee">${lui.plateau.map(c => htmlCrea(c, "enemy", visee && t.creatures.has(c.uid) ? "cible" : "")).join("") || vide("Aucune créature adverse")}</div>
       </section>
@@ -1576,12 +1690,12 @@ function render(){
             <span class="ressource or"><span class="jeton">${moi.or}</span>or</span>
             <span class="ressource puissance" data-aide="puissance" data-titre="Puissance"><span class="jeton">${moi.combat}</span>puissance</span>
           </div>
-          <div class="piles"><span><b>${moi.deck.length}</b>deck</span><span><b>${moi.defausse.length}</b>défausse</span><span><b>${moi.bannies.length}</b>bannies</span></div>
+
           <div class="joues">${moi.joues.map(c => htmlJoue(c, inter)).join("")}</div>
         </div>
         <div class="consigne">${consigne(inter, moi)}</div>
       </section>
-      <div class="main eventail" aria-label="Votre main">${moi.main.map((c, i) => htmlCarte(c, {act:"main", classes: inter ? "jouable" : "", style:`--r:${((i-milieu)*pas).toFixed(1)}deg;--y:${(Math.abs(i-milieu)**2*2.2).toFixed(1)}px;--chev:${chev}px`})).join("")}</div>
+      <div class="zone-main">${htmlPile(moi, "deck")}<div class="main eventail" aria-label="Votre main">${moi.main.map((c, i) => htmlCarte(c, {act:"main", classes: inter ? "jouable" : "", style:`--r:${((i-milieu)*pas).toFixed(1)}deg;--y:${(Math.abs(i-milieu)**2*2.2).toFixed(1)}px`})).join("")}</div>${htmlPile(moi, "defausse")}</div>
     </div>
     <aside class="cote">
       <section class="marche">
@@ -1594,9 +1708,11 @@ function render(){
       <details class="journal" ${ui.journalFerme ? "" : "open"}><summary>Journal</summary><ol>${S.journal.slice(-10).reverse().map(l => `<li>${l}</li>`).join("")}</ol></details>
     </aside>
   </div>`;
+  ajusterEventail();
   if(tutoActif()) avancerTuto();
   renderCouche();
   animerChangements();
+  jouerEffets();
   renderTuto();
   if(PROG.pret) signaler();
   if(S.vainqueur!==null) verifierRecompense();
@@ -1609,6 +1725,10 @@ function instantane(){
           crea:Object.fromEntries(S.joueurs.flatMap(j => j.plateau.map(c => [c.uid, vieRestante(c)])))};
 }
 function flottant(el, d){
+  if(d<0 && fxPossible()) return setTimeout(() => { if(document.body.contains(el)) flottantImmediat(el, d); }, 300);
+  flottantImmediat(el, d);
+}
+function flottantImmediat(el, d){
   const s = document.createElement("span");
   s.className = "flottant " + (d<0 ? "degat" : "soin");
   s.textContent = (d>0 ? "+" : "") + d;
@@ -1661,9 +1781,13 @@ function renderCouche(){
         <button type="button" class="btn second" data-act="credits">Crédits</button>
         <button type="button" class="btn second" data-act="en-ligne">Jouer en ligne</button>
         <button type="button" class="btn second" data-act="admin">Administration</button>
-      </div>${regles}</div>`;
+      </div><div class="reglages-joueur">${htmlReglageAnimations()}</div>${regles}</div>`;
     if(PROG.actif) h = PROG.porte ? htmlPorte() : PROG.accueilEtape && PROG.pret ? htmlBienvenue() : PROG.compteVue && PROG.pret ? htmlFormCompte() : PROG.choixDeck ? htmlChoixDeck() : htmlAccueilProg(regles);
     if(EN.ecran) h = htmlEnLigne();
+  } else if(S.vainqueur!==null && niveauAnim()>0 && ui.finVue!==S.idPartie){
+    // Laisse le temps de voir le médaillon du vaincu voler en éclats
+    const id = S.idPartie;
+    if(!ui.finAttente){ ui.finAttente = true; setTimeout(() => { ui.finAttente = false; ui.finVue = id; if(S && S.idPartie===id) renderCouche(); }, 1300); }
   } else if(S.vainqueur!==null && S.tuto){
     h = htmlFinTuto();
   } else if(S.vainqueur!==null){
@@ -3210,7 +3334,7 @@ function htmlAccueilProg(regles){
       ${accesAdmin() ? `<button type="button" class="btn second" data-act="admin">Administration</button>` : ""}
     </div>
     ${htmlCompte()}
-    ${aDesMusiques() ? `<div class="reglage-son">Musique ${htmlSon(true)}</div>` : ""}
+    <div class="reglages-joueur">${aDesMusiques() ? `<span class="reglage-son">Musique ${htmlSon(true)}</span>` : ""}${htmlReglageAnimations()}</div>
     ${regles}</div>`;
 }
 function htmlBienvenue(){
@@ -4299,7 +4423,7 @@ document.addEventListener("click", e => {
   if(!a) return;
   e.preventDefault();
   const cible = document.getElementById(a.dataset.ancre);
-  if(cible) cible.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"start"});
+  if(cible) cible.scrollIntoView({behavior: (typeof matchMedia==="function" && matchMedia("(prefers-reduced-motion: reduce)").matches) ? "auto" : "smooth", block:"start"});
 });
 
 /* ============================================================
@@ -4630,7 +4754,355 @@ async function actionMusiques(act, id){
   renderAdmin();
 }
 
+/* ============================================================
+   ANIMATIONS EN PARTIE (calque au-dessus du plateau)
+   Le moteur note les actions dans S.evt ; l’affichage les rejoue ici.
+   Rapides (0,3 à 0,6 s), jamais bloquantes, coupées si le joueur
+   a réduit les animations dans son système.
+   ============================================================ */
+let POS_AVANT = {}, FX_VU = {id:null, n:0};
+const fxPossible = () => niveauAnim() > 0;
+function calqueFx(){
+  let c = document.getElementById("fx");
+  if(!c){ c = document.createElement("div"); c.id = "fx"; c.setAttribute("aria-hidden", "true"); document.body.appendChild(c); }
+  return c;
+}
+// Mémorise la position des cartes, créatures et médaillons avant chaque nouvel affichage
+function memoriserPositions(){
+  POS_AVANT = {};
+  if(!S) return;
+  document.querySelectorAll("#app [data-uid], #app .crea[data-id], #couche [data-uid]").forEach(el => {
+    const r = el.getBoundingClientRect();
+    if(r.width) POS_AVANT[el.dataset.uid || el.dataset.id] = {r, html:el.outerHTML};
+  });
+  document.querySelectorAll("#app .medaillon[data-joueur]").forEach(el => { POS_AVANT["heros-" + el.dataset.joueur] = {r:el.getBoundingClientRect()}; });
+  const ma = document.querySelector("#app .main-adverse"); if(ma) POS_AVANT["main-adverse"] = {r:ma.getBoundingClientRect()};
+}
+const centre = r => ({x:r.left + r.width/2, y:r.top + r.height/2});
+const rectDe = sel => { const el = typeof sel==="string" ? document.querySelector(sel) : sel; return el ? el.getBoundingClientRect() : null; };
+function voler(el, de, a, duree, delai, extra){
+  const c = calqueFx(); c.appendChild(el);
+  const ki = extra && extra.milieu
+    ? [{transform:`translate(${de.x}px,${de.y}px) scale(${extra.e0 ?? 1})`, opacity:1},
+       {transform:`translate(${extra.milieu.x}px,${extra.milieu.y}px) scale(${extra.e1 ?? 1.15})`, opacity:1, offset:.45},
+       {transform:`translate(${a.x}px,${a.y}px) scale(${extra.e2 ?? .6})`, opacity:extra.o2 ?? .9}]
+    : [{transform:`translate(${de.x}px,${de.y}px) scale(${(extra && extra.e0) ?? 1})`, opacity:1},
+       {transform:`translate(${a.x}px,${a.y}px) scale(${(extra && extra.e2) ?? .6})`, opacity:(extra && extra.o2) ?? .9}];
+  const anim = el.animate(ki, {duration:duree, delay:delai || 0, easing:"cubic-bezier(.3,.7,.35,1)", fill:"both"});
+  anim.finished.then(() => el.remove(), () => el.remove());
+  return anim;
+}
+function eclat(point, type, delai){
+  const e = document.createElement("span");
+  e.className = "fx-eclat " + (type || "impact");
+  e.style.left = point.x + "px"; e.style.top = point.y + "px";
+  calqueFx().appendChild(e);
+  const anim = e.animate([{transform:"translate(-50%,-50%) scale(.2)", opacity:1}, {transform:"translate(-50%,-50%) scale(1.5)", opacity:0}],
+    {duration:type==="soin" ? 600 : 380, delay:delai || 0, easing:"ease-out", fill:"both"});
+  anim.finished.then(() => e.remove(), () => e.remove());
+  if(type==="soin") for(let k=0; k<5; k++){
+    const p = document.createElement("span"); p.className = "fx-particule-soin"; p.textContent = "+";
+    p.style.left = point.x + "px"; p.style.top = point.y + "px"; calqueFx().appendChild(p);
+    const dx = (k-2)*14 + (Math.random()*8-4);
+    p.animate([{transform:"translate(-50%,-50%)", opacity:0}, {transform:`translate(calc(-50% + ${dx}px), calc(-50% - 10px))`, opacity:1, offset:.25},
+      {transform:`translate(calc(-50% + ${dx}px), calc(-50% - ${46 + k*4}px))`, opacity:0}], {duration:750, delay:(delai || 0) + k*50, easing:"ease-out", fill:"both"})
+      .finished.then(() => p.remove(), () => p.remove());
+  }
+}
+function pulser(el){ if(!el) return; el.classList.remove("fx-pulse"); void el.offsetWidth; el.classList.add("fx-pulse"); }
+function icoVolante(cle, taille){
+  const s = document.createElement("span"); s.className = "fx-objet";
+  s.style.width = s.style.height = (taille || 28) + "px";
+  s.style.marginLeft = s.style.marginTop = -(taille || 28)/2 + "px";
+  s.innerHTML = `<svg viewBox="0 0 24 24">${ICONES[cle]}</svg>`;
+  return s;
+}
+// Origine d’un effet : la carte jouée (avant affichage), sinon le médaillon ou la main adverse
+function origine(ev){
+  if(ev.src && POS_AVANT[ev.src]) return centre(POS_AVANT[ev.src].r);
+  if(ev.src==="heros"){ const r = rectDe(`.medaillon[data-joueur="${ev.j}"]`); if(r) return centre(r); }
+  const r = ev.j===vue() ? rectDe(".zone-main .main") : (POS_AVANT["main-adverse"] && POS_AVANT["main-adverse"].r) || rectDe(".main-adverse");
+  return r ? centre(r) : {x:innerWidth/2, y:innerHeight/2};
+}
+function ciblePoint(j, cible){
+  if(cible==="face"){ const r = rectDe(`.medaillon[data-joueur="${1-j}"]`) || (POS_AVANT["heros-" + (1-j)] || {}).r; return r ? centre(r) : null; }
+  const r = rectDe(`.crea[data-id="${cible}"]`) || (POS_AVANT[cible] || {}).r;
+  return r ? centre(r) : null;
+}
+function animerEvenement(ev){
+  const moi = ev.j===vue();
+  switch(ev.t){
+    case "or": case "puissance": {
+      const de = origine(ev), n = Math.min(ev.v || 1, 5);
+      const jeton = moi ? document.querySelector(`.ressource.${ev.t==="or" ? "or" : "puissance"} .jeton`) : document.querySelector(`.medaillon[data-joueur="${ev.j}"]`);
+      const r = jeton && jeton.getBoundingClientRect(); if(!r) return;
+      const a = centre(r);
+      for(let k=0; k<n; k++){
+        const mil = {x:(de.x+a.x)/2 + (k-(n-1)/2)*26, y:Math.min(de.y, a.y) - 50 - Math.random()*30};
+        voler(icoVolante(ev.t==="or" ? "or" : "puissance", ev.t==="or" ? 26 : 30), de, a, 560, k*70, {milieu:mil, e0:.6, e1:1.2, e2:.7});
+      }
+      setTimeout(() => pulser(jeton), 560 + (n-1)*70);
+      break;
+    }
+    case "soin": {
+      const r = rectDe(`.medaillon[data-joueur="${ev.j}"]`); if(r) eclat(centre(r), "soin");
+      break;
+    }
+    case "achat": {
+      const av = POS_AVANT[ev.src]; if(!av) return;
+      const pile = document.querySelector(`.pile-defausse[data-joueur="${ev.j}"] .pile-tas`);
+      const rp = pile && pile.getBoundingClientRect(); if(!rp) return;
+      const clone = document.createElement("div"); clone.className = "fx-carte";
+      clone.style.width = av.r.width + "px"; clone.style.marginLeft = -av.r.width/2 + "px"; clone.style.marginTop = -av.r.height/2 + "px";
+      clone.innerHTML = av.html;
+      voler(clone, centre(av.r), centre(rp), 600, 0, {e0:1, e2:rp.width/av.r.width, o2:1});
+      setTimeout(() => pulser(pile.closest(".pile")), 600);
+      break;
+    }
+    case "attaque": {
+      const att = document.querySelector(`.crea[data-id="${ev.att}"]`), pt = ciblePoint(ev.j, ev.cible);
+      if(!pt) return;
+      const ra = att ? att.getBoundingClientRect() : (POS_AVANT[ev.att] || {}).r; if(!ra) return;
+      const c0 = centre(ra), dx = (pt.x - c0.x)*.78, dy = (pt.y - c0.y)*.78;
+      if(att){
+        att.style.zIndex = 8;
+        att.animate([{transform:"translate(0,0)"}, {transform:`translate(${dx*-.08}px,${dy*-.08}px) scale(1.04)`, offset:.25},
+          {transform:`translate(${dx}px,${dy}px) scale(1.08)`, offset:.55}, {transform:"translate(0,0)"}], {duration:560, easing:"ease-in-out"})
+          .finished.then(() => { att.style.zIndex = ""; }, () => {});
+      } else if(POS_AVANT[ev.att]){
+        const clone = document.createElement("div"); clone.className = "fx-carte";
+        clone.style.width = ra.width + "px"; clone.style.marginLeft = -ra.width/2 + "px"; clone.style.marginTop = -ra.height/2 + "px";
+        clone.innerHTML = POS_AVANT[ev.att].html;
+        voler(clone, c0, {x:c0.x+dx, y:c0.y+dy}, 420, 0, {e0:1, e2:1, o2:0});
+      }
+      eclat(pt, "impact", 300);
+      break;
+    }
+    case "frappe": {
+      const de = centre(rectDe(`.medaillon[data-joueur="${ev.j}"]`) || {left:0, top:0, width:0, height:0}), pt = ciblePoint(ev.j, ev.cible);
+      if(!pt) return;
+      const lame = icoVolante("puissance", 40);
+      voler(lame, de, pt, 360, 0, {e0:.8, e2:1.1, o2:1});
+      eclat(pt, "impact", 330);
+      break;
+    }
+  }
+}
+function jouerEffets(){
+  if(!S) return;
+  const evts = S.evt || [];
+  const dernier = evts.length ? evts[evts.length-1].n : 0;
+  if(FX_VU.id!==S.idPartie){ FX_VU = {id:S.idPartie, n:dernier}; return; }
+  const nouveaux = evts.filter(e => e.n > FX_VU.n);
+  FX_VU.n = Math.max(FX_VU.n, dernier);
+  const niveau = niveauAnim();
+  if(!niveau || !nouveaux.length) return;
+  delaiPioche = 0;
+  nouveaux.forEach(ev => {
+    try {
+      if(animerEvenement2(ev, niveau)) return;
+      // Or, puissance, achat : les objets ne volent qu’en mode complet
+      if(niveau<2 && ["or","puissance","achat"].includes(ev.t)){ if(ev.t!=="achat" && ev.j===vue()) pulser(document.querySelector(`.ressource.${ev.t==="or" ? "or" : "puissance"} .jeton`)); return; }
+      animerEvenement(ev);
+    } catch(e) {}
+  });
+}
+
+/* ============================================================
+   ANIMATIONS, ÉTAPE 2 : pioche, fin de tour, mort, armes, bannir,
+   sacrifice, pouvoir, combo, résistance, dégâts de zone, marché,
+   fin de partie, et réglage « complètes / réduites / aucune »
+   ============================================================ */
+const NIVEAUX_ANIM = {completes:2, reduites:1, aucune:0};
+function reglageAnimations(){
+  let v = null; try { v = localStorage.getItem("animations"); } catch(e) {}
+  if(!NIVEAUX_ANIM.hasOwnProperty(v)) v = (typeof matchMedia==="function" && matchMedia("(prefers-reduced-motion: reduce)").matches) ? "reduites" : "completes";
+  return v;
+}
+// 2 : tout ; 1 : éclats et chiffres, rien ne vole ; 0 : aucune animation
+function niveauAnim(){
+  if(typeof Element==="undefined" || !Element.prototype.animate) return 0;
+  return NIVEAUX_ANIM[reglageAnimations()];
+}
+function appliquerReglageAnimations(){ document.body.classList.toggle("sans-animations", niveauAnim()===0); }
+function htmlReglageAnimations(){
+  const v = reglageAnimations();
+  return `<label class="reglage-anim">Animations <select data-reglage="animations" aria-label="Niveau des animations">
+    ${[["completes","Complètes"],["reduites","Réduites"],["aucune","Aucune"]].map(([k,l]) => `<option value="${k}" ${v===k ? "selected" : ""}>${l}</option>`).join("")}</select></label>`;
+}
+document.addEventListener("change", e => {
+  if(!(e.target.dataset && e.target.dataset.reglage==="animations")) return;
+  try { localStorage.setItem("animations", e.target.value); } catch(err) {}
+  appliquerReglageAnimations();
+});
+function cloneCarte(uid){
+  const av = POS_AVANT[uid]; if(!av || !av.html) return null;
+  const el = document.createElement("div"); el.className = "fx-carte";
+  el.style.width = av.r.width + "px"; el.style.marginLeft = -av.r.width/2 + "px"; el.style.marginTop = -av.r.height/2 + "px";
+  el.innerHTML = av.html;
+  return {el, c:centre(av.r), r:av.r};
+}
+function dosVolant(largeur){
+  const el = document.createElement("div"); el.className = "fx-dos";
+  el.style.width = largeur + "px"; el.style.marginLeft = -largeur/2 + "px"; el.style.marginTop = -largeur*88/63/2 + "px";
+  el.innerHTML = `<span>${NOM_JEU.charAt(0)}</span>`;
+  return el;
+}
+function animerSur(el, images, opts){ if(!el) return null; const a = el.animate(images, opts); return a; }
+function pileRect(j, type){ return rectDe(`.pile-${type}[data-joueur="${j}"] .pile-tas`); }
+let delaiPioche = 0;
+function animerEvenement2(ev, niveau){
+  const moi = ev.j===vue();
+  switch(ev.t){
+    case "pioche": {
+      if(niveau<2) return;
+      const de = pileRect(ev.j, "deck"); if(!de) return;
+      const cible = moi ? document.querySelector(`.zone-main .main .carte[data-uid="${ev.uid}"]`) : document.querySelector(".main-adverse");
+      const ra = cible && cible.getBoundingClientRect(); if(!ra) return;
+      const d = delaiPioche; delaiPioche += 80;
+      const largeur = moi ? ra.width : 30;
+      if(moi) animerSur(cible, [{opacity:0}, {opacity:0, offset:.99}, {opacity:1}], {duration:420 + d, fill:"backwards"});
+      voler(dosVolant(largeur), centre(de), centre(ra), 420, d, {e0:de.width/largeur, e2:1, o2:1});
+      break;
+    }
+    case "melange": {
+      if(niveau<2) return;
+      const de = pileRect(ev.j, "defausse") || pileRect(ev.j, "deck"), a = pileRect(ev.j, "deck"); if(!de || !a) return;
+      for(let k=0; k<Math.min(ev.n || 4, 6); k++) voler(dosVolant(a.width), centre(de), centre(a), 420, k*55, {milieu:{x:(de.left+a.left)/2 + de.width/2, y:Math.min(de.top, a.top) - 60}, e0:.9, e1:1, e2:1, o2:.8});
+      setTimeout(() => pulser(document.querySelector(`.pile-deck[data-joueur="${ev.j}"]`)), 420 + 5*55);
+      break;
+    }
+    case "defausse": {
+      if(niveau<2) return;
+      const a = pileRect(ev.j, "defausse"); if(!a) return;
+      (ev.uids || []).forEach((u, k) => { const cl = cloneCarte(u); if(cl) voler(cl.el, cl.c, centre(a), 460, k*45, {e0:1, e2:a.width/cl.r.width, o2:.95}); });
+      setTimeout(() => pulser(document.querySelector(`.pile-defausse[data-joueur="${ev.j}"]`)), 460 + (ev.uids || []).length*45);
+      break;
+    }
+    case "mort": {
+      const cl = cloneCarte(ev.uid); if(!cl) return;
+      calqueFx().appendChild(cl.el);
+      cl.el.style.transform = `translate(${cl.c.x}px,${cl.c.y}px)`;
+      cl.el.animate([{transform:`translate(${cl.c.x}px,${cl.c.y}px) scale(1)`, opacity:1, filter:"none"},
+        {transform:`translate(${cl.c.x}px,${cl.c.y + 8}px) scale(.85)`, opacity:0, filter:"grayscale(1) blur(3px)"}], {duration:550, delay:280, easing:"ease-in", fill:"both"})
+        .finished.then(() => cl.el.remove(), () => cl.el.remove());
+      eclat(cl.c, "poussiere", 330);
+      break;
+    }
+    case "arme": {
+      const pt = ciblePoint(ev.j===undefined ? 0 : 1-ev.j, ev.cible) || (rectDe(`.crea[data-id="${ev.cible}"]`) && centre(rectDe(`.crea[data-id="${ev.cible}"]`)));
+      const r = rectDe(`.crea[data-id="${ev.cible}"]`); const a = r ? centre(r) : pt; if(!a) return;
+      const cl = niveau>=2 ? cloneCarte(ev.src) : null;
+      if(cl) voler(cl.el, cl.c, a, 480, 0, {e0:1, e2:.3, o2:.6});
+      eclat(a, "or", cl ? 420 : 0);
+      break;
+    }
+    case "bannir": {
+      const cl = cloneCarte(ev.uid);
+      const point = cl ? cl.c : origine(ev);
+      if(cl && niveau>=2){
+        calqueFx().appendChild(cl.el);
+        cl.el.animate([{transform:`translate(${cl.c.x}px,${cl.c.y}px) scale(1) rotate(0)`, opacity:1, filter:"none"},
+          {transform:`translate(${cl.c.x}px,${cl.c.y}px) scale(.35) rotate(-14deg)`, opacity:0, filter:"grayscale(1) brightness(.6)"}], {duration:600, easing:"ease-in", fill:"both"})
+          .finished.then(() => cl.el.remove(), () => cl.el.remove());
+      }
+      const b = document.createElement("span"); b.className = "fx-symbole"; b.innerHTML = symMot("bannir");
+      b.style.left = point.x + "px"; b.style.top = point.y + "px"; calqueFx().appendChild(b);
+      b.animate([{transform:"translate(-50%,-50%) scale(.3)", opacity:0}, {transform:"translate(-50%,-50%) scale(1.6)", opacity:1, offset:.4}, {transform:"translate(-50%,-50%) scale(1.9)", opacity:0}], {duration:700, fill:"both"})
+        .finished.then(() => b.remove(), () => b.remove());
+      break;
+    }
+    case "sacrifice": {
+      const cl = cloneCarte(ev.uid); const point = cl ? cl.c : origine(ev);
+      if(cl && niveau>=2){
+        calqueFx().appendChild(cl.el);
+        cl.el.animate([{transform:`translate(${cl.c.x}px,${cl.c.y}px)`, opacity:1, filter:"none"},
+          {transform:`translate(${cl.c.x}px,${cl.c.y - 30}px)`, opacity:.9, filter:"sepia(1) saturate(4) hue-rotate(-20deg) brightness(1.3)", offset:.4},
+          {transform:`translate(${cl.c.x}px,${cl.c.y - 70}px) scale(.8)`, opacity:0, filter:"sepia(1) saturate(4) brightness(.4) blur(4px)"}], {duration:700, easing:"ease-out", fill:"both"})
+          .finished.then(() => cl.el.remove(), () => cl.el.remove());
+      }
+      eclat(point, "feu", 80);
+      break;
+    }
+    case "pouvoir": {
+      const r = rectDe(`.medaillon[data-joueur="${ev.j}"]`); if(!r) return;
+      const c = centre(r);
+      eclat(c, "pouvoir");
+      if(niveau>=2) for(let k=0; k<10; k++){
+        const ray = document.createElement("span"); ray.className = "fx-rayon";
+        ray.style.left = c.x + "px"; ray.style.top = c.y + "px"; calqueFx().appendChild(ray);
+        const ang = k*36;
+        ray.animate([{transform:`translate(-50%,-100%) rotate(${ang}deg) scaleY(.2)`, opacity:0}, {transform:`translate(-50%,-100%) rotate(${ang}deg) scaleY(1)`, opacity:1, offset:.3},
+          {transform:`translate(-50%,-100%) rotate(${ang}deg) scaleY(1.4)`, opacity:0}], {duration:750, easing:"ease-out", fill:"both"})
+          .finished.then(() => ray.remove(), () => ray.remove());
+      }
+      break;
+    }
+    case "combo": {
+      const p = origine(ev);
+      const b = document.createElement("span"); b.className = "fx-symbole fx-combo"; b.innerHTML = symCombo(ev.faction);
+      b.style.left = p.x + "px"; b.style.top = (p.y - 30) + "px"; calqueFx().appendChild(b);
+      b.animate([{transform:"translate(-50%,-50%) scale(.2)", opacity:0}, {transform:"translate(-50%,-50%) scale(1.5)", opacity:1, offset:.35},
+        {transform:"translate(-50%,-90%) scale(1.3)", opacity:1, offset:.7}, {transform:"translate(-50%,-140%) scale(1.1)", opacity:0}], {duration:900, easing:"ease-out", fill:"both"})
+        .finished.then(() => b.remove(), () => b.remove());
+      break;
+    }
+    case "bouclier": {
+      const r = rectDe(`.crea[data-id="${ev.uid}"]`) || (POS_AVANT[ev.uid] || {}).r; if(r) eclat(centre(r), "bouclier");
+      break;
+    }
+    case "onde": {
+      const rangee = document.querySelector(ev.cote===vue() ? ".camp-moi .rangee" : ".camp-adv .rangee");
+      const rr = rangee && rangee.getBoundingClientRect();
+      if(rr && niveau>=2){
+        const o = document.createElement("span"); o.className = "fx-onde";
+        o.style.left = rr.left + "px"; o.style.top = (rr.top + rr.height/2) + "px"; o.style.width = rr.width + "px";
+        calqueFx().appendChild(o);
+        o.animate([{transform:"translateY(-50%) scaleX(0)", opacity:1}, {transform:"translateY(-50%) scaleX(1)", opacity:.9, offset:.6}, {transform:"translateY(-50%) scaleX(1)", opacity:0}], {duration:600, easing:"ease-out", fill:"both"})
+          .finished.then(() => o.remove(), () => o.remove());
+      }
+      (ev.uids || []).forEach((u, k) => { const r = rectDe(`.crea[data-id="${u}"]`) || (POS_AVANT[u] || {}).r; if(r) eclat(centre(r), "impact", 150 + k*60); });
+      break;
+    }
+    case "eclair": {
+      const r = rectDe(`.crea[data-id="${ev.cible}"]`) || (POS_AVANT[ev.cible] || {}).r; if(!r) return;
+      const a = centre(r);
+      if(niveau>=2) voler(icoVolante("puissance", 34), origine(ev), a, 380, 0, {e0:.7, e2:1.1, o2:1});
+      eclat(a, "impact", niveau>=2 ? 350 : 0);
+      break;
+    }
+    case "marche": {
+      const el = document.querySelector(`.marche-cartes .carte[data-uid="${ev.uid}"]`);
+      animerSur(el, [{transform:"perspective(600px) rotateY(90deg) scale(.8)", opacity:0}, {transform:"perspective(600px) rotateY(0) scale(1)", opacity:1}], {duration:450, delay:niveau>=2 ? 350 : 0, easing:"ease-out", fill:"backwards"});
+      break;
+    }
+    case "fin": {
+      const perdant = document.querySelector(`.medaillon[data-joueur="${ev.perdant}"]`);
+      const gagnant = document.querySelector(`.medaillon[data-joueur="${1-ev.perdant}"]`);
+      if(perdant){
+        const c = centre(perdant.getBoundingClientRect());
+        animerSur(perdant, [{transform:"none", filter:"none"}, {transform:"translateX(-8px) rotate(-4deg)", offset:.15}, {transform:"translateX(7px) rotate(3deg)", offset:.3},
+          {transform:"none", filter:"grayscale(1) brightness(.6)", offset:.55}, {transform:"scale(.92)", filter:"grayscale(1) brightness(.5)"}], {duration:900, fill:"forwards"});
+        if(niveau>=2) for(let k=0; k<10; k++){
+          const e = document.createElement("span"); e.className = "fx-eclat-medaillon";
+          e.style.left = c.x + "px"; e.style.top = c.y + "px"; calqueFx().appendChild(e);
+          const ang = k*36 * Math.PI/180, dist = 70 + Math.random()*40;
+          e.animate([{transform:"translate(-50%,-50%) rotate(0)", opacity:1},
+            {transform:`translate(calc(-50% + ${Math.cos(ang)*dist}px), calc(-50% + ${Math.sin(ang)*dist + 30}px)) rotate(${180 + k*40}deg)`, opacity:0}], {duration:800, delay:450, easing:"cubic-bezier(.2,.7,.4,1)", fill:"both"})
+            .finished.then(() => e.remove(), () => e.remove());
+        }
+        eclat(c, "impact", 450);
+      }
+      if(gagnant) eclat(centre(gagnant.getBoundingClientRect()), "pouvoir", 600);
+      break;
+    }
+    default: return false;
+  }
+  return true;
+}
+
 chargerConfig();
+appliquerReglageAnimations();
 render();
 chargerFichierConfig().then(chargerProgression);
 </script>
