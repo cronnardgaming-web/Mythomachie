@@ -309,6 +309,18 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 @media (max-width:1060px){#tuto-panneau{top:auto;bottom:12px;left:12px;right:12px;width:auto}}
 @media (prefers-reduced-motion: reduce){.tuto-cible{animation:none}}
 
+/* Musique */
+.son{display:inline-flex;align-items:center;gap:8px}
+.btn-son{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink-2);display:grid;place-items:center;cursor:pointer;padding:0}
+.btn-son:hover{color:var(--ink);border-color:var(--bronze)}
+.btn-son svg{width:22px;height:22px}
+.btn-son[aria-pressed="false"]{opacity:.6}
+.son input[type=range]{width:130px;accent-color:var(--bronze)}
+.reglage-son{display:flex;align-items:center;gap:10px;margin-top:14px;color:var(--ink-2)}
+.ligne-musique{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin:8px 0}
+.ligne-musique .champ{flex:1 1 320px}
+.adm-page code{font-family:ui-monospace,Menlo,Consolas,monospace;background:var(--table-2);padding:1px 6px;border-radius:4px}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -645,6 +657,7 @@ if(!window.claude) document.title = NOM_JEU;
 const DEFAUT = {
   version:3,
   // Valeurs d’origine = config.json du site (GitHub), sans les images
+  musiques:{menu:"", duel:[]},
   regles:{pvDepart:40, seuilPouvoir:10, mainDepart:5, piocheParTour:5, tailleMarche:5, plateauMax:7, tailleDeck:30, copiesMax:2, copiesLegendaire:1, carteBase:"pierre", deckDepart:{piece:7, rubis:1, dague:1, epee:1}},
   mots:{provocation:"Provocation", rapidite:"Rapidité", resistance:"Résistance", ethere:"Ethéré"},
   termes:{conjuration:"Conjuration", echo:"Echo", allie:"Combo", sacrifice:"Sacrifice"},
@@ -806,6 +819,7 @@ function fusionner(obj){
   // Version 3 : arrivée des héros, 40 points de vie
   if((obj.version || 1) < 3){ if(reglesObj.pvDepart===30) reglesObj.pvDepart = 40; reglesObj.seuilPouvoir = reglesObj.seuilPouvoir || 10; }
   return {version:d.version, exporte:obj.exporte || 0, repare:obj.repare || 0, cartes:cartesFinales, factions:obj.factions, heros:{...d.heros, ...(obj.heros||{})},
+          musiques:{menu:(obj.musiques && obj.musiques.menu) || "", duel:(obj.musiques && Array.isArray(obj.musiques.duel)) ? [...obj.musiques.duel] : []},
           regles:{...reglesObj, deckDepart:{...((obj.regles && obj.regles.deckDepart) || d.regles.deckDepart)}},
           mots:{...d.mots, ...(obj.mots||{})}, termes:renommerTermes({...d.termes, ...(obj.termes||{})})};
 }
@@ -1494,6 +1508,7 @@ function htmlMedaillon(j, estMoi, inter, cible){
 }
 function render(){
   const app = document.getElementById("app");
+  queueMicrotask(majMusique);
   if(ui.ecran==="admin"){ INSTANT = null; renderAdmin(); return; }
   if(ui.ecran!=="jeu" || !tutoActif()){ const p = document.getElementById("tuto-panneau"); if(p) p.remove(); }
   if(ui.ecran==="regles"){ INSTANT = null; app.innerHTML = pageRegles(); document.getElementById("couche").innerHTML = ""; document.getElementById("couche").classList.remove("accueil"); return; }
@@ -1519,6 +1534,7 @@ function render(){
     <span class="logo-mini">${NOM_JEU}</span>
     <span class="mode">${S.mode==="ia" ? "Contre l’ordinateur" : enLigne() ? `En ligne, partie ${EN.code}` : "Deux joueurs sur cet écran"}</span>
     <span class="tour-info">Tour ${S.tour}, ${enLigne() || S.mode==="ia" ? (S.courant===me ? "à vous de jouer" : S.mode==="ia" ? "l’ordinateur joue" : "tour de l’adversaire") : S.joueurs[S.courant].nom + " joue"}</span>
+    ${htmlSon(false)}
     <button type="button" class="btn-discret" data-act="nouvelle">${enLigne() ? "Quitter la partie" : "Nouvelle partie"}</button>
   </header>
   <div class="table-jeu">
@@ -1745,14 +1761,14 @@ function renderAdmin(){
     cle = actif.dataset.chemin ? `[data-chemin="${actif.dataset.chemin}"]` : actif.dataset.adm ? `[data-adm="${actif.dataset.adm}"]` : null;
     try { pos = actif.selectionStart; } catch(e) { pos = null; }
   }
-  const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:admStats};
+  const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:admStats, musiques:admMusiques};
   app.innerHTML = `
   <header class="entete">
     <h1>Administration</h1>
     <span class="mode">Enregistré automatiquement dans ce navigateur. Les changements s’appliquent à la prochaine partie.${window.claude ? "" : " Pour les partager avec vos joueurs, utilisez Sauvegarde, puis Télécharger config.json."}</span>
     <button type="button" class="btn-discret" data-act="admin-quitter" style="margin-left:auto">Retour au jeu</button>
   </header>
-  <nav class="onglets" role="tablist">${[["cartes","Cartes"],["regles","Règles"],["heros","Héros"],["factions","Factions"],["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"], ["stats","Statistiques"]] : [])].map(([k,l]) =>
+  <nav class="onglets" role="tablist">${[["cartes","Cartes"],["regles","Règles"],["heros","Héros"],["musiques","Musiques"],["factions","Factions"],["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"], ["stats","Statistiques"]] : [])].map(([k,l]) =>
     `<button type="button" role="tab" class="onglet" aria-selected="${adm.onglet===k}" data-act="onglet" data-id="${k}">${l}</button>`).join("")}</nav>
   ${pages[adm.onglet]()}`;
   document.getElementById("couche").innerHTML = "";
@@ -2022,6 +2038,8 @@ function idUnique(prefixe){
 
 function actionAdmin(act, id, el){
   if(act.startsWith("srv-")){ actionServeur(act); return; }
+  if(act.startsWith("mus-")){ actionMusiques(act, id); return; }
+  if(act==="son"){ basculerSon(); return renderAdmin(); }
   if(act==="stats-rafraichir"){ chargerAdminStats(); erreur("Actualisation…"); return; }
   if(act==="stats-tri" || act==="stats-tri-c"){
     const k = act==="stats-tri" ? "tri" : "triCartes", t = PROG.adminStats[k] || {};
@@ -2679,6 +2697,7 @@ document.addEventListener("click", e => {
   }
   if(act==="nouvelle"){ if(enLigne() || EN.role) quitterEnLigne(); S = null; ui.couvert = false; ui.aiEnCours = false; return render(); }
   if(act.startsWith("en-")) return actionEnLigne(act, id);
+  if(act==="son"){ basculerSon(); return render(); }
   if(act==="tuto") return lancerTuto();
   if(act==="regles"){ if(tutoActif()) S = null; ui.ecran = "regles"; window.scrollTo(0, 0); return render(); }
   if(act==="regles-retour"){ ui.ecran = "jeu"; return render(); }
@@ -3170,6 +3189,7 @@ function htmlAccueilProg(regles){
       ${accesAdmin() ? `<button type="button" class="btn second" data-act="admin">Administration</button>` : ""}
     </div>
     ${htmlCompte()}
+    ${aDesMusiques() ? `<div class="reglage-son">Musique ${htmlSon(true)}</div>` : ""}
     ${regles}</div>`;
 }
 function htmlBienvenue(){
@@ -4417,6 +4437,145 @@ function htmlFinTuto(){
     <p>Les règles complètes (mots-clés, héros, collection…) sont dans le menu « Règles du jeu ».</p>
     <div class="actions"><button type="button" class="btn" data-act="tuto-quitter">Retour à l’accueil</button>
       <button type="button" class="btn second" data-act="regles">Lire les règles</button></div></div>`;
+}
+
+/* ============================================================
+   MUSIQUE : une musique pour les menus, une liste pour les duels
+   Les fichiers sont dans le dossier « musiques » du site (GitHub).
+   ============================================================ */
+const MUSIQUE = {el:null, contexte:null, piste:null, partieId:null, debloque:false, ecoute:null};
+function prefsMusique(){
+  try { return Object.assign({actif:true, volume:0.5}, JSON.parse(localStorage.getItem("musique-prefs")) || {}); }
+  catch(e) { return {actif:true, volume:0.5}; }
+}
+function sauverPrefsMusique(p){ try { localStorage.setItem("musique-prefs", JSON.stringify(p)); } catch(e) {} }
+const listeDuel = () => ((CONFIG.musiques && CONFIG.musiques.duel) || []).map(x => String(x || "").trim()).filter(Boolean);
+const musiqueMenu = () => String((CONFIG.musiques && CONFIG.musiques.menu) || "").trim();
+const aDesMusiques = () => !!(musiqueMenu() || listeDuel().length);
+const contexteMusique = () => (S && ui.ecran==="jeu") ? "duel" : "menu";
+function choisirPiste(ctx){
+  if(ctx==="menu") return musiqueMenu() || null;
+  const l = listeDuel();
+  if(!l.length) return null;
+  let p, essais = 0;
+  do { p = l[Math.floor(Math.random()*l.length)]; } while(l.length>1 && p===MUSIQUE.piste && essais++ < 10);
+  return p;
+}
+function fondu(a, cible, ms, fin){
+  const debut = a.volume, t0 = performance.now();
+  const pas = () => {
+    const k = Math.min(1, (performance.now()-t0)/ms);
+    try { a.volume = Math.max(0, Math.min(1, debut + (cible-debut)*k)); } catch(e) {}
+    if(k<1) setTimeout(pas, 30); else if(fin) fin();
+  };
+  pas();
+}
+function jouerPiste(src, boucle){
+  const ancien = MUSIQUE.el, prefs = prefsMusique();
+  if(ancien){ MUSIQUE.el = null; fondu(ancien, 0, 700, () => { ancien.pause(); ancien.removeAttribute("src"); ancien.load(); }); }
+  MUSIQUE.piste = src;
+  if(!src || !prefs.actif || document.hidden) return;
+  const a = new Audio(/^https?:/i.test(src) ? src : encodeURI(src));
+  a.loop = boucle; a.volume = 0; a.preload = "auto";
+  a.addEventListener("ended", () => { if(MUSIQUE.el===a && !a.loop) jouerPiste(choisirPiste("duel"), false); });
+  a.addEventListener("error", () => console.warn("Musique introuvable :", src));
+  MUSIQUE.el = a;
+  a.play().then(() => fondu(a, prefs.volume, 900)).catch(() => {});
+}
+function majMusique(){
+  if(!MUSIQUE.debloque || !aDesMusiques()) return;
+  const ctx = contexteMusique(), pid = ctx==="duel" ? S.idPartie : null;
+  if(ctx===MUSIQUE.contexte && pid===MUSIQUE.partieId) return;
+  MUSIQUE.contexte = ctx; MUSIQUE.partieId = pid;
+  const piste = choisirPiste(ctx);
+  // Même musique de menu : on ne la relance pas
+  if(ctx==="menu" && MUSIQUE.el && piste===MUSIQUE.piste) return;
+  jouerPiste(piste, ctx==="menu");
+}
+function relancerMusique(){ MUSIQUE.contexte = null; MUSIQUE.partieId = null; MUSIQUE.piste = null; majMusique(); }
+// Les navigateurs n’autorisent le son qu’après une première action du joueur
+["pointerdown","keydown"].forEach(t => document.addEventListener(t, () => {
+  if(MUSIQUE.debloque) return;
+  MUSIQUE.debloque = true; majMusique();
+}, true));
+document.addEventListener("visibilitychange", () => {
+  if(document.hidden){ if(MUSIQUE.el) MUSIQUE.el.pause(); }
+  else if(MUSIQUE.el) MUSIQUE.el.play().catch(() => {});
+  else relancerMusique();
+});
+// Bouton son et réglage du volume
+const SVG_SON = actif => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/>${actif
+  ? '<path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+  : '<path d="M16.5 9.5l5 5M21.5 9.5l-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'}</svg>`;
+function htmlSon(avecVolume){
+  if(!aDesMusiques()) return "";
+  const p = prefsMusique();
+  return `<span class="son"><button type="button" class="btn-son" data-act="son" aria-pressed="${p.actif}" aria-label="${p.actif ? "Couper la musique" : "Activer la musique"}" title="${p.actif ? "Couper la musique" : "Activer la musique"}">${SVG_SON(p.actif)}</button>${avecVolume
+    ? `<input type="range" min="0" max="1" step="0.05" value="${p.volume}" data-son="volume" aria-label="Volume de la musique" ${p.actif ? "" : "disabled"}>` : ""}</span>`;
+}
+function basculerSon(){
+  const p = prefsMusique(); p.actif = !p.actif; sauverPrefsMusique(p);
+  MUSIQUE.debloque = true;
+  if(p.actif) relancerMusique(); else jouerPiste(null, false);
+}
+document.addEventListener("input", e => {
+  if(!(e.target.dataset && e.target.dataset.son==="volume")) return;
+  const p = prefsMusique(); p.volume = Number(e.target.value); sauverPrefsMusique(p);
+  if(MUSIQUE.el) MUSIQUE.el.volume = p.volume;
+});
+
+// ----- Administration : onglet Musiques
+function admMusiques(){
+  if(!CONFIG.musiques) CONFIG.musiques = {menu:"", duel:[]};
+  const m = CONFIG.musiques, duel = Array.isArray(m.duel) ? m.duel : (m.duel = []);
+  const etat = chemin => { const e = (adm.verifMusiques || {})[chemin]; return e===undefined ? "" : e ? `<span class="ok">en ligne</span>` : `<span class="invalide">introuvable</span>`; };
+  const ligne = (label, ch, val, suppr) => `<div class="ligne-musique">
+      <label class="champ"><span>${label}</span><input type="text" data-chemin="${ch}" value="${esc(val || "")}" placeholder="musiques/nom-du-fichier.mp3"></label>
+      <button type="button" class="btn second" data-act="mus-ecouter" data-id="${esc(val || "")}" ${val ? "" : "disabled"}>${MUSIQUE.ecoute && MUSIQUE.ecoute.chemin===val ? "Arrêter" : "Écouter"}</button>
+      ${suppr!=null ? `<button type="button" class="btn second" data-act="mus-retirer" data-id="${suppr}">Retirer</button>` : ""}
+      ${val ? etat(val) : ""}</div>`;
+  return `<div class="adm-page">
+    <h2>Musiques</h2>
+    <p class="aide">Déposez vos fichiers audio (MP3 de préférence) dans un dossier <b>musiques</b> de votre dépôt GitHub, à côté de index.html, puis indiquez ici leur chemin, par exemple <code>musiques/menu.mp3</code>. Évitez les espaces et les accents dans les noms de fichiers. Une adresse web complète (https://…) fonctionne aussi.</p>
+    <p class="aide">Après vos changements, exportez config.json (onglet Sauvegarde) et déposez-le sur GitHub.</p>
+    <h3>Menus</h3>
+    ${ligne("Musique des menus (jouée en boucle)", "musiques.menu", m.menu, null)}
+    <h3>Duels</h3>
+    <p class="aide">Une musique est tirée au hasard au début de chaque partie ; à la fin du morceau, une autre prend le relais.</p>
+    ${duel.map((v, i) => ligne(`Musique de duel ${i+1}`, `musiques.duel.${i}`, v, i)).join("") || `<p class="aide">Aucune musique de duel pour l’instant.</p>`}
+    <div class="adm-actions"><button type="button" class="btn second" data-act="mus-ajouter">Ajouter une musique de duel</button>
+      <button type="button" class="btn" data-act="mus-verifier">Vérifier que les fichiers sont en ligne</button></div>
+    ${window.claude ? `<p class="avertissement">Sur le prototype Claude, les musiques ne peuvent pas être lues : elles fonctionnent sur votre site GitHub.</p>` : ""}
+  </div>`;
+}
+async function actionMusiques(act, id){
+  const m = CONFIG.musiques || (CONFIG.musiques = {menu:"", duel:[]});
+  switch(act){
+    case "mus-ajouter": m.duel = [...(m.duel || []), ""]; sauver(); break;
+    case "mus-retirer": m.duel.splice(Number(id), 1); sauver(); break;
+    case "mus-ecouter": {
+      if(MUSIQUE.ecoute){ MUSIQUE.ecoute.audio.pause(); const meme = MUSIQUE.ecoute.chemin===id; MUSIQUE.ecoute = null; if(meme) break; }
+      if(MUSIQUE.el) MUSIQUE.el.pause();
+      const a = new Audio(/^https?:/i.test(id) ? id : encodeURI(id)); a.volume = prefsMusique().volume;
+      a.addEventListener("error", () => { erreur(`Fichier introuvable : ${id}`); MUSIQUE.ecoute = null; renderAdmin(); });
+      a.addEventListener("ended", () => { MUSIQUE.ecoute = null; renderAdmin(); });
+      MUSIQUE.ecoute = {chemin:id, audio:a};
+      a.play().catch(() => erreur("Lecture impossible : vérifiez le chemin du fichier."));
+      break;
+    }
+    case "mus-verifier": {
+      const chemins = [m.menu, ...(m.duel || [])].map(x => String(x || "").trim()).filter(Boolean);
+      adm.verifMusiques = {};
+      await Promise.all(chemins.map(async c => {
+        try { const r = await fetch(/^https?:/i.test(c) ? c : encodeURI(c), {method:"HEAD", cache:"no-store"}); adm.verifMusiques[c] = r.ok; }
+        catch(e) { adm.verifMusiques[c] = false; }
+      }));
+      const ko = Object.values(adm.verifMusiques).filter(x => !x).length;
+      erreur(ko ? `${ko} fichier${ko>1 ? "s" : ""} introuvable${ko>1 ? "s" : ""}.` : "Tous les fichiers sont en ligne.");
+      break;
+    }
+  }
+  renderAdmin();
 }
 
 chargerConfig();
