@@ -644,32 +644,18 @@ if(!window.claude) document.title = NOM_JEU;
    ============================================================ */
 const DEFAUT = {
   version:3,
-  regles:{pvDepart:40, seuilPouvoir:10, mainDepart:5, piocheParTour:5, tailleMarche:5, plateauMax:7,
-          tailleDeck:30, copiesMax:2, copiesLegendaire:1, carteBase:"pierre",
-          deckDepart:{piece:7, rubis:1, dague:1, epee:1}},
+  // Valeurs d’origine = config.json du site (GitHub), sans les images
+  regles:{pvDepart:40, seuilPouvoir:10, mainDepart:5, piocheParTour:5, tailleMarche:5, plateauMax:7, tailleDeck:30, copiesMax:2, copiesLegendaire:1, carteBase:"pierre", deckDepart:{piece:7, rubis:1, dague:1, epee:1}},
   mots:{provocation:"Provocation", rapidite:"Rapidité", resistance:"Résistance", ethere:"Ethéré"},
   termes:{conjuration:"Conjuration", echo:"Echo", allie:"Combo", sacrifice:"Sacrifice"},
-  heros:{
-    egy:{nom:"Atoum", titre:"Dieu primordial égyptien", pouvoir:{nom:"Souffle de vie", effet:{soin:8, renfort:{atk:0, vie:2}}}},
-    hin:{nom:"Brahma", titre:"Dieu créateur hindou", pouvoir:{nom:"Abondance", effet:{or:6, pioche:2}}},
-    nor:{nom:"Ymir", titre:"Géant primordial nordique", pouvoir:{nom:"Colère du géant", effet:{combat:8}}},
-    gre:{nom:"Chaos", titre:"Abîme primordial grec", pouvoir:{nom:"Abîme originel", effet:{pioche:3, bannir:1}}}
-  },
-  factions:{
-    egy:{nom:"Égyptiens", f:"égyptienne", m:"égyptien", sym:"☥", couleur:"#d4a017"},
-    hin:{nom:"Hindous", f:"hindoue", m:"hindou", sym:"✿", couleur:"#c8402a"},
-    nor:{nom:"Nordiques", f:"nordique", m:"nordique", sym:"⚔", couleur:"#6e7b88"},
-    gre:{nom:"Grecs", f:"grecque", m:"grec", sym:"Ω", couleur:"#2d5fbf"}
-  },
+  heros:{egy:{nom:"Atoum", titre:"Dieu primordial égyptien", pouvoir:{nom:"Souffle de vie", effet:{soin:8, renfort:{atk:0, vie:2}}}}, hin:{nom:"Brahma", titre:"Dieu créateur hindou", pouvoir:{nom:"Abondance", effet:{or:6, pioche:2}}}, nor:{nom:"Ymir", titre:"Géant primordial nordique", pouvoir:{nom:"Colère du géant", effet:{combat:8}}}, gre:{nom:"Chaos", titre:"Abîme primordial grec", pouvoir:{nom:"Abîme originel", effet:{pioche:3, bannir:1}}}},
+  factions:{egy:{nom:"Égyptiens", f:"égyptienne", m:"égyptien", sym:"☥", couleur:"#d4a017"}, hin:{nom:"Hindous", f:"hindoue", m:"hindou", sym:"✿", couleur:"#c8402a"}, nor:{nom:"Nordiques", f:"nordique", m:"nordique", sym:"⚔", couleur:"#6e7b88"}, gre:{nom:"Grecs", f:"grecque", m:"grec", sym:"Ω", couleur:"#2d5fbf"}},
   cartes:{
-    // Deck de départ et carte de base
-    piece:{nom:"Pièce d’or", type:"sort", depart:true, effet:{or:1}},
-    rubis:{nom:"Rubis", type:"sort", depart:true, effet:{or:2}},
-    dague:{nom:"Dague", type:"sort", depart:true, effet:{combat:1}},
-    epee:{nom:"Épée courte", type:"sort", depart:true, effet:{combat:2}},
-    pierre:{nom:"Pierre de feu", type:"sort", base:true, prix:2, effet:{or:2}, choixSacrifice:{combat:3}},
-
-    // Égyptiens : soin, créatures solides, Provocation (17 créatures, 11 sorts, 2 équipements)
+    piece:{nom:"Trésor", type:"sort", depart:true, effet:{or:1}},
+    rubis:{nom:"Joyau", type:"sort", depart:true, effet:{or:2}},
+    dague:{nom:"Vagabon", type:"creature", depart:true, effet:{combat:1}, attaque:1, vie:1},
+    epee:{nom:"Encourager", type:"sort", depart:true, effet:{combat:2}},
+    pierre:{nom:"Amulette Magique", type:"sort", base:true, prix:2, effet:{or:2}, choixSacrifice:{combat:3}},
     porteur_jarres:{nom:"Porteur de jarres", type:"creature", rarete:"commune", prix:1, attaque:1, vie:3, conjuration:{soin:1, or:1}, faction:"egy"},
     gardien_temple:{nom:"Gardien du temple", type:"creature", rarete:"commune", prix:2, attaque:2, vie:4, mots:["provocation"], faction:"egy"},
     scarabee:{nom:"Scarabée sacré", type:"creature", rarete:"commune", prix:2, attaque:2, vie:2, echo:{soin:3}, faction:"egy"},
@@ -700,8 +686,6 @@ const DEFAUT = {
     oeil_ra:{nom:"Œil de Râ", type:"sort", rarete:"legendaire", prix:7, effet:{combat:5, soin:5, pioche:1}, faction:"egy"},
     khepesh:{nom:"Khépesh", type:"arme", rarete:"commune", prix:2, bonus:2, durabilite:2, faction:"egy"},
     fleau:{nom:"Fléau du pharaon", type:"arme", rarete:"rare", prix:4, bonus:3, durabilite:3, allie:{soin:2}, faction:"egy"},
-
-    // Hindous : or, achats à bas prix, Ethéré (17 créatures, 11 sorts, 2 équipements)
     singe_temple:{nom:"Singe du temple", type:"creature", rarete:"commune", prix:1, attaque:2, vie:2, conjuration:{or:1}, faction:"hin"},
     apsara:{nom:"Apsara voilée", type:"creature", rarete:"commune", prix:2, attaque:3, vie:2, mots:["ethere"], conjuration:{or:1}, faction:"hin"},
     marchand_epices:{nom:"Marchand d’épices", type:"creature", rarete:"commune", prix:2, attaque:2, vie:3, conjuration:{or:2}, faction:"hin"},
@@ -732,8 +716,6 @@ const DEFAUT = {
     himalaya:{nom:"Trésor de l’Himalaya", type:"sort", rarete:"legendaire", prix:7, effet:{or:5, combat:5, pioche:1}, allie:{combat:3}, faction:"hin"},
     chakram:{nom:"Chakram", type:"arme", rarete:"commune", prix:2, bonus:2, durabilite:2, allie:{or:1}, faction:"hin"},
     trident:{nom:"Trident sacré", type:"arme", rarete:"rare", prix:4, bonus:3, durabilite:3, faction:"hin"},
-
-    // Nordiques : combat élevé, Rapidité (17 créatures, 11 sorts, 2 équipements)
     eclaireur:{nom:"Éclaireur des fjords", type:"creature", rarete:"commune", prix:1, attaque:2, vie:2, mots:["rapidite"], faction:"nor"},
     berserker:{nom:"Berserker du fjord", type:"creature", rarete:"commune", prix:2, attaque:3, vie:2, mots:["rapidite"], faction:"nor"},
     porte_bouclier:{nom:"Jeune porte-bouclier", type:"creature", rarete:"commune", prix:2, attaque:2, vie:3, mots:["provocation"], faction:"nor"},
@@ -764,8 +746,6 @@ const DEFAUT = {
     ragnarok:{nom:"Ragnarök", type:"sort", rarete:"legendaire", prix:7, effet:{degatsTous:3, combat:5}, faction:"nor"},
     hache:{nom:"Hache de guerre", type:"arme", rarete:"commune", prix:2, bonus:2, durabilite:3, faction:"nor"},
     marteau:{nom:"Marteau runique", type:"arme", rarete:"rare", prix:4, bonus:3, durabilite:3, allie:{combat:2}, faction:"nor"},
-
-    // Grecs : pioche, Bannir, Conjuration et Echo (17 créatures, 11 sorts, 2 équipements)
     messager:{nom:"Messager d’Hermès", type:"creature", rarete:"commune", prix:2, attaque:1, vie:2, conjuration:{pioche:1}, faction:"gre"},
     satyre:{nom:"Satyre", type:"creature", rarete:"commune", prix:2, attaque:2, vie:2, echo:{pioche:1}, faction:"gre"},
     archer_crete:{nom:"Archer crétois", type:"creature", rarete:"commune", prix:2, attaque:3, vie:2, faction:"gre"},
@@ -796,14 +776,13 @@ const DEFAUT = {
     pandore:{nom:"Boîte de Pandore", type:"sort", rarete:"legendaire", prix:7, effet:{degatsTous:3, pioche:1, combat:3}, faction:"gre"},
     glaive:{nom:"Glaive d’hoplite", type:"arme", rarete:"commune", prix:2, bonus:2, durabilite:2, allie:{pioche:1}, faction:"gre"},
     lance:{nom:"Lance d’Achille", type:"arme", rarete:"rare", prix:4, bonus:3, durabilite:3, faction:"gre"},
-
-    // Jetons (invoqués par d’autres cartes, jamais au marché)
     momie:{nom:"Momie", type:"creature", faction:"egy", jeton:true, attaque:2, vie:2, mots:["provocation"]},
     esprit:{nom:"Esprit vengeur", type:"creature", faction:"hin", jeton:true, attaque:2, vie:2, mots:["ethere"]},
     loup:{nom:"Loup de Fenrir", type:"creature", faction:"nor", jeton:true, attaque:2, vie:1, mots:["rapidite"]},
     tete:{nom:"Tête d’hydre", type:"creature", faction:"gre", jeton:true, attaque:2, vie:2}
   }
 };
+
 const CLE_STOCKAGE = "prototype-combat-config-v1";
 const copie = o => JSON.parse(JSON.stringify(o));
 let CONFIG, CARTES, FACTIONS, MOTS, TERMES, REGLES, HEROS;
@@ -4263,21 +4242,56 @@ document.addEventListener("click", e => {
 /* ============================================================
    TUTORIEL JOUÉ : un combat scripté en deux tours
    ============================================================ */
-const TUTO = {etape:0, ids:{}, pvAdverse:7};
+const TUTO = {etape:0, ids:{}, pvAdverse:7, c:{}};
 const tutoActif = () => !!(S && S.tuto);
+const nC = id => `«\u00a0<b>${esc(CARTES[id] ? CARTES[id].nom : id)}</b>\u00a0»`;
+const laCarte = id => `la carte ${nC(id)}`, laCrea = id => `la créature ${nC(id)}`;
+// « de Ymir » → « d’Ymir »
+const de = nom => (/^[aeiouyàâäéèêëîïôöùûüœh]/i.test(nom) ? "d’" : "de ") + nom;
+const valeur = (id, cle) => (CARTES[id] && CARTES[id].effet && CARTES[id].effet[cle]) || 0;
+// Choisit les cartes du tutoriel dans la configuration du jeu (celle de config.json sur le site)
+function preparerTuto(){
+  const C = CARTES, dep = Object.keys(REGLES.deckDepart || {}).filter(k => C[k] && C[k].type==="sort");
+  const ors = dep.filter(k => valeur(k, "or")>0).sort((a,b) => valeur(a,"or") - valeur(b,"or"));
+  const premier = (liste, test) => liste.find(k => C[k] && test(C[k]));
+  const tous = Object.keys(C);
+  const c = {
+    or1: ors[0] || "piece", or2: ors[ors.length-1] || ors[0] || "rubis",
+    puiss: premier(dep, d => d.effet && d.effet.combat) || premier(tous, d => d.type==="sort" && d.effet && d.effet.combat && !d.jeton),
+    achat: C.garde_anubis ? "garde_anubis" : premier(tous, d => d.faction==="egy" && d.type==="creature" && !d.jeton),
+    rapide: C.ulfhednar && (C.ulfhednar.mots || []).includes("rapidite") ? "ulfhednar" : premier(tous, d => d.type==="creature" && (d.mots || []).includes("rapidite") && !d.jeton && (d.vie || 0)>2),
+    jeton: C.loup ? "loup" : premier(tous, d => d.jeton && d.type==="creature"),
+    combo1: C.scribe && C.scribe.allie ? "scribe" : premier(tous, d => d.faction==="egy" && d.type==="sort" && d.allie),
+    combo2: C.pain_nil ? "pain_nil" : premier(tous, d => d.faction==="egy" && d.type==="sort" && !d.allie),
+    assaut1: C.sekhmet ? "sekhmet" : premier(tous, d => d.faction==="egy" && d.type==="sort" && d.effet && d.effet.combat),
+    assaut2: C.jugement ? "jugement" : premier(tous, d => d.faction==="egy" && d.type==="sort" && d.effet && d.effet.combat>=4),
+    defenseur: C.porte_bouclier ? "porte_bouclier" : premier(tous, d => d.faction==="nor" && d.type==="creature" && (d.mots || []).includes("provocation"))
+  };
+  // Assez d’or pour l’achat
+  const prix = (C[c.achat] && C[c.achat].prix) || 3;
+  c.nbOr1 = 2; while(c.nbOr1*valeur(c.or1, "or") + valeur(c.or2, "or") < prix && c.nbOr1 < 5) c.nbOr1++;
+  // PV de l’adversaire calculés pour que le coup final suffise, avec une petite marge
+  const comboP = id => (C[id] && C[id].allie && C[id].allie.combat) || 0;
+  const total2 = valeur(c.assaut1, "combat") + comboP(c.assaut1) + valeur(c.assaut2, "combat") + comboP(c.assaut2);
+  const p1 = valeur(c.puiss, "combat"), defVie = (C[c.defenseur] && C[c.defenseur].vie) || 3;
+  TUTO.pvAdverse = Math.max(p1 + 1, p1 + total2 - defVie - 1);
+  TUTO.c = c;
+}
 function lancerTuto(){
+  preparerTuto();
+  const c = TUTO.c;
   nouvellePartie("ia");
   S.tuto = true; S.courant = 0; S.tour = 1;
   const j = S.joueurs[0], o = S.joueurs[1];
   j.nom = "Joueur 1"; j.heros = "egy"; o.heros = "nor"; j.morts = 0; o.morts = 0;
   o.pv = TUTO.pvAdverse;
-  const mk = id => inst(id);
-  const p1 = mk("piece"), p2 = mk("piece"), rb = mk("rubis"), ulf = mk("ulfhednar"), dg = mk("dague");
-  j.main = [p1, p2, rb, ulf, dg];
-  S.marche = ["garde_anubis","apsara","hoplite","valkyrie","oracle"].map(mk);
-  const loup = creature(mk("loup")); o.plateau = [loup]; o.main = [];
-  TUTO.ids = {p1:p1.uid, p2:p2.uid, rb:rb.uid, ulf:ulf.uid, dg:dg.uid, garde:S.marche[0].uid, loup:loup.uid};
-  TUTO.etape = 0;
+  const ors = [...Array.from({length:c.nbOr1}, () => inst(c.or1)), inst(c.or2)];
+  const rap = inst(c.rapide), pu = inst(c.puiss);
+  j.main = [...ors, rap, pu];
+  S.marche = [c.achat, "apsara", "hoplite", "valkyrie", "oracle"].filter(id => CARTES[id]).map(inst);
+  const jet = creature(inst(c.jeton)); o.plateau = [jet]; o.main = [];
+  TUTO.ids = {ors:ors.map(x => x.uid), rap:rap.uid, puiss:pu.uid, achat:S.marche[0].uid, jeton:jet.uid};
+  TUTO.etape = 0; TUTO.pouvoirPret = false; ETAPES_CACHE = null;
   S.journal = ["Tutoriel : à vous de jouer !"];
   Object.assign(ui, {ecran:"jeu", attaquant:null, armeEnAttente:null, choixPierre:null, couvert:false, aiEnCours:false});
   if(typeof PROG!=="undefined"){ PROG.choixDeck = null; PROG.accueilEtape = null; }
@@ -4286,78 +4300,85 @@ function lancerTuto(){
 const moiT = () => S.joueurs[0], luiT = () => S.joueurs[1];
 const enMain = uid => moiT().main.some(c => c.uid===uid);
 const indexMarche = uid => S.marche.findIndex(c => c.uid===uid);
-// Les étapes sont construites au premier usage (les symboles ont besoin de la configuration chargée)
+// Les étapes sont construites au lancement, avec les noms et valeurs de la configuration
 let ETAPES_CACHE = null;
-const etapesTuto = () => ETAPES_CACHE || (ETAPES_CACHE = [
-  {titre:"Bienvenue !", texte:`Vous incarnez <b>Atoum</b>, dieu primordial égyptien. Votre adversaire, <b>Ymir</b>, n’a que ${TUTO.pvAdverse} points de vie pour ce tutoriel : faites-le tomber à 0 pour gagner.<br><br>Votre héros et ses points de vie sont en bas, ceux de l’adversaire en haut.`,
+const etapesTuto = () => ETAPES_CACHE || (ETAPES_CACHE = construireEtapes());
+function construireEtapes(){
+  const c = TUTO.c, I = TUTO.ids, moiH = heroDe({heros:"egy"}), luiH = heroDe({heros:"nor"});
+  const pouvoir = moiH.pouvoir || {nom:"Pouvoir", effet:{}};
+  const prixAchat = CARTES[c.achat] ? CARTES[c.achat].prix : 3;
+  const nomsOr = c.nbOr1>1 ? `vos ${c.nbOr1} cartes ${nC(c.or1)}` : laCarte(c.or1);
+  return [
+  {titre:"Bienvenue !", texte:`Vous incarnez <b>${esc(moiH.nom)}</b>, ${esc((moiH.titre || "").toLowerCase())}. Votre adversaire, <b>${esc(luiH.nom)}</b>, n’a que ${TUTO.pvAdverse} points de vie pour ce tutoriel : faites-le tomber à 0 pour gagner.<br><br>Votre héros et ses points de vie sont en bas, ceux de l’adversaire en haut.`,
     info:true, cible:() => [".medaillon-bloc.moi .medaillon", ".medaillon-bloc.adv .medaillon"]},
-  {titre:"Jouez votre or", texte:`Jouer une carte est <b>gratuit</b>. Cliquez sur vos deux <b>Pièces d’or</b> et sur le <b>Rubis</b> : ils vous donnent de l’or ${icone("or")} pour ce tour.`,
-    cible:() => [TUTO.ids.p1, TUTO.ids.p2, TUTO.ids.rb].filter(enMain).map(u => `.main .carte[data-id="${u}"]`),
-    autorise:(act, id) => act==="main" && [TUTO.ids.p1, TUTO.ids.p2, TUTO.ids.rb].includes(id),
-    fini:() => ![TUTO.ids.p1, TUTO.ids.p2, TUTO.ids.rb].some(enMain)},
-  {titre:"Achetez au marché", texte:`Le <b>marché</b> est à droite. Avec votre or, achetez la <b>Garde d’Anubis</b> (3 ${icone("or")}). Une carte achetée va dans votre <b>défausse</b> : vous la piocherez lors d’un prochain tour.`,
-    cible:() => [`.marche-cartes .carte[data-act="marche"][data-id="${indexMarche(TUTO.ids.garde)}"]`],
-    autorise:(act, id) => act==="marche" && Number(id)===indexMarche(TUTO.ids.garde),
-    fini:() => moiT().defausse.some(c => c.uid===TUTO.ids.garde)},
-  {titre:"Posez une créature", texte:`Cliquez sur <b>Ulfhednar</b> pour le poser sur le plateau. Une créature reste en jeu jusqu’à sa mort. D’habitude, elle ne peut pas attaquer le tour où elle arrive, mais Ulfhednar a ${symMot("rapidite")} <b>Rapidité</b> : il peut attaquer tout de suite.`,
-    cible:() => [`.main .carte[data-id="${TUTO.ids.ulf}"]`],
-    autorise:(act, id) => act==="main" && id===TUTO.ids.ulf,
-    fini:() => moiT().plateau.some(c => c.uid===TUTO.ids.ulf)},
-  {titre:"Attaquez une créature", texte:`Pour viser le héros adverse, il faut d’abord détruire <b>toutes ses créatures visibles</b>. Cliquez sur votre <b>Ulfhednar</b>, puis sur le <b>Loup de Fenrir</b>. Les deux créatures s’infligent leurs dégâts en même temps.`,
-    cible:() => ui.attaquant ? [`.crea[data-act="enemy"][data-id="${TUTO.ids.loup}"]`] : [`.crea[data-act="own"][data-id="${TUTO.ids.ulf}"]`],
-    autorise:(act, id) => (act==="own" && id===TUTO.ids.ulf) || (act==="enemy" && id===TUTO.ids.loup && ui.attaquant===TUTO.ids.ulf),
-    fini:() => !luiT().plateau.some(c => c.uid===TUTO.ids.loup)},
-  {titre:"Gagnez de la puissance", texte:`Jouez la <b>Dague</b> : elle vous donne +1 ${icone("puissance")} <b>puissance</b>. La puissance, ce sont les points d’attaque de votre <b>héros</b> pour ce tour.`,
-    cible:() => [`.main .carte[data-id="${TUTO.ids.dg}"]`],
-    autorise:(act, id) => act==="main" && id===TUTO.ids.dg,
-    fini:() => !enMain(TUTO.ids.dg)},
-  {titre:"Votre héros attaque", texte:`L’adversaire n’a plus de créature : cliquez sur le <b>médaillon d’Ymir</b> pour que votre héros le frappe avec votre puissance.`,
+  {titre:"Jouez votre or", texte:`Jouer une carte est <b>gratuit</b>. Cliquez sur ${nomsOr} et sur ${laCarte(c.or2)} : elles vous donnent de l’or ${icone("or")} pour ce tour.`,
+    cible:() => I.ors.filter(enMain).map(u => `.main .carte[data-id="${u}"]`),
+    autorise:(act, id) => act==="main" && I.ors.includes(id),
+    fini:() => !I.ors.some(enMain)},
+  {titre:"Achetez au marché", texte:`Le <b>marché</b> est à droite. Avec votre or, achetez ${laCarte(c.achat)} (${prixAchat} ${icone("or")}). Une carte achetée va dans votre <b>défausse</b> : vous la piocherez lors d’un prochain tour.`,
+    cible:() => [`.marche-cartes .carte[data-act="marche"][data-id="${indexMarche(I.achat)}"]`],
+    autorise:(act, id) => act==="marche" && Number(id)===indexMarche(I.achat),
+    fini:() => moiT().defausse.some(x => x.uid===I.achat)},
+  {titre:"Posez une créature", texte:`Cliquez sur ${laCrea(c.rapide)} pour la poser sur le plateau. Une créature reste en jeu jusqu’à sa mort. D’habitude, elle ne peut pas attaquer le tour où elle arrive, mais celle-ci a ${symMot("rapidite")} <b>${esc(nomMot("rapidite"))}</b> : elle peut attaquer tout de suite.`,
+    cible:() => [`.main .carte[data-id="${I.rap}"]`],
+    autorise:(act, id) => act==="main" && id===I.rap,
+    fini:() => moiT().plateau.some(x => x.uid===I.rap)},
+  {titre:"Attaquez une créature", texte:`Pour viser le héros adverse, il faut d’abord détruire <b>toutes ses créatures visibles</b>. Cliquez sur votre créature ${nC(c.rapide)}, puis sur ${laCrea(c.jeton)} adverse. Les deux créatures s’infligent leurs dégâts en même temps.`,
+    cible:() => ui.attaquant ? [`.crea[data-act="enemy"][data-id="${I.jeton}"]`] : [`.crea[data-act="own"][data-id="${I.rap}"]`],
+    autorise:(act, id) => (act==="own" && id===I.rap) || (act==="enemy" && id===I.jeton && ui.attaquant===I.rap),
+    fini:() => !luiT().plateau.some(x => x.uid===I.jeton)},
+  {titre:"Gagnez de la puissance", texte:`Jouez ${laCarte(c.puiss)} : elle vous donne +${valeur(c.puiss, "combat")} ${icone("puissance")} <b>puissance</b>. La puissance, ce sont les points d’attaque de votre <b>héros</b> pour ce tour.`,
+    cible:() => [`.main .carte[data-id="${I.puiss}"]`],
+    autorise:(act, id) => act==="main" && id===I.puiss,
+    fini:() => !enMain(I.puiss)},
+  {titre:"Votre héros attaque", texte:`L’adversaire n’a plus de créature : cliquez sur le <b>médaillon ${esc(de(luiH.nom))}</b> pour que votre héros le frappe avec votre puissance.`,
     cible:() => [".medaillon-bloc.adv .medaillon"],
     autorise:(act) => act==="face",
     fini:() => luiT().pv < TUTO.pvAdverse},
-  {titre:"Finissez votre tour", texte:`Cliquez sur <b>Fin du tour</b>. Vos cartes jouées et celles restées en main partent à la défausse, l’or et la puissance restants sont perdus, et vous piochez 5 nouvelles cartes.`,
+  {titre:"Finissez votre tour", texte:`Cliquez sur <b>Fin du tour</b>. Vos cartes jouées et celles restées en main partent à la défausse, l’or et la puissance restants sont perdus, et vous piochez ${REGLES.piocheParTour} nouvelles cartes.`,
     cible:() => [".fin"],
     autorise:(act) => act==="fin",
     fini:() => S.courant===1 || S.tour>=3},
-  {titre:"Les combos", texte:`L’adversaire a posé un <b>Jeune porte-bouclier</b>. À vous !<br><br>Le Scribe du Nil a un effet précédé du symbole ${symCombo("egy")} : c’est un <b>combo</b>. Il se déclenche si une <b>autre</b> carte égyptienne est jouée dans le même tour. Jouez le <b>Scribe du Nil</b>, puis le <b>Pain du Nil</b>.`,
-    cible:() => [TUTO.ids.scribe, TUTO.ids.pain].filter(enMain).map(u => `.main .carte[data-id="${u}"]`),
-    autorise:(act, id) => act==="main" && [TUTO.ids.scribe, TUTO.ids.pain].includes(id),
-    fini:() => moiT().tour.some(t => t.uid===TUTO.ids.scribe && t.allieFait)},
-  {titre:"Le pouvoir de votre héros", texte:`Le pouvoir d’un héros se charge à chaque créature ennemie détruite. Pour ce tutoriel, celui d’Atoum est déjà prêt : son anneau doré est plein. Cliquez sur votre <b>médaillon</b> (ou sur « Activer ») pour déclencher <b>Souffle de vie</b>.`,
+  {titre:"Les combos", texte:`L’adversaire a posé ${laCrea(c.defenseur)}. À vous !<br><br>${laCarte(c.combo1).replace(/^l/, "L")} a un effet précédé du symbole ${symCombo("egy")} : c’est un <b>${esc(TERMES.allie || "combo")}</b>. Il se déclenche si une <b>autre</b> carte ${esc(FACTIONS.egy ? FACTIONS.egy.f : "égyptienne")} est jouée dans le même tour. Jouez ${laCarte(c.combo1)}, puis ${laCarte(c.combo2)}.`,
+    cible:() => [I.combo1, I.combo2].filter(enMain).map(u => `.main .carte[data-id="${u}"]`),
+    autorise:(act, id) => act==="main" && [I.combo1, I.combo2].includes(id),
+    fini:() => moiT().tour.some(t => t.uid===I.combo1 && t.allieFait)},
+  {titre:"Le pouvoir de votre héros", texte:`Le pouvoir d’un héros se charge à chaque créature ennemie détruite (${REGLES.seuilPouvoir || 10} au total). Pour ce tutoriel, celui ${esc(de(moiH.nom))} est déjà prêt : son anneau doré est plein. Cliquez sur votre <b>médaillon</b> (ou sur « Activer ») pour déclencher <b>${esc(pouvoir.nom)}</b> : ${decrireHTML(pouvoir.effet || {})}`,
     cible:() => ['[data-act="pouvoir"]'],
     autorise:(act) => act==="pouvoir",
     fini:() => (moiT().morts || 0)===0 && TUTO.pouvoirPret},
-  {titre:"Préparez l’assaut", texte:`Jouez la <b>Fureur de Sekhmet</b> et le <b>Jugement d’Anubis</b> pour gagner beaucoup de ${icone("puissance")} puissance. Remarquez leurs combos ${symCombo("egy")} : ils se déclenchent grâce à vos autres cartes égyptiennes.`,
-    cible:() => [TUTO.ids.sekhmet, TUTO.ids.jugement].filter(enMain).map(u => `.main .carte[data-id="${u}"]`),
-    autorise:(act, id) => act==="main" && [TUTO.ids.sekhmet, TUTO.ids.jugement].includes(id),
-    fini:() => ![TUTO.ids.sekhmet, TUTO.ids.jugement].some(enMain)},
-  {titre:"Détruisez le défenseur", texte:`Le porte-bouclier a ${symMot("provocation")} <b>Provocation</b> : il doit être détruit en premier. Cliquez dessus pour que votre héros l’attaque avec sa puissance. Attention : un héros qui frappe une créature subit sa <b>riposte</b>.`,
-    cible:() => [`.crea[data-act="enemy"][data-id="${TUTO.ids.bouclier}"]`],
-    autorise:(act, id) => act==="enemy" && id===TUTO.ids.bouclier && !ui.attaquant,
-    fini:() => !luiT().plateau.some(c => c.uid===TUTO.ids.bouclier)},
-  {titre:"Le coup final", texte:`La voie est libre ! Cliquez sur le <b>médaillon d’Ymir</b> pour frapper avec la puissance qu’il vous reste.`,
+  {titre:"Préparez l’assaut", texte:`Jouez les cartes ${nC(c.assaut1)} et ${nC(c.assaut2)} pour gagner beaucoup de ${icone("puissance")} puissance. Remarquez leurs ${esc((TERMES.allie || "combo").toLowerCase())}s ${symCombo("egy")} : ils se déclenchent grâce à vos autres cartes ${esc(FACTIONS.egy ? FACTIONS.egy.f + "s" : "égyptiennes")}.`,
+    cible:() => [I.assaut1, I.assaut2].filter(enMain).map(u => `.main .carte[data-id="${u}"]`),
+    autorise:(act, id) => act==="main" && [I.assaut1, I.assaut2].includes(id),
+    fini:() => ![I.assaut1, I.assaut2].some(enMain)},
+  {titre:"Détruisez le défenseur", texte:`${laCrea(c.defenseur).replace(/^l/, "L")} a ${symMot("provocation")} <b>${esc(nomMot("provocation"))}</b> : elle doit être détruite en premier. Cliquez dessus pour que votre héros l’attaque avec sa puissance. Attention : un héros qui frappe une créature subit sa <b>riposte</b>.`,
+    cible:() => [`.crea[data-act="enemy"][data-id="${I.defenseur}"]`],
+    autorise:(act, id) => act==="enemy" && id===I.defenseur && !ui.attaquant,
+    fini:() => !luiT().plateau.some(x => x.uid===I.defenseur)},
+  {titre:"Le coup final", texte:`La voie est libre ! Cliquez sur le <b>médaillon ${esc(de(luiH.nom))}</b> pour frapper avec la puissance qu’il vous reste.`,
     cible:() => [".medaillon-bloc.adv .medaillon"],
     autorise:(act) => act==="face",
     fini:() => S.vainqueur!==null}
-]);
+  ];
+}
 // Tour de l’adversaire, scripté
 async function tutoTourAdverse(){
   ui.aiEnCours = true; render();
   await new Promise(r => setTimeout(r, 900));
   if(!tutoActif()) return;
-  const o = luiT();
-  const pb = inst("porte_bouclier"); o.main = [pb];
-  jouer(pb.uid);
-  TUTO.ids.bouclier = pb.uid;
+  const c = TUTO.c, o = luiT();
+  const def = inst(c.defenseur); o.main = [def];
+  jouer(def.uid);
+  TUTO.ids.defenseur = def.uid;
   render();
   await new Promise(r => setTimeout(r, 900));
   if(!tutoActif()) return;
   finTour();
-  // Votre deuxième tour : une main préparée et un pouvoir chargé
+  // Deuxième tour : une main préparée et un pouvoir chargé
   const j = moiT();
-  const sc = inst("scribe"), pn = inst("pain_nil"), sk = inst("sekhmet"), jg = inst("jugement");
-  j.main = [sc, pn, sk, jg];
-  Object.assign(TUTO.ids, {scribe:sc.uid, pain:pn.uid, sekhmet:sk.uid, jugement:jg.uid});
+  const m = [c.combo1, c.combo2, c.assaut1, c.assaut2].map(inst);
+  j.main = m;
+  Object.assign(TUTO.ids, {combo1:m[0].uid, combo2:m[1].uid, assaut1:m[2].uid, assaut2:m[3].uid});
   j.morts = REGLES.seuilPouvoir || 10; TUTO.pouvoirPret = true;
   ui.aiEnCours = false; render();
 }
