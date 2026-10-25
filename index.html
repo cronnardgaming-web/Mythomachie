@@ -4841,7 +4841,7 @@ function voler(el, de, a, duree, delai, extra){
        {transform:`translate(${extra.milieu.x}px,${extra.milieu.y}px) scale(${extra.e1 ?? 1.15})`, opacity:1, offset:.45},
        {transform:`translate(${a.x}px,${a.y}px) scale(${extra.e2 ?? .6})`, opacity:extra.o2 ?? .9}]
     : [{transform:`translate(${de.x}px,${de.y}px) scale(${(extra && extra.e0) ?? 1})`, opacity:1},
-       {transform:`translate(${a.x}px,${a.y}px) scale(${(extra && extra.e2) ?? .6})`, opacity:(extra && extra.o2) ?? .9}];
+       {transform:`translate(${a.x}px,${a.y}px) scale(${(extra && extra.e2) ?? .6}) rotate(${(extra && extra.rot) || 0}deg)`, opacity:(extra && extra.o2) ?? .9}];
   const anim = el.animate(ki, {duration:duree, delay:delai || 0, easing:"cubic-bezier(.3,.7,.35,1)", fill:"both"});
   anim.finished.then(() => el.remove(), () => el.remove());
   return anim;
@@ -4948,19 +4948,22 @@ function animerEvenement(ev){
     }
   }
 }
-const ATTAQUANTS_CACHES = new Set();
+const ATTAQUANTS_CACHES = new Set(), PIOCHE_CACHEES = new Set();
 function jouerEffets(){
   if(!S) return;
   // Une créature en plein vol reste masquée même si le plateau est réaffiché
   ATTAQUANTS_CACHES.forEach(u => { const el = document.querySelector(`.crea[data-id="${u}"]`); if(el) el.style.visibility = "hidden"; });
+  PIOCHE_CACHEES.forEach(u => { const el = document.querySelector(`.zone-main .main .carte[data-uid="${u}"]`); if(el) el.style.visibility = "hidden"; });
   const evts = S.evt || [];
   const dernier = evts.length ? evts[evts.length-1].n : 0;
-  if(FX_VU.id!==S.idPartie){ FX_VU = {id:S.idPartie, n:dernier}; return; }
+  if(FX_VU.id!==S.idPartie){ FX_VU = {id:S.idPartie, n:dernier}; PIOCHE_CACHEES.clear(); ATTAQUANTS_CACHES.clear(); return; }
   const nouveaux = evts.filter(e => e.n > FX_VU.n);
   FX_VU.n = Math.max(FX_VU.n, dernier);
   const niveau = niveauAnim();
   if(!niveau || !nouveaux.length) return;
-  delaiPioche = 0;
+  // Si des cartes partent à la défausse dans le même temps, la pioche attend qu’elles soient arrivées
+  const defausse = nouveaux.find(e => e.t==="defausse");
+  delaiPioche = defausse && niveau>=2 ? 460 + (defausse.uids || []).length*45 + 120 : 0;
   nouveaux.forEach(ev => {
     try {
       if(animerEvenement2(ev, niveau)) return;
@@ -5020,12 +5023,25 @@ function animerEvenement2(ev, niveau){
     case "pioche": {
       if(niveau<2) return;
       const de = pileRect(ev.j, "deck"); if(!de) return;
-      const cible = moi ? document.querySelector(`.zone-main .main .carte[data-uid="${ev.uid}"]`) : document.querySelector(".main-adverse");
-      const ra = cible && cible.getBoundingClientRect(); if(!ra) return;
-      const d = delaiPioche; delaiPioche += 80;
-      const largeur = moi ? ra.width : 30;
-      if(moi) animerSur(cible, [{opacity:0}, {opacity:0, offset:.99}, {opacity:1}], {duration:420 + d, fill:"backwards"});
-      voler(dosVolant(largeur), centre(de), centre(ra), 420, d, {e0:de.width/largeur, e2:1, o2:1});
+      const d = delaiPioche; delaiPioche += 170;
+      if(moi){
+        const cible = document.querySelector(`.zone-main .main .carte[data-uid="${ev.uid}"]`);
+        const ra = cible && cible.getBoundingClientRect(); if(!ra) return;
+        const rot = parseFloat(cible.style.getPropertyValue("--r")) || 0;
+        // La carte reste cachée (même si le plateau se réaffiche) jusqu’à l’arrivée de son dos
+        PIOCHE_CACHEES.add(ev.uid); cible.style.visibility = "hidden";
+        const reveler = () => {
+          if(!PIOCHE_CACHEES.delete(ev.uid)) return;
+          const vraie = document.querySelector(`.zone-main .main .carte[data-uid="${ev.uid}"]`);
+          if(vraie){ vraie.style.visibility = ""; vraie.animate([{opacity:.4, filter:"brightness(1.8)"}, {opacity:1, filter:"none"}], {duration:180, easing:"ease-out"}); }
+        };
+        const anim = voler(dosVolant(ra.width), centre(de), centre(ra), 420, d, {e0:de.width/ra.width, e2:1, o2:1, rot});
+        anim.finished.then(reveler, reveler);
+        setTimeout(reveler, (420 + d)*FX_LENT + 1500);   // sécurité : jamais de carte bloquée invisible
+      } else {
+        const r = rectDe(".main-adverse"); if(!r) return;
+        voler(dosVolant(30), centre(de), centre(r), 420, d, {e0:de.width/30, e2:1, o2:.9});
+      }
       break;
     }
     case "melange": {
