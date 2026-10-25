@@ -708,6 +708,107 @@ button.medaillon[data-act="pouvoir"]{cursor:pointer}
   .main.eventail .carte{transition:none}
 }
 
+/* ================= MOBILE EN PAYSAGE (hauteur ≤ 520 px) ================= */
+#apercu-carte{position:fixed;inset:0;z-index:40;display:none;place-items:center;background:rgba(6,8,14,.55);pointer-events:none}
+#apercu-carte.montre{display:grid}
+#apercu-carte .carte{--w:min(calc(86vh * 63 / 88), 70vw);box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.carte,.crea{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+#pivoter{display:none}
+@media (orientation: portrait) and (max-width: 600px){
+  body.en-partie:not(.portrait-ok) #pivoter{display:flex;position:fixed;inset:0;z-index:45;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+    padding:24px;text-align:center;background:var(--voile);color:#fff;font-size:18px}
+  #pivoter .icone-pivot{font-size:54px;animation:pivot 1.6s ease-in-out infinite}
+  @keyframes pivot{50%{transform:rotate(-90deg)}}
+}
+@media (orientation: landscape) and (max-height: 520px){
+  /* Partie : tout tient sur un écran, sans défilement */
+  body.en-partie{overflow:hidden}
+  body.en-partie #app{max-width:none;height:100vh;height:100dvh;overflow:hidden;gap:4px;
+    padding:4px calc(8px + env(safe-area-inset-right, 0px)) 0 calc(8px + env(safe-area-inset-left, 0px))}
+  .barre-jeu{gap:10px;min-height:28px;padding:0}
+  .barre-jeu .logo-mini,.barre-jeu .mode{display:none}
+  .barre-jeu .tour-info{font-size:13px}
+  .barre-jeu .btn-discret{padding:3px 10px;font-size:13px}
+  .barre-jeu .btn-son{width:28px;height:28px}.barre-jeu .btn-son svg{width:17px;height:17px}
+  .table-jeu{grid-template-columns:minmax(0,1fr) 170px;gap:6px;height:calc(100dvh - 38px);align-items:stretch}
+  .plateau{height:100%;min-height:0;padding:4px 6px 0;gap:0 8px;display:grid;overflow:visible;
+    grid-template-columns:132px minmax(0,1fr);grid-template-rows:minmax(0,1fr) 14px minmax(0,1fr) 104px;
+    grid-template-areas:"hadv radv" "hadv axe" "hmoi rmoi" "main main"}
+  .camp-adv,.camp-moi{display:contents}
+  .camp-adv > .ligne-heros{grid-area:hadv}
+  .camp-adv > .rangee{grid-area:radv}
+  .camp-moi > .rangee{grid-area:rmoi}
+  .camp-moi > .ligne-heros{grid-area:hmoi}
+  .camp-moi > .consigne{display:none}
+  .axe{grid-area:axe;height:16px;margin:0}
+  .zone-main{grid-area:main}
+  /* Colonne des héros */
+  .ligne-heros{flex-direction:column;flex-wrap:nowrap;align-items:center;justify-content:center;gap:3px;padding:0}
+  .medaillon-bloc{flex-direction:column;gap:2px}
+  .medaillon{width:62px;height:62px}
+  .medaillon .visage{width:48px;height:48px;font-size:22px}
+  .medaillon .pv-ecu{min-width:30px;height:32px;font-size:14px;bottom:-12px;padding:2px 5px 9px}
+  .plaque{align-items:center;text-align:center;min-width:0;gap:0;margin-top:8px}
+  .plaque b{font-size:13px}
+  .plaque .qui{display:none}
+  .plaque .charge{font-size:10.5px;line-height:1.15}
+  .btn-pouvoir{padding:3px 8px;font-size:12px;margin-top:2px}
+  .main-adverse,.joues,.camp-moi .piles{display:none}
+  .piles-adverses{display:none}
+  .ressources-jeu{gap:8px}
+  .ressource{font-size:0;gap:0}
+  .ressource .jeton{width:32px;height:32px;font-size:15px}
+  .camp-moi > .ligne-heros{flex-direction:row;align-items:center;gap:8px}
+  .camp-moi .ressources-jeu{flex-direction:column;gap:6px}
+  /* Créatures */
+  .plateau .rangee{min-height:0;height:100%;padding:2px;gap:6px;align-items:center;overflow:visible}
+  .crea{width:min(72px, calc((100dvh - 38px - 118px) / 2 * .68))}
+  .ligne-heros,.plateau .rangee{min-height:0;overflow:visible}
+  .plateau .vide{font-size:12px}
+  .fin{width:56px;height:56px;font-size:10.5px;padding:3px;right:2px}
+  .flottant{font-size:21px}
+  /* Main : les cartes dépassent en bas, une carte touchée se soulève */
+  .zone-main{gap:6px;align-items:start;height:104px}
+  .zone-main .pile{padding-bottom:0}
+  .zone-main .pile .pile-tas{width:44px}
+  .zone-main .pile .pile-tas .carte{--w:44px}
+  .zone-main .pile .dos-pile{font-size:15px}
+  .zone-main .pile .pile-nom{display:none}
+  .zone-main .pile-nb{min-width:22px;height:22px;font-size:12px;right:-7px;bottom:-7px;padding:0 5px}
+  .main.eventail{min-height:0;height:104px;padding:4px 16px 0;overflow:visible;align-items:flex-start}
+  .zone-main .main.eventail{padding-left:16px;padding-right:16px}
+  .main.eventail .carte{--w:96px;transform:translateY(calc(var(--y,0px) * .5)) rotate(var(--r,0deg))}
+  .main.eventail .carte.jouable:hover,.main.eventail .carte.jouable:focus-visible,.main.eventail .carte:active{transform:translateY(-72px) scale(1.3);z-index:9}
+  /* Marché à droite, avec défilement */
+  .cote{height:100%;gap:0;position:static}
+  .cote .marche{height:100%;overflow-y:auto;padding:6px;border-radius:8px}
+  .cote .marche h2{font-size:13px;margin-bottom:4px}
+  .cote .marche h2 .reste{display:block;font-size:11px}
+  .cote .marche-cartes{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .cote .marche .carte{--w:74px}
+  .cote .marche .illimite{font-size:8px}
+  .cote .journal{display:none}
+  #banniere span{font-size:26px;padding:8px 40px}
+  /* Tutoriel : en bas à droite, sur le marché, jamais sur la main */
+  #tuto-panneau{top:auto;left:auto;bottom:6px;right:calc(6px + env(safe-area-inset-right, 0px));width:250px;max-height:64vh;overflow:auto;padding:10px 12px}
+  #tuto-panneau h2{font-size:15px;margin:2px 0 4px}
+  #tuto-panneau p{font-size:12.5px;margin-bottom:8px;line-height:1.4}
+  #tuto-panneau .tuto-etape{font-size:11px}
+  /* Fenêtres et menus : défilement si nécessaire */
+  #couche{padding:8px calc(8px + env(safe-area-inset-right, 0px)) 8px calc(8px + env(safe-area-inset-left, 0px));place-items:start center}
+  .boite{max-height:calc(100dvh - 16px);overflow:auto;padding:16px 18px}
+  .logo{font-size:30px}
+  .tete-accueil{margin-bottom:2px}
+  .boite h3{margin:10px 0 6px}
+  #app{padding-left:calc(12px + env(safe-area-inset-left, 0px));padding-right:calc(12px + env(safe-area-inset-right, 0px))}
+  /* Grande vue de la collection : illustration à gauche, texte à droite */
+  .carte-ouverte{flex-direction:row;width:auto;min-width:0;height:calc(100dvh - 24px);padding:8px;gap:8px}
+  .z-illu{height:100%;width:auto;aspect-ratio:7/9}
+  .z-texte{width:210px;overflow-y:auto;font-size:14px;padding:10px}
+  .z-tete b{font-size:16px}
+  .zoom{align-items:center}
+}
+
 </style>
 </head>
 <body>
@@ -717,6 +818,7 @@ button.medaillon[data-act="pouvoir"]{cursor:pointer}
 <div id="toast" role="status"></div>
 <div id="bulle" role="tooltip"></div>
 <div id="banniere" aria-live="polite"><span></span></div>
+<div id="pivoter" role="dialog" aria-label="Tournez votre téléphone"><span class="icone-pivot" aria-hidden="true">📱</span><p>Pour jouer confortablement, tournez votre téléphone en mode paysage.</p><button type="button" class="btn second" data-act="portrait-ok">Continuer en portrait</button></div>
 
 <script>
 const NOM_JEU = window.claude ? "Prototype de combat" : "Mythomachie";
@@ -1635,13 +1737,14 @@ function htmlMedaillon(j, estMoi, inter, cible){
     <${balise} ${attrs} class="medaillon f-${j.heros || "neutre"} ${pret ? "pret" : ""} ${cible ? "cible" : ""}" data-joueur="${idx}" style="--p:${(m/seuil).toFixed(3)}" data-aide="carte" data-titre="${esc(pv.nom)}" data-texte="${esc(aide)}">
       <span class="anneau" aria-hidden="true"></span><span class="visage ${h.image ? "portrait-heros" : ""}" aria-hidden="true">${h.image ? `<img src="${h.image}" alt="">` : sym}</span><span class="pv-ecu" title="Points de vie">${j.pv}</span>
     </${balise}>
-    <div class="plaque"><b>${esc(h.nom)}</b><span class="qui">${esc(nomAffiche(j))}</span>
+    <div class="plaque" title="${estMoi ? "" : `Deck : ${j.deck.length}, défausse : ${j.defausse.length}, main : ${j.main.length}`}"><b>${esc(h.nom)}</b><span class="qui">${esc(nomAffiche(j))}</span>
       <span class="charge ${pret ? "ok" : ""}">${pret ? `${esc(pv.nom)} est prêt` : `${esc(pv.nom)} : ${m} / ${seuil}`}</span>
       ${activable ? `<button type="button" class="btn btn-pouvoir" data-act="pouvoir">Activer</button>` : ""}
     </div></div>`;
 }
 function render(){
   const app = document.getElementById("app");
+  document.body.classList.toggle("en-partie", !!S && ui.ecran==="jeu");
   queueMicrotask(majMusique);
   if(ui.ecran==="admin"){ INSTANT = null; renderAdmin(); return; }
   if(ui.ecran!=="jeu" || !tutoActif()){ const p = document.getElementById("tuto-panneau"); if(p) p.remove(); }
@@ -5179,6 +5282,49 @@ function animerEvenement2(ev, niveau){
   }
   return true;
 }
+
+/* ===== Mobile : appui long pour voir une carte en grand ===== */
+function idCarteDe(el){
+  const uid = el.dataset.uid || (el.classList.contains("crea") ? el.dataset.id : null);
+  if(uid==="base") return REGLES.carteBase;
+  if(uid && S){
+    const zones = [S.marche, ...S.joueurs.flatMap(j => [j.main, j.plateau, j.joues, j.defausse, j.bannies])];
+    for(const z of zones){ const c = (z || []).find(x => x && x.uid===uid); if(c) return c.id; }
+  }
+  if(el.dataset.id && CARTES[el.dataset.id]) return el.dataset.id;
+  const nom = el.querySelector(".nom-bande"); if(nom){ const id = Object.keys(CARTES).find(k => CARTES[k].nom===nom.textContent.trim()); if(id) return id; }
+  return null;
+}
+let appuiLong = null, bloquerClic = false;
+function apercu(id){
+  let a = document.getElementById("apercu-carte");
+  if(!a){ a = document.createElement("div"); a.id = "apercu-carte"; a.setAttribute("aria-hidden", "true"); document.body.appendChild(a); }
+  if(!id){ a.classList.remove("montre"); a.innerHTML = ""; return; }
+  a.innerHTML = htmlCarte({id, uid:"apercu"}, {hd:true});
+  a.classList.add("montre");
+}
+document.addEventListener("pointerdown", e => {
+  if(e.pointerType!=="touch") return;
+  const el = e.target.closest && e.target.closest(".carte, .crea");
+  if(!el || el.closest("#apercu-carte, #fx")) return;
+  clearTimeout(appuiLong && appuiLong.t);
+  appuiLong = {x:e.clientX, y:e.clientY, montre:false, t:setTimeout(() => { const id = idCarteDe(el); if(id){ apercu(id); appuiLong.montre = true; } }, 450)};
+}, true);
+document.addEventListener("pointermove", e => {
+  if(appuiLong && !appuiLong.montre && Math.hypot(e.clientX - appuiLong.x, e.clientY - appuiLong.y) > 10){ clearTimeout(appuiLong.t); appuiLong = null; }
+}, true);
+["pointerup","pointercancel"].forEach(t => document.addEventListener(t, () => {
+  if(!appuiLong) return;
+  clearTimeout(appuiLong.t);
+  if(appuiLong.montre){ apercu(null); bloquerClic = true; setTimeout(() => { bloquerClic = false; }, 400); }
+  appuiLong = null;
+}, true));
+// Le relâchement après un aperçu ne doit pas jouer la carte
+document.addEventListener("click", e => { if(bloquerClic){ e.stopPropagation(); e.preventDefault(); bloquerClic = false; } }, true);
+document.addEventListener("contextmenu", e => { if(e.target.closest && e.target.closest(".carte, .crea")) e.preventDefault(); });
+document.addEventListener("click", e => {
+  if(e.target.closest && e.target.closest('[data-act="portrait-ok"]')){ document.body.classList.add("portrait-ok"); }
+});
 
 chargerConfig();
 appliquerReglageAnimations();
