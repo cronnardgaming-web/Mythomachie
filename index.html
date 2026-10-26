@@ -1826,7 +1826,7 @@ function render(){
   animerChangements();
   jouerEffets();
   renderTuto();
-  if(PROG.pret) signaler();
+  if(PROG.pret){ signaler(); assurerTicket(); }
   if(S.vainqueur!==null) verifierRecompense();
 }
 
@@ -2689,6 +2689,16 @@ const refPartie = () => EN.db.doc(`parties/${EN.hoteId}/p/${EN.code}`);
 const refOrdres = () => EN.db.doc(`ordres/${EN.inviteId}/p/${EN.code}`);
 const refPrive = () => EN.db.doc(`data/users/${EN.hoteId}/parties/${EN.code}`);
 
+// Empreinte des règles et des cartes (sans les images) pour vérifier que les deux joueurs ont la même version
+function empreinteConfig(cfg){
+  const tri = v => Array.isArray(v) ? v.map(tri) : v && typeof v==="object" ? Object.fromEntries(Object.keys(v).sort().map(k => [k, tri(v[k])])) : v;
+  const cartes = {};
+  for(const [k, c] of Object.entries((cfg && cfg.cartes) || {})){ const { image, imageHD, ...reste } = c || {}; cartes[k] = reste; }
+  const s = JSON.stringify(tri({cartes, regles:(cfg && cfg.regles) || {}}));
+  let h1 = 0x811c9dc5;
+  for(let i=0; i<s.length; i++){ h1 ^= s.charCodeAt(i); h1 = Math.imul(h1, 16777619); }
+  return (h1 >>> 0).toString(16) + ":" + s.length;
+}
 function configPublique(){
   const cartes = copie(CONFIG.cartes);
   // Les images embarquées (data:) sont trop lourdes pour voyager : l’invité reprend celles de son site
@@ -3164,7 +3174,17 @@ if(!window.claude && SUPA.url){
     return {
       rejoindre: p => {
         if(!p.id) return;
-        if(!EN.inviteId){ EN.deckInvite = p.deck || null; EN.pseudoInvite = p.pseudo || null; demarrerHote(p.id); }
+        if(!EN.inviteId && !EN.verifInvite){
+          EN.verifInvite = true; EN.pseudoInvite = p.pseudo || null;
+          (async () => {
+            let ok = true;
+            try { ok = await rpc("deck_invite_valide", {p_invite:p.id, p_cartes:p.deck || []}); } catch(e) { ok = !/schema cache|does not exist/i.test(e.message) ? false : true; }
+            EN.deckInvite = ok ? (p.deck || null) : null;
+            EN.verifInvite = false;
+            demarrerHote(p.id);
+            if(!ok && S){ S.journal.push("Le deck de l’invité n’a pas été validé par le serveur : un deck au hasard le remplace."); publier(); render(); }
+          })();
+        }
         else if(p.id===EN.inviteId) envoyerEtat(true);
         else emettre("complet", {id:p.id});
       },
@@ -3232,7 +3252,17 @@ if(!window.claude && SUPA.url){
     appliquerConfig(c);
   }
   function recevoirEtat(p){
-    if(p.config && !EN.cfgRecu){ appliquerConfigInvite(p.config); EN.cfgRecu = true; }
+    if(p.config && !EN.cfgRecu){
+      if(!window.claude && CONFIG_SITE_PRET){
+        // Sur le site, chaque joueur utilise les cartes officielles : une configuration différente est refusée
+        if(empreinteConfig(p.config)!==empreinteConfig(CONFIG)){
+          quitterEnLigne(); S = null;
+          EN.erreurMenu = "Partie refusée : l’hôte n’utilise pas la même version des cartes que vous. Rechargez la page tous les deux, puis recommencez.";
+          EN.ecran = "menu"; render(); return;
+        }
+        EN.cfgRecu = true;
+      } else { appliquerConfigInvite(p.config); EN.cfgRecu = true; }
+    }
     if(!EN.cfgRecu){ emettre("bonjour", {id:EN.monId}); return; }
     if(p.session!==EN.sessionVue){ EN.sessionVue = p.session; EN.versionRecue = 0; }
     if(p.version <= (EN.versionRecue || 0)) return;
@@ -3408,19 +3438,28 @@ async function verifierRecompense(){
   const cle = S.idPartie;
   PROG.recompensees.add(cle);
   try { localStorage.setItem("parties-recompensees", JSON.stringify([...PROG.recompensees].slice(-60))); } catch(e) {}
-  enregistrerDuel();
-  if(S.mode==="duo") return;
-  const me = vue(), victoire = S.vainqueur===S.joueurs[me].nom;
-  ajouterProgresQuete(S.stats ? S.stats[me] : null, victoire);
-  try { const gain = await rpc("fin_partie", {victoire}); PROG.dernierGain = {cle, gain}; await rafraichir(); }
-  catch(e) { PROG.dernierGain = {cle, gain:0, erreur:e.message}; }
+  const ticket = S.ticket, hoteOuSeul = !(S.mode==="enligne" && EN.role!=="hote");
+  if(S.mode==="duo"){ if(ticket) enregistrerDuel().catch(() => {}); return; }
+  try {
+    if(!ticket) throw new Error(S.ticketErreur || "Ticket de partie manquant.");
+    if(hoteOuSeul) await enregistrerDuel();
+    // L’invité attend que l’hôte ait enregistré la partie
+    let gain = null;
+    for(let essai=0; ; essai++){
+      try { gain = await rpc("fin_partie_ticket", {p_ticket:ticket}); break; }
+      catch(e) { if(/pas encore enregistrée/.test(e.message) && essai<5){ await new Promise(r => setTimeout(r, 1500*(essai+1))); continue; } throw e; }
+    }
+    PROG.dernierGain = {cle, gain};
+    await rafraichir();
+    chargerMesStats(true);
+  } catch(e) { PROG.dernierGain = {cle, gain:0, erreur:messageServeur(e.message)}; }
   if(S && S.idPartie===cle) renderCouche();
 }
 function htmlGainFin(){
   if(!PROG.actif || !S || S.mode==="duo") return "";
   const g = PROG.dernierGain;
   if(!g || g.cle!==S.idPartie) return `<p class="attente">Calcul des récompenses…</p>`;
-  if(g.erreur) return `<p>Récompense indisponible : ${esc(g.erreur)}</p>`;
+  if(g.erreur) return `<p class="avertissement">Pas de récompense : ${esc(String(g.erreur).replace(/\.+$/, ""))}.</p>`;
   const st = S.stats ? S.stats[vue()] : null;
   const pl = (n, un, plusieurs) => `${nf(n)} ${(n || 0) > 1 ? plusieurs : un}`;
   const resume = st ? `<p class="aide">Dans cette partie : ${pl(st.degats, "dégât infligé", "dégâts infligés")}, ${pl(st.soins || 0, "point de vie soigné", "points de vie soignés")}, ${pl(st.creatures, "créature jouée", "créatures jouées")}, ${pl(st.achats, "carte achetée", "cartes achetées")}.</p>` : "";
@@ -3430,8 +3469,9 @@ function htmlGainFin(){
 // ----- Affichage commun
 const bourse = () => PROG.profil ? `<div class="bourse"><span class="res or"><b>${PROG.profil.pieces_or}</b>or</span><span class="res encre"><b>${PROG.profil.encre}</b>encre</span></div>` : "";
 function htmlQuete(){
-  const q = queteDuJour(), p = progresQuete(), v = Math.min(p[q.cle] || 0, q.but);
-  const faite = PROG.profil && PROG.profil.quete_jour===jourISO();
+  const serveur = PROG.quete;
+  const q = serveur || queteDuJour(), v = serveur ? Math.min(serveur.progres || 0, q.but) : Math.min(progresQuete()[q.cle] || 0, q.but);
+  const faite = serveur ? !!serveur.faite : PROG.profil && PROG.profil.quete_jour===jourISO();
   const gain = (PROG.eco && PROG.eco.or_quete) || 40;
   return `<div class="quete"><div><b>Quête du jour</b> : ${q.texte}</div>
     <div class="barre" role="progressbar" aria-valuemin="0" aria-valuemax="${q.but}" aria-valuenow="${v}"><span style="width:${100*v/q.but}%"></span></div>
@@ -3731,7 +3771,7 @@ function actionProg(act, id){
     case "bienvenue-jouer": PROG.accueilEtape = null; PROG.choixDeck = {mode:"ia"}; break;
     case "bienvenue-tuto": PROG.accueilEtape = null; lancerTuto(); return true;
     case "choix-lancer": lancerAvecDecks(); return true;
-    case "quete-reclamer": action(() => rpc("reclamer_quete"), g => `+${g} or : quête du jour réussie !`); return true;
+    case "quete-reclamer": action(async () => { const g = await rpc("reclamer_quete"); await chargerQuete(); return g; }, g => `+${g} or : quête du jour réussie !`); return true;
     case "col-sel": PROG.sel = id; PROG.zoom = true; PROG.zoomAnim = true; break;
     case "zoom-rien": return true;
     case "zoom-fermer": PROG.zoom = false; break;
@@ -4080,31 +4120,40 @@ function demarrerPresence(){
 }
 
 // ----- Enregistrement d’une partie terminée
+// ----- Sécurité : chaque partie est ouverte par le serveur, qui lui donne un ticket
+function assurerTicket(){
+  if(!PROG.pret || !S || S.tuto || S.ticket || S.ticketDemande || S.vainqueur!==null) return;
+  if(S.mode==="enligne" && EN.role!=="hote") return;   // l’hôte demande le ticket pour les deux joueurs
+  S.ticketDemande = true;
+  const id = S.idPartie;
+  rpc("commencer_partie", S.mode==="enligne" ? {p_mode:"enligne", p_invite:EN.inviteId} : {p_mode:S.mode})
+    .then(t => { if(S && S.idPartie===id){ S.ticket = t; if(enLigne() && EN.role==="hote") publier(); } })
+    .catch(e => { if(S && S.idPartie===id) S.ticketErreur = e.message; });
+}
+const messageServeur = m => /trop courte/i.test(m) ? "partie trop courte (moins de 2 minutes) : elle n’est pas comptée"
+  : /Trop de parties/i.test(m) ? "trop de parties commencées en une heure"
+  : /ticket|Ticket/.test(m) ? "partie non enregistrée par le serveur" : m;
 // Une partie = deux camps, enregistrés ensemble et une seule fois :
 // contre l’ordinateur, le joueur enregistre son camp et celui de l’ordinateur ;
 // en ligne, l’hôte enregistre les deux joueurs ; à deux sur un écran, les deux camps sont « locaux ».
 async function enregistrerDuel(){
-  if(S.mode==="enligne" && EN.role!=="hote"){
-    // L’invité ne fait rien : l’hôte s’en charge. On rafraîchit ses statistiques un peu plus tard.
-    setTimeout(() => chargerMesStats(true), 2500);
-    return;
-  }
+  if(!S.ticket) throw new Error(S.ticketErreur || "Ticket de partie manquant.");
   const camp = i => {
     const st = (S.stats && S.stats[i]) || {};
-    return {heros:S.joueurs[i].heros || null, joueur: S.mode==="enligne" && i===1 ? EN.inviteId : null,
+    return {heros:S.joueurs[i].heros || null,
             degats:st.degats || 0, soins:st.soins || 0, creatures:st.creatures || 0, sorts:st.sorts || 0,
             achats:st.achats || 0, pouvoirs:st.pouvoirs || 0, jouees:st.jouees || {}, achetees:st.achetees || {}};
   };
   const nomV = S.vainqueur, v = nomV===S.joueurs[0].nom ? 0 : nomV===S.joueurs[1].nom ? 1 : null;
-  const d = {id_partie:S.idPartie, mode:S.mode, vainqueur:v, tours:S.tour,
-             duree_s:S.debut ? Math.round((Date.now()-S.debut)/1000) : 0, cotes:[camp(0), camp(1)]};
-  for(let essai=0; essai<3; essai++){
-    try { await rpc("enregistrer_duel", {d}); break; }
-    catch(e) { if(/inconnu|identifiant|camp|volumineuses|Connexion/i.test(e.message)) break; await new Promise(r => setTimeout(r, 1500*(essai+1))); }
+  const d = {id_partie:S.ticket, mode:S.mode, vainqueur:v, tours:S.tour, cotes:[camp(0), camp(1)]};
+  for(let essai=0; ; essai++){
+    try { await rpc("enregistrer_duel", {d}); return; }
+    catch(e) { if(essai>=2 || /ticket|Ticket|courte|invalides|mode|expiré|Connexion/.test(e.message)) throw e; await new Promise(r => setTimeout(r, 1500*(essai+1))); }
   }
-  if(S.mode!=="duo") chargerMesStats(true);
 }
+async function chargerQuete(){ try { PROG.quete = await rpc("mes_quete"); } catch(e) { PROG.quete = null; } }
 async function chargerMesStats(annoncer){
+  chargerQuete().then(() => { if(!S && PROG.pret) renderCouche(); });
   try { PROG.mesStats = await rpc("mes_stats"); } catch(e) { return; }
   verifierTrophees(annoncer);
 }

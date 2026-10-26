@@ -84,6 +84,15 @@ ou changé leur faction, renvoyez le catalogue depuis l’administration (onglet
 `supabase-admin-joueurs.sql` permet à l’administrateur de corriger l’or et l’encre d’un joueur depuis l’onglet
 « Statistiques » de l’administration (bouton « Modifier » dans la liste des joueurs).
 
+## Sécurité, niveau 1 (anti-triche)
+
+`supabase-securite.sql` (à exécuter en dernier) fait du serveur le seul juge de l’économie :
+chaque partie reçoit un ticket du serveur ; la récompense et les statistiques ne sont acceptées qu’une fois
+par ticket, après une durée minimale (2 minutes par défaut, réglage `duree_min_partie` de la table `economie`),
+et avec des valeurs plausibles. La quête du jour est calculée par le serveur. Les decks sont vérifiés (cartes
+possédées, limites d’exemplaires, 30 cartes au plus). En ligne, l’hôte vérifie le deck de l’invité auprès du
+serveur, et l’invité refuse une partie dont les cartes diffèrent des cartes officielles.
+
 ## Sécurité
 
 Le dépôt est public : n’y mettez jamais de mot de passe ni la clé « service_role » de Supabase.
