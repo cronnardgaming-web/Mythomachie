@@ -386,6 +386,24 @@ body.sans-animations *,body.sans-animations *::before,body.sans-animations *::af
 .reglage-anim{display:flex;align-items:center;gap:8px}
 .reglage-anim select{font:inherit;font-size:15px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
 
+/* Surveillance */
+.liste-alertes{display:flex;flex-direction:column;gap:10px}
+.alerte{background:var(--table-2);border:1px solid var(--line);border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:6px}
+.alerte.traitee{opacity:.55}
+.alerte header,.alerte footer{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.alerte footer{justify-content:space-between}
+.alerte .quand{margin-left:auto;font-size:13px;color:var(--ink-2)}
+.joueur-alerte{font-size:16px}
+.motif-alerte{margin:0;font-size:14px;line-height:1.45}
+.details-alerte{display:flex;flex-wrap:wrap;gap:6px}
+.detail-alerte{font-size:13px;background:var(--zone);border-radius:4px;padding:3px 8px}
+.detail-alerte b{color:var(--ink-2);font-weight:700;margin-right:4px}
+.gravite{font-size:12px;font-weight:700;border-radius:99px;padding:2px 10px;color:#fff}
+.gravite.g-forte{background:#b8402f}
+.gravite.g-moyenne{background:#b07a1e}
+.gravite.g-faible{background:#6f7c88}
+.adm-stats select{font:inherit;font-size:15px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -2016,14 +2034,14 @@ function renderAdmin(){
     cle = actif.dataset.chemin ? `[data-chemin="${actif.dataset.chemin}"]` : actif.dataset.adm ? `[data-adm="${actif.dataset.adm}"]` : null;
     try { pos = actif.selectionStart; } catch(e) { pos = null; }
   }
-  const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:admStats, musiques:admMusiques};
+  const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:admStats, musiques:admMusiques, surveillance:admSurveillance};
   app.innerHTML = `
   <header class="entete">
     <h1>Administration</h1>
     <span class="mode">Enregistré automatiquement dans ce navigateur. Les changements s’appliquent à la prochaine partie.${window.claude ? "" : " Pour les partager avec vos joueurs, utilisez Sauvegarde, puis Télécharger config.json."}</span>
     <button type="button" class="btn-discret" data-act="admin-quitter" style="margin-left:auto">Retour au jeu</button>
   </header>
-  <nav class="onglets" role="tablist">${[["cartes","Cartes"],["regles","Règles"],["heros","Héros"],["musiques","Musiques"],["factions","Factions"],["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"], ["stats","Statistiques"]] : [])].map(([k,l]) =>
+  <nav class="onglets" role="tablist">${[["cartes","Cartes"],["regles","Règles"],["heros","Héros"],["musiques","Musiques"],["factions","Factions"],["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"], ["stats","Statistiques"], ["surveillance", "Surveillance" + (PROG.surv && PROG.surv.alertes && PROG.surv.alertes.some(a => !a.traite) ? ` (${PROG.surv.alertes.filter(a => !a.traite).length})` : "")]] : [])].map(([k,l]) =>
     `<button type="button" role="tab" class="onglet" aria-selected="${adm.onglet===k}" data-act="onglet" data-id="${k}">${l}</button>`).join("")}</nav>
   ${pages[adm.onglet]()}`;
   document.getElementById("couche").innerHTML = "";
@@ -2296,6 +2314,12 @@ function actionAdmin(act, id, el){
   if(act.startsWith("mus-")){ actionMusiques(act, id); return; }
   if(act==="son"){ basculerSon(); return renderAdmin(); }
   if(act==="stats-rafraichir"){ chargerAdminStats(); erreur("Actualisation…"); return; }
+  if(act==="surv-rafraichir"){ chargerSurveillance(); erreur("Actualisation…"); return; }
+  if(act==="surv-traiter"){
+    const a = PROG.surv.alertes.find(x => String(x.id)===String(id)); if(!a) return;
+    rpc("admin_traiter_alerte", {p_id:a.id, p_traite:!a.traite}).then(() => { a.traite = !a.traite; renderAdmin(); }, e => erreur(e.message));
+    return;
+  }
   if(act==="stats-res"){
     const j = PROG.adminStats.joueurs.find(x => x.id===id); if(!j) return;
     PROG.adminStats.edition = id; PROG.adminStats.formRes = {or:j.pieces_or || 0, encre:j.encre || 0};
@@ -3410,8 +3434,8 @@ async function rafraichir(){
 async function creerDeckDepart(){
   const ids = [];
   for(const [id, n] of Object.entries(PROG.collection)) for(let i=0; i<Math.min(n, maxCopies(id)); i++) ids.push(id);
-  const { error } = await sbc().from("decks").insert({nom:"Deck de départ", cartes:ids.slice(0, REGLES.tailleDeck)});
-  if(error) throw new Error(error.message);
+  const r = await rpc("sauver_deck", {p_id:null, p_nom:"Deck de départ", p_cartes:ids.slice(0, REGLES.tailleDeck)});
+  if(r && r.erreur) throw new Error(r.erreur);
 }
 async function chargerProgression(){
   if(window.claude || !window.__supa) return;
@@ -3446,7 +3470,7 @@ async function verifierRecompense(){
     // L’invité attend que l’hôte ait enregistré la partie
     let gain = null;
     for(let essai=0; ; essai++){
-      try { gain = await rpc("fin_partie_ticket", {p_ticket:ticket}); break; }
+      try { const r = await rpc("fin_partie_ticket", {p_ticket:ticket}); if(r && r.erreur) throw new Error(r.erreur); gain = r ? r.gain : 0; break; }
       catch(e) { if(/pas encore enregistrée/.test(e.message) && essai<5){ await new Promise(r => setTimeout(r, 1500*(essai+1))); continue; } throw e; }
     }
     PROG.dernierGain = {cle, gain};
@@ -3771,7 +3795,12 @@ function actionProg(act, id){
     case "bienvenue-jouer": PROG.accueilEtape = null; PROG.choixDeck = {mode:"ia"}; break;
     case "bienvenue-tuto": PROG.accueilEtape = null; lancerTuto(); return true;
     case "choix-lancer": lancerAvecDecks(); return true;
-    case "quete-reclamer": action(async () => { const g = await rpc("reclamer_quete"); await chargerQuete(); return g; }, g => `+${g} or : quête du jour réussie !`); return true;
+    case "quete-reclamer": action(async () => {
+      const g = await rpc("reclamer_quete");
+      if(g===-1) throw new Error("La quête du jour n’est pas encore terminée.");
+      if(g===-2) throw new Error("La quête du jour a déjà été récompensée.");
+      await chargerQuete(); return g;
+    }, g => `+${g} or : quête du jour réussie !`); return true;
     case "col-sel": PROG.sel = id; PROG.zoom = true; PROG.zoomAnim = true; break;
     case "zoom-rien": return true;
     case "zoom-fermer": PROG.zoom = false; break;
@@ -3801,8 +3830,8 @@ function actionProg(act, id){
       const e = PROG.deckEdit, nom = (e.nom || "").trim() || "Deck sans nom";
       action(async () => {
         const c = sbc();
-        const r = e.id ? await c.from("decks").update({nom, cartes:e.cartes, maj:new Date().toISOString()}).eq("id", e.id)
-                       : await c.from("decks").insert({nom, cartes:e.cartes});
+        const r0 = await rpc("sauver_deck", {p_id:e.id || null, p_nom:nom, p_cartes:e.cartes});
+        const r = r0 && r0.erreur ? {error:{message:r0.erreur}} : {error:null};
         if(r.error) throw new Error(r.error.message);
         ui.ecran = "decks"; PROG.deckEdit = null;
       }, "Deck enregistré.");
@@ -4127,7 +4156,7 @@ function assurerTicket(){
   S.ticketDemande = true;
   const id = S.idPartie;
   rpc("commencer_partie", S.mode==="enligne" ? {p_mode:"enligne", p_invite:EN.inviteId} : {p_mode:S.mode})
-    .then(t => { if(S && S.idPartie===id){ S.ticket = t; if(enLigne() && EN.role==="hote") publier(); } })
+    .then(t => { if(!(S && S.idPartie===id)) return; if(!t){ S.ticketErreur = "le serveur a refusé d’ouvrir la partie (trop de parties en une heure ?)"; return; } S.ticket = t; if(enLigne() && EN.role==="hote") publier(); })
     .catch(e => { if(S && S.idPartie===id) S.ticketErreur = e.message; });
 }
 const messageServeur = m => /trop courte/i.test(m) ? "partie trop courte (moins de 2 minutes) : elle n’est pas comptée"
@@ -4147,7 +4176,7 @@ async function enregistrerDuel(){
   const nomV = S.vainqueur, v = nomV===S.joueurs[0].nom ? 0 : nomV===S.joueurs[1].nom ? 1 : null;
   const d = {id_partie:S.ticket, mode:S.mode, vainqueur:v, tours:S.tour, cotes:[camp(0), camp(1)]};
   for(let essai=0; ; essai++){
-    try { await rpc("enregistrer_duel", {d}); return; }
+    try { const refus = await rpc("enregistrer_duel", {d}); if(refus) throw new Error(refus); return; }
     catch(e) { if(essai>=2 || /ticket|Ticket|courte|invalides|mode|expiré|Connexion/.test(e.message)) throw e; await new Promise(r => setTimeout(r, 1500*(essai+1))); }
   }
 }
@@ -5411,6 +5440,105 @@ function majCompact(){
 addEventListener("resize", () => { majCompact(); if(S) ajusterEventail(); });
 addEventListener("orientationchange", () => setTimeout(() => { majCompact(); if(S) ajusterEventail(); }, 250));
 if(window.visualViewport) visualViewport.addEventListener("resize", () => { majCompact(); if(S) ajusterEventail(); });
+
+/* ============================================================
+   ADMINISTRATION : onglet « Surveillance »
+   ============================================================ */
+const MOTIFS = {
+  recompense_sans_partie:["Récompense réclamée pour une partie inexistante", "Demande d’or avec un ticket inventé ou appartenant à un autre joueur. Le jeu normal ne fait jamais cela : manipulation probable depuis la console."],
+  partie_sans_ticket:["Partie envoyée sans ticket", "Tentative d’enregistrer une partie que le serveur n’a jamais ouverte."],
+  ticket_invente:["Ticket de partie inventé", "Enregistrement d’une partie avec un ticket inconnu ou celui d’un autre joueur."],
+  mode_falsifie:["Mode de partie falsifié", "Le mode envoyé (contre l’ordinateur, en ligne…) ne correspond pas à celui de la partie ouverte."],
+  statistiques_impossibles:["Statistiques impossibles", "Valeurs hors limites ou cartes inexistantes dans les statistiques envoyées."],
+  partie_trop_courte:["Partie trop courte", "Partie terminée avant la durée minimale. Peut arriver à un joueur qui abandonne vite ; suspect si répété."],
+  quete_non_terminee:["Quête réclamée sans être terminée", "Le jeu n’affiche le bouton qu’une fois la quête finie : appel manuel probable."],
+  quete_deja_recompensee:["Quête réclamée deux fois", "Souvent un double clic ; suspect seulement si répété."],
+  deck_illegal:["Deck illégal", "Deck avec des cartes non possédées, trop d’exemplaires ou des cartes interdites. L’éditeur l’empêche normalement."],
+  deck_illegal_en_ligne:["Deck illégal envoyé en ligne", "Deck refusé par le serveur lors d’une partie en ligne (vérifié à la demande de l’hôte)."],
+  deck_d_un_autre:["Modification du deck d’un autre joueur", "Tentative de modifier un deck qui ne lui appartient pas."],
+  trop_de_parties:["Trop de parties en une heure", "Limite de parties par heure atteinte : programme automatique possible."],
+  adversaire_invente:["Adversaire en ligne inventé", "Partie en ligne ouverte avec un adversaire inexistant ou soi-même."],
+  mode_inconnu:["Mode de partie inconnu", "Appel au serveur avec un mode qui n’existe pas."],
+  ancienne_version:["Ancienne version du jeu", "Page non rechargée depuis la mise à jour de sécurité. Généralement sans gravité."]
+};
+const LIBELLES_DETAILS = {ticket:"Ticket", ticket_d_un_autre_joueur:"Ticket d’un autre joueur", identifiant_envoye:"Identifiant envoyé", mode_du_ticket:"Mode réel",
+  mode_envoye:"Mode envoyé", duree_s:"Durée (s)", minimum_s:"Minimum (s)", tours_declares:"Tours déclarés", tours:"Tours", mode:"Mode", camp_joueur:"Son camp",
+  camp_adverse:"Camp adverse", quete:"Quête", progres:"Progression", objectif:"Objectif", refus:"Refus", nb_cartes:"Cartes", hote:"Hôte", pseudo_hote:"Hôte",
+  deck:"Deck", parties_en_une_heure:"Parties en 1 h", limite:"Limite", invite:"Adversaire", victoire_declaree:"Victoire déclarée", victoires:"Victoires",
+  parties:"Parties", taux:"Taux (%)", parties_24h:"Parties en 24 h", duree_mediane_s:"Durée médiane (s)", degats_moyens:"Dégâts moyens",
+  parties_ensemble:"Parties ensemble", victoires_du_meme_joueur:"Victoires du même joueur", adversaire:"Adversaire"};
+const NOMS_MODES = {ia:"contre l’ordinateur", enligne:"en ligne", duo:"même écran"};
+function htmlDetails(d){
+  return Object.entries(d || {}).filter(([k]) => k!=="hote").map(([k, v]) => {
+    let val = v && typeof v==="object" ? Object.entries(v).filter(([, x]) => x!==0 && x!=="" && !(x && typeof x==="object" && !Object.keys(x).length)).map(([a, b]) => `${a} ${typeof b==="object" ? JSON.stringify(b) : b}`).join(", ") || "rien"
+      : k==="mode" || k.startsWith("mode_") ? (NOMS_MODES[v] || v) : v===true ? "oui" : v===false ? "non" : v;
+    return `<span class="detail-alerte"><b>${esc(LIBELLES_DETAILS[k] || k)}</b> ${esc(String(val ?? "–")).slice(0, 160)}</span>`;
+  }).join("");
+}
+const badgeGravite = g => `<span class="gravite g-${g}">${g==="forte" ? "Forte" : g==="moyenne" ? "Moyenne" : "Faible"}</span>`;
+function ficheJoueur(f){
+  if(!f) return "";
+  return `<span class="aide">${nf(f.parties)} parties, ${nf(f.victoires)} victoires, ${nf(f.pieces_or)} or, ${nf(f.encre)} encre, ${nf(f.nb_alertes)} alerte${f.nb_alertes>1 ? "s" : ""}, inscrit le ${f.cree ? new Date(f.cree).toLocaleDateString("fr-FR") : "–"}</span>`;
+}
+async function chargerSurveillance(){
+  const jours = (PROG.surv && PROG.surv.jours) || 30;
+  try {
+    const r = await rpc("admin_surveillance", {p_jours:jours});
+    PROG.surv = {...(PROG.surv || {}), ...r, jours, quand:Date.now(), erreur:null};
+  } catch(e) { PROG.surv = {...(PROG.surv || {}), jours, erreur:messageScriptManquant(e.message).replace("supabase-stats.sql", "supabase-surveillance.sql")}; }
+  if(ui.ecran==="admin" && adm.onglet==="surveillance") renderAdmin();
+}
+function admSurveillance(){
+  if(!PROG.actif || !PROG.pret) return `<div class="adm-page"><p>La surveillance est disponible sur votre site GitHub.</p></div>`;
+  const V = PROG.surv;
+  if(!V || (!V.alertes && !V.erreur)){ if(!V || !V.chargement){ PROG.surv = {...(V || {}), chargement:true}; chargerSurveillance(); } return `<div class="adm-page"><p class="attente">Chargement…</p></div>`; }
+  if(V.erreur) return `<div class="adm-page"><p style="color:var(--danger)">${esc(V.erreur)}</p><div class="adm-actions"><button type="button" class="btn" data-act="surv-rafraichir">Réessayer</button></div></div>`;
+  const statut = V.statut || "atraiter", grav = V.grav || "toutes";
+  const alertes = V.alertes.filter(a => (statut==="toutes" || !a.traite) && (grav==="toutes" || a.gravite===grav));
+  const aTraiter = V.alertes.filter(a => !a.traite);
+  const joueursConcernes = new Set(aTraiter.map(a => a.joueur)).size;
+  const nomJ = a => esc(a.pseudo || a.email || "Joueur supprimé");
+  return `<div class="adm-page adm-stats">
+    <div class="adm-actions" style="margin-top:0;align-items:center">
+      <select data-surv="jours" aria-label="Période">${[[7,"7 derniers jours"],[30,"30 derniers jours"],[365,"12 derniers mois"]].map(([v,l]) => `<option value="${v}" ${V.jours==v ? "selected" : ""}>${l}</option>`).join("")}</select>
+      <select data-surv="statut" aria-label="Statut"><option value="atraiter" ${statut==="atraiter" ? "selected" : ""}>À traiter</option><option value="toutes" ${statut==="toutes" ? "selected" : ""}>Toutes les alertes</option></select>
+      <select data-surv="grav" aria-label="Gravité">${[["toutes","Toutes gravités"],["forte","Forte"],["moyenne","Moyenne"],["faible","Faible"]].map(([v,l]) => `<option value="${v}" ${grav===v ? "selected" : ""}>${l}</option>`).join("")}</select>
+      <button type="button" class="btn second" data-act="surv-rafraichir">Actualiser</button>
+    </div>
+    <div class="tuiles">
+      <div class="tuile"><b>${nf(aTraiter.length)}</b><span>alertes à traiter</span></div>
+      <div class="tuile"><b>${nf(aTraiter.filter(a => a.gravite==="forte").length)}</b><span>de gravité forte</span></div>
+      <div class="tuile"><b>${nf(joueursConcernes)}</b><span>joueurs concernés</span></div>
+      <div class="tuile"><b>${nf(V.comportements.length)}</b><span>comportements inhabituels</span></div>
+    </div>
+    <h2>Tentatives refusées par le serveur</h2>
+    <p class="aide">Le jeu normal ne provoque jamais ces refus (sauf ceux de gravité faible) : ils signalent très probablement une manipulation depuis la console. Les répétitions d’une même journée sont regroupées.</p>
+    ${alertes.length ? `<div class="liste-alertes">${alertes.map(a => {
+      const m = MOTIFS[a.motif] || [a.motif, ""];
+      return `<article class="alerte ${a.traite ? "traitee" : ""}">
+        <header>${badgeGravite(a.gravite)}<b class="joueur-alerte">${nomJ(a)}</b>${a.email && a.pseudo ? `<span class="aide">${esc(a.email)}</span>` : ""}
+          <span class="quand">${a.compteur>1 ? `${nf(a.compteur)} fois, ` : ""}${new Date(a.derniere).toLocaleString("fr-FR", {dateStyle:"short", timeStyle:"short"})}</span></header>
+        <p class="motif-alerte"><b>${esc(m[0])}</b>${m[1] ? ` : ${esc(m[1])}` : ""}</p>
+        <div class="details-alerte">${htmlDetails(a.details)}</div>
+        <footer>${ficheJoueur(V.joueurs[a.joueur])}
+          <button type="button" class="btn-discret" data-act="surv-traiter" data-id="${a.id}">${a.traite ? "Rouvrir" : "Marquer comme traitée"}</button></footer>
+      </article>`; }).join("")}</div>` : `<p class="aide">Aucune alerte${statut==="atraiter" ? " à traiter" : ""} sur cette période.</p>`}
+    <h2>Comportements inhabituels</h2>
+    <p class="aide">Calculés à partir des parties enregistrées. Ils ne prouvent rien à eux seuls : un très bon joueur peut gagner souvent. À croiser avec les alertes ci-dessus.</p>
+    ${V.comportements.length ? `<div class="liste-alertes">${V.comportements.map(c => `<article class="alerte">
+        <header>${badgeGravite(c.gravite)}<b class="joueur-alerte">${nomJ(c)}</b>${c.email && c.pseudo ? `<span class="aide">${esc(c.email)}</span>` : ""}</header>
+        <p class="motif-alerte"><b>${esc(c.motif)}</b></p>
+        <div class="details-alerte">${htmlDetails(c.details)}</div>
+        <footer>${ficheJoueur(V.joueurs[c.joueur])}</footer></article>`).join("")}</div>` : `<p class="aide">Rien d’inhabituel sur cette période.</p>`}
+    <p class="aide">Pour corriger l’or ou l’encre d’un joueur, utilisez le bouton « Modifier » de l’onglet Statistiques.</p>
+  </div>`;
+}
+document.addEventListener("change", e => {
+  const k = e.target.dataset && e.target.dataset.surv;
+  if(!k || !PROG.surv) return;
+  if(k==="jours"){ PROG.surv.jours = Number(e.target.value); chargerSurveillance(); }
+  else { PROG.surv[k] = e.target.value; renderAdmin(); }
+});
 
 chargerConfig();
 appliquerReglageAnimations();

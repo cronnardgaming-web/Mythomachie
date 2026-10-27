@@ -84,6 +84,13 @@ ou changé leur faction, renvoyez le catalogue depuis l’administration (onglet
 `supabase-admin-joueurs.sql` permet à l’administrateur de corriger l’or et l’encre d’un joueur depuis l’onglet
 « Statistiques » de l’administration (bouton « Modifier » dans la liste des joueurs).
 
+## Surveillance des comportements suspects
+
+`supabase-surveillance.sql` (à exécuter après `supabase-securite.sql`) enregistre chaque tentative refusée par le
+serveur (récompense sans partie, statistiques impossibles, quête non terminée, deck illégal…) et calcule les
+comportements inhabituels (taux de victoire anormal, parties très nombreuses ou très courtes, arrangements possibles
+entre deux joueurs). Tout est consultable dans l’onglet « Surveillance » de l’administration.
+
 ## Sécurité, niveau 1 (anti-triche)
 
 `supabase-securite.sql` (à exécuter en dernier) fait du serveur le seul juge de l’économie :
