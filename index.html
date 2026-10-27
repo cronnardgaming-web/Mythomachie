@@ -541,6 +541,39 @@ body.compact .adm-statut{display:none}
 .offre-speciale{border-left-width:5px}
 @media (prefers-reduced-motion: reduce){.carte.variante.cadre-holo .art::after,.crea.variante.cadre-holo .art::after{animation:none}}
 
+/* Tour de jeu bien visible */
+#banniere{top:34%}
+#banniere .banniere-bande{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;padding:16px 20px;text-align:center;
+  background:linear-gradient(90deg,transparent,color-mix(in srgb, var(--table) 92%, transparent) 18%,color-mix(in srgb, var(--table) 92%, transparent) 82%,transparent);
+  border-top:2px solid color-mix(in srgb, var(--or) 70%, transparent);border-bottom:2px solid color-mix(in srgb, var(--or) 70%, transparent);
+  box-shadow:0 0 40px color-mix(in srgb, var(--or) 25%, transparent)}
+#banniere .banniere-bande b{font-family:"Cinzel Decorative",Cinzel,serif;font-weight:700;font-size:clamp(34px,6vw,62px);color:var(--or);text-shadow:0 3px 0 var(--ombre),0 0 30px color-mix(in srgb, var(--or) 45%, transparent);letter-spacing:.04em}
+#banniere .banniere-bande small{font-family:Cinzel,serif;font-size:clamp(14px,1.8vw,18px);color:var(--ink);letter-spacing:.2em;text-transform:uppercase}
+#banniere.adverse .banniere-bande{border-color:color-mix(in srgb, var(--ink-2) 50%, transparent);box-shadow:none}
+#banniere.adverse .banniere-bande b{color:var(--ink);font-size:clamp(26px,4.5vw,44px);text-shadow:0 2px 0 var(--ombre)}
+.pastille-tour{font-size:14px;font-weight:700;border-radius:99px;padding:4px 14px;white-space:nowrap}
+.pastille-tour.a-moi{color:var(--btn-texte);background:linear-gradient(180deg,var(--btn-haut),var(--btn-bas));box-shadow:0 0 12px color-mix(in srgb, var(--or) 45%, transparent)}
+.pastille-tour.adverse{color:var(--ink-2);background:var(--zone);border:1px solid var(--line)}
+.plateau.tour-moi .camp-moi{box-shadow:inset 0 0 0 2px color-mix(in srgb, var(--or) 55%, transparent);animation:liseré-tour 2.4s ease-in-out infinite}
+@keyframes liseré-tour{50%{box-shadow:inset 0 0 0 2px color-mix(in srgb, var(--or) 25%, transparent),inset 0 0 30px color-mix(in srgb, var(--or) 10%, transparent)}}
+.plateau.tour-moi .medaillon-bloc.moi .medaillon .anneau{filter:drop-shadow(0 0 8px var(--or))}
+.plateau.tour-adverse .medaillon-bloc.adv .medaillon .anneau{filter:drop-shadow(0 0 8px color-mix(in srgb, var(--ink) 60%, transparent))}
+.plateau.tour-adverse .zone-main .main{filter:saturate(.55) brightness(.75);transition:filter .4s}
+.fin.attend{animation:fin-respire 2.2s ease-in-out infinite}
+@keyframes fin-respire{50%{box-shadow:inset 0 2px 0 rgba(255,255,255,.3),0 0 0 6px color-mix(in srgb, var(--or) 22%, transparent),0 6px 16px var(--ombre)}}
+.fin:disabled{font-size:13px}
+.adversaire-joue{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;font-family:Cinzel,serif;font-weight:700;font-size:15px;color:var(--ink);
+  background:var(--zone);border:1px solid var(--line);border-radius:99px;padding:5px 16px;box-shadow:0 4px 14px var(--ombre);white-space:nowrap}
+.adversaire-joue .points i{font-style:normal;animation:point-attente 1.2s infinite}
+.adversaire-joue .points i:nth-child(2){animation-delay:.2s}
+.adversaire-joue .points i:nth-child(3){animation-delay:.4s}
+@keyframes point-attente{0%,60%,100%{opacity:.2}30%{opacity:1}}
+body.compact .adversaire-joue{position:static;transform:none;grid-area:axe;justify-self:center;align-self:center;font-size:12px;padding:2px 10px}
+body.compact .pastille-tour{font-size:12px;padding:2px 10px}
+body.compact #banniere .banniere-bande{padding:8px 12px}
+body.compact #banniere .banniere-bande b{font-size:30px}
+@media (prefers-reduced-motion: reduce){.plateau.tour-moi .camp-moi,.fin.attend,.adversaire-joue .points i{animation:none}}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -972,7 +1005,7 @@ body.compact .zoom{align-items:center}
 <div id="couche"></div>
 <div id="toast" role="status"></div>
 <div id="bulle" role="tooltip"></div>
-<div id="banniere" aria-live="polite"><span></span></div>
+<div id="banniere" aria-live="polite"></div>
 <div id="pivoter" role="dialog" aria-label="Tournez votre téléphone"><span class="icone-pivot" aria-hidden="true">📱</span><p>Pour jouer confortablement, tournez votre téléphone en mode paysage.</p><button type="button" class="btn second" data-act="portrait-ok">Continuer en portrait</button></div>
 
 <script>
@@ -1938,12 +1971,12 @@ function render(){
   <header class="barre-jeu">
     <span class="logo-mini">${NOM_JEU}</span>
     <span class="mode">${S.mode==="ia" ? "Contre l’ordinateur" : enLigne() ? `En ligne, partie ${EN.code}` : "Deux joueurs sur cet écran"}</span>
-    <span class="tour-info">Tour ${S.tour}, ${enLigne() || S.mode==="ia" ? (S.courant===me ? "à vous de jouer" : S.mode==="ia" ? "l’ordinateur joue" : "tour de l’adversaire") : S.joueurs[S.courant].nom + " joue"}</span>
+    <span class="tour-info">Tour ${S.tour}</span><span class="pastille-tour ${S.vainqueur!==null ? "" : S.courant===me || S.mode==="duo" ? "a-moi" : "adverse"}">${S.vainqueur!==null ? "Partie terminée" : S.mode==="duo" ? `Au tour de ${esc(S.joueurs[S.courant].nom)}` : S.courant===me ? "À vous de jouer" : S.mode==="ia" ? "Tour de l’ordinateur" : "Tour de l’adversaire"}</span>
     ${htmlSon(false)}
     <button type="button" class="btn-discret" data-act="nouvelle">${enLigne() ? "Quitter la partie" : "Nouvelle partie"}</button>
   </header>
   <div class="table-jeu">
-    <div class="plateau" style="--fa:${FACTIONS[lui.heros] ? FACTIONS[lui.heros].couleur : "#9a8b6c"};--fm:${FACTIONS[moi.heros] ? FACTIONS[moi.heros].couleur : "#9a8b6c"}">
+    <div class="plateau ${S.vainqueur!==null ? "" : S.courant===me || S.mode==="duo" ? "tour-moi" : "tour-adverse"}" style="--fa:${FACTIONS[lui.heros] ? FACTIONS[lui.heros].couleur : "#9a8b6c"};--fm:${FACTIONS[moi.heros] ? FACTIONS[moi.heros].couleur : "#9a8b6c"}">
       <section class="camp-adv f-${lui.heros || "neutre"}" aria-label="Camp adverse">
         <div class="ligne-heros">
           ${htmlMedaillon(lui, false, inter, visee && t.face)}
@@ -1953,7 +1986,8 @@ function render(){
         <div class="rangee">${lui.plateau.map(c => htmlCrea(c, "enemy", visee && t.creatures.has(c.uid) ? "cible" : "")).join("") || vide("Aucune créature adverse")}</div>
       </section>
       <div class="axe"><span class="axe-ligne"></span>
-        <button type="button" class="fin" data-act="fin" ${inter ? "" : "disabled"}>Fin du tour</button>
+        <button type="button" class="fin ${inter ? "attend" : ""}" data-act="fin" ${inter ? "" : "disabled"}>${inter || S.vainqueur!==null || S.mode==="duo" ? "Fin du tour" : "Tour adverse"}</button>
+        ${S.vainqueur===null && S.courant!==me && S.mode!=="duo" ? `<span class="adversaire-joue" role="status">${S.mode==="ia" ? "L’ordinateur joue" : "L’adversaire joue"}<span class="points" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></span>` : ""}
       </div>
       <section class="camp-moi f-${moi.heros || "neutre"}" aria-label="Votre camp">
         <div class="rangee">${moi.plateau.map(c => htmlCrea(c, "own", classesOwn(c))).join("") || vide("Vos créatures apparaîtront ici")}</div>
@@ -2008,10 +2042,11 @@ function flottantImmediat(el, d){
   el.appendChild(s);
   setTimeout(() => s.remove(), 1200*FX_LENT);
 }
-function banniereTour(texte){
+function banniereTour(texte, sousTexte, adverse){
   const b = document.getElementById("banniere");
   if(!b) return;
-  b.firstElementChild.textContent = texte;
+  b.innerHTML = `<span class="banniere-bande"><b>${esc(texte)}</b>${sousTexte ? `<small>${esc(sousTexte)}</small>` : ""}</span>`;
+  b.classList.toggle("adverse", !!adverse);
   b.classList.remove("montre"); void b.offsetWidth; b.classList.add("montre");
   clearTimeout(banniereTour.t); banniereTour.t = setTimeout(() => b.classList.remove("montre"), 1600*FX_LENT);
 }
@@ -2020,7 +2055,10 @@ function animerChangements(){
   INSTANT = apres;
   const monTour = apres.courant===vue() && S.vainqueur===null && !ui.couvert;
   const texteTour = S.mode==="duo" ? `Au tour de ${S.joueurs[S.courant].nom}` : "À vous de jouer";
-  if(!avant || avant.id!==apres.id){ if(monTour) banniereTour(texteTour); return; }
+  const sousTexte = `Tour ${S.tour}`;
+  const tourAdverse = S.vainqueur===null && apres.courant!==vue() && S.mode!=="duo";
+  const qui = S.mode==="ia" ? "Tour de l’ordinateur" : "Tour de l’adversaire";
+  if(!avant || avant.id!==apres.id){ if(monTour) banniereTour(texteTour, sousTexte); else if(tourAdverse) banniereTour(qui, sousTexte, true); return; }
   for(const [uid, v] of Object.entries(apres.crea)){
     const el = document.querySelector(`.crea[data-id="${uid}"]`);
     if(!el) continue;
@@ -2035,7 +2073,8 @@ function animerChangements(){
     flottant(el, d);
     if(d<0){ el.classList.remove("touche"); void el.offsetWidth; el.classList.add("touche"); }
   });
-  if(monTour && (apres.courant!==avant.courant || (avant.couvert && !apres.couvert))) banniereTour(texteTour);
+  if(monTour && (apres.courant!==avant.courant || (avant.couvert && !apres.couvert))) banniereTour(texteTour, sousTexte);
+  else if(tourAdverse && apres.courant!==avant.courant) banniereTour(qui, sousTexte, true);
 }
 
 function renderCouche(){
@@ -4905,7 +4944,7 @@ function construireEtapes(){
     cible:() => I.ors.filter(enMain).map(u => `.main .carte[data-id="${u}"]`),
     autorise:(act, id) => act==="main" && I.ors.includes(id),
     fini:() => !I.ors.some(enMain)},
-  {titre:"Achetez au marché", texte:`Le <b>marché</b> est à droite. Avec votre or, achetez ${laCarte(c.achat)} (${prixAchat} ${icone("or")}). Une carte achetée va dans votre <b>défausse</b> : vous la piocherez lors d’un prochain tour.`,
+  {titre:"Achetez au marché", texte:`Le <b>marché</b> est à droite. Il est formé des <b>decks construits des deux joueurs</b>, mélangés : vous pouvez acheter les cartes de votre adversaire, et lui les vôtres.<br><br>Avec votre or, achetez ${laCarte(c.achat)} (${prixAchat} ${icone("or")}). Une carte achetée va dans votre <b>défausse</b> : vous la piocherez lors d’un prochain tour.`,
     cible:() => [`.marche-cartes .carte[data-act="marche"][data-id="${indexMarche(I.achat)}"]`],
     autorise:(act, id) => act==="marche" && Number(id)===indexMarche(I.achat),
     fini:() => moiT().defausse.some(x => x.uid===I.achat)},
@@ -4925,7 +4964,7 @@ function construireEtapes(){
     cible:() => [".medaillon-bloc.adv .medaillon"],
     autorise:(act) => act==="face",
     fini:() => luiT().pv < TUTO.pvAdverse},
-  {titre:"Finissez votre tour", texte:`Cliquez sur <b>Fin du tour</b>. Vos cartes jouées et celles restées en main partent à la défausse, l’or et la puissance restants sont perdus, et vous piochez ${REGLES.piocheParTour} nouvelles cartes.`,
+  {titre:"Finissez votre tour", texte:`Cliquez sur <b>Fin du tour</b>.<br><br>Attention : à la fin du tour, <b>tout ce qui n’a pas été utilisé est défaussé</b>. Les cartes jouées et celles restées en main partent dans votre défausse, et l’or ${icone("or")} et la puissance ${icone("puissance")} non dépensés sont perdus. Vous piochez ensuite ${REGLES.piocheParTour} nouvelles cartes pour votre prochain tour.`,
     cible:() => [".fin"],
     autorise:(act) => act==="fin",
     fini:() => S.courant===1 || S.tour>=3},
