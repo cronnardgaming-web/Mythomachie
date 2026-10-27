@@ -404,6 +404,109 @@ body.sans-animations *,body.sans-animations *::before,body.sans-animations *::af
 .gravite.g-faible{background:#6f7c88}
 .adm-stats select{font:inherit;font-size:15px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
 
+/* Accueil : écran plein */
+#couche.couche-hall{place-items:start center;overflow-y:auto;padding:18px calc(18px + env(safe-area-inset-right, 0px)) 18px calc(18px + env(safe-area-inset-left, 0px))}
+.hall{width:min(1100px,100%);display:flex;flex-direction:column;gap:16px;margin:auto 0}
+.hall-tete{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.hall-logo .logo{font-size:clamp(30px,4.5vw,46px)}
+.hall-logo .sous-logo{margin:4px 0 0}
+.hall-droite{display:flex;align-items:center;gap:10px;margin-left:auto;flex-wrap:wrap}
+.hall-profil{display:flex;align-items:center;gap:8px;background:var(--zone);border:1px solid var(--line);border-radius:99px;padding:4px 14px 4px 4px;color:var(--ink);font:inherit;cursor:pointer}
+.hall-profil:hover{border-color:var(--bronze)}
+.avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-family:Cinzel,serif;font-weight:700;color:var(--btn-texte);background:linear-gradient(135deg,var(--btn-haut),var(--btn-bas))}
+.nom-profil{font-weight:700;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hall-icone{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--zone);color:var(--ink-2);display:grid;place-items:center;cursor:pointer}
+.hall-icone:hover{color:var(--ink);border-color:var(--bronze)}
+.ico{width:20px;height:20px;flex:none}
+.hall-icone .ico{width:22px;height:22px}
+.hall-grille{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);grid-template-areas:"jouer quete" "tuiles tuiles" "apprendre apprendre";gap:16px}
+.hall-jouer{grid-area:jouer;background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb, var(--bronze) 22%, var(--zone)),var(--zone) 60%);border:1px solid color-mix(in srgb, var(--bronze) 45%, var(--line));border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.hall-jouer h2,.hall-quete .quete b{font-family:Cinzel,serif}
+.hall-jouer h2{font-size:20px;margin:0}
+.btn-geant{display:flex;align-items:center;gap:16px;text-align:left;width:100%;padding:16px 20px;border-radius:10px;cursor:pointer;color:var(--btn-texte);
+  background:linear-gradient(180deg,var(--btn-haut),var(--btn-bas));border:1px solid var(--btn-bord);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 4px 14px var(--ombre);transition:filter .12s, transform .08s}
+.btn-geant:hover{filter:brightness(1.08)}
+.btn-geant:active{transform:translateY(1px)}
+.btn-geant b{display:block;font-family:Cinzel,serif;font-size:clamp(19px,2.3vw,24px)}
+.btn-geant small{display:block;font-size:14px;opacity:.85;margin-top:2px}
+.ico-geant{width:44px;height:44px;flex:none}
+.hall-modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hall-modes .btn{display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:11px 12px}
+.hall-quete{grid-area:quete;display:flex}
+.hall-quete .quete{flex:1;margin:0;display:flex;flex-direction:column;justify-content:center;gap:10px;border-radius:12px;padding:18px}
+.hall-tuiles{grid-area:tuiles;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.tuile-hall{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;padding:16px;border-radius:12px;background:var(--zone);border:1px solid var(--line);color:var(--ink);font:inherit;cursor:pointer;transition:border-color .15s, transform .15s}
+.tuile-hall:hover,.tuile-hall:focus-visible{border-color:var(--bronze);transform:translateY(-2px)}
+.ico-tuile{width:34px;height:34px;color:var(--or)}
+.tuile-titre{font-family:Cinzel,serif;font-weight:700;font-size:18px}
+.tuile-info{font-size:13px;color:var(--ink-2)}
+.hall-apprendre{grid-area:apprendre;display:flex;gap:6px 22px;flex-wrap:wrap;justify-content:center}
+.lien-hall{display:inline-flex;align-items:center;gap:8px;background:none;border:none;color:var(--ink-2);font:inherit;font-size:15px;cursor:pointer;padding:6px 4px}
+.lien-hall:hover{color:var(--ink);text-decoration:underline}
+.pastille-nouveau{font-size:11px;font-weight:700;color:#fff;background:#3f9d6b;border-radius:99px;padding:1px 8px}
+.hall > .compte{margin:0}
+.boite-reglages{max-width:480px}
+.boite-reglages section{border-top:1px solid var(--line);padding-top:10px;margin-top:12px}
+.boite-reglages h2 + section{border-top:none;margin-top:4px;padding-top:0}
+.boite-reglages h3{margin:0 0 8px}
+@media (max-width:760px){
+  .hall-grille{grid-template-columns:1fr;grid-template-areas:"jouer" "quete" "tuiles" "apprendre"}
+  .hall-tuiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hall-modes{grid-template-columns:1fr}
+}
+body.compact .hall{gap:8px}
+body.compact .hall-logo .logo{font-size:24px}
+body.compact .hall-logo .sous-logo{display:none}
+body.compact .hall-grille{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);grid-template-areas:"jouer quete" "tuiles tuiles" "apprendre apprendre";gap:8px}
+body.compact .hall-jouer{padding:10px 12px;gap:8px}
+body.compact .hall-jouer h2{display:none}
+body.compact .btn-geant{padding:10px 14px}
+body.compact .btn-geant small{display:none}
+body.compact .ico-geant{width:32px;height:32px}
+body.compact .hall-modes .btn{padding:7px 8px;font-size:13px}
+body.compact .hall-quete .quete{padding:10px 12px;gap:6px}
+body.compact .hall-tuiles{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+body.compact .tuile-hall{padding:8px 10px;gap:2px;flex-direction:row;align-items:center;flex-wrap:wrap}
+body.compact .ico-tuile{width:22px;height:22px}
+body.compact .tuile-titre{font-size:15px}
+body.compact .tuile-info{width:100%;font-size:11px}
+body.compact .hall-icone{width:34px;height:34px}
+body.compact .nom-profil{max-width:100px}
+body.compact .lien-hall{padding:2px 4px;font-size:13px}
+
+/* Administration : barre fixe et menu par thèmes */
+.adm-coque{max-width:1440px;margin:0 auto}
+.adm-barre{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;padding:12px 0;margin-bottom:12px;
+  background:color-mix(in srgb, var(--table) 92%, transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.adm-barre h1{margin:0;font-size:22px}
+.adm-statut{font-size:13px;color:var(--ink-2)}
+.adm-barre-actions{display:flex;gap:10px;margin-left:auto;align-items:center}
+.adm-barre-actions .btn{margin:0}
+.adm-corps{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px;align-items:start}
+.adm-menu{position:sticky;top:76px;display:flex;flex-direction:column;gap:14px;background:var(--zone);border:1px solid var(--line);border-radius:10px;padding:12px}
+.adm-menu-groupe{display:flex;flex-direction:column;gap:2px}
+.adm-menu-groupe h2{font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);margin:0 0 4px 10px}
+.adm-lien{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left;padding:8px 10px;border-radius:6px;border:none;background:none;color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+.adm-lien:hover{background:color-mix(in srgb, var(--bronze) 12%, transparent)}
+.adm-lien[aria-current="page"]{background:color-mix(in srgb, var(--bronze) 24%, transparent);box-shadow:inset 3px 0 0 var(--bronze);font-weight:700}
+.badge-menu{background:#b8402f;color:#fff;border-radius:99px;font-size:12px;font-weight:700;padding:0 7px;line-height:20px}
+.adm-contenu{min-width:0}
+.adm-contenu > .adm-page:first-child,.adm-contenu > .adm-cartes:first-child{margin-top:0}
+details.effet .champs{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+.adm-contenu .champ input,.adm-contenu .champ select{min-width:0;width:100%;box-sizing:border-box}
+@media (max-width:900px){
+  .adm-corps{grid-template-columns:1fr}
+  .adm-menu{position:static;flex-direction:row;overflow-x:auto;gap:4px;padding:6px}
+  .adm-menu-groupe{flex-direction:row;gap:4px}
+  .adm-menu-groupe h2{display:none}
+  .adm-menu-groupe + .adm-menu-groupe{border-left:1px solid var(--line);padding-left:4px}
+  .adm-lien{white-space:nowrap;padding:6px 10px}
+  .adm-statut{display:none}
+}
+body.compact .adm-barre{padding:6px 0;margin-bottom:6px}
+body.compact .adm-barre h1{font-size:17px}
+body.compact .adm-statut{display:none}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -1912,7 +2015,7 @@ function renderCouche(){
         <button type="button" class="btn second" data-act="en-ligne">Jouer en ligne</button>
         <button type="button" class="btn second" data-act="admin">Administration</button>
       </div><div class="reglages-joueur">${htmlReglageAnimations()}</div>${regles}</div>`;
-    if(PROG.actif) h = PROG.porte ? htmlPorte() : PROG.accueilEtape && PROG.pret ? htmlBienvenue() : PROG.compteVue && PROG.pret ? htmlFormCompte() : PROG.choixDeck ? htmlChoixDeck() : htmlAccueilProg(regles);
+    if(PROG.actif) h = PROG.porte ? htmlPorte() : PROG.accueilEtape && PROG.pret ? htmlBienvenue() : PROG.reglagesOuverts && PROG.pret ? htmlReglages() : PROG.compteVue && PROG.pret ? htmlFormCompte() : PROG.choixDeck ? htmlChoixDeck() : htmlAccueilProg(regles);
     if(EN.ecran) h = htmlEnLigne();
   } else if(S.vainqueur!==null && niveauAnim()>0 && ui.finVue!==S.idPartie){
     // Laisse le temps de voir le médaillon du vaincu voler en éclats
@@ -1955,6 +2058,7 @@ function renderCouche(){
   }
   couche.innerHTML = h;
   couche.classList.toggle("accueil", !S && ui.ecran==="jeu");
+  couche.classList.toggle("couche-hall", !!couche.querySelector(".hall"));
 }
 
 function apresAction(){
@@ -2035,15 +2139,29 @@ function renderAdmin(){
     try { pos = actif.selectionStart; } catch(e) { pos = null; }
   }
   const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:admStats, musiques:admMusiques, surveillance:admSurveillance};
-  app.innerHTML = `
-  <header class="entete">
+  const nbAlertes = PROG.surv && PROG.surv.alertes ? PROG.surv.alertes.filter(a => !a.traite).length : 0;
+  const groupes = [
+    ["Contenu du jeu", [["cartes","Cartes"],["heros","Héros"],["factions","Factions"],["regles","Règles"],["musiques","Musiques"]]],
+    ["Publication", [["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"]] : [])]],
+    ...(PROG.actif ? [["Joueurs", [["stats","Statistiques"],["surveillance","Surveillance", nbAlertes]]]] : [])
+  ];
+  const titres = Object.fromEntries(groupes.flatMap(([, l]) => l.map(([k, t]) => [k, t])));
+  app.innerHTML = `<div class="adm-coque">
+  <header class="adm-barre">
     <h1>Administration</h1>
-    <span class="mode">Enregistré automatiquement dans ce navigateur. Les changements s’appliquent à la prochaine partie.${window.claude ? "" : " Pour les partager avec vos joueurs, utilisez Sauvegarde, puis Télécharger config.json."}</span>
-    <button type="button" class="btn-discret" data-act="admin-quitter" style="margin-left:auto">Retour au jeu</button>
+    <span class="adm-statut">${window.claude ? "Prototype : les changements restent dans ce navigateur." : "Enregistré dans ce navigateur. Exportez config.json pour publier vos changements."}</span>
+    <div class="adm-barre-actions">
+      ${window.claude ? "" : `<button type="button" class="btn" data-act="config-telecharger">Exporter config.json</button>`}
+      <button type="button" class="btn-discret" data-act="admin-quitter">Retour au jeu</button>
+    </div>
   </header>
-  <nav class="onglets" role="tablist">${[["cartes","Cartes"],["regles","Règles"],["heros","Héros"],["musiques","Musiques"],["factions","Factions"],["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"], ["stats","Statistiques"], ["surveillance", "Surveillance" + (PROG.surv && PROG.surv.alertes && PROG.surv.alertes.some(a => !a.traite) ? ` (${PROG.surv.alertes.filter(a => !a.traite).length})` : "")]] : [])].map(([k,l]) =>
-    `<button type="button" role="tab" class="onglet" aria-selected="${adm.onglet===k}" data-act="onglet" data-id="${k}">${l}</button>`).join("")}</nav>
-  ${pages[adm.onglet]()}`;
+  <div class="adm-corps">
+    <nav class="adm-menu" aria-label="Sections de l’administration">
+      ${groupes.map(([g, liens]) => `<div class="adm-menu-groupe"><h2>${g}</h2>${liens.map(([k, l, n]) =>
+        `<button type="button" class="adm-lien" data-act="onglet" data-id="${k}" ${adm.onglet===k ? 'aria-current="page"' : ""}>${l}${n ? `<span class="badge-menu" aria-label="${n} alertes à traiter">${n}</span>` : ""}</button>`).join("")}</div>`).join("")}
+    </nav>
+    <section class="adm-contenu" aria-label="${esc(titres[adm.onglet] || "")}">${pages[adm.onglet]()}</section>
+  </div></div>`;
   document.getElementById("couche").innerHTML = "";
   if(cle){
     const el = app.querySelector(cle);
@@ -3009,6 +3127,7 @@ document.addEventListener("click", e => {
   if(act==="nouvelle"){ if(enLigne() || EN.role) quitterEnLigne(); S = null; ui.couvert = false; ui.aiEnCours = false; return render(); }
   if(act.startsWith("en-")) return actionEnLigne(act, id);
   if(act==="son"){ basculerSon(); return render(); }
+  if(act==="reglages-ouvrir" || act==="reglages-fermer"){ PROG.reglagesOuverts = act==="reglages-ouvrir"; return render(); }
   if(act==="tuto") return lancerTuto();
   if(act==="regles"){ if(tutoActif()) S = null; ui.ecran = "regles"; window.scrollTo(0, 0); return render(); }
   if(act==="regles-retour"){ ui.ecran = "jeu"; return render(); }
@@ -3507,33 +3626,7 @@ function htmlAccueilProg(regles){
       <h3>Jouer sans collection</h3><p class="aide">Les decks sont tirés au hasard et les parties ne rapportent pas d’or.</p>
       <div class="actions"><button type="button" class="btn second" data-act="mode-ia">Contre l’ordinateur</button><button type="button" class="btn second" data-act="mode-duo">Deux joueurs sur cet écran</button><button type="button" class="btn second" data-act="en-ligne">En ligne</button></div>
       <h3>Apprendre</h3><div class="actions"><button type="button" class="btn second" data-act="tuto">Tutoriel</button><button type="button" class="btn second" data-act="regles">Règles du jeu</button><button type="button" class="btn second" data-act="credits">Crédits</button></div>` : `<p class="attente">Chargement de votre collection…</p>`}</div>`;
-  const bienvenue = "";
-  return `<div class="boite boite-large" role="dialog" aria-label="${NOM_JEU}">
-    <div class="tete-accueil"><div><h2 class="logo">${NOM_JEU}</h2><span class="sous-logo">Le choc des panthéons</span></div>${bourse()}</div>
-    ${bienvenue}${htmlQuete()}
-    <h3>Jouer</h3>
-    <div class="actions">
-      <button type="button" class="btn" data-act="jouer-ia">Contre l’ordinateur</button>
-      <button type="button" class="btn" data-act="en-ligne">En ligne</button>
-      <button type="button" class="btn second" data-act="jouer-duo">Deux joueurs sur cet écran</button>
-    </div>
-    <h3>Apprendre</h3>
-    <div class="actions">
-      <button type="button" class="btn ${(() => { try { return localStorage.getItem("tuto-fini") ? "second" : ""; } catch(e) { return ""; } })()}" data-act="tuto">Tutoriel</button>
-      <button type="button" class="btn second" data-act="regles">Règles du jeu</button>
-      <button type="button" class="btn second" data-act="credits">Crédits</button>
-    </div>
-    <h3>Ma collection</h3>
-    <div class="actions">
-      <button type="button" class="btn second" data-act="prog-collection">Collection</button>
-      <button type="button" class="btn second" data-act="prog-decks">Decks (${PROG.decks.length}/9)</button>
-      <button type="button" class="btn second" data-act="prog-boutique">Boutique</button>
-      <button type="button" class="btn second" data-act="prog-profil">${PROG.profil && PROG.profil.pseudo ? "Mon profil" : "Mon profil (choisir un pseudo)"}</button>
-      ${accesAdmin() ? `<button type="button" class="btn second" data-act="admin">Administration</button>` : ""}
-    </div>
-    ${htmlCompte()}
-    <div class="reglages-joueur">${aDesMusiques() ? `<span class="reglage-son">Musique ${htmlSon(true)}</span>` : ""}${htmlReglageAnimations()}</div>
-    ${regles}</div>`;
+  return htmlHall();
 }
 function htmlBienvenue(){
   const e = PROG.accueilEtape, n = (PROG.cartesOffertes || []).length;
@@ -3781,6 +3874,8 @@ function actionProg(act, id){
     case "prog-collection": ui.ecran = "collection"; PROG.sel = null; PROG.zoom = false; PROG.choixDeck = null; break;
     case "prog-decks": ui.ecran = "decks"; PROG.deckEdit = null; PROG.supprDeck = null; PROG.choixDeck = null; break;
     case "prog-boutique": ui.ecran = "boutique"; PROG.paquet = null; break;
+    case "reglages-ouvrir": PROG.reglagesOuverts = true; break;
+    case "reglages-fermer": PROG.reglagesOuverts = false; break;
     case "prog-profil": ui.ecran = "profil"; PROG.formPseudo = null; chargerMesStats(false).then(() => { if(ui.ecran==="profil") renderProg(); }); break;
     case "pseudo-sauver": {
       const v = (PROG.formPseudo ?? (PROG.profil && PROG.profil.pseudo) ?? "").trim();
@@ -5177,9 +5272,9 @@ function niveauAnim(){
   return NIVEAUX_ANIM[reglageAnimations()];
 }
 function appliquerReglageAnimations(){ document.body.classList.toggle("sans-animations", niveauAnim()===0); }
-function htmlReglageAnimations(){
+function htmlReglageAnimations(libelle = true){
   const v = reglageAnimations();
-  return `<label class="reglage-anim">Animations <select data-reglage="animations" aria-label="Niveau des animations">
+  return `<label class="reglage-anim">${libelle ? "Animations " : ""}<select data-reglage="animations" aria-label="Niveau des animations">
     ${[["completes","Complètes"],["reduites","Réduites"],["aucune","Aucune"]].map(([k,l]) => `<option value="${k}" ${v===k ? "selected" : ""}>${l}</option>`).join("")}</select></label>`;
 }
 document.addEventListener("change", e => {
@@ -5539,6 +5634,78 @@ document.addEventListener("change", e => {
   if(k==="jours"){ PROG.surv.jours = Number(e.target.value); chargerSurveillance(); }
   else { PROG.surv[k] = e.target.value; renderAdmin(); }
 });
+
+/* ============================================================
+   ACCUEIL (site) : écran plein, hiérarchie claire
+   ============================================================ */
+const ICO = {
+  jouer:'<path d="M5 3l4 4-2 2-4-4V3zm14 0v2l-9.5 9.5-2-2L17 3h2zM8 14l2 2-3 3 1 1-1.5 1.5L4 19 2.5 20.5 1 19l1.5-1.5L1 16l1.5-1.5 1 1 3-3zm8 0l1.5 1.5-1 1 3 3 1-1L22 20l-1.5 1.5L19 20l-1.5 1.5L16 20l1-1-3-3 2-2z" fill="currentColor"/>',
+  enligne:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18" fill="none" stroke="currentColor" stroke-width="1.6"/>',
+  duo:'<circle cx="8" cy="8" r="3.2" fill="currentColor"/><circle cx="16.5" cy="8.5" r="2.8" fill="currentColor" opacity=".75"/><path d="M2 20c0-3.6 2.7-6 6-6s6 2.4 6 6zM13 20c.2-2.4-.6-4.3-1.8-5.4 1.3-.7 2.6-.8 3.8-.8 3 0 5 2.2 5 6.2z" fill="currentColor"/>',
+  collection:'<rect x="3" y="5" width="11" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.8" transform="rotate(-8 8.5 12.5)"/><rect x="10" y="4" width="11" height="15" rx="2" fill="currentColor" opacity=".85" transform="rotate(8 15.5 11.5)"/>',
+  decks:'<rect x="6" y="2.5" width="12" height="15" rx="2" fill="currentColor" opacity=".45"/><rect x="4.5" y="4.5" width="12" height="15" rx="2" fill="currentColor" opacity=".7"/><rect x="3" y="6.5" width="12" height="15" rx="2" fill="currentColor"/>',
+  boutique:'<path d="M5 8h14l-1.2 12.5a1.6 1.6 0 0 1-1.6 1.5H7.8a1.6 1.6 0 0 1-1.6-1.5z" fill="currentColor"/><path d="M8.5 9V6.5a3.5 3.5 0 0 1 7 0V9" fill="none" stroke="currentColor" stroke-width="1.8"/>',
+  profil:'<path d="M7 3h10v3a5 5 0 0 1-10 0zM7 4H4v2a3 3 0 0 0 3 3M17 4h3v2a3 3 0 0 1-3 3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 11.5h4v3l2 3H8l2-3zM7 19h10v2H7z" fill="currentColor"/>',
+  tuto:'<path d="M12 4 2 9l10 5 10-5zM6 11.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5l-6 3z" fill="currentColor"/>',
+  regles:'<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5zM4 21.5A2.5 2.5 0 0 1 6.5 19H20v3H6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 7h8M8 10.5h6" stroke="currentColor" stroke-width="1.6"/>',
+  credits:'<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z" fill="currentColor"/>',
+  reglages:'<path d="M10.3 2h3.4l.5 2.6 1.8.8 2.2-1.5 2.4 2.4-1.5 2.2.8 1.8 2.6.5v3.4l-2.6.5-.8 1.8 1.5 2.2-2.4 2.4-2.2-1.5-1.8.8-.5 2.6h-3.4l-.5-2.6-1.8-.8-2.2 1.5-2.4-2.4 1.5-2.2-.8-1.8L2 13.7v-3.4l2.6-.5.8-1.8-1.5-2.2 2.4-2.4 2.2 1.5 1.8-.8z" fill="currentColor"/><circle cx="12" cy="12" r="3.4" fill="var(--zone)"/>',
+  admin:'<path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 12l2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="2"/>'
+};
+const ico = (k, cls) => `<svg class="${cls || "ico"}" viewBox="0 0 24 24" aria-hidden="true">${ICO[k]}</svg>`;
+function htmlHall(){
+  const p = PROG.profil || {}, pseudo = p.pseudo;
+  const total = Object.keys(CARTES).filter(id => estCollectionnable(CARTES[id])).length;
+  const possedees = Object.keys(PROG.collection).filter(id => estCollectionnable(CARTES[id])).length;
+  const trophees = PROG.mesStats && typeof TROPHEES!=="undefined" ? TROPHEES.reduce((a, t) => a + palierAtteint(t, PROG.mesStats), 0) : null;
+  const tutoFait = (() => { try { return !!localStorage.getItem("tuto-fini"); } catch(e) { return true; } })();
+  const prixPaquet = (PROG.eco && PROG.eco.prix_paquet) || 100;
+  const tuile = (act, k, titre, info) => `<button type="button" class="tuile-hall" data-act="${act}">${ico(k, "ico-tuile")}<span class="tuile-titre">${titre}</span><span class="tuile-info">${info}</span></button>`;
+  const compteIncomplet = typeof compteEtat==="function" && compteEtat()!=="complet";
+  return `<div class="hall" role="main" aria-label="${NOM_JEU}">
+    <header class="hall-tete">
+      <div class="hall-logo"><h1 class="logo">${NOM_JEU}</h1><span class="sous-logo">Le choc des panthéons</span></div>
+      <div class="hall-droite">
+        ${bourse()}
+        <button type="button" class="hall-profil" data-act="prog-profil" title="Mon profil"><span class="avatar" aria-hidden="true">${esc((pseudo || "?").charAt(0).toUpperCase())}</span><span class="nom-profil">${pseudo ? esc(pseudo) : "Choisir un pseudo"}</span></button>
+        <button type="button" class="hall-icone" data-act="reglages-ouvrir" aria-label="Réglages" title="Réglages">${ico("reglages")}</button>
+        ${accesAdmin() ? `<button type="button" class="hall-icone" data-act="admin" aria-label="Administration" title="Administration">${ico("admin")}</button>` : ""}
+      </div>
+    </header>
+    ${compteIncomplet ? htmlCompte() : ""}
+    <div class="hall-grille">
+      <section class="hall-jouer" aria-labelledby="titre-jouer">
+        <h2 id="titre-jouer">Jouer</h2>
+        <button type="button" class="btn-geant" data-act="jouer-ia">${ico("jouer", "ico-geant")}<span><b>Contre l’ordinateur</b><small>Une partie avec l’un de vos decks</small></span></button>
+        <div class="hall-modes">
+          <button type="button" class="btn second" data-act="en-ligne">${ico("enligne")} En ligne</button>
+          <button type="button" class="btn second" data-act="jouer-duo">${ico("duo")} Deux joueurs sur cet écran</button>
+        </div>
+      </section>
+      <section class="hall-quete" aria-label="Quête du jour">${htmlQuete()}</section>
+      <nav class="hall-tuiles" aria-label="Ma collection">
+        ${tuile("prog-collection", "collection", "Collection", `${possedees} / ${total} cartes`)}
+        ${tuile("prog-decks", "decks", "Decks", `${PROG.decks.length} / 9 decks`)}
+        ${tuile("prog-boutique", "boutique", "Boutique", `Paquets à ${prixPaquet} or`)}
+        ${tuile("prog-profil", "profil", "Profil", trophees===null ? "Statistiques et trophées" : `${trophees} / ${(typeof TROPHEES!=="undefined" ? TROPHEES.length : 10)*3} paliers de trophées`)}
+      </nav>
+      <nav class="hall-apprendre" aria-label="Apprendre">
+        <button type="button" class="lien-hall" data-act="tuto">${ico("tuto")} Tutoriel ${tutoFait ? "" : `<span class="pastille-nouveau">Nouveau</span>`}</button>
+        <button type="button" class="lien-hall" data-act="regles">${ico("regles")} Règles du jeu</button>
+        <button type="button" class="lien-hall" data-act="credits">${ico("credits")} Crédits</button>
+      </nav>
+    </div>
+  </div>`;
+}
+function htmlReglages(){
+  return `<div class="boite boite-reglages" role="dialog" aria-label="Réglages">
+    <h2>Réglages</h2>
+    ${aDesMusiques() ? `<section><h3>Musique</h3>${htmlSon(true)}</section>` : ""}
+    <section><h3>Animations</h3>${htmlReglageAnimations(false)}<p class="aide">« Réduites » garde les éclats et les chiffres, sans objets qui volent.</p></section>
+    ${PROG.actif ? `<section><h3>Compte</h3>${htmlCompte()}</section>` : ""}
+    <div class="actions"><button type="button" class="btn" data-act="reglages-fermer">Fermer</button></div>
+  </div>`;
+}
 
 chargerConfig();
 appliquerReglageAnimations();
