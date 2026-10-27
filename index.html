@@ -430,7 +430,8 @@ body.sans-animations *,body.sans-animations *::before,body.sans-animations *::af
 .btn-geant b{display:block;font-family:Cinzel,serif;font-size:clamp(19px,2.3vw,24px)}
 .btn-geant small{display:block;font-size:14px;opacity:.85;margin-top:2px}
 .ico-geant{width:44px;height:44px;flex:none}
-.hall-modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hall-modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));grid-auto-flow:column;gap:10px}
+.pastille-test{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:#6b3fa0;border-radius:99px;padding:1px 7px;margin-left:4px}
 .hall-modes .btn{display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:11px 12px}
 .hall-quete{grid-area:quete;display:flex}
 .hall-quete .quete{flex:1;margin:0;display:flex;flex-direction:column;justify-content:center;gap:10px;border-radius:12px;padding:18px}
@@ -573,6 +574,8 @@ body.compact .pastille-tour{font-size:12px;padding:2px 10px}
 body.compact #banniere .banniere-bande{padding:8px 12px}
 body.compact #banniere .banniere-bande b{font-size:30px}
 @media (prefers-reduced-motion: reduce){.plateau.tour-moi .camp-moi,.fin.attend,.adversaire-joue .points i{animation:none}}
+
+
 
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
@@ -997,6 +1000,67 @@ body.compact .z-texte{width:210px;overflow-y:auto;font-size:14px;padding:10px}
 body.compact .z-tete b{font-size:16px}
 body.compact .zoom{align-items:center}
 
+/* Écran 2 contre 2 */
+.plateau-2v2{display:flex;flex-direction:column;gap:6px}
+.rang2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bloc2{--fc:var(--neutre);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:6px;border:1px solid transparent;
+  background:radial-gradient(90% 80% at 50% 0%,color-mix(in srgb, var(--fc) 16%, transparent),transparent 75%)}
+.bloc-ennemi{background:radial-gradient(90% 80% at 50% 0%,color-mix(in srgb, var(--fc) 18%, transparent),transparent 75%)}
+.bloc-moi,.bloc-allie{background:radial-gradient(90% 80% at 50% 100%,color-mix(in srgb, var(--fc) 18%, transparent),transparent 75%)}
+.bloc-moi{border-color:color-mix(in srgb, var(--or) 30%, transparent)}
+.bloc2.bloc-actif{border-color:color-mix(in srgb, var(--or) 70%, transparent);box-shadow:0 0 18px color-mix(in srgb, var(--or) 25%, transparent)}
+.tete-bloc{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bloc2 .medaillon{width:76px;height:76px}
+.bloc2 .medaillon .visage{width:60px;height:60px;font-size:28px}
+.bloc2 .medaillon .pv-ecu{min-width:36px;height:38px;font-size:16px;bottom:-14px}
+.bloc2 .plaque b{font-size:16px}
+.bloc2 .rangee{justify-content:center;min-height:150px;flex-wrap:nowrap}
+.bloc2 .rangee .crea{width:min(96px, calc((100% - 40px) / 7));flex:0 1 auto;min-width:0}
+.medaillon-bloc.esprit .medaillon{filter:grayscale(1) brightness(.7)}
+.medaillon-bloc.esprit .pv-ecu{background:linear-gradient(#a7b0bb,#5f6874)}
+.medaillon-bloc.allie .plaque .qui{color:#6fc59a;font-weight:700}
+.piles-mini{margin-left:auto}
+.axe-2v2{display:flex;align-items:center;gap:10px;height:auto;padding:4px 0}
+.axe-2v2::before{display:none}
+.axe-2v2 .fin{position:static;transform:none;flex:none}
+.jauge-eq{font-size:13px;color:var(--ink-2);white-space:nowrap}
+.barre-moi{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.main-allie{display:flex;align-items:center;gap:8px;min-width:0;flex:1 1 280px}
+.cartes-allie{display:flex;gap:4px;overflow-x:auto}
+.cartes-allie .carte{--w:54px;pointer-events:none}
+.choix-benef{display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--ink-2)}
+.choix-benef select{font:inherit;font-size:14px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:4px 6px}
+.plateau-2v2.tour-moi .bloc-moi{animation:liseré-tour 2.4s ease-in-out infinite}
+.plateau-2v2.tour-adverse .zone-main .main{filter:saturate(.55) brightness(.75)}
+.plateau-2v2 .adversaire-joue{position:static;transform:none}
+@media (max-width:1060px){.rang2{grid-template-columns:1fr 1fr}}
+body.compact .plateau.plateau-2v2{display:flex;flex-direction:column;height:100%;gap:2px;padding:2px 6px 0;overflow:visible}
+body.compact .plateau.plateau-2v2 .rang2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+body.compact .plateau.plateau-2v2 .bloc2{padding:2px 6px;gap:4px;flex-direction:row;align-items:center;min-width:0}
+body.compact .plateau.plateau-2v2 .tete-bloc{flex-direction:column;gap:0;flex:none;width:70px}
+body.compact .plateau.plateau-2v2 .medaillon{width:44px;height:44px}
+body.compact .plateau.plateau-2v2 .medaillon .visage{width:34px;height:34px;font-size:16px}
+body.compact .plateau.plateau-2v2 .medaillon .pv-ecu{min-width:22px;height:24px;font-size:11px;bottom:-8px;padding:1px 4px 6px}
+body.compact .plateau.plateau-2v2 .plaque{margin-top:6px;align-items:center;text-align:center}
+body.compact .plateau.plateau-2v2 .plaque b{font-size:11px}
+body.compact .plateau.plateau-2v2 .plaque .qui,body.compact .plateau.plateau-2v2 .piles-mini,body.compact .plateau.plateau-2v2 .btn-pouvoir{display:none}
+body.compact .plateau.plateau-2v2 .plaque .charge{font-size:9px}
+body.compact .plateau.plateau-2v2 .rangee{min-height:0;height:auto;flex:1;padding:0;gap:3px;justify-content:center}
+body.compact .plateau.plateau-2v2 .rangee .crea{width:min(48px, calc((100% - 24px) / 7));flex:0 1 auto;min-width:0}
+body.compact .plateau.plateau-2v2 .vide{font-size:10px}
+body.compact .plateau.plateau-2v2 .axe-2v2{display:flex;height:auto;padding:0;gap:6px;margin:0}
+body.compact .plateau.plateau-2v2 .axe-2v2 .axe-ligne{display:block}
+body.compact .plateau.plateau-2v2 .axe-2v2 .fin{grid-area:auto;height:28px;padding:0 12px;font-size:11px;border-radius:14px;width:auto}
+body.compact .plateau.plateau-2v2 .jauge-eq{font-size:10px}
+body.compact .plateau.plateau-2v2 .adversaire-joue{font-size:10px;padding:1px 8px}
+body.compact .plateau.plateau-2v2 .barre-moi{gap:10px;flex-wrap:nowrap}
+body.compact .plateau.plateau-2v2 .main-allie{display:none}
+body.compact .plateau.plateau-2v2 .ressources-jeu{flex-direction:row;gap:6px}
+body.compact .plateau.plateau-2v2 .ressource .jeton{width:28px;height:28px;font-size:13px}
+body.compact .plateau.plateau-2v2 .choix-benef{font-size:10px;flex-direction:row;align-items:center;gap:4px}
+body.compact .plateau.plateau-2v2 .choix-benef select{font-size:11px;padding:1px 4px}
+body.compact .plateau.plateau-2v2 .zone-main{height:auto;flex:1 1 88px;min-height:72px;margin-top:0}
+body.compact .plateau.plateau-2v2 .main.eventail{height:100%;min-height:0}
 </style>
 </head>
 <body>
@@ -1335,12 +1399,12 @@ function choisirHeros(ids){
   const egaux = Object.keys(n).filter(f => n[f]===max);
   return egaux.length ? egaux[Math.floor(Math.random()*egaux.length)] : Object.keys(FACTIONS)[0];
 }
-const pouvoirPret = j => (j.morts || 0) >= (REGLES.seuilPouvoir || 10);
+const pouvoirPret = j => est2v2() ? (!j.esprit && S.jauge[j.eq] >= S.r2.seuilJauge) : (j.morts || 0) >= (REGLES.seuilPouvoir || 10);
 function activerPouvoir(){
   const i = S.courant, j = S.joueurs[i], h = heroDe(j);
   if(!pouvoirPret(j)) return erreur(`Le pouvoir de ${h.nom} se charge : ${j.morts || 0} créatures ennemies détruites sur ${REGLES.seuilPouvoir}.`);
   fxEvt({t:"pouvoir", j:i});
-  j.morts = 0;
+  if(est2v2()) S.jauge[j.eq] = 0; else j.morts = 0;
   if(S.stats && S.stats[i]) S.stats[i].pouvoirs = (S.stats[i].pouvoirs || 0) + 1;
   log(`${h.nom} déchaîne ${h.pouvoir.nom} (${decrire(h.pouvoir.effet || {})})`);
   appliquer(i, h.pouvoir.effet || {}, "heros");
@@ -1406,23 +1470,32 @@ function fxEvt(o){
 }
 function appliquer(i, e, src){
   if(!e) return;
-  const j = S.joueurs[i], opp = adversaire(i);
+  const j = S.joueurs[i], deux = est2v2();
+  const opp = deux ? null : adversaire(i);
+  // Créatures ennemies concernées par les dégâts : l’adversaire en 1 contre 1, les deux adversaires en 2 contre 2
+  const plateauEnnemi = () => deux ? ennemisVivants(i).flatMap(x => x.plateau) : opp.plateau;
   if(e.or) fxEvt({t:"or", j:i, v:e.or, src});
   if(e.combat) fxEvt({t:"puissance", j:i, v:e.combat, src});
   if(e.soin) fxEvt({t:"soin", j:i, v:e.soin, src});
   if(e.or) j.or += e.or;
-  if(e.combat) j.combat += e.combat;
-  if(e.soin){ j.pv += e.soin; if(S.stats && S.stats[i]) S.stats[i].soins = (S.stats[i].soins || 0) + e.soin; }
+  if(e.combat){
+    if(deux && j.esprit){ const a = S.joueurs[allieDe(i)]; if(!a.esprit) a.reserve = Math.min(S.r2.reserveMax, a.reserve + e.combat); }
+    else j.combat += e.combat;
+  }
+  if(e.soin){
+    const b = deux ? beneficiaire2v2(i, "soin") : j;
+    if(b){ b.pv += e.soin; if(S.stats && S.stats[i]) S.stats[i].soins = (S.stats[i].soins || 0) + e.soin; }
+  }
   if(e.pioche) piocher(j, e.pioche);
-  if(e.degatsTous && opp.plateau.length){ fxEvt({t:"onde", j:i, cote:1-i, src, uids:opp.plateau.map(c => c.uid)}); opp.plateau.forEach(c => blesser(c, e.degatsTous)); }
-  if(e.degatsHasard && opp.plateau.length){
-    const c = opp.plateau[Math.floor(Math.random()*opp.plateau.length)];
+  if(e.degatsTous && plateauEnnemi().length){ const cr = plateauEnnemi(); fxEvt({t:"onde", j:i, cote:deux ? null : 1-i, src, uids:cr.map(c => c.uid)}); cr.forEach(c => blesser(c, e.degatsTous)); }
+  if(e.degatsHasard && plateauEnnemi().length){
+    const cr = plateauEnnemi(), c = cr[Math.floor(Math.random()*cr.length)];
     fxEvt({t:"eclair", j:i, src, cible:c.uid});
     blesser(c, e.degatsHasard);
     log(`${def(c).nom} subit ${e.degatsHasard} dégâts.`);
   }
-  if(e.renfort) j.plateau.forEach(c => { c.atk += e.renfort.atk; c.vieMax += e.renfort.vie; });
-  if(e.invoque){
+  if(e.renfort){ const b = deux ? beneficiaire2v2(i, "renfort") : j; if(b) b.plateau.forEach(c => { c.atk += e.renfort.atk; c.vieMax += e.renfort.vie; }); }
+  if(e.invoque && !(deux && j.esprit)){
     if(CARTES[e.invoque.id]) for(let k=0;k<e.invoque.n && j.plateau.length<REGLES.plateauMax;k++) j.plateau.push(creature(inst(e.invoque.id)));
   }
   if(e.bannir && i===S.courant) S.bannirEnAttente += e.bannir;
@@ -1441,13 +1514,15 @@ function nettoyer(){
       if(c.arme) j.defausse.push({uid:c.arme.uid, id:c.arme.id});
       log(`${d.nom} est détruit${d.jeton ? "e" : ""}.`);
       fxEvt({t:"mort", j:idx, uid:c.uid});
-      const ennemi = S.joueurs[1-idx]; if(ennemi) ennemi.morts = (ennemi.morts || 0) + 1;
+      if(est2v2()) S.jauge[1 - S.joueurs[idx].eq]++;
+      else { const ennemi = S.joueurs[1-idx]; if(ennemi) ennemi.morts = (ennemi.morts || 0) + 1; }
       if(d.echo){ log(`Echo de ${d.nom}.`); appliquer(idx, d.echo); }
     });
   });
 }
 
 function verifierVictoire(){
+  if(est2v2()) return verifierVictoire2v2();
   const [a,b] = S.joueurs;
   const avant = S.vainqueur;
   if(a.pv<=0 && b.pv<=0) S.vainqueur = "egalite";
@@ -1467,7 +1542,8 @@ function verifierAllies(i){
     for(const t of j.tour){
       const d = CARTES[t.id], cible = factionCombo(d);
       if(!d.allie || t.allieFait || !cible) continue;
-      if(j.tour.some(o => o!==t && CARTES[o.id] && CARTES[o.id].faction===cible)){
+      // En 2 contre 2, les cartes jouées par l’allié pendant son dernier tour comptent aussi
+      if(j.tour.some(o => o!==t && CARTES[o.id] && CARTES[o.id].faction===cible) || (est2v2() && (S.joueurs[allieDe(i)].factionsTour || []).includes(cible))){
         t.allieFait = true; encore = true;
         fxEvt({t:"combo", j:i, src:t.uid, faction:cible});
         log(`${TERMES.allie || "Combo"} : ${d.nom} (${decrire(d.allie)})`);
@@ -1482,6 +1558,7 @@ function jouer(id, opts={}){
   const k = j.main.findIndex(c => c.uid===id);
   if(k<0) return false;
   const c = j.main[k], d = def(c);
+  if(est2v2() && j.esprit && (d.type==="creature" || d.type==="arme")) return erreur("Un esprit ne peut ni poser de créature ni équiper d’arme.");
   if(d.type==="creature" && j.plateau.length>=REGLES.plateauMax) return erreur(`Votre plateau est plein (${REGLES.plateauMax} créatures).`);
   if(d.type==="arme"){
     const cible = j.plateau.find(x => x.uid===opts.cible);
@@ -1635,6 +1712,7 @@ function utiliserCombat(cible){
 }
 
 function finTour(){
+  if(est2v2()) return finTour2v2();
   const j = S.joueurs[S.courant];
   const aDefausser = [...j.main, ...j.joues].map(c => c.uid);
   if(aDefausser.length) fxEvt({t:"defausse", j:S.courant, uids:aDefausser});
@@ -1738,9 +1816,10 @@ function erreur(msg){
 function interactif(){
   return S && S.vainqueur===null && !ui.couvert && !ui.aiEnCours && (S.mode==="duo" || S.courant===vue()) && !(enLigne() && EN.enAttente);
 }
-const vue = () => S.mode==="ia" ? 0 : S.mode==="enligne" ? (EN.role==="hote" ? 0 : 1) : S.courant;
+const vue = () => S.format==="2v2" ? 0 : S.mode==="ia" ? 0 : S.mode==="enligne" ? (EN.role==="hote" ? 0 : 1) : S.courant;
 const enLigne = () => !!S && S.mode==="enligne";
 function nomAffiche(j){
+  if(est2v2()) return j===S.joueurs[0] ? "Vous" : j.nom;
   const estMoi = j===S.joueurs[vue()];
   if(enLigne()) return estMoi ? "Vous" : (j.pseudo || "Adversaire");
   if(S.mode==="ia" && estMoi && PROG.profil && PROG.profil.pseudo) return PROG.profil.pseudo;
@@ -1951,6 +2030,7 @@ function render(){
   if(ui.ecran==="regles"){ INSTANT = null; app.innerHTML = pageRegles(); document.getElementById("couche").innerHTML = ""; document.getElementById("couche").classList.remove("accueil"); return; }
   if(["collection","decks","editeur","boutique","profil"].includes(ui.ecran)){ INSTANT = null; renderProg(); return; }
   if(!S){ INSTANT = null; app.innerHTML = ""; renderCouche(); if(PROG.pret) signaler(); return; }
+  if(est2v2()) return render2v2();
   const me = vue(), moi = S.joueurs[me], lui = S.joueurs[1-me];
   const inter = interactif();
   const t = cibles(me);
@@ -2055,9 +2135,9 @@ function animerChangements(){
   INSTANT = apres;
   const monTour = apres.courant===vue() && S.vainqueur===null && !ui.couvert;
   const texteTour = S.mode==="duo" ? `Au tour de ${S.joueurs[S.courant].nom}` : "À vous de jouer";
-  const sousTexte = `Tour ${S.tour}`;
+  const sousTexte = `Tour ${est2v2() ? Math.ceil(S.tour/4) : S.tour}`;
   const tourAdverse = S.vainqueur===null && apres.courant!==vue() && S.mode!=="duo";
-  const qui = S.mode==="ia" ? "Tour de l’ordinateur" : "Tour de l’adversaire";
+  const qui = est2v2() ? (apres.courant===2 ? "Tour de votre allié" : `Tour de ${S.joueurs[apres.courant].nom}`) : S.mode==="ia" ? "Tour de l’ordinateur" : "Tour de l’adversaire";
   if(!avant || avant.id!==apres.id){ if(monTour) banniereTour(texteTour, sousTexte); else if(tourAdverse) banniereTour(qui, sousTexte, true); return; }
   for(const [uid, v] of Object.entries(apres.crea)){
     const el = document.querySelector(`.crea[data-id="${uid}"]`);
@@ -2088,6 +2168,7 @@ function renderCouche(){
       <div class="actions">
         <button type="button" class="btn" data-act="mode-ia">Jouer contre l’ordinateur</button>
         <button type="button" class="btn second" data-act="mode-duo">Deux joueurs sur cet écran</button>
+        <button type="button" class="btn second" data-act="mode-2v2">2 contre 2</button>
         <button type="button" class="btn second" data-act="tuto">Tutoriel</button>
         <button type="button" class="btn second" data-act="regles">Règles du jeu</button>
         <button type="button" class="btn second" data-act="credits">Crédits</button>
@@ -2100,6 +2181,8 @@ function renderCouche(){
     // Laisse le temps de voir le médaillon du vaincu voler en éclats
     const id = S.idPartie;
     if(!ui.finAttente){ ui.finAttente = true; setTimeout(() => { ui.finAttente = false; ui.finVue = id; if(S && S.idPartie===id) renderCouche(); }, 1300*FX_LENT); }
+  } else if(S.vainqueur!==null && est2v2()){
+    h = htmlFin2v2();
   } else if(S.vainqueur!==null && S.tuto){
     h = htmlFinTuto();
   } else if(S.vainqueur!==null){
@@ -2143,6 +2226,7 @@ function renderCouche(){
 function apresAction(){
   if(enLigne() && EN.role==="hote") publier();
   render();
+  if(S && est2v2()){ if(S.vainqueur===null && !S.joueurs[S.courant].humain && !ui.aiEnCours) tourIA2v2Anime(); return; }
   if(S && S.vainqueur===null && S.mode==="ia" && S.courant===1 && !ui.aiEnCours) (tutoActif() ? tutoTourAdverse() : tourIA());
 }
 
@@ -3234,6 +3318,8 @@ document.addEventListener("click", e => {
   if(ui.ecran==="admin" || act==="admin"){ return actionAdmin(act, id, el); }
   if(actionProg(act, id)) return;
   if(act==="rejouer" && enLigne()){ if(EN.role==="hote") revancheHote(); return; }
+  if(act==="rejouer" && S && est2v2()) return lancer2v2(S.deck0);
+  if(act==="mode-2v2") return lancer2v2(null);
   if(act==="rejouer"){
     const mode = S.mode;
     nouvellePartie(mode);
@@ -3242,6 +3328,8 @@ document.addEventListener("click", e => {
   }
   if(act==="commencer"){ ui.couvert = false; return render(); }
   if(!S) return;
+  // 2 contre 2 : bénéficiaire choisi des soins et renforts
+  if(est2v2()) S.choixBenef = ui.benef==="moi" ? 0 : ui.benef==="allie" ? 2 : null;
   if(act==="ban"){ M().bannir(id); return apresAction(); }
   if(act==="ban-stop"){ if(enLigne() && EN.role==="invite") S.bannirEnAttente = 0; M().bannirStop(); return apresAction(); }
   if(act==="annuler"){ ui.attaquant = null; ui.armeEnAttente = null; ui.choixPierre = null; return render(); }
@@ -3253,6 +3341,7 @@ document.addEventListener("click", e => {
     const e = etapesTuto()[TUTO.etape];
     return erreur(e ? `Pour l’instant, suivez l’étape « ${e.titre} » : l’élément à utiliser brille.` : "Suivez les étapes du tutoriel.");
   }
+  if(est2v2() && clic2v2(act, id)) return apresAction();
   const j = S.joueurs[S.courant];
   switch(act){
     case "main": {
@@ -3674,7 +3763,7 @@ async function action(fn, succes){
 
 // ----- Fin de partie : or et quête
 async function verifierRecompense(){
-  if(!PROG.pret || !S || S.vainqueur===null || !S.idPartie || S.tuto) return;
+  if(!PROG.pret || !S || S.vainqueur===null || !S.idPartie || S.tuto || est2v2()) return;
   if(PROG.recompensees.has(S.idPartie)) return;
   const cle = S.idPartie;
   PROG.recompensees.add(cle);
@@ -3771,7 +3860,7 @@ function htmlChoixDeck(){
     <div class="actions"><button type="button" class="btn" data-act="prog-decks">Mes decks</button><button type="button" class="btn second" data-act="choix-retour">Retour</button></div></div>`;
   c.d1 = v.some(d => d.id===c.d1) ? c.d1 : v[0].id;
   c.d2 = v.some(d => d.id===c.d2) ? c.d2 : v[0].id;
-  return `<div class="boite" role="dialog" aria-label="Choisir un deck"><h2>Choisir ${c.mode==="duo" ? "les decks" : "votre deck"}</h2>
+  return `<div class="boite" role="dialog" aria-label="Choisir un deck"><h2>${c.mode==="2v2" ? "2 contre 2 : choisir votre deck" : `Choisir ${c.mode==="duo" ? "les decks" : "votre deck"}`}</h2>
     <p>Les deux decks sont mélangés pour former le marché commun de la partie.</p>
     <label class="champ"><span>${c.mode==="duo" ? "Joueur 1" : "Votre deck"}</span>${selectDeck("d1", c.d1)}</label>
     ${c.mode==="duo" ? `<label class="champ" style="margin-top:10px"><span>Joueur 2</span>${selectDeck("d2", c.d2)}</label>` : `<p class="aide">L’ordinateur joue avec un deck tiré au hasard dans toutes les cartes.</p>`}
@@ -3780,6 +3869,7 @@ function htmlChoixDeck(){
 function lancerAvecDecks(){
   const c = PROG.choixDeck, d1 = PROG.decks.find(d => d.id===c.d1), d2 = PROG.decks.find(d => d.id===c.d2);
   if(!d1) return;
+  if(c.mode==="2v2") return lancer2v2(d1.cartes);
   nouvellePartie(c.mode, [d1.cartes, c.mode==="duo" && d2 ? d2.cartes : deckConstruit()], [prefVariantes(), c.mode==="duo" ? prefVariantes() : null]);
   PROG.choixDeck = null; PROG.bienvenue = false;
   Object.assign(ui, {ecran:"jeu", attaquant:null, armeEnAttente:null, choixPierre:null, aiEnCours:false, couvert:c.mode==="duo"});
@@ -3983,6 +4073,7 @@ function actionProg(act, id){
       return true;
     }
     case "jouer-ia": case "jouer-duo": PROG.choixDeck = {mode: act==="jouer-ia" ? "ia" : "duo"}; break;
+    case "jouer-2v2": if(!mode2v2Visible()) return true; PROG.choixDeck = {mode:"2v2"}; break;
     case "choix-retour": PROG.choixDeck = null; break;
     case "bienvenue-suite": PROG.accueilEtape = Math.min(3, (PROG.accueilEtape || 1) + 1); PROG.accueilAnimer = true; break;
     case "bienvenue-fermer": PROG.accueilEtape = null; break;
@@ -4360,7 +4451,7 @@ function demarrerPresence(){
 // ----- Enregistrement d’une partie terminée
 // ----- Sécurité : chaque partie est ouverte par le serveur, qui lui donne un ticket
 function assurerTicket(){
-  if(!PROG.pret || !S || S.tuto || S.ticket || S.ticketDemande || S.vainqueur!==null) return;
+  if(!PROG.pret || !S || est2v2() || S.tuto || S.ticket || S.ticketDemande || S.vainqueur!==null) return;
   if(S.mode==="enligne" && EN.role!=="hote") return;   // l’hôte demande le ticket pour les deux joueurs
   S.ticketDemande = true;
   const id = S.idPartie;
@@ -4948,7 +5039,7 @@ function construireEtapes(){
     cible:() => [`.marche-cartes .carte[data-act="marche"][data-id="${indexMarche(I.achat)}"]`],
     autorise:(act, id) => act==="marche" && Number(id)===indexMarche(I.achat),
     fini:() => moiT().defausse.some(x => x.uid===I.achat)},
-  {titre:"Posez une créature", texte:`Cliquez sur ${laCrea(c.rapide)} pour la poser sur le plateau. Une créature reste en jeu jusqu’à sa mort. D’habitude, elle ne peut pas attaquer le tour où elle arrive, mais celle-ci a ${symMot("rapidite")} <b>${esc(nomMot("rapidite"))}</b> : elle peut attaquer tout de suite.`,
+  {titre:"Posez une créature", texte:`Cliquez sur ${laCrea(c.rapide)} pour la poser sur le plateau. Une créature reste en jeu jusqu’à sa mort, et votre côté du plateau ne peut pas en contenir plus de <b>${REGLES.plateauMax}</b>. D’habitude, elle ne peut pas attaquer le tour où elle arrive, mais celle-ci a ${symMot("rapidite")} <b>${esc(nomMot("rapidite"))}</b> : elle peut attaquer tout de suite.`,
     cible:() => [`.main .carte[data-id="${I.rap}"]`],
     autorise:(act, id) => act==="main" && id===I.rap,
     fini:() => moiT().plateau.some(x => x.uid===I.rap)},
@@ -5273,8 +5364,8 @@ function origine(ev){
   const r = ev.j===vue() ? rectDe(".zone-main .main") : (POS_AVANT["main-adverse"] && POS_AVANT["main-adverse"].r) || rectDe(".main-adverse");
   return r ? centre(r) : {x:innerWidth/2, y:innerHeight/2};
 }
-function ciblePoint(j, cible){
-  if(cible==="face"){ const r = rectDe(`.medaillon[data-joueur="${1-j}"]`) || (POS_AVANT["heros-" + (1-j)] || {}).r; return r ? centre(r) : null; }
+function ciblePoint(j, cible, k){
+  if(cible==="face"){ const q = k!==undefined ? k : 1-j; const r = rectDe(`.medaillon[data-joueur="${q}"]`) || (POS_AVANT["heros-" + q] || {}).r; return r ? centre(r) : null; }
   const r = rectDe(`.crea[data-id="${cible}"]`) || (POS_AVANT[cible] || {}).r;
   return r ? centre(r) : null;
 }
@@ -5309,7 +5400,7 @@ function animerEvenement(ev){
       break;
     }
     case "attaque": {
-      const att = document.querySelector(`.crea[data-id="${ev.att}"]`), pt = ciblePoint(ev.j, ev.cible);
+      const att = document.querySelector(`.crea[data-id="${ev.att}"]`), pt = ciblePoint(ev.j, ev.cible, ev.k);
       if(!pt) return;
       const ra = att ? att.getBoundingClientRect() : (POS_AVANT[ev.att] || {}).r; if(!ra) return;
       const c0 = centre(ra), dx = (pt.x - c0.x)*.78, dy = (pt.y - c0.y)*.78;
@@ -5334,7 +5425,7 @@ function animerEvenement(ev){
       break;
     }
     case "frappe": {
-      const de = centre(rectDe(`.medaillon[data-joueur="${ev.j}"]`) || {left:0, top:0, width:0, height:0}), pt = ciblePoint(ev.j, ev.cible);
+      const de = centre(rectDe(`.medaillon[data-joueur="${ev.j}"]`) || {left:0, top:0, width:0, height:0}), pt = ciblePoint(ev.j, ev.cible, ev.k);
       if(!pt) return;
       const lame = icoVolante("puissance", 40);
       voler(lame, de, pt, 360, 0, {e0:.8, e2:1.1, o2:1});
@@ -5548,6 +5639,18 @@ function animerEvenement2(ev, niveau){
     case "marche": {
       const el = document.querySelector(`.marche-cartes .carte[data-uid="${ev.uid}"]`);
       animerSur(el, [{transform:"perspective(600px) rotateY(90deg) scale(.8)", opacity:0}, {transform:"perspective(600px) rotateY(0) scale(1)", opacity:1}], {duration:450, delay:niveau>=2 ? 350 : 0, easing:"ease-out", fill:"backwards"});
+      break;
+    }
+    case "chute": {
+      const m = document.querySelector(`.medaillon[data-joueur="${ev.j}"]`); if(!m) return;
+      const c = centre(m.getBoundingClientRect());
+      animerSur(m, [{transform:"none"}, {transform:"translateX(-7px) rotate(-4deg)", offset:.2}, {transform:"translateX(6px) rotate(3deg)", offset:.4}, {transform:"none"}], {duration:600});
+      eclat(c, "impact"); eclat(c, "poussiere", 250);
+      break;
+    }
+    case "resurrection": {
+      const m = document.querySelector(`.medaillon[data-joueur="${ev.j}"]`); if(!m) return;
+      eclat(centre(m.getBoundingClientRect()), "pouvoir"); eclat(centre(m.getBoundingClientRect()), "soin", 200);
       break;
     }
     case "fin": {
@@ -5794,6 +5897,7 @@ function htmlHall(){
         <div class="hall-modes">
           <button type="button" class="btn second" data-act="en-ligne">${ico("enligne")} En ligne</button>
           <button type="button" class="btn second" data-act="jouer-duo">${ico("duo")} Deux joueurs sur cet écran</button>
+          ${mode2v2Visible() ? `<button type="button" class="btn second" data-act="jouer-2v2">${ico("duo")} 2 contre 2 avec un allié <span class="pastille-test">Test</span></button>` : ""}
         </div>
       </section>
       <section class="hall-quete" aria-label="Quête du jour">${htmlQuete()}</section>
@@ -5987,6 +6091,366 @@ function htmlTirage(t, i, pq){
   }
   return `${htmlCarte({id:t, uid:"p" + i})}${pq.nouvelles.has(t) ? `<span class="nouvelle">Nouvelle !</span>` : ""}`;
 }
+
+/* ============================================================
+   MODE 2 CONTRE 2 : règles propres au mode
+   (les règles des cartes sont partagées avec le 1 contre 1)
+   Places : 0 = A1, 1 = B1, 2 = A2, 3 = B2 ; équipe = place % 2.
+   ============================================================ */
+const REGLES_2V2_DEFAUT = {pv:30, marche:7, pioche:[2,4,5,5], seuilJauge:14, resuTours:2, resuPV:15, vengeance:8, reserveMax:5};
+const est2v2 = () => !!(S && S.format==="2v2");
+const allieDe = i => (i + 2) % 4;
+const ennemisDe = i => [(i + 1) % 4, (i + 3) % 4];
+const ennemisVivants = i => ennemisDe(i).map(k => S.joueurs[k]).filter(j => !j.esprit);
+const NOMS_EQUIPES = ["Équipe A", "Équipe B"];
+function nouvellePartie2v2(decks, opts = {}){
+  compteurUid = 0;
+  const R2 = {...REGLES_2V2_DEFAUT, ...((CONFIG && CONFIG.regles2v2) || {})};
+  const noms = opts.noms || ["Joueur A1", "Joueur B1", "Joueur A2", "Joueur B2"];
+  S = {format:"2v2", mode:opts.mode || "ia2v2", r2:R2, joueurs:[0, 1, 2, 3].map(k => {
+         const j = nouveauJoueur(noms[k]);
+         Object.assign(j, {eq:k % 2, pv:R2.pv, esprit:false, tEsprit:0, reserve:0, factionsTour:[], humain:(opts.humains || []).includes(k)});
+         return j; }),
+       courant:0, tour:1, journal:[], vainqueur:null, marcheDeck:[], marche:[], bannirEnAttente:0, jauge:[0, 0],
+       iaCiblage:opts.iaCiblage || ["focus", "focus"]};
+  const listes = [0, 1, 2, 3].map(k => (decks && decks[k]) || deckConstruit());
+  S.marcheDeck = melange(listes.flatMap((l, k) => l.filter(id => CARTES[id]).map(id => {
+    const c = inst(id), v = opts.variantes && opts.variantes[k] && opts.variantes[k][id];
+    if(v && CONFIG.variantes && CONFIG.variantes[v] && CONFIG.variantes[v].carte===id) c.v = v;
+    return c;
+  })));
+  S.joueurs.forEach((j, k) => { j.heros = choisirHeros(listes[k]); j.morts = 0; });
+  S.idPartie = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  S.stats = [0, 1, 2, 3].map(() => ({creatures:0, sorts:0, achats:0, degats:0, soins:0, pouvoirs:0, jouees:{}, achetees:{}}));
+  S.debut = Date.now();
+  for(let k=0; k<R2.marche && S.marcheDeck.length; k++) S.marche.push(S.marcheDeck.pop());
+  S.joueurs.forEach((j, k) => piocher(j, R2.pioche[k] ?? REGLES.mainDepart, true));
+  log(`${S.joueurs[0].nom} commence.`);
+}
+// Bénéficiaire d’un soin ou d’un renfort : celui choisi par le joueur (S.choixBenef), sinon celui qui en a le plus besoin
+function beneficiaire2v2(i, genre){
+  const j = S.joueurs[i], a = S.joueurs[allieDe(i)];
+  if(j.esprit) return a.esprit ? null : a;
+  if(S.choixBenef===i || S.choixBenef===allieDe(i)){ const b = S.joueurs[S.choixBenef]; if(!b.esprit) return b; }
+  if(a.esprit) return j;
+  if(genre==="renfort") return a.plateau.length > j.plateau.length ? a : j;
+  return a.pv < j.pv ? a : j;
+}
+// Ciblage en 2 contre 2 : la Provocation protège toute l’équipe visée ; sinon les créatures visibles du joueur visé
+function cibles2v2(i, k){
+  const e = S.joueurs[k];
+  if(!e || e.esprit || e.eq===S.joueurs[i].eq) return {face:false, creatures:new Set()};
+  const vis = x => x.plateau.filter(c => !(aMot(c, "ethere") && !c.revele));
+  const prov = [e, S.joueurs[allieDe(k)]].flatMap(x => vis(x).filter(c => aMot(c, "provocation")));
+  if(prov.length) return {face:false, creatures:new Set(prov.map(c => c.uid))};
+  const v = vis(e);
+  return {face:v.length===0, creatures:new Set(v.map(c => c.uid))};
+}
+const proprietaire = uid => S.joueurs.find(x => x.plateau.some(c => c.uid===uid));
+function attaquer2v2(idAtt, cible, k){
+  const i = S.courant, j = S.joueurs[i];
+  const att = j.plateau.find(x => x.uid===idAtt);
+  if(!att || !att.peutAttaquer || att.aAttaque) return erreur("Cette créature ne peut pas attaquer maintenant.");
+  const t = cibles2v2(i, k), e = S.joueurs[k];
+  if(cible==="face"){
+    if(!t.face) return erreur("Il faut d’abord détruire les créatures qui protègent ce héros.");
+    e.pv -= atkTotal(att);
+    if(S.stats && S.stats[i]) S.stats[i].degats += atkTotal(att);
+    log(`${def(att).nom} inflige ${atkTotal(att)} dégâts à ${e.nom}.`);
+  } else {
+    if(!t.creatures.has(cible)) return erreur("Cette créature ne peut pas être visée.");
+    const p = proprietaire(cible), v = p.plateau.find(x => x.uid===cible);
+    const a1 = atkTotal(att), a2 = atkTotal(v);
+    blesser(v, a1); blesser(att, a2);
+    log(`${def(att).nom} attaque ${def(v).nom}.`);
+  }
+  att.aAttaque = true; att.revele = true;
+  fxEvt({t:"attaque", j:i, att:idAtt, cible:cible==="face" ? "face" : cible, k});
+  if(att.arme){
+    att.arme.dur--;
+    if(att.arme.dur<=0){ j.defausse.push({uid:att.arme.uid, id:att.arme.id}); log(`${CARTES[att.arme.id].nom} se brise.`); att.arme = null; }
+  }
+  nettoyer(); verifierVictoire();
+  return true;
+}
+function utiliserCombat2v2(cible, k){
+  const i = S.courant, j = S.joueurs[i];
+  if(j.combat<=0 || j.esprit) return false;
+  const t = cibles2v2(i, k), e = S.joueurs[k];
+  if(cible==="face"){
+    if(!t.face) return erreur("Il faut d’abord détruire les créatures qui protègent ce héros.");
+    fxEvt({t:"frappe", j:i, cible:"face", k});
+    log(`${heroDe(j).nom} inflige ${j.combat} dégâts à ${e.nom}.`);
+    if(S.stats && S.stats[i]) S.stats[i].degats += j.combat;
+    e.pv -= j.combat; j.combat = 0;
+  } else {
+    if(!t.creatures.has(cible)) return erreur("Cette créature ne peut pas être visée.");
+    fxEvt({t:"frappe", j:i, cible, k});
+    const p = proprietaire(cible), v = p.plateau.find(x => x.uid===cible);
+    const riposte = atkTotal(v);
+    if(riposte>0){ j.pv -= riposte; log(`${heroDe(j).nom} subit ${riposte} dégâts de riposte de ${def(v).nom}.`); }
+    if(v.bouclier){ v.bouclier = false; j.combat -= 1; }
+    else { const n = Math.min(j.combat, vieRestante(v)); v.deg += n; j.combat -= n; }
+  }
+  nettoyer(); verifierVictoire();
+  return true;
+}
+// Un héros à 0 PV devient un esprit ; l’équipe dont les deux héros sont des esprits perd
+function verifierVictoire2v2(){
+  const R2 = S.r2;
+  S.joueurs.forEach((j, k) => {
+    if(j.esprit || j.pv>0) return;
+    j.esprit = true; j.tEsprit = 0; j.pv = 0;
+    for(const c of j.plateau){ if(!def(c).jeton) j.defausse.push({uid:c.uid, id:c.id}); if(c.arme) j.defausse.push({uid:c.arme.uid, id:c.arme.id}); }
+    j.plateau = [];
+    log(`${heroDe(j).nom} tombe et devient un esprit.`);
+    fxEvt({t:"chute", j:k});
+    const a = S.joueurs[allieDe(k)];
+    if(!a.esprit && R2.vengeance){ a.pv += R2.vengeance; log(`Vengeance : ${heroDe(a).nom} récupère ${R2.vengeance} PV.`); fxEvt({t:"soin", j:allieDe(k), v:R2.vengeance}); }
+  });
+  if(S.vainqueur!==null) return;
+  for(const eq of [0, 1]){
+    if(S.joueurs.filter(j => j.eq===eq).every(j => j.esprit)){ S.vainqueur = NOMS_EQUIPES[1 - eq]; S.equipeGagnante = 1 - eq; fxEvt({t:"fin", perdant:eq}); return; }
+  }
+}
+function debutTour2v2(){
+  const R2 = S.r2, j = S.joueurs[S.courant];
+  if(j.esprit && j.tEsprit>=R2.resuTours){
+    j.esprit = false; j.pv = R2.resuPV;
+    log(`${heroDe(j).nom} revient à la vie avec ${R2.resuPV} PV !`);
+    fxEvt({t:"resurrection", j:S.courant});
+  }
+  j.plateau.forEach(c => { c.peutAttaquer = true; c.aAttaque = false; });
+  if(!j.esprit && j.reserve){ j.combat += j.reserve; log(`${heroDe(j).nom} reçoit ${j.reserve} puissance de son allié esprit.`); j.reserve = 0; }
+}
+function finTour2v2(){
+  const j = S.joueurs[S.courant];
+  j.factionsTour = [...new Set(j.tour.map(t => CARTES[t.id] && CARTES[t.id].faction).filter(Boolean))];
+  const aDefausser = [...j.main, ...j.joues].map(c => c.uid);
+  if(aDefausser.length) fxEvt({t:"defausse", j:S.courant, uids:aDefausser});
+  j.defausse.push(...j.main, ...j.joues);
+  j.main = []; j.joues = []; j.tour = []; j.or = 0; j.combat = 0;
+  S.bannirEnAttente = 0; S.choixBenef = null;
+  if(j.esprit) j.tEsprit++;
+  piocher(j, REGLES.piocheParTour);
+  S.courant = (S.courant + 1) % 4; S.tour++;
+  log(`Tour de ${S.joueurs[S.courant].nom}.`);
+  debutTour2v2();
+}
+// ----- Ordinateur (allié ou adversaire) : un tour complet
+function bannirAuto(){
+  const j = S.joueurs[S.courant];
+  let garde = 10;
+  while(S.bannirEnAttente>0 && garde-->0){
+    const c = j.defausse.find(x => def(x).depart) || j.main.find(x => def(x).depart);
+    if(!c){ S.bannirEnAttente = 0; break; }
+    bannir(c.uid);
+  }
+}
+function choisirCibleIA(i){
+  const enn = ennemisDe(i).filter(k => !S.joueurs[k].esprit);
+  if(!enn.length) return null;
+  const strat = S.iaCiblage[S.joueurs[i].eq];
+  return enn.sort((a, b) => strat==="equilibre" ? S.joueurs[b].pv - S.joueurs[a].pv : S.joueurs[a].pv - S.joueurs[b].pv)[0];
+}
+async function jouerTourIA2v2(){
+  const etape = async () => { if(!S.simulation && typeof document!=="undefined" && document.getElementById("app")){ render(); await pause(520); } };
+  const i = S.courant, j = S.joueurs[i];
+  if(!j.esprit && pouvoirPret(j)){ activerPouvoir(); bannirAuto(); await etape(); }
+  let p = true, garde = 60;
+  while(p && S.vainqueur===null && garde-->0){
+    p = false;
+    for(const c of [...j.main]){
+      const d = def(c);
+      if(d.type==="creature" && !j.esprit && j.plateau.length<REGLES.plateauMax){ jouer(c.uid); p = true; await etape(); break; }
+      if(d.type==="sort"){ jouer(c.uid, {}); p = true; await etape(); break; }
+      if(d.type==="arme" && !j.esprit && j.plateau.length){ jouer(c.uid, {cible:[...j.plateau].sort((a, b) => atkTotal(b) - atkTotal(a))[0].uid}); p = true; await etape(); break; }
+    }
+    bannirAuto();
+  }
+  let garde2 = 40;
+  while(S.vainqueur===null && garde2-->0){
+    const o = S.marche.map((c, k) => ({k, d:def(c)})).filter(x => x.d.prix<=j.or)
+      .sort((a, b) => (b.d.prix + (b.d.faction===j.heros ? 1.5 : 0)) - (a.d.prix + (a.d.faction===j.heros ? 1.5 : 0)));
+    const base = CARTES[REGLES.carteBase];
+    if(o.length) acheter(o[0].k); else if(base && (base.prix || 0)>0 && j.or>=base.prix) acheter("base"); else break;
+    await etape();
+  }
+  if(!j.esprit){
+    for(const c of [...j.plateau]){
+      if(S.vainqueur!==null) break;
+      if(!j.plateau.includes(c) || !c.peutAttaquer || c.aAttaque) continue;
+      const k = choisirCibleIA(i); if(k===null) break;
+      const t = cibles2v2(i, k);
+      if(t.face){ attaquer2v2(c.uid, "face", k); await etape(); continue; }
+      const cand = S.joueurs.flatMap(x => x.plateau).filter(v => t.creatures.has(v.uid));
+      const tues = cand.filter(v => !v.bouclier && vieRestante(v)<=atkTotal(c)).sort((a, b) => atkTotal(b) - atkTotal(a));
+      const ch = tues[0] || cand.sort((a, b) => vieRestante(a) - vieRestante(b))[0];
+      if(ch){ attaquer2v2(c.uid, ch.uid, k); await etape(); }
+    }
+    let g = 40;
+    while(j.combat>0 && S.vainqueur===null && g-->0 && !j.esprit){
+      const ordre = ennemisDe(i).filter(k => !S.joueurs[k].esprit)
+        .sort((a, b) => S.iaCiblage[j.eq]==="equilibre" ? S.joueurs[b].pv - S.joueurs[a].pv : S.joueurs[a].pv - S.joueurs[b].pv);
+      let fait = false;
+      for(const k of ordre){
+        const t = cibles2v2(i, k);
+        if(t.face){ utiliserCombat2v2("face", k); fait = true; await etape(); break; }
+        const cand = S.joueurs.flatMap(x => x.plateau).filter(v => t.creatures.has(v.uid) && atkTotal(v) < j.pv).sort((a, b) => vieRestante(a) - vieRestante(b));
+        if(cand.length){ utiliserCombat2v2(cand[0].uid, k); fait = true; await etape(); break; }
+      }
+      if(!fait) break;
+    }
+  }
+  if(S.vainqueur===null) finTour2v2();
+}
+
+/* ============================================================
+   MODE 2 CONTRE 2 : écran de jeu (toi et un allié ordinateur contre deux ordinateurs)
+   ============================================================ */
+// Mode en test : visible uniquement par l’administrateur (et sur le prototype Claude)
+const mode2v2Visible = () => !!window.claude || !!(typeof PROG!=="undefined" && PROG.admin);
+function lancer2v2(deck){
+  const pseudo = typeof PROG!=="undefined" && PROG.profil && PROG.profil.pseudo;
+  nouvellePartie2v2([deck || null, null, null, null], {humains:[0], noms:[pseudo || "Joueur A1", "Adversaire 1", "Votre allié", "Adversaire 2"],
+    variantes:[typeof PROG!=="undefined" && PROG.pret ? prefVariantes() : null, null, null, null]});
+  S.deck0 = deck || null;
+  if(typeof PROG!=="undefined"){ PROG.choixDeck = null; }
+  Object.assign(ui, {ecran:"jeu", attaquant:null, armeEnAttente:null, choixPierre:null, aiEnCours:false, couvert:false});
+  apresAction();
+}
+// Tours de l’ordinateur (allié et adversaires), joués étape par étape jusqu’au tour du joueur
+async function tourIA2v2Anime(){
+  if(ui.aiEnCours) return;
+  ui.aiEnCours = true; render();
+  const id = S.idPartie;
+  await pause(650);
+  while(S && S.idPartie===id && est2v2() && S.vainqueur===null && !S.joueurs[S.courant].humain){
+    await jouerTourIA2v2();
+    if(!S || S.idPartie!==id) return;
+    render();
+    await pause(700);
+  }
+  ui.aiEnCours = false;
+  if(S && S.idPartie===id) render();
+}
+function htmlMedaillon2v2(k, inter, visee){
+  const j = S.joueurs[k], h = heroDe(j), moi = k===0, ennemi = j.eq!==S.joueurs[0].eq, R2 = S.r2;
+  const sym = FACTIONS[j.heros] ? FACTIONS[j.heros].sym : "✦";
+  const ciblable = ennemi && visee && cibles2v2(0, k).face;
+  const activable = moi && inter && pouvoirPret(j);
+  const balise = ennemi || activable ? "button" : "div";
+  const attrs = ennemi ? `type="button" data-act="face2" data-id="${k}" aria-label="Viser ${esc(h.nom)}"` : activable ? `type="button" data-act="pouvoir" aria-label="Activer ${esc(h.pouvoir ? h.pouvoir.nom : "le pouvoir")}"` : "";
+  const role = moi ? "Vous" : j.eq===S.joueurs[0].eq ? "Votre allié" : j.nom;
+  const etat = j.esprit
+    ? `Esprit : revient dans ${Math.max(1, R2.resuTours - j.tEsprit)} tour${Math.max(1, R2.resuTours - j.tEsprit)>1 ? "s" : ""}`
+    : j.reserve ? `+${j.reserve} puissance en réserve` : "";
+  return `<div class="medaillon-bloc ${moi ? "moi" : ennemi ? "adv" : "allie"} ${j.esprit ? "esprit" : ""} ${S.courant===k && S.vainqueur===null ? "actif" : ""}">
+    <${balise} ${attrs} class="medaillon f-${j.heros || "neutre"} ${ciblable ? "cible" : ""} ${activable ? "pret" : ""}" data-joueur="${k}" style="--p:${Math.min(1, S.jauge[j.eq]/R2.seuilJauge).toFixed(3)}">
+      <span class="anneau" aria-hidden="true"></span><span class="visage" aria-hidden="true">${h.image ? `<img src="${h.image}" alt="">` : sym}</span><span class="pv-ecu" title="Points de vie">${j.esprit ? "✝" : j.pv}</span>
+    </${balise}>
+    <div class="plaque"><b>${esc(h.nom)}</b><span class="qui">${esc(role)}</span>${etat ? `<span class="charge ${j.esprit ? "" : "ok"}">${etat}</span>` : ""}
+      ${activable ? `<button type="button" class="btn btn-pouvoir" data-act="pouvoir">Activer</button>` : ""}</div>
+  </div>`;
+}
+function htmlBloc2v2(k, inter, visee, ciblesEnn){
+  const j = S.joueurs[k], moi = k===0, ennemi = j.eq!==S.joueurs[0].eq;
+  const vide = j.esprit ? "Esprit : plus de créatures" : ennemi ? "Aucune créature" : moi ? "Vos créatures" : "Créatures de votre allié";
+  const crea = j.plateau.map(c => moi ? htmlCrea(c, "own", inter ? (ui.armeEnAttente ? "cible" : `${c.peutAttaquer && !c.aAttaque ? "peut" : ""} ${ui.attaquant===c.uid ? "choisie" : ""}`) : "")
+                                      : htmlCrea(c, ennemi ? "enemy" : "allie", ennemi && visee && ciblesEnn.has(c.uid) ? "cible" : "")).join("");
+  return `<section class="bloc2 ${moi ? "bloc-moi" : ennemi ? "bloc-ennemi" : "bloc-allie"} f-${j.heros || "neutre"} ${S.courant===k && S.vainqueur===null ? "bloc-actif" : ""}" aria-label="${esc(moi ? "Votre camp" : ennemi ? j.nom : "Votre allié")}">
+    <div class="tete-bloc">${htmlMedaillon2v2(k, inter, visee)}${ennemi ? `<span class="aide piles-mini" title="Deck, défausse et main">${j.deck.length} deck, ${j.defausse.length} défausse, ${j.main.length} en main</span>` : ""}</div>
+    <div class="rangee">${crea || `<span class="vide">${vide}</span>`}</div>
+  </section>`;
+}
+function render2v2(){
+  const app = document.getElementById("app");
+  const moi = S.joueurs[0], allie = S.joueurs[2], inter = interactif();
+  const visee = inter && !moi.esprit && (ui.attaquant || moi.combat>0);
+  const ciblesEnn = new Set([1, 3].flatMap(k => [...cibles2v2(0, k).creatures]));
+  const n = moi.main.length, milieu = (n-1)/2, pas = Math.min(5, 26/Math.max(n, 1));
+  const base = CARTES[REGLES.carteBase] ? {uid:"base", id:REGLES.carteBase} : null;
+  const monTour = S.vainqueur===null && S.courant===0;
+  const courant = S.joueurs[S.courant];
+  const qui = S.courant===2 ? "Votre allié joue" : "L’adversaire joue";
+  memoriserPositions();
+  app.innerHTML = `
+  <header class="barre-jeu">
+    <span class="logo-mini">${NOM_JEU}</span><span class="mode">2 contre 2</span>
+    <span class="tour-info">Tour ${Math.ceil(S.tour/4)}</span>
+    <span class="pastille-tour ${S.vainqueur!==null ? "" : monTour ? "a-moi" : "adverse"}">${S.vainqueur!==null ? "Partie terminée" : monTour ? (moi.esprit ? "À vous (esprit)" : "À vous de jouer") : S.courant===2 ? "Tour de votre allié" : `Tour de ${esc(courant.nom)}`}</span>
+    ${htmlSon(false)}
+    <button type="button" class="btn-discret" data-act="nouvelle">Quitter la partie</button>
+  </header>
+  <div class="table-jeu">
+    <div class="plateau plateau-2v2 ${S.vainqueur!==null ? "" : monTour ? "tour-moi" : "tour-adverse"}">
+      <div class="rang2 rang-ennemis">${htmlBloc2v2(1, inter, visee, ciblesEnn)}${htmlBloc2v2(3, inter, visee, ciblesEnn)}</div>
+      <div class="axe axe-2v2">
+        <span class="jauge-eq" title="Créatures adverses détruites par votre équipe">Pouvoir de votre équipe : ${S.jauge[0]} / ${S.r2.seuilJauge}</span>
+        <span class="axe-ligne"></span>
+        <button type="button" class="fin ${inter ? "attend" : ""}" data-act="fin" ${inter ? "" : "disabled"}>${inter || S.vainqueur!==null ? "Fin du tour" : "Patientez"}</button>
+        <span class="axe-ligne"></span>
+        <span class="jauge-eq" title="Créatures de votre équipe détruites par les adversaires">Pouvoir adverse : ${S.jauge[1]} / ${S.r2.seuilJauge}</span>
+        ${S.vainqueur===null && !monTour ? `<span class="adversaire-joue" role="status">${qui}<span class="points" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></span>` : ""}
+      </div>
+      <div class="rang2 rang-allies">${htmlBloc2v2(2, inter, visee, ciblesEnn)}${htmlBloc2v2(0, inter, visee, ciblesEnn)}</div>
+      <div class="barre-moi">
+        <div class="main-allie" aria-label="Main de votre allié"><span class="aide">Main de votre allié</span><div class="cartes-allie">${allie.main.map(c => htmlCarte(c)).join("") || `<span class="aide">vide</span>`}</div></div>
+        <div class="ressources-jeu">
+          <span class="ressource or"><span class="jeton">${moi.or}</span>or</span>
+          <span class="ressource puissance" data-aide="puissance" data-titre="Puissance"><span class="jeton">${moi.combat}</span>puissance</span>
+        </div>
+        <label class="choix-benef">Soins et renforts
+          <select data-benef aria-label="Bénéficiaire des soins et renforts">${[["auto","Automatique (au plus blessé)"],["moi","Pour moi"],["allie","Pour mon allié"]].map(([v, l]) => `<option value="${v}" ${(ui.benef || "auto")===v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+      </div>
+      <div class="zone-main">${htmlPile(moi, "deck")}<div class="main eventail" aria-label="Votre main">${moi.main.map((c, i) => htmlCarte(c, {act:"main", classes: inter ? "jouable" : "", style:`--r:${((i-milieu)*pas).toFixed(1)}deg;--y:${(Math.abs(i-milieu)**2*2.2).toFixed(1)}px`})).join("")}</div>${htmlPile(moi, "defausse")}</div>
+    </div>
+    <aside class="cote">
+      <section class="marche">
+        <h2>Marché <span class="reste">${S.marcheDeck.length} en réserve</span></h2>
+        <div class="marche-cartes">
+          ${S.marche.map((c, k) => htmlCarte(c, {act:"marche", id:k, classes: inter && moi.or>=def(c).prix ? "achetable" : ""})).join("")}
+          ${base ? htmlCarte(base, {act:"base", classes: inter && moi.or>=(def(base).prix || 0) ? "achetable" : "", extra:'<span class="illimite">Toujours disponible</span>'}) : ""}
+        </div>
+      </section>
+      <details class="journal" ${ui.journalFerme ? "" : "open"}><summary>Journal</summary><ol>${S.journal.slice(-12).reverse().map(l => `<li>${l}</li>`).join("")}</ol></details>
+    </aside>
+  </div>`;
+  ajusterEventail();
+  renderCouche();
+  animerChangements();
+  jouerEffets();
+  if(PROG.pret) signaler();
+}
+// Clics propres au 2 contre 2 (les autres actions passent par le jeu habituel)
+function clic2v2(act, id){
+  const j = S.joueurs[0];
+  if(act==="enemy" || act==="face2"){
+    if(j.esprit) return erreur("Un esprit ne peut pas attaquer : soutenez votre allié avec vos cartes."), true;
+    const p = act==="face2" ? S.joueurs[Number(id)] : proprietaire(id);
+    if(!p) return true;
+    const k = S.joueurs.indexOf(p), cible = act==="face2" ? "face" : id;
+    if(ui.attaquant){ attaquer2v2(ui.attaquant, cible, k); ui.attaquant = null; }
+    else if(j.combat>0) utiliserCombat2v2(cible, k);
+    else erreur("Sélectionnez une de vos créatures prêtes, ou gagnez de la puissance pour que votre héros attaque.");
+    return true;
+  }
+  return false;
+}
+function htmlFin2v2(){
+  const gagne = S.equipeGagnante===0;
+  return `<div class="boite" role="dialog" aria-label="Fin de partie">
+    <h2>${gagne ? "Victoire de votre équipe !" : "Défaite"}</h2>
+    <p>${gagne ? "Les deux héros adverses sont tombés." : "Votre héros et celui de votre allié sont tombés."} Partie terminée au tour ${Math.ceil(S.tour/4)}.</p>
+    <div class="actions"><button type="button" class="btn" data-act="rejouer">Rejouer</button><button type="button" class="btn second" data-act="nouvelle">Changer de mode</button></div>
+  </div>`;
+}
+document.addEventListener("change", e => {
+  if(!(e.target.dataset && e.target.dataset.benef!==undefined)) return;
+  ui.benef = e.target.value;
+  try { localStorage.setItem("benef-2v2", ui.benef); } catch(err) {}
+});
+try { ui.benef = localStorage.getItem("benef-2v2") || "auto"; } catch(e) { ui.benef = "auto"; }
 
 chargerConfig();
 appliquerReglageAnimations();
