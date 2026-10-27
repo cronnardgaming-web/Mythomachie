@@ -84,6 +84,19 @@ ou changé leur faction, renvoyez le catalogue depuis l’administration (onglet
 `supabase-admin-joueurs.sql` permet à l’administrateur de corriger l’or et l’encre d’un joueur depuis l’onglet
 « Statistiques » de l’administration (bouton « Modifier » dans la liste des joueurs).
 
+## Illustrations alternatives, cartes promotionnelles et boosters spéciaux
+
+`supabase-variantes.sql` (à exécuter après `supabase-surveillance.sql`) ajoute :
+- les **illustrations alternatives** : créées dans la fiche d’une carte (onglet Cartes), elles ne changent que
+  l’apparence ; les joueurs les débloquent une fois pour toutes (un doublon est converti en encre) et choisissent
+  celle qu’ils affichent dans leur collection ;
+- les **cartes promotionnelles** (case dans la fiche d’une carte) : absentes du booster principal et des boosters de
+  panthéon, elles ne se fabriquent pas et ne se recyclent pas ;
+- les **boosters spéciaux** (écran Boosters) : leur contenu est choisi carte par carte et illustration par
+  illustration.
+
+Après chaque changement : onglet Serveur, « Envoyer le catalogue », puis exporter config.json.
+
 ## Surveillance des comportements suspects
 
 `supabase-surveillance.sql` (à exécuter après `supabase-securite.sql`) enregistre chaque tentative refusée par le
