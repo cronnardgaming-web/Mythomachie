@@ -102,7 +102,7 @@ button.portrait{cursor:pointer}
 .gemme{flex:none;width:3.6cqw;height:3.6cqw;transform:rotate(45deg);background:var(--gem);box-shadow:0 0 0 .5cqw rgba(0,0,0,.35)}
 .prix{position:absolute;z-index:2;top:2.4cqw;right:2.4cqw;width:16cqw;height:16cqw;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff4c2,#f0c64e 45%,#a8750f);color:#3b2a06;border:.8cqw solid #7a520a;display:grid;place-items:center;font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:8.5cqw;box-shadow:0 1px 3px rgba(0,0,0,.55)}
 .atk,.pv,.dur{position:absolute;z-index:2;bottom:1.6cqw;width:15cqw;height:15cqw;display:grid;place-items:center;font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:8cqw;text-shadow:0 1px 1px rgba(0,0,0,.4)}
-.atk{left:2cqw;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe6b3,#d9a14a 55%,#8a5a1f);color:#2b1a04;border:.7cqw solid #5e3b10}
+.atk{left:2cqw;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffb8a3,#d0503a 55%,#7a1d10);color:#fff;border:.7cqw solid #4f120a;text-shadow:0 1px 1px rgba(0,0,0,.6)}
 .pv,.dur{right:2cqw;padding-bottom:2cqw;clip-path:polygon(0 0,100% 0,100% 58%,50% 100%,0 58%)}
 .pv{background:linear-gradient(#e0705c,#a3291b);color:#fff}
 .pv.blesse{background:linear-gradient(#8f1f14,#4e0d07)}
@@ -577,6 +577,41 @@ body.compact #banniere .banniere-bande b{font-size:30px}
 
 
 
+/* Lisibilité : actions possibles, défausses, journal */
+.main .carte.jouable{box-shadow:0 0 0 2px #ffd34d,0 0 18px rgba(255,211,77,.55),0 3px 8px var(--ombre)}
+.crea.peut{box-shadow:0 0 0 3px #4fd18b,0 0 14px rgba(79,209,139,.6);animation:crea-prete 1.6s ease-in-out infinite}
+.crea.peut::before{content:"⚔";position:absolute;z-index:4;top:-9px;left:50%;transform:translateX(-50%);width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;
+  background:#2f9e63;color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.5)}
+@keyframes crea-prete{50%{box-shadow:0 0 0 3px #4fd18b,0 0 22px rgba(79,209,139,.9)}}
+.crea.choisie{box-shadow:0 0 0 4px #ffd34d,0 0 24px rgba(255,211,77,.85);transform:translateY(-8px);animation:none}
+.crea.cible{box-shadow:0 0 0 3px #ff5a45,0 0 16px rgba(255,90,69,.7);cursor:crosshair;animation:cible-pulse 1.1s ease-in-out infinite}
+.medaillon.cible{cursor:crosshair}
+.medaillon.cible .visage{animation:cible-medaillon 1.1s ease-in-out infinite}
+@keyframes cible-pulse{50%{box-shadow:0 0 0 3px #ff5a45,0 0 26px rgba(255,90,69,1)}}
+@keyframes cible-medaillon{50%{box-shadow:0 0 0 5px #ff5a45,0 0 34px #ff5a45}}
+.marche .carte.achetable{box-shadow:0 0 0 3px #4fd18b,0 0 14px rgba(79,209,139,.55),0 2px 6px rgba(0,0,0,.28)}
+.plateau.tour-moi ~ .cote .marche .carte:not(.achetable),.table-jeu:has(.plateau.tour-moi) .marche .carte:not(.achetable){opacity:.6;filter:saturate(.6)}
+.ressource.puissance.dispo .jeton{animation:jeton-dispo 1.2s ease-in-out infinite}
+@keyframes jeton-dispo{50%{transform:scale(1.12);box-shadow:0 0 0 4px rgba(255,90,69,.45),0 0 18px rgba(255,90,69,.8)}}
+.pile-defausse[data-act]{cursor:pointer}
+.pile-defausse[data-act]:hover .pile-tas,.pile-defausse[data-act]:focus-visible .pile-tas{filter:brightness(1.15);outline:2px solid var(--bronze);outline-offset:3px;border-radius:6px}
+.lien-defausse{background:none;border:none;padding:0;color:inherit;font:inherit;text-decoration:underline;cursor:pointer}
+.boite-defausse{max-width:min(980px,94vw)}
+.grille-defausse{display:flex;flex-wrap:wrap;gap:8px;max-height:60vh;overflow:auto;padding:4px}
+.grille-defausse .carte{--w:118px}
+.ressources-autre{display:inline-flex;gap:4px;align-items:center}
+.mini-jeton{min-width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:Cinzel,serif;font-weight:700;font-size:13px;padding:0 3px;box-shadow:0 1px 3px rgba(0,0,0,.45)}
+.mini-jeton.or{background:radial-gradient(circle at 35% 30%,#fff1b8,#e0b13d 55%,#8a5f12);color:#2b1a04}
+.mini-jeton.puissance{background:radial-gradient(circle at 35% 30%,#ffb8a3,#d0503a 55%,#7a1d10);color:#fff}
+.nom-journal{color:var(--or);cursor:help;font-weight:700}
+.nom-journal:hover,.nom-journal:focus-visible{text-decoration:underline}
+#survol-carte{position:fixed;z-index:60;pointer-events:none;opacity:0;transition:opacity .12s}
+#survol-carte.montre{opacity:1}
+#survol-carte .carte{--w:190px;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+body.compact .mini-jeton{min-width:18px;height:18px;font-size:10px}
+body.compact .crea.peut::before{width:14px;height:14px;font-size:9px;top:-6px}
+@media (prefers-reduced-motion: reduce){.crea.peut,.crea.cible,.medaillon.cible .visage,.ressource.puissance.dispo .jeton{animation:none}}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -678,7 +713,7 @@ body.compact #banniere .banniere-bande b{font-size:30px}
 .z-effets .symboles{display:inline-flex;gap:.3em}
 .z-stats{display:flex;justify-content:space-between;margin-top:8px}
 .z-atk,.z-pv,.z-dur{min-width:38px;height:38px;display:grid;place-items:center;font-family:Cinzel,serif;font-weight:700;font-size:19px;padding:0 6px}
-.z-atk{border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe6b3,#d9a14a 55%,#8a5a1f);color:#2b1a04;border:2px solid #5e3b10}
+.z-atk{border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffb8a3,#d0503a 55%,#7a1d10);color:#fff;border:2px solid #4f120a;text-shadow:0 1px 1px rgba(0,0,0,.6)}
 .z-pv,.z-dur{padding-bottom:6px;clip-path:polygon(0 0,100% 0,100% 58%,50% 100%,0 58%)}
 .z-pv{background:linear-gradient(#e0705c,#a3291b);color:#fff}
 .z-dur{background:linear-gradient(#c5ced6,#6f7c88);color:#1d232a}
@@ -1987,9 +2022,9 @@ function consigne(inter, moi){
   if(ui.armeEnAttente) return `Choisissez la créature à équiper. <button type="button" data-act="annuler">Annuler</button>`;
   if(ui.attaquant){
     const c = moi.plateau.find(x => x.uid===ui.attaquant);
-    return `Choisissez la cible de ${c ? def(c).nom : "votre créature"} (contour vert). <button type="button" data-act="annuler">Annuler</button>`;
+    return `Choisissez la cible de ${c ? def(c).nom : "votre créature"} (contour rouge). <button type="button" data-act="annuler">Annuler</button>`;
   }
-  if(moi.combat>0) return `Cliquez sur une cible au contour vert pour que ${heroDe(moi).nom} l’attaque avec votre puissance (une créature riposte).`;
+  if(moi.combat>0) return `Cliquez sur une cible au contour rouge pour que ${heroDe(moi).nom} l’attaque avec votre puissance (une créature riposte).`;
   if(moi.main.length) return "Cliquez sur vos cartes pour les jouer, achetez au marché, puis finissez le tour.";
   return "Achetez au marché, attaquez avec vos créatures, puis finissez le tour.";
 }
@@ -2020,7 +2055,7 @@ function htmlPile(j, type, petite){
       <span class="pile-nom">Deck</span></div>`;
   }
   const n = j.defausse.length, haut = j.defausse[n-1];
-  return `<div class="pile pile-defausse ${petite ? "petite" : ""}" data-joueur="${idx}" title="Défausse : ${n} carte${n>1 ? "s" : ""}${haut && CARTES[haut.id] ? `, dessus : ${esc(CARTES[haut.id].nom)}` : ""}">
+  return `<div class="pile pile-defausse ${petite ? "petite" : ""}" data-joueur="${idx}" role="button" tabindex="0" data-act="voir-defausse" data-id="${idx}" title="Voir la défausse : ${n} carte${n>1 ? "s" : ""}${haut && CARTES[haut.id] ? `, dessus : ${esc(CARTES[haut.id].nom)}` : ""}">
     <div class="pile-tas">${haut && CARTES[haut.id] ? htmlCarte({id:haut.id}) : `<span class="pile-vide"></span>`}<span class="pile-nb">${n}</span></div>
     <span class="pile-nom">Défausse${!petite && j.bannies.length ? ` <span class="pile-bannies" title="Cartes bannies : ${j.bannies.length}">${symMot("bannir")}\u00a0${j.bannies.length}</span>` : ""}</span></div>`;
 }
@@ -2082,6 +2117,7 @@ function render(){
       <section class="camp-adv f-${lui.heros || "neutre"}" aria-label="Camp adverse">
         <div class="ligne-heros">
           ${htmlMedaillon(lui, false, inter, visee && t.face)}
+          ${htmlRessourcesAutre(lui)}
           <div class="main-adverse" title="${lui.main.length} cartes en main" aria-label="${lui.main.length} cartes en main">${Array.from({length:Math.min(lui.main.length, 10)}, () => `<span class="dos-mini"></span>`).join("")}</div>
           <div class="piles-adverses">${htmlPile(lui, "deck", true)}${htmlPile(lui, "defausse", true)}</div>
         </div>
@@ -2097,7 +2133,7 @@ function render(){
           ${htmlMedaillon(moi, true, inter, false)}
           <div class="ressources-jeu">
             <span class="ressource or"><span class="jeton">${moi.or}</span>or</span>
-            <span class="ressource puissance" data-aide="puissance" data-titre="Puissance"><span class="jeton">${moi.combat}</span>puissance</span>
+            <span class="ressource puissance ${inter && moi.combat>0 ? "dispo" : ""}" data-aide="puissance" data-titre="Puissance"><span class="jeton">${moi.combat}</span>puissance</span>
           </div>
 
           <div class="joues">${moi.joues.map(c => htmlJoue(c, inter)).join("")}</div>
@@ -2114,7 +2150,7 @@ function render(){
           ${base ? htmlCarte(base, {act:"base", classes: inter && moi.or>=(def(base).prix||0) ? "achetable" : "", extra:'<span class="illimite">Toujours disponible</span>'}) : ""}
         </div>
       </section>
-      <details class="journal" ${ui.journalFerme ? "" : "open"}><summary>Journal</summary><ol>${S.journal.slice(-10).reverse().map(l => `<li>${l}</li>`).join("")}</ol></details>
+      <details class="journal" ${ui.journalFerme ? "" : "open"}><summary>Journal</summary><ol>${S.journal.slice(-10).reverse().map(l => `<li>${journalHTML(l)}</li>`).join("")}</ol></details>
     </aside>
   </div>`;
   ajusterEventail();
@@ -2183,7 +2219,9 @@ function renderCouche(){
   const couche = document.getElementById("couche");
   let h = "";
   const regles = "";
-  if(!S){
+  if(S && ui.voirDefausse!=null && S.joueurs[ui.voirDefausse]){
+    h = htmlVoirDefausse();
+  } else if(!S){
     h = `<div class="boite" role="dialog" aria-label="Nouvelle partie">
       <h2 class="logo">${NOM_JEU}</h2><span class="sous-logo">Le choc des panthéons</span>
       <p>Un premier essai jouable : quatre factions, un marché commun et des créatures sur le plateau. Choisissez un mode pour commencer.</p>
@@ -3350,6 +3388,8 @@ document.addEventListener("click", e => {
   }
   if(act==="commencer"){ ui.couvert = false; return render(); }
   if(!S) return;
+  if(act==="voir-defausse"){ ui.voirDefausse = Number(id); return renderCouche(); }
+  if(act==="fermer-defausse"){ ui.voirDefausse = null; return renderCouche(); }
   // 2 contre 2 : bénéficiaire choisi des soins et renforts
   if(est2v2()) S.choixBenef = ui.benef==="moi" ? 0 : ui.benef==="allie" ? 2 : null;
   if(act==="ban"){ M().bannir(id); return apresAction(); }
@@ -6386,7 +6426,7 @@ function htmlBloc2v2(k, inter, visee, ciblesEnn){
   const crea = j.plateau.map(c => moi ? htmlCrea(c, "own", inter ? (ui.armeEnAttente ? "cible" : `${c.peutAttaquer && !c.aAttaque ? "peut" : ""} ${ui.attaquant===c.uid ? "choisie" : ""}`) : "")
                                       : htmlCrea(c, ennemi ? "enemy" : "allie", ennemi && visee && ciblesEnn.has(c.uid) ? "cible" : "")).join("");
   return `<section class="bloc2 ${moi ? "bloc-moi" : ennemi ? "bloc-ennemi" : "bloc-allie"} f-${j.heros || "neutre"} ${S.courant===k && S.vainqueur===null ? "bloc-actif" : ""}" aria-label="${esc(moi ? "Votre camp" : ennemi ? j.nom : "Votre allié")}">
-    <div class="tete-bloc">${htmlMedaillon2v2(k, inter, visee)}${ennemi ? `<span class="aide piles-mini" title="Deck, défausse et main">${j.deck.length} deck, ${j.defausse.length} défausse, ${j.main.length} en main</span>` : ""}</div>
+    <div class="tete-bloc">${htmlMedaillon2v2(k, inter, visee)}${moi ? "" : htmlRessourcesAutre(j)}${moi ? "" : `<span class="aide piles-mini">${j.deck.length} deck, <button type="button" class="lien-defausse" data-act="voir-defausse" data-id="${k}">${j.defausse.length} défausse</button>, ${j.main.length} en main</span>`}</div>
     <div class="rangee">${crea || `<span class="vide">${vide}</span>`}</div>
   </section>`;
 }
@@ -6425,7 +6465,7 @@ function render2v2(){
         <div class="main-allie" aria-label="Main de votre allié"><span class="aide">Main de votre allié</span><div class="cartes-allie">${allie.main.map(c => htmlCarte(c)).join("") || `<span class="aide">vide</span>`}</div></div>
         <div class="ressources-jeu">
           <span class="ressource or"><span class="jeton">${moi.or}</span>or</span>
-          <span class="ressource puissance" data-aide="puissance" data-titre="Puissance"><span class="jeton">${moi.combat}</span>puissance</span>
+          <span class="ressource puissance ${inter && moi.combat>0 ? "dispo" : ""}" data-aide="puissance" data-titre="Puissance"><span class="jeton">${moi.combat}</span>puissance</span>
         </div>
         <label class="choix-benef">Soins et renforts
           <select data-benef aria-label="Bénéficiaire des soins et renforts">${[["auto","Automatique (au plus blessé)"],["moi","Pour moi"],["allie","Pour mon allié"]].map(([v, l]) => `<option value="${v}" ${(ui.benef || "auto")===v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
@@ -6440,7 +6480,7 @@ function render2v2(){
           ${base ? htmlCarte(base, {act:"base", classes: inter && moi.or>=(def(base).prix || 0) ? "achetable" : "", extra:'<span class="illimite">Toujours disponible</span>'}) : ""}
         </div>
       </section>
-      <details class="journal" ${ui.journalFerme ? "" : "open"}><summary>Journal</summary><ol>${S.journal.slice(-12).reverse().map(l => `<li>${l}</li>`).join("")}</ol></details>
+      <details class="journal" ${ui.journalFerme ? "" : "open"}><summary>Journal</summary><ol>${S.journal.slice(-12).reverse().map(l => `<li>${journalHTML(l)}</li>`).join("")}</ol></details>
     </aside>
   </div>`;
   ajusterEventail();
@@ -6478,6 +6518,59 @@ document.addEventListener("change", e => {
   try { localStorage.setItem("benef-2v2", ui.benef); } catch(err) {}
 });
 try { ui.benef = localStorage.getItem("benef-2v2") || "auto"; } catch(e) { ui.benef = "auto"; }
+
+/* ============================================================
+   LISIBILITÉ : défausses consultables, noms de cartes du journal
+   ============================================================ */
+function htmlVoirDefausse(){
+  const k = ui.voirDefausse, j = S.joueurs[k];
+  const qui = est2v2() ? (k===0 ? "Votre défausse" : k===2 ? "Défausse de votre allié" : `Défausse ${/^[aeiouyhéèêàâîôû]/i.test(j.nom) ? "d’" : "de "}${esc(j.nom)}`) : (k===vue() ? "Votre défausse" : S.mode==="ia" ? "Défausse de l’ordinateur" : enLigne() ? "Défausse de votre adversaire" : `Défausse de ${esc(nomAffiche(j))}`);
+  const cartes = [...j.defausse].reverse();
+  return `<div class="boite boite-defausse" role="dialog" aria-label="${qui}">
+    <h2>${qui} <span class="aide">${cartes.length} carte${cartes.length>1 ? "s" : ""}, de la plus récente à la plus ancienne</span></h2>
+    ${cartes.length ? `<div class="grille-defausse">${cartes.map((c, i) => htmlCarte({id:c.id, uid:"vd" + i, v:c.v})).join("")}</div>` : `<p class="aide">La défausse est vide.</p>`}
+    <div class="actions"><button type="button" class="btn" data-act="fermer-defausse">Fermer</button></div>
+  </div>`;
+}
+// Noms de cartes du journal : en gras, avec la carte au survol
+let RX_NOMS = null, RX_CLE = "";
+function journalHTML(l){
+  const cle = Object.keys(CARTES).length + ":" + (CONFIG.exporte || "");
+  if(!RX_NOMS || RX_CLE!==cle){
+    const noms = Object.entries(CARTES).filter(([, d]) => d && d.nom).map(([id, d]) => [d.nom, id]).sort((a, b) => b[0].length - a[0].length);
+    RX_NOMS = {map:Object.fromEntries(noms), rx:noms.length ? new RegExp(`(?<![\\p{L}])(${noms.map(([n]) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})(?![\\p{L}])`, "gu") : null};
+    RX_CLE = cle;
+  }
+  if(!RX_NOMS.rx) return l;
+  return l.replace(RX_NOMS.rx, n => `<b class="nom-journal" data-carte="${RX_NOMS.map[n]}" tabindex="0">${n}</b>`);
+}
+function survolCarte(el){
+  let s = document.getElementById("survol-carte");
+  if(!s){ s = document.createElement("div"); s.id = "survol-carte"; s.setAttribute("aria-hidden", "true"); document.body.appendChild(s); }
+  if(!el){ s.classList.remove("montre"); return; }
+  s.innerHTML = htmlCarte({id:el.dataset.carte, uid:"survol"});
+  const r = el.getBoundingClientRect(), L = 190, H = L * 88 / 63;
+  const gauche = r.left - L - 14 > 8 ? r.left - L - 14 : Math.min(innerWidth - L - 8, r.right + 14);
+  s.style.left = gauche + "px";
+  s.style.top = Math.max(8, Math.min(innerHeight - H - 8, r.top + r.height / 2 - H / 2)) + "px";
+  s.classList.add("montre");
+}
+document.addEventListener("pointerover", e => { const el = e.target.closest && e.target.closest(".nom-journal"); if(el && e.pointerType!=="touch") survolCarte(el); });
+document.addEventListener("pointerout", e => { if(e.target.closest && e.target.closest(".nom-journal")) survolCarte(null); });
+document.addEventListener("focusin", e => { if(e.target.classList && e.target.classList.contains("nom-journal")) survolCarte(e.target); });
+document.addEventListener("focusout", e => { if(e.target.classList && e.target.classList.contains("nom-journal")) survolCarte(null); });
+document.addEventListener("click", e => {
+  const el = e.target.closest && e.target.closest(".nom-journal");
+  const s = document.getElementById("survol-carte");
+  if(el){ e.preventDefault(); if(s && s.classList.contains("montre") && s.dataset.pour===el.dataset.carte){ survolCarte(null); } else { survolCarte(el); document.getElementById("survol-carte").dataset.pour = el.dataset.carte; } }
+  else if(s && s.classList.contains("montre")) survolCarte(null);
+});
+document.addEventListener("keydown", e => {
+  if(e.key==="Escape" && S && ui.voirDefausse!=null){ ui.voirDefausse = null; renderCouche(); }
+  if((e.key==="Enter" || e.key===" ") && e.target.classList && e.target.classList.contains("pile-defausse")){ e.preventDefault(); e.target.click(); }
+});
+// Mini jetons d’or et de puissance d’un autre joueur
+const htmlRessourcesAutre = j => `<span class="ressources-autre" title="Or et puissance de ce joueur, en temps réel"><span class="mini-jeton or" aria-label="${j.or} or">${j.or}</span><span class="mini-jeton puissance" aria-label="${j.combat} puissance">${j.combat}</span></span>`;
 
 chargerConfig();
 appliquerReglageAnimations();
