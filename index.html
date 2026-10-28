@@ -612,6 +612,17 @@ body.compact .mini-jeton{min-width:18px;height:18px;font-size:10px}
 body.compact .crea.peut::before{width:14px;height:14px;font-size:9px;top:-6px}
 @media (prefers-reduced-motion: reduce){.crea.peut,.crea.cible,.medaillon.cible .visage,.ressource.puissance.dispo .jeton{animation:none}}
 
+/* Dévotion */
+.devotion-palier{font-size:12px;font-weight:700;color:var(--or);letter-spacing:.04em}
+.devotion-deck{display:flex;flex-direction:column;gap:5px;font-size:14px;padding:8px 10px;border-radius:8px;background:color-mix(in srgb, var(--fc) 14%, transparent);border:1px solid color-mix(in srgb, var(--fc) 40%, transparent);margin:8px 0}
+.barre-devotion{position:relative;height:8px;border-radius:4px;background:var(--line);overflow:visible}
+.barre-devotion > span{display:block;height:100%;border-radius:4px;background:var(--fc)}
+.barre-devotion i{position:absolute;top:-3px;width:2px;height:14px;background:var(--ink-2)}
+.liste-versions{display:flex;flex-direction:column;gap:6px}
+.ligne-version{display:grid;grid-template-columns:auto 110px 1fr auto;align-items:center;gap:10px}
+.ligne-version .btn{margin:0}
+body.compact .devotion-palier{font-size:9px}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -1121,13 +1132,33 @@ const DEFAUT = {
   // Valeurs d’origine = config.json du site (GitHub), sans les images
   musiques:{menu:"", duel:[]}, variantes:{}, boosters:{},
   credits:{musiques:[{titre:"Battle Cinematic Heroic Orchestra", artiste:"Echoes of Lumen"}, {titre:"Battle Music", artiste:"PaulYudin"}, {titre:"Battle", artiste:"NastelBom"}, {titre:"Epic Battle", artiste:"YevhenAstafiev"}, {titre:"Cinematic Powerful Battle Music", artiste:"Tunetank"}, {titre:"Epic Cinematic Battle Music", artiste:"Tunetank"}]},
-  regles:{armesHeros:true, armesImmediat:true, armesPermanentes:true, armesVie:true, pvDepart:40, seuilPouvoir:10, mainDepart:5, piocheParTour:5, tailleMarche:5, plateauMax:7, tailleDeck:30, copiesMax:2, copiesLegendaire:1, carteBase:"pierre", deckDepart:{piece:7, rubis:1, dague:1, epee:1}},
+  regles:{devotionSeuils:[16, 30], devotionNbTresors:2, devotionTresor:"piece", devotionCreature:"dague", armesHeros:true, armesImmediat:true, armesPermanentes:true, armesVie:true, pvDepart:40, seuilPouvoir:10, mainDepart:5, piocheParTour:5, tailleMarche:5, plateauMax:7, tailleDeck:30, copiesMax:2, copiesLegendaire:1, carteBase:"pierre", deckDepart:{piece:7, rubis:1, dague:1, epee:1}},
   mots:{provocation:"Provocation", rapidite:"Rapidité", resistance:"Résistance", ethere:"Ethéré"},
   termes:{conjuration:"Conjuration", echo:"Echo", allie:"Combo", sacrifice:"Sacrifice"},
-  heros:{egy:{nom:"Atoum", titre:"Dieu primordial égyptien", pouvoir:{nom:"Souffle de vie", effet:{soin:8, renfort:{atk:0, vie:2}}}}, hin:{nom:"Brahma", titre:"Dieu créateur hindou", pouvoir:{nom:"Abondance", effet:{or:6, pioche:2}}}, nor:{nom:"Ymir", titre:"Géant primordial nordique", pouvoir:{nom:"Colère du géant", effet:{combat:8}}}, gre:{nom:"Chaos", titre:"Abîme primordial grec", pouvoir:{nom:"Abîme originel", effet:{pioche:3, bannir:1}}}},
+  heros:{
+    "egy-0":{nom:"Osiris", titre:"Dieu des morts égyptien", pouvoir:{nom:"Renaissance", effet:{soin:8, renfort:{atk:0, vie:2}}}},
+    "egy-1":{nom:"Râ", titre:"Dieu du soleil égyptien", pouvoir:{nom:"Lumière de Râ", effet:{soin:10, renfort:{atk:0, vie:2}}}},
+    egy:{nom:"Atoum", titre:"Dieu primordial égyptien", pouvoir:{nom:"Souffle de vie", effet:{soin:9, renfort:{atk:1, vie:2}}}},
+    "hin-0":{nom:"Shiva", titre:"Dieu destructeur hindou", pouvoir:{nom:"Danse cosmique", effet:{or:6, pioche:2}}},
+    "hin-1":{nom:"Vishnu", titre:"Dieu protecteur hindou", pouvoir:{nom:"Préservation", effet:{or:7, pioche:2}}},
+    hin:{nom:"Brahma", titre:"Dieu créateur hindou", pouvoir:{nom:"Abondance", effet:{or:8, pioche:2}}},
+    "nor-0":{nom:"Thor", titre:"Dieu du tonnerre nordique", pouvoir:{nom:"Fureur du tonnerre", effet:{combat:8}}},
+    "nor-1":{nom:"Odin", titre:"Père des dieux nordiques", pouvoir:{nom:"Lance Gungnir", effet:{combat:10}}},
+    nor:{nom:"Ymir", titre:"Géant primordial nordique", pouvoir:{nom:"Colère du géant", effet:{combat:11}}},
+    "gre-0":{nom:"Poséidon", titre:"Dieu des mers grec", pouvoir:{nom:"Raz-de-marée", effet:{pioche:3, bannir:1}}},
+    "gre-1":{nom:"Zeus", titre:"Roi des dieux grecs", pouvoir:{nom:"Foudre de l’Olympe", effet:{pioche:4, bannir:1}}},
+    gre:{nom:"Chaos", titre:"Abîme primordial grec", pouvoir:{nom:"Abîme originel", effet:{pioche:4, bannir:2}}}},
   factions:{egy:{nom:"Égyptiens", f:"égyptienne", m:"égyptien", sym:"☥", couleur:"#d4a017"}, hin:{nom:"Hindous", f:"hindoue", m:"hindou", sym:"✿", couleur:"#c8402a"}, nor:{nom:"Nordiques", f:"nordique", m:"nordique", sym:"⚔", couleur:"#6e7b88"}, gre:{nom:"Grecs", f:"grecque", m:"grec", sym:"Ω", couleur:"#2d5fbf"}},
   cartes:{
     piece:{nom:"Trésor", type:"sort", depart:true, effet:{or:1}},
+    piece_egy:{nom:"Ankh d’or", type:"sort", depart:true, faction:"egy", versionDe:"piece", effet:{or:1}},
+    piece_hin:{nom:"Pièce de Lakshmi", type:"sort", depart:true, faction:"hin", versionDe:"piece", effet:{or:1}},
+    piece_nor:{nom:"Or des Nibelungen", type:"sort", depart:true, faction:"nor", versionDe:"piece", effet:{or:1}},
+    piece_gre:{nom:"Drachme d’Athéna", type:"sort", depart:true, faction:"gre", versionDe:"piece", effet:{or:1}},
+    dague_egy:{nom:"Gardien d’Héliopolis", type:"creature", depart:true, faction:"egy", versionDe:"dague", attaque:1, vie:1, mots:["provocation"], effet:{combat:1}, allie:{soin:1}},
+    dague_hin:{nom:"Garde de Lakshmi", type:"creature", depart:true, faction:"hin", versionDe:"dague", attaque:1, vie:1, effet:{combat:1}, allie:{combat:1}},
+    dague_nor:{nom:"Jeune einherjar", type:"creature", depart:true, faction:"nor", versionDe:"dague", attaque:1, vie:1, mots:["rapidite"], effet:{combat:1}, allie:{combat:1}},
+    dague_gre:{nom:"Éphèbe d’Athènes", type:"creature", depart:true, faction:"gre", versionDe:"dague", attaque:1, vie:1, mots:["ethere"], effet:{combat:1}, allie:{combat:1}},
     rubis:{nom:"Joyau", type:"sort", depart:true, effet:{or:2}},
     dague:{nom:"Vagabon", type:"creature", depart:true, effet:{combat:1}, attaque:1, vie:1},
     epee:{nom:"Encourager", type:"sort", depart:true, effet:{combat:2}},
@@ -1278,10 +1309,25 @@ function fusionner(obj){
       else if(cartesFinales[k] && c.image) cartesFinales[k].image = c.image;
     }
   }
+  // Dévotion : ajouter les versions par panthéon des cartes de départ si le config.json ne les contient pas encore
+  if(Object.values(cartesFinales).every(c => !c.versionDe)){
+    cartesFinales = {...cartesFinales};
+    for(const [k, c] of Object.entries(d.cartes)) if(c.versionDe && !cartesFinales[k]) cartesFinales[k] = copie(c);
+  }
+  // Dévotion : un ancien héros unique devient la divinité primordiale (palier 30) ; la divinité du premier rang
+  // garde exactement son pouvoir actuel, pour ne pas changer l’équilibre des decks mélangés
+  const herosFinaux = {...d.heros, ...(obj.heros || {})};
+  for(const f of Object.keys(obj.factions || {})){
+    const ancien = obj.heros && obj.heros[f];
+    if(ancien && !obj.heros[`${f}-0`] && d.heros[`${f}-0`]){
+      herosFinaux[`${f}-0`] = {...d.heros[`${f}-0`], pouvoir:{nom:d.heros[`${f}-0`].pouvoir.nom, effet:copie((ancien.pouvoir && ancien.pouvoir.effet) || d.heros[`${f}-0`].pouvoir.effet)}};
+      herosFinaux[f] = {...ancien, pouvoir:{nom:(ancien.pouvoir && ancien.pouvoir.nom) || d.heros[f].pouvoir.nom, effet:copie(d.heros[f].pouvoir.effet)}};
+    }
+  }
   const reglesObj = {...d.regles, ...(obj.regles||{})};
   // Version 3 : arrivée des héros, 40 points de vie
   if((obj.version || 1) < 3){ if(reglesObj.pvDepart===30) reglesObj.pvDepart = 40; reglesObj.seuilPouvoir = reglesObj.seuilPouvoir || 10; }
-  return {version:d.version, exporte:obj.exporte || 0, repare:obj.repare || 0, cartes:cartesFinales, factions:obj.factions, heros:{...d.heros, ...(obj.heros||{})},
+  return {version:d.version, exporte:obj.exporte || 0, repare:obj.repare || 0, cartes:cartesFinales, factions:obj.factions, heros:herosFinaux,
           musiques:{menu:(obj.musiques && obj.musiques.menu) || "", duel:(obj.musiques && Array.isArray(obj.musiques.duel)) ? [...obj.musiques.duel] : []},
           variantes:(obj.variantes && typeof obj.variantes==="object") ? copie(obj.variantes) : {},
           boosters:(obj.boosters && typeof obj.boosters==="object") ? copie(obj.boosters) : {},
@@ -1413,7 +1459,43 @@ function nouveauJoueur(nom){
 }
 function log(t){ if(S) S.journal.push(t); }
 
-function nouvellePartie(mode, decks, variantesJeu){
+/* ============================================================
+   DÉVOTION : récompense modeste des decks spécialisés dans un panthéon
+   Palier 0 (moins de 16 cartes du panthéon) : 3e divinité, cartes de départ normales
+   Palier 1 (16 à 29) : 2e divinité, 2 Trésors prennent la couleur du panthéon
+   Palier 2 (30) : divinité primordiale, et le Vagabon devient une créature du panthéon
+   ============================================================ */
+const seuilsDevotion = () => (Array.isArray(REGLES.devotionSeuils) && REGLES.devotionSeuils.length===2) ? REGLES.devotionSeuils : [16, 30];
+const cleHeros = (f, p) => p===2 ? f : `${f}-${p}`;
+function compterDevotion(f, liste){
+  return (liste || []).filter(id => CARTES[id] && CARTES[id].faction===f && estCollectionnable(CARTES[id])).length;
+}
+function palierDevotion(f, liste){
+  const n = compterDevotion(f, liste), [s1, s2] = seuilsDevotion();
+  return n>=s2 ? 2 : n>=s1 ? 1 : 0;
+}
+const versionDevotion = (base, f) => Object.keys(CARTES).find(k => CARTES[k].versionDe===base && CARTES[k].faction===f) || null;
+// Transforme les cartes de départ du joueur selon son palier (appelé une fois le héros choisi)
+function appliquerDevotion(j, liste, sans){
+  const f = j.heros;
+  j.nbDevotion = compterDevotion(f, liste);
+  j.palier = sans ? 0 : palierDevotion(f, liste);
+  const tresor = REGLES.devotionTresor || "piece", creature = REGLES.devotionCreature || "dague";
+  if(j.palier>=1){
+    const v = versionDevotion(tresor, f); let n = REGLES.devotionNbTresors ?? 2;
+    if(v) j.deck.forEach(c => { if(n>0 && c.id===tresor){ c.id = v; n--; } });
+  }
+  if(j.palier>=2){
+    const v = versionDevotion(creature, f);
+    if(v) j.deck.forEach(c => { if(c.id===creature) c.id = v; });
+  }
+}
+function logDevotion(j){
+  if(!j.palier || !FACTIONS[j.heros]) return;
+  log(`Dévotion ${FACTIONS[j.heros].f} (${j.nbDevotion} cartes) : ${j.nom} est guidé par ${heroDe(j).nom}.`);
+}
+
+function nouvellePartie(mode, decks, variantesJeu, opts = {}){
   compteurUid = 0;
   S = {mode, joueurs:[nouveauJoueur("Joueur 1"), nouveauJoueur(mode==="ia" ? "Ordinateur" : "Joueur 2")],
        courant: Math.random()<0.5 ? 0 : 1, tour:1, journal:[], vainqueur:null,
@@ -1424,19 +1506,20 @@ function nouvellePartie(mode, decks, variantesJeu){
     if(v && CONFIG.variantes && CONFIG.variantes[v] && CONFIG.variantes[v].carte===id) c.v = v;
     return c;
   }));
-  S.joueurs.forEach((j, k) => { j.heros = choisirHeros(listesJ[k]); j.morts = 0; });
+  S.joueurs.forEach((j, k) => { j.heros = choisirHeros(listesJ[k]); j.morts = 0; appliquerDevotion(j, listesJ[k], opts.sansDevotion && opts.sansDevotion[k]); });
   S.idPartie = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   S.stats = [0, 1].map(() => ({creatures:0, sorts:0, achats:0, degats:0, soins:0, pouvoirs:0, jouees:{}, achetees:{}}));
   S.debut = Date.now();
   for(let i=0;i<REGLES.tailleMarche && S.marcheDeck.length;i++) S.marche.push(S.marcheDeck.pop());
   S.joueurs.forEach(j => piocher(j, REGLES.mainDepart, true));
   S.joueurs[S.courant].plateau.forEach(c => c.peutAttaquer = true);
+  S.joueurs.forEach(logDevotion);
   log(`${S.joueurs[S.courant].nom} commence.`);
 }
 
 // Héros : le dieu primordial du panthéon le plus représenté dans le deck (égalité : au hasard)
 const HEROS_DEFAUT = {nom:"Héros", titre:"", pouvoir:{nom:"Pouvoir", effet:{combat:6}}};
-const heroDe = j => (j && j.heros && HEROS[j.heros]) || HEROS_DEFAUT;
+const heroDe = j => (j && j.heros && (HEROS[cleHeros(j.heros, j.palier ?? 0)] || HEROS[j.heros])) || HEROS_DEFAUT;
 function choisirHeros(ids){
   const n = {};
   (ids || []).forEach(id => { const f = CARTES[id] && CARTES[id].faction; if(f && FACTIONS[f]) n[f] = (n[f] || 0) + 1; });
@@ -2071,7 +2154,7 @@ function htmlMedaillon(j, estMoi, inter, cible){
     <${balise} ${attrs} class="medaillon f-${j.heros || "neutre"} ${pret ? "pret" : ""} ${cible ? "cible" : ""}" data-joueur="${idx}" style="--p:${(m/seuil).toFixed(3)}" data-aide="carte" data-titre="${esc(pv.nom)}" data-texte="${esc(aide)}">
       <span class="anneau" aria-hidden="true"></span><span class="visage ${h.image ? "portrait-heros" : ""}" aria-hidden="true">${h.image ? `<img src="${h.image}" alt="">` : sym}</span><span class="pv-ecu" title="Points de vie">${j.pv}</span>
     </${balise}>
-    <div class="plaque" title="${estMoi ? "" : `Deck : ${j.deck.length}, défausse : ${j.defausse.length}, main : ${j.main.length}`}"><b>${esc(h.nom)}</b><span class="qui">${esc(nomAffiche(j))}</span>
+    <div class="plaque" title="${estMoi ? "" : `Deck : ${j.deck.length}, défausse : ${j.defausse.length}, main : ${j.main.length}`}"><b>${esc(h.nom)}</b>${j.palier ? `<span class="devotion-palier" title="Dévotion ${FACTIONS[j.heros] ? FACTIONS[j.heros].f : ""} : palier ${j.palier}">${"✦".repeat(j.palier)} Dévotion</span>` : ""}<span class="qui">${esc(nomAffiche(j))}</span>
       <span class="charge ${pret ? "ok" : ""}">${pret ? `${esc(pv.nom)} est prêt` : `${esc(pv.nom)} : ${m} / ${seuil}`}</span>
       ${activable ? `<button type="button" class="btn btn-pouvoir" data-act="pouvoir">Activer</button>` : ""}
     </div></div>`;
@@ -2469,6 +2552,7 @@ function formCarte(id){
       </div>
       <p class="aide">Depuis un site : clic droit sur l’image, « Copier l’image », puis Ctrl+V (Cmd+V sur Mac) sur cette page. Vous pouvez aussi glisser un fichier dans ce cadre. Format conseillé : 896 × 1152 pixels (portrait). Une image d’un autre format est recadrée automatiquement. ${ASSETS ? "Les images sont enregistrées sur le serveur du jeu." : "Les images sont enregistrées dans ce navigateur."}</p>
     </fieldset>
+    ${htmlAdminDevotion(id)}
     ${htmlAdminVariantes(id)}
     ${d.type==="creature" ? `<fieldset><legend>Mots-clés</legend><div class="mots">${Object.entries(MOTS).map(([k,l]) =>
       `<label title="${esc(AIDE_MOTS[k] || "")}"><input type="checkbox" data-mot="${k}" data-carte="${id}" ${(d.mots || []).includes(k) ? "checked" : ""}> ${esc(l)}</label>`).join("")}</div></fieldset>` : ""}
@@ -2517,14 +2601,15 @@ function admRegles(){
 
 function admHeros(){
   return `<div class="adm-page"><h2>Héros</h2>
-    <p class="aide">Chaque joueur reçoit le héros du panthéon le plus représenté dans son deck (en cas d’égalité, au hasard). Le pouvoir se charge quand ${REGLES.seuilPouvoir || 10} créatures ennemies sont mortes (réglable dans l’onglet Règles), puis se recharge après chaque utilisation.</p>
-    ${Object.entries(FACTIONS).map(([k,f]) => {
+    <p class="aide">Chaque joueur reçoit une divinité du panthéon le plus représenté dans son deck (en cas d’égalité, au hasard) : la 3<sup>e</sup> divinité du panthéon en dessous de ${seuilsDevotion()[0]} cartes, la 2<sup>e</sup> à partir de ${seuilsDevotion()[0]} cartes, et la divinité primordiale avec ${seuilsDevotion()[1]} cartes (Dévotion). Le pouvoir se charge quand ${REGLES.seuilPouvoir || 10} créatures ennemies sont mortes (réglable dans l’onglet Règles), puis se recharge après chaque utilisation.</p>
+    ${Object.entries(FACTIONS).map(([k,f]) => PALIERS_HEROS().map(([suffixe, palier]) => {
+      const cle = k + suffixe;
       if(!CONFIG.heros) CONFIG.heros = {};
-      if(!CONFIG.heros[k]) CONFIG.heros[k] = copie(HEROS_DEFAUT);
-      const hr = CONFIG.heros[k], e = (hr.pouvoir && hr.pouvoir.effet) || {}, pc = `heros.${k}.pouvoir.effet`;
+      if(!CONFIG.heros[cle]) CONFIG.heros[cle] = copie(HEROS_DEFAUT);
+      const hr = CONFIG.heros[cle], e = (hr.pouvoir && hr.pouvoir.effet) || {}, pc = `heros.${cle}.pouvoir.effet`;
       const creatures = Object.entries(CARTES).filter(([,c]) => c.type==="creature").map(([id,c]) => [id,c.nom]);
-      const cleImg = `heros:${k}`;
-      return `<fieldset class="f-${k}" data-depot="${cleImg}"><legend><span class="pastille"></span>${esc(f.nom)}</legend>
+      const cleImg = `heros:${cle}`;
+      return `<fieldset class="f-${k}" data-depot="${cleImg}"><legend><span class="pastille"></span>${esc(f.nom)}, ${esc(palier)} : ${esc(hr.nom || "")}</legend>
         <div class="heros-admin">
           <div class="medaillon f-${k}" style="--p:1"><span class="anneau"></span><span class="visage ${hr.image ? "portrait-heros" : ""}">${hr.image ? `<img src="${hr.image}" alt="Portrait de ${esc(hr.nom)}">` : f.sym}</span></div>
           <div>
@@ -2538,9 +2623,9 @@ function admHeros(){
           </div>
         </div>
         <div class="champs">
-          ${champTexte("Nom du héros", `heros.${k}.nom`, hr.nom)}
-          ${champTexte("Titre", `heros.${k}.titre`, hr.titre || "")}
-          ${champTexte("Nom du pouvoir", `heros.${k}.pouvoir.nom`, hr.pouvoir ? hr.pouvoir.nom : "")}
+          ${champTexte("Nom de la divinité", `heros.${cle}.nom`, hr.nom)}
+          ${champTexte("Titre", `heros.${cle}.titre`, hr.titre || "")}
+          ${champTexte("Nom du pouvoir", `heros.${cle}.pouvoir.nom`, hr.pouvoir ? hr.pouvoir.nom : "")}
         </div>
         <p class="effet-resume" style="margin-top:12px">Pouvoir : ${esc(decrire(e))}</p>
         <div class="champs petits">
@@ -2550,7 +2635,7 @@ function admHeros(){
           ${champSelect("Invoquer", `${pc}.invoque.id`, e.invoque ? e.invoque.id : "", [["","Rien"], ...creatures])}
           ${champNombre("Nombre invoqué", `${pc}.invoque.n`, e.invoque ? e.invoque.n : 0)}
         </div></fieldset>`;
-    }).join("")}</div>`;
+    }).join("")).join("")}</div>`;
 }
 function admFactions(){
   return `<div class="adm-page"><h2>Factions</h2>
@@ -2660,6 +2745,7 @@ function actionAdmin(act, id, el){
   if(act.startsWith("srv-")){ actionServeur(act); return; }
   if(act.startsWith("mus-")){ actionMusiques(act, id); return; }
   if(act.startsWith("variante-") || act.startsWith("booster-") || act==="carte-promo"){ actionVariantes(act, id); return; }
+  if(act==="devotion-creer"){ const [b, f] = String(id).split("|"); creerVersionDevotion(b, f); return; }
   if(act==="son"){ basculerSon(); return renderAdmin(); }
   if(act==="stats-rafraichir"){ chargerAdminStats(); erreur("Actualisation…"); return; }
   if(act==="surv-rafraichir"){ chargerSurveillance(); erreur("Actualisation…"); return; }
@@ -4063,6 +4149,7 @@ function pageEditeur(){
         <label class="champ"><span>Nom du deck</span><input type="text" maxlength="40" data-prog="nomDeck" value="${esc(e.nom)}"></label>
         <div class="compteur ${pb.length ? "invalide" : "valide"}">${e.cartes.length} / ${REGLES.tailleDeck}</div>
         <div class="courbe" aria-label="Courbe des prix">${prix.map((n, i) => `<div class="colonne"><span class="nb">${n || ""}</span><span class="b" style="height:${Math.round(60*n/maxBarre)}px"></span><span class="x">${i===7 ? "8+" : i+1}</span></div>`).join("")}</div>
+        ${htmlDevotionDeck(e.cartes)}
         <div class="factions-deck">${Object.entries(parFaction).map(([f, n]) => `<span class="puce-fac f-${f}"><span class="pastille"></span>${f==="neutre" ? "Neutre" : esc(FACTIONS[f] ? FACTIONS[f].nom : f)} ${n}</span>`).join("")}</div>
         <p class="${pb.length ? "invalide" : "valide"}">${pb.length ? pb.map(esc).join("<br>") : "Deck prêt à jouer."}</p>
         <ul class="liste-deck">${lignes.map(id => `<li><button type="button" data-act="deck-retirer" data-id="${id}" title="Retirer une carte"><span class="prix-mini">${CARTES[id].prix ?? "–"}</span><span class="pastille f-${CARTES[id].faction || "neutre"}"></span>${esc(CARTES[id].nom)}<span class="x-nb">×${compte[id]}</span></button></li>`).join("")}</ul>
@@ -4527,13 +4614,19 @@ const messageServeur = m => /trop courte/i.test(m) ? "partie trop courte (moins 
 // Une partie = deux camps, enregistrés ensemble et une seule fois :
 // contre l’ordinateur, le joueur enregistre son camp et celui de l’ordinateur ;
 // en ligne, l’hôte enregistre les deux joueurs ; à deux sur un écran, les deux camps sont « locaux ».
+// Les versions de dévotion comptent comme leur carte de base dans les statistiques envoyées au serveur
+function versionsVersBase(o){
+  const r = {};
+  for(const [k, n] of Object.entries(o || {})){ const b = (CARTES[k] && CARTES[k].versionDe) || k; r[b] = (r[b] || 0) + n; }
+  return r;
+}
 async function enregistrerDuel(){
   if(!S.ticket) throw new Error(S.ticketErreur || "Ticket de partie manquant.");
   const camp = i => {
     const st = (S.stats && S.stats[i]) || {};
     return {heros:S.joueurs[i].heros || null,
             degats:st.degats || 0, soins:st.soins || 0, creatures:st.creatures || 0, sorts:st.sorts || 0,
-            achats:st.achats || 0, pouvoirs:st.pouvoirs || 0, jouees:st.jouees || {}, achetees:st.achetees || {}};
+            achats:st.achats || 0, pouvoirs:st.pouvoirs || 0, jouees:versionsVersBase(st.jouees), achetees:versionsVersBase(st.achetees)};
   };
   const nomV = S.vainqueur, v = nomV===S.joueurs[0].nom ? 0 : nomV===S.joueurs[1].nom ? 1 : null;
   const d = {id_partie:S.ticket, mode:S.mode, vainqueur:v, tours:S.tour, cotes:[camp(0), camp(1)]};
@@ -4992,6 +5085,11 @@ function pageRegles(){
     ["mots", "Les mots-clés", `<table class="tableau"><tbody>${mots.map(k => `<tr><td>${symMot(k)} <b>${esc(nomMot(k))}</b></td><td>${esc(TEXTES_AIDE[k] || "")}</td></tr>`).join("")}</tbody></table>`],
     ["combos", "Les combos", `<p>Un effet précédé d’un <b>symbole de faction</b> est un combo : il se déclenche si une <b>autre</b> carte de cette faction est jouée dans le même tour, avant ou après. Une carte ne déclenche jamais son propre combo.</p>
       <p>${Object.keys(FACTIONS).map(k => `${symCombo(k)} ${esc(FACTIONS[k].nom)}`).join(" &nbsp; ")}</p>`],
+    ["devotion", "Dévotion : se spécialiser dans un panthéon", `<p>Votre héros est une divinité du panthéon le plus représenté dans votre deck. Plus votre deck est spécialisé, plus la divinité est importante, et plus vos cartes de départ prennent la couleur de son panthéon :</p>
+      <ul><li><b>Moins de ${seuilsDevotion()[0]} cartes du panthéon :</b> la 3<sup>e</sup> divinité du panthéon, et vos cartes de départ habituelles.</li>
+      <li><b>De ${seuilsDevotion()[0]} à ${seuilsDevotion()[1]-1} cartes :</b> la 2<sup>e</sup> divinité, au pouvoir un peu plus fort, et ${REGLES.devotionNbTresors ?? 2} de vos ${esc((CARTES[REGLES.devotionTresor || "piece"] || {}).nom || "Trésors")}s prennent la couleur du panthéon : elles comptent comme des cartes du panthéon et peuvent déclencher vos combos.</li>
+      <li><b>${seuilsDevotion()[1]} cartes :</b> la divinité primordiale, au pouvoir encore plus fort, et votre ${esc((CARTES[REGLES.devotionCreature || "dague"] || {}).nom || "créature de départ")} devient une créature du panthéon, avec un effet et un combo.</li></ul>
+      <p>Ces avantages restent volontairement modestes : un deck mélangé reste parfaitement capable de gagner. Le palier de chaque joueur s’affiche sous le nom de sa divinité (✦ ou ✦✦).</p>`],
     ["conseils", "Conseils pour bien débuter", `<ul>
       <li><b>Les créatures sont le cœur d’un deck.</b> Un sort sert une fois, puis part à la défausse ; une créature reste sur le plateau, attaque à chaque tour et protège votre héros, puisque l’adversaire doit la détruire avant de vous toucher. Un deck sans créatures perd presque toujours. Les sorts restent indispensables pour produire l’or et la puissance du tour : le meilleur deck mélange les deux, avec une majorité de créatures.</li>
       <li><b>Une carte chère vaut mieux que deux cartes bon marché.</b> Ce qui vous limite, ce ne sont pas vos pièces mais les ${REGLES.piocheParTour} cartes que vous piochez par tour : chaque carte achetée prend une place dans votre deck. Une créature à 6 or est bien plus forte qu’une créature à 3, et ne prend qu’une place au lieu de deux.</li>
@@ -6185,7 +6283,7 @@ function nouvellePartie2v2(decks, opts = {}){
     if(v && CONFIG.variantes && CONFIG.variantes[v] && CONFIG.variantes[v].carte===id) c.v = v;
     return c;
   })));
-  S.joueurs.forEach((j, k) => { j.heros = choisirHeros(listes[k]); j.morts = 0; });
+  S.joueurs.forEach((j, k) => { j.heros = choisirHeros(listes[k]); j.morts = 0; appliquerDevotion(j, listes[k], opts.sansDevotion && opts.sansDevotion[k]); });
   S.idPartie = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   S.stats = [0, 1, 2, 3].map(() => ({creatures:0, sorts:0, achats:0, degats:0, soins:0, pouvoirs:0, jouees:{}, achetees:{}}));
   S.debut = Date.now();
@@ -6416,7 +6514,7 @@ function htmlMedaillon2v2(k, inter, visee){
     <${balise} ${attrs} class="medaillon f-${j.heros || "neutre"} ${ciblable ? "cible" : ""} ${activable ? "pret" : ""}" data-joueur="${k}" style="--p:${Math.min(1, S.jauge[j.eq]/R2.seuilJauge).toFixed(3)}">
       <span class="anneau" aria-hidden="true"></span><span class="visage" aria-hidden="true">${h.image ? `<img src="${h.image}" alt="">` : sym}</span><span class="pv-ecu" title="Points de vie">${j.esprit ? "✝" : j.pv}</span>
     </${balise}>
-    <div class="plaque"><b>${esc(h.nom)}</b><span class="qui">${esc(role)}</span>${etat ? `<span class="charge ${j.esprit ? "" : "ok"}">${etat}</span>` : ""}
+    <div class="plaque"><b>${esc(h.nom)}</b>${j.palier ? `<span class="devotion-palier">${"✦".repeat(j.palier)} Dévotion</span>` : ""}<span class="qui">${esc(role)}</span>${etat ? `<span class="charge ${j.esprit ? "" : "ok"}">${etat}</span>` : ""}
       ${activable ? `<button type="button" class="btn btn-pouvoir" data-act="pouvoir">Activer</button>` : ""}</div>
   </div>`;
 }
@@ -6571,6 +6669,49 @@ document.addEventListener("keydown", e => {
 });
 // Mini jetons d’or et de puissance d’un autre joueur
 const htmlRessourcesAutre = j => `<span class="ressources-autre" title="Or et puissance de ce joueur, en temps réel"><span class="mini-jeton or" aria-label="${j.or} or">${j.or}</span><span class="mini-jeton puissance" aria-label="${j.combat} puissance">${j.combat}</span></span>`;
+
+/* ----- Dévotion : administration, éditeur de decks, règles ----- */
+const PALIERS_HEROS = () => { const [s1, s2] = seuilsDevotion(); return [["-0", `moins de ${s1} cartes`], ["-1", `${s1} à ${s2-1} cartes`], ["", `${s2} cartes (divinité primordiale)`]]; };
+function htmlAdminDevotion(id){
+  const d = CARTES[id], [s1, s2] = seuilsDevotion();
+  const bases = {[REGLES.devotionTresor || "piece"]:`À partir de ${s1} cartes d’un même panthéon, ${REGLES.devotionNbTresors ?? 2} de ces cartes prennent la couleur du panthéon dans le deck de départ du joueur.`,
+                 [REGLES.devotionCreature || "dague"]:`Avec ${s2} cartes d’un même panthéon, cette carte prend la couleur du panthéon dans le deck de départ du joueur.`};
+  if(d.versionDe){
+    const base = CARTES[d.versionDe], fac = FACTIONS[d.faction];
+    return `<fieldset class="devotion-admin"><legend>Version de dévotion</legend>
+      <p class="aide">Version ${fac ? esc(fac.f) : ""} de « ${esc(base ? base.nom : d.versionDe)} ». ${esc(bases[d.versionDe] || "")} Elle compte comme une carte ${fac ? esc(fac.f) : "du panthéon"} pour les combos.</p>
+      <div class="adm-actions"><button type="button" class="btn second" data-act="carte-sel" data-id="${d.versionDe}">Voir la carte de base</button></div></fieldset>`;
+  }
+  if(!bases[id]) return "";
+  return `<fieldset class="devotion-admin"><legend>Versions de dévotion</legend>
+    <p class="aide">${esc(bases[id])} Chaque version est une carte à part entière : nom, statistiques, mots-clés, effets, combo et illustration se modifient comme pour n’importe quelle carte.</p>
+    <div class="liste-versions">${Object.entries(FACTIONS).map(([f, fac]) => {
+      const v = versionDevotion(id, f);
+      return `<div class="ligne-version f-${f}"><span class="pastille"></span><b>${esc(fac.nom)}</b>
+        ${v ? `<span>${esc(CARTES[v].nom)}</span><button type="button" class="btn second" data-act="carte-sel" data-id="${v}">Modifier</button>`
+            : `<span class="aide">aucune version</span><button type="button" class="btn second" data-act="devotion-creer" data-id="${id}|${f}">Créer la version ${esc(fac.f)}</button>`}</div>`;
+    }).join("")}</div></fieldset>`;
+}
+function creerVersionDevotion(base, f){
+  const k = idUnique(`${base}_${f}`);
+  CARTES[k] = {...copie(CARTES[base]), faction:f, versionDe:base, depart:true, nom:`${CARTES[base].nom} ${FACTIONS[f].m}`};
+  delete CARTES[k].image; delete CARTES[k].imageHD;
+  sauver(); adm.sel = k; renderAdmin();
+}
+// Éditeur de decks : où en est la Dévotion du deck ?
+function htmlDevotionDeck(cartes){
+  const n = {};
+  cartes.forEach(id => { const f = CARTES[id] && CARTES[id].faction; if(f && FACTIONS[f] && estCollectionnable(CARTES[id])) n[f] = (n[f] || 0) + 1; });
+  const f = Object.keys(n).sort((a, b) => n[b] - n[a])[0];
+  if(!f) return "";
+  const [s1, s2] = seuilsDevotion(), p = palierDevotion(f, cartes), h = HEROS[cleHeros(f, p)] || HEROS[f] || {};
+  const suivant = p===0 ? s1 : p===1 ? s2 : null, hs = suivant ? (HEROS[cleHeros(f, p + 1)] || {}) : null;
+  return `<div class="devotion-deck f-${f}">
+    <b>Dévotion ${esc(FACTIONS[f].f)} : ${n[f]} / ${s2}</b>
+    <span class="barre-devotion"><span style="width:${Math.min(100, 100*n[f]/s2)}%"></span><i style="left:${100*s1/s2}%"></i></span>
+    <span>Divinité : <b>${esc(h.nom || "")}</b>${p ? ` (palier ${p})` : ""}.${hs ? ` Encore ${suivant - n[f]} carte${suivant - n[f]>1 ? "s" : ""} ${esc(FACTIONS[f].f)}${suivant - n[f]>1 ? "s" : ""} pour ${esc(hs.nom || "le palier suivant")}.` : " Palier maximal atteint."}</span>
+  </div>`;
+}
 
 chargerConfig();
 appliquerReglageAnimations();
