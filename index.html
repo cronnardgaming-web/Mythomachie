@@ -1086,7 +1086,7 @@ const DEFAUT = {
   // Valeurs d’origine = config.json du site (GitHub), sans les images
   musiques:{menu:"", duel:[]}, variantes:{}, boosters:{},
   credits:{musiques:[{titre:"Battle Cinematic Heroic Orchestra", artiste:"Echoes of Lumen"}, {titre:"Battle Music", artiste:"PaulYudin"}, {titre:"Battle", artiste:"NastelBom"}, {titre:"Epic Battle", artiste:"YevhenAstafiev"}, {titre:"Cinematic Powerful Battle Music", artiste:"Tunetank"}, {titre:"Epic Cinematic Battle Music", artiste:"Tunetank"}]},
-  regles:{pvDepart:40, seuilPouvoir:10, mainDepart:5, piocheParTour:5, tailleMarche:5, plateauMax:7, tailleDeck:30, copiesMax:2, copiesLegendaire:1, carteBase:"pierre", deckDepart:{piece:7, rubis:1, dague:1, epee:1}},
+  regles:{armesHeros:true, armesImmediat:true, armesPermanentes:true, armesVie:true, pvDepart:40, seuilPouvoir:10, mainDepart:5, piocheParTour:5, tailleMarche:5, plateauMax:7, tailleDeck:30, copiesMax:2, copiesLegendaire:1, carteBase:"pierre", deckDepart:{piece:7, rubis:1, dague:1, epee:1}},
   mots:{provocation:"Provocation", rapidite:"Rapidité", resistance:"Résistance", ethere:"Ethéré"},
   termes:{conjuration:"Conjuration", echo:"Echo", allie:"Combo", sacrifice:"Sacrifice"},
   heros:{egy:{nom:"Atoum", titre:"Dieu primordial égyptien", pouvoir:{nom:"Souffle de vie", effet:{soin:8, renfort:{atk:0, vie:2}}}}, hin:{nom:"Brahma", titre:"Dieu créateur hindou", pouvoir:{nom:"Abondance", effet:{or:6, pioche:2}}}, nor:{nom:"Ymir", titre:"Géant primordial nordique", pouvoir:{nom:"Colère du géant", effet:{combat:8}}}, gre:{nom:"Chaos", titre:"Abîme primordial grec", pouvoir:{nom:"Abîme originel", effet:{pioche:3, bannir:1}}}},
@@ -1314,11 +1314,21 @@ function decrire(e){
   if(!s) return "Aucun effet.";
   return s.charAt(0).toUpperCase() + s.slice(1) + ".";
 }
+// Texte d’un équipement selon les réglages (par défaut : puissance immédiate et bonus permanent attaque + PV)
+function texteArme(d, html){
+  const b = d.bonus || 0, pu = html ? icone("puissance") : " puissance";
+  const equipe = REGLES.armesPermanentes
+    ? (REGLES.armesVie ? `Équipe une créature : +${b}/+${b} pour toujours.` : `Équipe une créature : +${b} attaque pour toujours.`)
+    : `Équipe une créature : +${b} attaque, ${d.durabilite} attaques.`;
+  if(REGLES.armesImmediat) return html ? `<span class="effet-part">+${b}${pu}</span><br>${equipe}` : `+${b}${pu}. ${equipe}`;
+  if(REGLES.armesHeros) return `${equipe} Sans créature : +${b}${pu}${html ? "" : "."}`;
+  return equipe;
+}
 function texteCarte(d){
   const l = [];
   if(d.type==="creature" && d.mots && d.mots.length) l.push(d.mots.map(m=>MOTS[m] || m).join(", ") + ".");
   if(d.type==="sort" && d.effet) l.push(decrire(d.effet));
-  if(d.type==="arme") l.push(`Équipe une de vos créatures : +${d.bonus} attaque pendant ${d.durabilite} attaques.`);
+  if(d.type==="arme") l.push(texteArme(d, false));
   if(d.type==="creature" && d.conjuration) l.push(TERMES.conjuration + " : " + decrire(d.conjuration));
   if(d.type==="creature" && d.echo) l.push(TERMES.echo + " : " + decrire(d.echo));
   if(d.allie){ const fc = factionCombo(d); l.push(`${TERMES.allie}${fc ? ` (${FACTIONS[fc].nom})` : ""} : ${decrire(d.allie)}`); }
@@ -1511,7 +1521,7 @@ function nettoyer(){
     morts.forEach(c => {
       const d = def(c);
       if(!d.jeton) j.defausse.push({uid:c.uid, id:c.id});
-      if(c.arme) j.defausse.push({uid:c.arme.uid, id:c.arme.id});
+      if(c.arme) (REGLES.armesRetour ? j.main : j.defausse).push({uid:c.arme.uid, id:c.arme.id});
       log(`${d.nom} est détruit${d.jeton ? "e" : ""}.`);
       fxEvt({t:"mort", j:idx, uid:c.uid});
       if(est2v2()) S.jauge[1 - S.joueurs[idx].eq]++;
@@ -1560,12 +1570,20 @@ function jouer(id, opts={}){
   const c = j.main[k], d = def(c);
   if(est2v2() && j.esprit && (d.type==="creature" || d.type==="arme")) return erreur("Un esprit ne peut ni poser de créature ni équiper d’arme.");
   if(d.type==="creature" && j.plateau.length>=REGLES.plateauMax) return erreur(`Votre plateau est plein (${REGLES.plateauMax} créatures).`);
-  if(d.type==="arme"){
+  if(d.type==="arme" && REGLES.armesHeros && !j.plateau.find(x => x.uid===opts.cible)){
+    // Sans créature à équiper : l’équipement donne sa valeur en puissance au héros
+    j.main.splice(k,1); j.joues.push(c);
+    j.combat += d.bonus || 0;
+    fxEvt({t:"puissance", j:i, v:d.bonus || 0, src:c.uid});
+    log(`${j.nom} utilise ${d.nom} : +${d.bonus} puissance.`);
+  } else if(d.type==="arme"){
     const cible = j.plateau.find(x => x.uid===opts.cible);
     if(!cible) return erreur("Choisissez une de vos créatures à équiper.");
     j.main.splice(k,1);
     if(cible.arme) j.defausse.push({uid:cible.arme.uid, id:cible.arme.id});
     cible.arme = {uid:c.uid, id:c.id, dur:d.durabilite};
+    if(REGLES.armesVie){ cible.vieMax += d.bonus || 0; }                         // l’équipement renforce aussi la créature
+    if(REGLES.armesImmediat){ j.combat += d.bonus || 0; fxEvt({t:"puissance", j:i, v:d.bonus || 0, src:c.uid}); }   // et donne sa valeur en puissance ce tour-ci
     fxEvt({t:"arme", j:i, src:c.uid, cible:cible.uid});
     log(`${j.nom} équipe ${def(cible).nom} de ${d.nom}.`);
   } else if(d.type==="creature"){
@@ -1671,7 +1689,7 @@ function attaquer(idAtt, cible){
   att.aAttaque = true; att.revele = true;
   fxEvt({t:"attaque", j:i, att:idAtt, cible});
   if(att.arme){
-    att.arme.dur--;
+    if(!REGLES.armesPermanentes) att.arme.dur--;
     if(att.arme.dur<=0){
       j.defausse.push({uid:att.arme.uid, id:att.arme.id});
       log(`${CARTES[att.arme.id].nom} se brise.`);
@@ -1756,6 +1774,7 @@ async function tourIAInterne(partie){
       const d = def(c);
       if(d.type==="creature" && j.plateau.length<REGLES.plateauMax){ jouer(c.uid); progres = true; break; }
       if(d.type==="sort"){ jouer(c.uid); progres = true; break; }
+      if(d.type==="arme" && !j.plateau.length && REGLES.armesHeros){ jouer(c.uid, {}); progres = true; break; }
       if(d.type==="arme" && j.plateau.length){
         const cible = [...j.plateau].sort((a,b) => atkTotal(b)-atkTotal(a))[0];
         jouer(c.uid, {cible:cible.uid}); progres = true; break;
@@ -1897,7 +1916,7 @@ function lignesHTML(d){
   const l = [];
   if(d.type==="creature" && d.mots && d.mots.length) l.push(`<span class="symboles">${d.mots.map(symMot).join("")}</span>`);
   if(d.type==="sort" && d.effet) l.push(decrireHTML(d.effet));
-  if(d.type==="arme") l.push(`Équipe une créature : +${d.bonus} attaque, ${d.durabilite} attaques.`);
+  if(d.type==="arme") l.push(texteArme(d, true));
   if(d.type==="creature" && d.conjuration) l.push(`${symMot("conjuration")} ${decrireHTML(d.conjuration)}`);
   if(d.type==="creature" && d.echo) l.push(`${symMot("echo")} ${decrireHTML(d.echo)}`);
   if(d.allie) l.push(`${symCombo(factionCombo(d))} ${decrireHTML(d.allie)}`);
@@ -1923,7 +1942,7 @@ function htmlCarte(c, o={}){
   const stats = d.type==="creature"
     ? `<span class="atk" title="Attaque">${d.attaque}</span><span class="pv" title="Points de vie">${d.vie}</span>`
     : d.type==="arme"
-      ? `<span class="atk" title="Bonus d’attaque">+${d.bonus}</span><span class="dur" title="Nombre d’attaques">${d.durabilite}</span>` : "";
+      ? `<span class="atk" title="Bonus d’attaque">+${d.bonus}</span>${REGLES.armesPermanentes ? (REGLES.armesVie ? `<span class="pv" title="Bonus de PV">+${d.bonus}</span>` : "") : `<span class="dur" title="Nombre d’attaques">${d.durabilite}</span>`}` : "";
   const act = (o.act ? `data-act="${o.act}" data-id="${o.id ?? c.uid}"` : "") + (c.uid ? ` data-uid="${c.uid}"` : "");
   const srcImg = imageAffichee(d, c, o.hd);
   return `<button type="button" class="carte f-${f} r-${d.rarete || "base"} ${classesVariante(c)} ${o.classes || ""}" ${act} ${o.style ? `style="${o.style}"` : ""}>
@@ -1943,7 +1962,10 @@ function htmlCrea(c, act, classes){
   if(aMot(c,"rapidite")) puces.push(puce("rapidite"));
   if(c.bouclier) puces.push(puce("resistance"));
   if(aMot(c,"ethere") && !c.revele) puces.push(puce("ethere"));
-  if(c.arme) puces.push(`<span class="puce" data-aide="carte" data-titre="${esc(CARTES[c.arme.id].nom)}" data-texte="+${CARTES[c.arme.id].bonus} attaque, encore ${c.arme.dur} attaque${c.arme.dur>1 ? "s" : ""}.">⚔\u00a0${c.arme.dur}</span>`);
+  if(c.arme){ const da = CARTES[c.arme.id], b = da.bonus || 0;
+    puces.push(REGLES.armesPermanentes
+      ? `<span class="puce" data-aide="carte" data-titre="${esc(da.nom)}" data-texte="+${b} attaque${REGLES.armesVie ? ` et +${b} PV` : ""}, pour toujours.">⚔\u00a0+${b}</span>`
+      : `<span class="puce" data-aide="carte" data-titre="${esc(da.nom)}" data-texte="+${b} attaque, encore ${c.arme.dur} attaque${c.arme.dur>1 ? "s" : ""}.">⚔\u00a0${c.arme.dur}</span>`); }
   const detail = texteCarte(d).join(" ").replace(/"/g,"");
   return `<button type="button" class="crea f-${f} r-${d.rarete || "base"} ${classesVariante(c)} ${classes}" data-act="${act}" data-id="${c.uid}" data-aide="carte" data-titre="${esc(d.nom)}" data-texte="${esc(detail)}">
     <span class="cadre">
@@ -2397,7 +2419,7 @@ function formCarte(id){
       ${champSelect("Rareté", p+".rarete", d.rarete || "commune", RARETES)}
       ${champNombre("Prix en or", p+".prix", d.prix ?? 0)}
       ${d.type==="creature" ? champNombre("Attaque", p+".attaque", d.attaque ?? 0) + champNombre("Points de vie", p+".vie", d.vie ?? 1) : ""}
-      ${d.type==="arme" ? champNombre("Bonus d’attaque", p+".bonus", d.bonus ?? 0) + champNombre("Nombre d’attaques", p+".durabilite", d.durabilite ?? 1) : ""}
+      ${d.type==="arme" ? champNombre(REGLES.armesPermanentes ? "Bonus (puissance, attaque et PV)" : "Bonus d’attaque", p+".bonus", d.bonus ?? 0) + (REGLES.armesPermanentes ? "" : champNombre("Nombre d’attaques", p+".durabilite", d.durabilite ?? 1)) : ""}
     </div>
     <fieldset data-depot="${id}"><legend>Illustration</legend>
       ${d.image ? `<img class="adm-illu" src="${d.image}" alt="Illustration de ${esc(d.nom)}">` : `<p class="aide">Aucune image pour cette carte.</p>`}
@@ -3349,7 +3371,7 @@ document.addEventListener("click", e => {
       const d = def(c);
       ui.attaquant = null;
       if(d.type==="arme"){
-        if(!j.plateau.length) erreur("Posez d’abord une créature à équiper.");
+        if(!j.plateau.length){ if(REGLES.armesHeros) M().jouer(id, {}); else erreur("Posez d’abord une créature à équiper."); }
         else ui.armeEnAttente = id;
       } else if(d.choixSacrifice) ui.choixPierre = id;
       else M().jouer(id);
@@ -3925,7 +3947,7 @@ function htmlCarteOuverte(d, id, vid){
   const img = imageAffichee(d, {v:vid}, true), sym = f!=="neutre" ? FACTIONS[f].sym : "";
   const lignes = lignesHTML(d);
   const stats = d.type==="creature" ? `<span class="z-atk" title="Attaque">${d.attaque}</span><span class="z-pv" title="Points de vie">${d.vie}</span>`
-    : d.type==="arme" ? `<span class="z-atk" title="Bonus d’attaque">+${d.bonus}</span><span class="z-dur" title="Nombre d’attaques">${d.durabilite}</span>` : "";
+    : d.type==="arme" ? `<span class="z-atk" title="Bonus d’attaque">+${d.bonus}</span>${REGLES.armesPermanentes ? (REGLES.armesVie ? `<span class="z-pv" title="Bonus de PV">+${d.bonus}</span>` : "") : `<span class="z-dur" title="Nombre d’attaques">${d.durabilite}</span>`}` : "";
   return `<div class="carte-ouverte f-${f} r-${d.rarete || "base"} ${classesVariante({v:vid})}">
     <div class="z-illu ${img ? "" : "sans-image"}" data-sym="${sym}">${img ? `<img src="${img}" alt="Illustration de ${esc(d.nom)}">` : ""}</div>
     <div class="z-texte">
@@ -4921,7 +4943,7 @@ function pageRegles(){
       <li>Quand deux créatures se battent, elles s’infligent leurs dégâts <b>en même temps</b>.</li>
       <li><b>Votre héros</b> attaque avec votre puissance. S’il frappe une créature, il subit sa <b>riposte</b> (l’attaque de la créature). S’il frappe le héros adverse, il ne subit rien.</li>
       <li><b>Pour viser le héros adverse, il faut d’abord détruire toutes ses créatures visibles.</b> Les créatures avec ${symMot("provocation")} Provocation doivent être visées en premier, et celles avec ${symMot("ethere")} Ethéré ne peuvent pas être visées tant qu’elles n’ont pas attaqué (elles ne protègent pas leur héros).</li>
-      <li>Une <b>arme</b> s’équipe sur une de vos créatures : elle augmente son attaque pour un nombre limité d’attaques.</li>
+      <li>Un <b>équipement</b> donne immédiatement sa valeur en puissance à votre héros. Si vous avez une créature, vous l’équipez en plus : elle gagne autant d’attaque et de PV, pour toujours (tant qu’elle vit). Sans créature, l’équipement reste donc utile.</li>
       <li>Le plateau d’un joueur ne peut pas contenir plus de ${R.plateauMax} créatures. Une créature détruite part dans la défausse de son propriétaire.</li></ul>`],
     ["heros", "Les héros et leurs pouvoirs", `<p>Le pouvoir d’un héros se charge à chaque créature ennemie détruite. Après <b>${R.seuilPouvoir || 10} créatures ennemies</b>, il est prêt : cliquez sur votre médaillon pour l’activer. Il se recharge ensuite.</p>
       <table class="tableau"><thead><tr><th>Panthéon</th><th>Héros</th><th>Pouvoir</th></tr></thead><tbody>
@@ -4930,6 +4952,10 @@ function pageRegles(){
     ["mots", "Les mots-clés", `<table class="tableau"><tbody>${mots.map(k => `<tr><td>${symMot(k)} <b>${esc(nomMot(k))}</b></td><td>${esc(TEXTES_AIDE[k] || "")}</td></tr>`).join("")}</tbody></table>`],
     ["combos", "Les combos", `<p>Un effet précédé d’un <b>symbole de faction</b> est un combo : il se déclenche si une <b>autre</b> carte de cette faction est jouée dans le même tour, avant ou après. Une carte ne déclenche jamais son propre combo.</p>
       <p>${Object.keys(FACTIONS).map(k => `${symCombo(k)} ${esc(FACTIONS[k].nom)}`).join(" &nbsp; ")}</p>`],
+    ["conseils", "Conseils pour bien débuter", `<ul>
+      <li><b>Les créatures sont le cœur d’un deck.</b> Un sort sert une fois, puis part à la défausse ; une créature reste sur le plateau, attaque à chaque tour et protège votre héros, puisque l’adversaire doit la détruire avant de vous toucher. Un deck sans créatures perd presque toujours. Les sorts restent indispensables pour produire l’or et la puissance du tour : le meilleur deck mélange les deux, avec une majorité de créatures.</li>
+      <li><b>Une carte chère vaut mieux que deux cartes bon marché.</b> Ce qui vous limite, ce ne sont pas vos pièces mais les ${REGLES.piocheParTour} cartes que vous piochez par tour : chaque carte achetée prend une place dans votre deck. Une créature à 6 or est bien plus forte qu’une créature à 3, et ne prend qu’une place au lieu de deux.</li>
+      <li><b>Ne gaspillez pas votre or.</b> Achetez d’abord la carte la plus chère possible, puis dépensez le reste : l’or non utilisé est perdu à la fin du tour.</li></ul>`],
     ["victoire", "Victoire et défaite", `<p>Un héros qui tombe à 0 point de vie perd la partie. Si les deux tombent en même temps, c’est une égalité.</p>`],
     ["collection", "Collection et progression", `<ul>
       <li><b>Cartes offertes :</b> à votre arrivée, vous recevez ${eco.depart ? Object.values(eco.depart).reduce((a,b) => a+b, 0) : 30} cartes pour former votre premier deck, et ${eco.or_depart} or afin d’ouvrir un booster.</li>
@@ -5035,11 +5061,11 @@ function construireEtapes(){
     cible:() => I.ors.filter(enMain).map(u => `.main .carte[data-id="${u}"]`),
     autorise:(act, id) => act==="main" && I.ors.includes(id),
     fini:() => !I.ors.some(enMain)},
-  {titre:"Achetez au marché", texte:`Le <b>marché</b> est à droite. Il est formé des <b>decks construits des deux joueurs</b>, mélangés : vous pouvez acheter les cartes de votre adversaire, et lui les vôtres.<br><br>Avec votre or, achetez ${laCarte(c.achat)} (${prixAchat} ${icone("or")}). Une carte achetée va dans votre <b>défausse</b> : vous la piocherez lors d’un prochain tour.`,
+  {titre:"Achetez au marché", texte:`Le <b>marché</b> est à droite. Il est formé des <b>decks construits des deux joueurs</b>, mélangés : vous pouvez acheter les cartes de votre adversaire, et lui les vôtres.<br><br>Avec votre or, achetez ${laCarte(c.achat)} (${prixAchat} ${icone("or")}). Une carte achetée va dans votre <b>défausse</b> : vous la piocherez lors d’un prochain tour.<br><br><b>Conseil :</b> une carte chère vaut mieux que deux cartes bon marché. Vous ne piochez que ${REGLES.piocheParTour} cartes par tour : chaque carte achetée prend une place dans votre deck, autant qu’elle soit forte. Dépensez quand même l’or qui reste, car il est perdu à la fin du tour.`,
     cible:() => [`.marche-cartes .carte[data-act="marche"][data-id="${indexMarche(I.achat)}"]`],
     autorise:(act, id) => act==="marche" && Number(id)===indexMarche(I.achat),
     fini:() => moiT().defausse.some(x => x.uid===I.achat)},
-  {titre:"Posez une créature", texte:`Cliquez sur ${laCrea(c.rapide)} pour la poser sur le plateau. Une créature reste en jeu jusqu’à sa mort, et votre côté du plateau ne peut pas en contenir plus de <b>${REGLES.plateauMax}</b>. D’habitude, elle ne peut pas attaquer le tour où elle arrive, mais celle-ci a ${symMot("rapidite")} <b>${esc(nomMot("rapidite"))}</b> : elle peut attaquer tout de suite.`,
+  {titre:"Posez une créature", texte:`Cliquez sur ${laCrea(c.rapide)} pour la poser sur le plateau. Une créature reste en jeu jusqu’à sa mort, et votre côté du plateau ne peut pas en contenir plus de <b>${REGLES.plateauMax}</b>. D’habitude, elle ne peut pas attaquer le tour où elle arrive, mais celle-ci a ${symMot("rapidite")} <b>${esc(nomMot("rapidite"))}</b> : elle peut attaquer tout de suite.<br><br><b>Conseil :</b> les créatures sont le cœur d’un deck. Un sort sert une fois, alors qu’une créature attaque à chaque tour et protège votre héros : l’adversaire doit la détruire avant de vous toucher.`,
     cible:() => [`.main .carte[data-id="${I.rap}"]`],
     autorise:(act, id) => act==="main" && id===I.rap,
     fini:() => moiT().plateau.some(x => x.uid===I.rap)},
@@ -6167,7 +6193,7 @@ function attaquer2v2(idAtt, cible, k){
   att.aAttaque = true; att.revele = true;
   fxEvt({t:"attaque", j:i, att:idAtt, cible:cible==="face" ? "face" : cible, k});
   if(att.arme){
-    att.arme.dur--;
+    if(!REGLES.armesPermanentes) att.arme.dur--;
     if(att.arme.dur<=0){ j.defausse.push({uid:att.arme.uid, id:att.arme.id}); log(`${CARTES[att.arme.id].nom} se brise.`); att.arme = null; }
   }
   nettoyer(); verifierVictoire();
@@ -6264,6 +6290,7 @@ async function jouerTourIA2v2(){
       const d = def(c);
       if(d.type==="creature" && !j.esprit && j.plateau.length<REGLES.plateauMax){ jouer(c.uid); p = true; await etape(); break; }
       if(d.type==="sort"){ jouer(c.uid, {}); p = true; await etape(); break; }
+      if(d.type==="arme" && !j.esprit && !j.plateau.length && REGLES.armesHeros){ jouer(c.uid, {}); p = true; await etape(); break; }
       if(d.type==="arme" && !j.esprit && j.plateau.length){ jouer(c.uid, {cible:[...j.plateau].sort((a, b) => atkTotal(b) - atkTotal(a))[0].uid}); p = true; await etape(); break; }
     }
     bannirAuto();
