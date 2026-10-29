@@ -623,6 +623,106 @@ body.compact .crea.peut::before{width:14px;height:14px;font-size:9px;top:-6px}
 .ligne-version .btn{margin:0}
 body.compact .devotion-palier{font-size:9px}
 
+/* Atelier de deck */
+.atelier{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:16px;height:calc(100dvh - 96px);min-height:520px}
+.onglets-atelier{display:none}
+.atelier-collection{display:flex;flex-direction:column;min-height:0;background:var(--zone);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.outils-atelier{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);background:color-mix(in srgb, var(--zone) 92%, var(--table))}
+.ligne-outils{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ligne-outils input[type=search]{flex:1 1 220px;min-width:160px;font:inherit;font-size:15px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.ligne-outils select{font:inherit;font-size:14px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:8px;padding:7px 8px}
+.tri-atelier{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2)}
+.puces-outils{gap:6px}
+.puce-filtre{display:inline-flex;align-items:center;gap:5px;font:inherit;font-size:13px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:99px;padding:5px 11px;cursor:pointer;white-space:nowrap}
+.puce-filtre:hover{border-color:var(--bronze)}
+.puce-filtre.actif{background:var(--bronze);border-color:var(--bronze);color:var(--btn-texte);font-weight:700}
+.puce-filtre[class*=" f-"].actif{background:var(--fc);border-color:var(--fc);color:#fff}
+.puce-filtre .sym{font-size:14px}
+.puce-cout{min-width:34px;justify-content:center;padding:5px 8px}
+.sep-outils{width:1px;height:22px;background:var(--line);margin:0 4px}
+.resultats{margin-left:auto}
+.grille-atelier{flex:1;overflow-y:auto;padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:14px 10px;align-content:start}
+.tuile-atelier{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px}
+.tuile-atelier .carte{--w:min(100%,150px);transition:transform .12s, box-shadow .12s}
+.tuile-atelier .carte:hover{transform:translateY(-3px)}
+.tuile-atelier.dans-deck .carte{box-shadow:0 0 0 3px #4fd18b,0 0 12px rgba(79,209,139,.45)}
+.tuile-atelier.epuisee .carte{filter:grayscale(.75) brightness(.7)}
+.pied-tuile{display:grid;grid-template-columns:26px 1fr 26px;align-items:center;justify-items:center;width:100%;max-width:150px;gap:4px}
+.moins-tuile,.moins-vide{width:24px;height:24px}
+.moins-tuile{border-radius:50%;border:none;background:#b8402f;color:#fff;font-size:17px;font-weight:700;line-height:1;cursor:pointer;padding:0}
+.moins-tuile:hover{filter:brightness(1.15)}
+.nb-tuile{min-width:24px;height:22px;border-radius:11px;display:grid;place-items:center;background:#2f9e63;color:#fff;font-weight:700;font-size:12px;padding:0 5px}
+.points-copies{display:flex;gap:4px}
+.points-copies i{width:9px;height:9px;border-radius:50%}
+.points-copies i.plein{background:#4fd18b}
+.points-copies i.libre{border:2px solid var(--ink-2)}
+.points-copies i.absent{border:2px dashed color-mix(in srgb, var(--ink-2) 45%, transparent)}
+.atelier-deck{display:flex;flex-direction:column;gap:10px;min-height:0;overflow-y:auto;background:var(--zone);border:1px solid var(--line);border-radius:12px;padding:14px}
+.nom-atelier{width:100%;box-sizing:border-box;font-family:Cinzel,serif;font-size:19px;font-weight:700;color:var(--ink);background:transparent;border:1px solid transparent;border-bottom-color:var(--line);border-radius:6px;padding:6px 8px}
+.nom-atelier:hover,.nom-atelier:focus{border-color:var(--bronze);background:var(--table)}
+.compteur-atelier{display:flex;flex-direction:column;gap:5px;font-size:14px;color:var(--ink-2);margin-top:6px}
+.compteur-atelier b{font-family:Cinzel,serif;font-size:30px;line-height:1}
+.compteur-atelier.valide b{color:#4fd18b}
+.compteur-atelier.invalide b{color:var(--ink)}
+.compteur-atelier > span:first-child{font-size:15px}
+.barre-compteur{display:block;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.barre-compteur span{display:block;height:100%;background:linear-gradient(90deg,var(--bronze),#4fd18b)}
+.etat-deck{margin:4px 0 0;font-size:13px}
+.etat-deck.valide{color:#4fd18b}
+.etat-deck.invalide{color:var(--ink-2)}
+.stats-atelier{display:flex;flex-direction:column;gap:10px;padding:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.types-deck{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.type-deck{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto auto;align-items:center;column-gap:6px;background:var(--table);border-radius:8px;padding:6px 8px}
+.type-deck .sym-type{grid-row:1/3;font-size:20px;color:var(--or)}
+.type-deck b{font-family:Cinzel,serif;font-size:20px;line-height:1}
+.type-deck span:not(.sym-type):not(.barre-type){font-size:11px;color:var(--ink-2)}
+.barre-type{grid-column:1/3;height:4px;border-radius:2px;background:var(--line);overflow:hidden;margin-top:4px}
+.barre-type span{display:block;height:100%;background:var(--or)}
+.t-creature .barre-type span{background:#4fd18b}.t-sort .barre-type span{background:#6aa8ff}.t-arme .barre-type span{background:#d0503a}
+.courbe-atelier .colonne{background:none;border:none;padding:0;cursor:pointer;color:inherit;font:inherit}
+.courbe-atelier .colonne:hover .b,.courbe-atelier .colonne.actif .b{background:#4fd18b}
+.liste-atelier{display:flex;flex-direction:column;gap:10px}
+.groupe-deck h3{display:flex;justify-content:space-between;margin:0 0 4px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);font-family:inherit}
+.groupe-deck ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+.ligne-atelier{display:grid;grid-template-columns:24px 10px 1fr auto 26px 26px;align-items:center;gap:7px;padding:4px 6px;border-radius:6px;background:var(--table);font-size:14px}
+.ligne-atelier:hover{background:color-mix(in srgb, var(--bronze) 16%, var(--table))}
+.ligne-atelier.r-legendaire .nom-ligne{color:#f0b84e;font-weight:700}
+.ligne-atelier.r-epique .nom-ligne{color:#c79cf5}
+.ligne-atelier.r-rare .nom-ligne{color:#8fc2ff}
+.nom-ligne{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ligne-atelier .pm{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:var(--zone);color:var(--ink);font-size:16px;font-weight:700;line-height:1;cursor:pointer;padding:0}
+.ligne-atelier .pm:hover:not(:disabled){border-color:var(--bronze)}
+.ligne-atelier .pm:disabled{opacity:.3;cursor:default}
+.vide-deck{text-align:center;padding:20px 8px}
+.actions-atelier{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:8px}
+.actions-atelier .btn{margin:0}
+@media (max-width:900px), (max-height:520px){
+  .atelier{grid-template-columns:1fr;height:auto;min-height:0}
+  .onglets-atelier{display:grid;grid-template-columns:1fr 1fr;gap:6px;position:sticky;top:0;z-index:5;background:var(--table);padding:4px 0}
+  .onglets-atelier button{font:inherit;font-size:14px;color:var(--ink);background:var(--zone);border:1px solid var(--line);border-radius:8px;padding:8px}
+  .onglets-atelier button[aria-pressed=true]{border-color:var(--bronze);background:color-mix(in srgb, var(--bronze) 22%, var(--zone));font-weight:700}
+  .onglets-atelier b.valide{color:#4fd18b}
+  .atelier.vue-collection .atelier-deck,.atelier.vue-deck .atelier-collection{display:none}
+  .atelier-collection,.atelier-deck{overflow:visible}
+  .grille-atelier{overflow:visible;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));padding:10px}
+  .puces-outils{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}
+  .outils-atelier{position:sticky;top:44px;z-index:4}
+}
+@media (max-height:520px){
+  .outils-atelier{position:static;padding:6px 8px;gap:5px}
+  .ligne-outils{gap:5px;flex-wrap:nowrap;overflow-x:auto}
+  .ligne-outils input[type=search]{flex:1 1 140px;font-size:13px;padding:5px 8px}
+  .ligne-outils select{font-size:12px;padding:4px 6px}
+  .tri-atelier{font-size:0;gap:0}
+  .puce-filtre{font-size:12px;padding:3px 9px}
+  .puce-cout{min-width:28px;padding:3px 6px}
+  .grille-atelier{grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px 8px;padding:8px}
+  .onglets-atelier{padding:2px 0}
+  .onglets-atelier button{padding:5px}
+  .atelier-deck{padding:10px;gap:8px}
+  .courbe-atelier .b{max-height:32px}
+}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -3812,7 +3912,7 @@ if(!window.claude && SUPA.url){
    L’or, l’encre, les paquets et la collection sont gérés par Supabase.
    ============================================================ */
 const PROG = {actif:false, pret:false, erreur:"", profil:null, collection:{}, decks:[], eco:null, admin:false,
-  filtres:{fac:"toutes", rar:"toutes", type:"tous", rech:"", possedees:false}, sel:null, deckEdit:null, supprDeck:null,
+  filtres:{fac:"toutes", rar:"toutes", type:"tous", rech:"", possedees:false, cout:null, tri:"pantheon", masquerMax:false}, sel:null, deckEdit:null, supprDeck:null,
   paquet:null, choixDeck:null, dernierGain:null, ecoEdit:null, bienvenue:false, occupe:false,
   recompensees:new Set((() => { try { return JSON.parse(localStorage.getItem("parties-recompensees")) || []; } catch(e) { return []; } })())};
 const QUETES = [
@@ -4034,13 +4134,19 @@ function filtrerCartes(seulementPossedees){
     if(f.fac!=="toutes" && d.faction!==f.fac) return false;
     if(f.rar!=="toutes" && (d.rarete || "commune")!==f.rar) return false;
     if(f.type!=="tous" && d.type!==f.type) return false;
+    if(f.cout && coutTranche(id)!==f.cout) return false;
     return !f.rech || d.nom.toLowerCase().includes(f.rech.toLowerCase());
   }));
 }
 function trierCartesProg(ids){
   const fac = Object.keys(FACTIONS), rar = ["commune","rare","epique","legendaire"];
+  const tri = (PROG.filtres && PROG.filtres.tri) || "pantheon";
   return ids.sort((a,b) => {
     const A = CARTES[a], B = CARTES[b];
+    if(tri==="cout") return ((A.prix||0) - (B.prix||0)) || (fac.indexOf(A.faction) - fac.indexOf(B.faction)) || A.nom.localeCompare(B.nom, "fr");
+    if(tri==="cout-desc") return ((B.prix||0) - (A.prix||0)) || (fac.indexOf(A.faction) - fac.indexOf(B.faction)) || A.nom.localeCompare(B.nom, "fr");
+    if(tri==="nom") return A.nom.localeCompare(B.nom, "fr");
+    if(tri==="rarete") return (rar.indexOf(B.rarete) - rar.indexOf(A.rarete)) || ((A.prix||0) - (B.prix||0)) || A.nom.localeCompare(B.nom, "fr");
     return (fac.indexOf(A.faction) - fac.indexOf(B.faction)) || (rar.indexOf(A.rarete) - rar.indexOf(B.rarete)) || ((A.prix||0) - (B.prix||0)) || A.nom.localeCompare(B.nom, "fr");
   });
 }
@@ -4051,6 +4157,7 @@ function htmlFiltres(avecPossedees){
     <select data-prog="fac" aria-label="Faction"><option value="toutes">Toutes les factions</option>${Object.entries(FACTIONS).map(([k,x]) => `<option value="${k}" ${f.fac===k ? "selected" : ""}>${esc(x.nom)}</option>`).join("")}</select>
     <select data-prog="rar" aria-label="Rareté"><option value="toutes">Toutes les raretés</option>${RARETES.map(([k,l]) => `<option value="${k}" ${f.rar===k ? "selected" : ""}>${l}</option>`).join("")}</select>
     <select data-prog="type" aria-label="Type"><option value="tous">Tous les types</option>${[["creature","Créatures"],["sort","Sorts"],["arme","Armes"]].map(([k,l]) => `<option value="${k}" ${f.type===k ? "selected" : ""}>${l}</option>`).join("")}</select>
+    <select data-prog="tri" aria-label="Trier les cartes">${[["pantheon","Trier par panthéon"],["cout","Coût croissant"],["cout-desc","Coût décroissant"],["nom","Par nom"],["rarete","Par rareté"]].map(([v, l]) => `<option value="${v}" ${f.tri===v ? "selected" : ""}>${l}</option>`).join("")}</select>
     ${avecPossedees ? `<label class="case"><input type="checkbox" data-prog="possedees" ${f.possedees ? "checked" : ""}> Seulement mes cartes</label>` : ""}
   </div>`;
 }
@@ -4128,39 +4235,6 @@ function pageDecks(){
     }).join("") || `<p class="aide">Aucun deck pour l’instant.</p>`}</div>`;
 }
 
-function pageEditeur(){
-  const e = PROG.deckEdit, compte = compter(e.cartes), pb = problemesDeck(e.cartes);
-  const ids = filtrerCartes(true);
-  const prix = Array.from({length:8}, (_, i) => e.cartes.filter(id => Math.min(8, Math.max(1, (CARTES[id] && CARTES[id].prix) || 1))===i+1).length);
-  const maxBarre = Math.max(1, ...prix);
-  const parFaction = {};
-  e.cartes.forEach(id => { const f = (CARTES[id] && CARTES[id].faction) || "neutre"; parFaction[f] = (parFaction[f] || 0) + 1; });
-  const lignes = trierCartesProg(Object.keys(compte)).sort((a,b) => ((CARTES[a].prix||0) - (CARTES[b].prix||0)) || CARTES[a].nom.localeCompare(CARTES[b].nom, "fr"));
-  return `${entete("Éditeur de deck")}
-    <div class="page-editeur">
-      <div>
-        ${htmlFiltres(false)}
-        <div class="grille">${ids.map(id => {
-          const reste = Math.min(PROG.collection[id] || 0, maxCopies(id)) - (compte[id] || 0);
-          return `<div class="col-item ${reste>0 ? "" : "manque"}">${htmlCarte({id, uid:id}, {act:"deck-ajouter", id})}<span class="badge-nb">${reste>0 ? "+" + reste : "max"}</span></div>`;
-        }).join("") || `<p class="aide">Aucune carte possédée ne correspond à ces filtres.</p>`}</div>
-      </div>
-      <aside class="panneau panneau-deck">
-        <label class="champ"><span>Nom du deck</span><input type="text" maxlength="40" data-prog="nomDeck" value="${esc(e.nom)}"></label>
-        <div class="compteur ${pb.length ? "invalide" : "valide"}">${e.cartes.length} / ${REGLES.tailleDeck}</div>
-        <div class="courbe" aria-label="Courbe des prix">${prix.map((n, i) => `<div class="colonne"><span class="nb">${n || ""}</span><span class="b" style="height:${Math.round(60*n/maxBarre)}px"></span><span class="x">${i===7 ? "8+" : i+1}</span></div>`).join("")}</div>
-        ${htmlDevotionDeck(e.cartes)}
-        <div class="factions-deck">${Object.entries(parFaction).map(([f, n]) => `<span class="puce-fac f-${f}"><span class="pastille"></span>${f==="neutre" ? "Neutre" : esc(FACTIONS[f] ? FACTIONS[f].nom : f)} ${n}</span>`).join("")}</div>
-        <p class="${pb.length ? "invalide" : "valide"}">${pb.length ? pb.map(esc).join("<br>") : "Deck prêt à jouer."}</p>
-        <ul class="liste-deck">${lignes.map(id => `<li><button type="button" data-act="deck-retirer" data-id="${id}" title="Retirer une carte"><span class="prix-mini">${CARTES[id].prix ?? "–"}</span><span class="pastille f-${CARTES[id].faction || "neutre"}"></span>${esc(CARTES[id].nom)}<span class="x-nb">×${compte[id]}</span></button></li>`).join("")}</ul>
-        <div class="actions">
-          <button type="button" class="btn" data-act="deck-sauver" ${PROG.occupe ? "disabled" : ""}>Enregistrer</button>
-          <button type="button" class="btn second" data-act="prog-decks">Annuler</button>
-        </div>
-        <p class="aide">Vous pouvez enregistrer un deck incomplet et le terminer plus tard.</p>
-      </aside>
-    </div>`;
-}
 
 function pageBoutique(){
   const prix = PROG.eco ? PROG.eco.prix_paquet : 100, n = PROG.eco ? PROG.eco.cartes_paquet : 5;
@@ -4197,7 +4271,11 @@ function renderProg(){
   const cle = actif && actif.dataset && actif.dataset.prog ? actif.dataset.prog : null;
   let pos = null; try { pos = actif.selectionStart; } catch(e) {}
   const pages = {collection:pageCollection, decks:pageDecks, editeur:pageEditeur, boutique:pageBoutique, profil:pageProfil};
+  const defil = {}; app.querySelectorAll(".grille-atelier, .liste-atelier, .atelier-deck").forEach(el => { defil[el.className.split(" ")[0]] = el.scrollTop; });
+  const yPage = window.scrollY;
   app.innerHTML = PROG.pret ? pages[ui.ecran]() : `${entete(NOM_JEU)}<p class="attente">Chargement…</p>`;
+  app.querySelectorAll(".grille-atelier, .liste-atelier, .atelier-deck").forEach(el => { const v = defil[el.className.split(" ")[0]]; if(v) el.scrollTop = v; });
+  if(ui.ecran!=="boutique" && Math.abs(window.scrollY - yPage)>1) window.scrollTo(0, yPage);
   signaler();
   if(PROG.paquet) PROG.paquet.anim = new Set();
   document.getElementById("couche").innerHTML = ui.ecran==="collection" && PROG.zoom ? htmlZoom() : "";
@@ -4260,6 +4338,17 @@ function actionProg(act, id){
       else e.cartes.push(id);
       break;
     }
+    case "filtre": {
+      const [k, v] = String(id).split(":");
+      if(k==="cout") PROG.filtres.cout = PROG.filtres.cout===Number(v) ? null : Number(v);
+      else PROG.filtres[k] = PROG.filtres[k]===v ? (k==="type" ? "tous" : "toutes") : v;
+      break;
+    }
+    case "filtre-masquer": PROG.filtres.masquerMax = !PROG.filtres.masquerMax; break;
+    case "filtres-raz": Object.assign(PROG.filtres, {fac:"toutes", rar:"toutes", type:"tous", rech:"", cout:null}); break;
+    case "edit-onglet": PROG.ongletEditeur = id; break;
+    case "deck-completer": completerDeck(); break;
+    case "deck-vider": if(confirm("Retirer toutes les cartes de ce deck ?")) PROG.deckEdit.cartes = []; break;
     case "deck-retirer": { const e = PROG.deckEdit, i = e.cartes.lastIndexOf(id); if(i>=0) e.cartes.splice(i, 1); break; }
     case "deck-sauver": {
       const e = PROG.deckEdit, nom = (e.nom || "").trim() || "Deck sans nom";
@@ -4589,7 +4678,7 @@ function signaler(force){
   if(!force && e===dernierEcranSignale) return;
   dernierEcranSignale = e;
   clearTimeout(minuteurSignal);
-  minuteurSignal = setTimeout(() => { sbc().rpc("signaler", {e}).then(() => {}, () => {}); }, force ? 0 : 1200);
+  minuteurSignal = setTimeout(() => { const c = sbc(); if(c) c.rpc("signaler", {e}).then(() => {}, () => {}); }, force ? 0 : 1200);
 }
 function demarrerPresence(){
   signaler(true);
@@ -6653,8 +6742,8 @@ function survolCarte(el){
   s.style.top = Math.max(8, Math.min(innerHeight - H - 8, r.top + r.height / 2 - H / 2)) + "px";
   s.classList.add("montre");
 }
-document.addEventListener("pointerover", e => { const el = e.target.closest && e.target.closest(".nom-journal"); if(el && e.pointerType!=="touch") survolCarte(el); });
-document.addEventListener("pointerout", e => { if(e.target.closest && e.target.closest(".nom-journal")) survolCarte(null); });
+document.addEventListener("pointerover", e => { const el = e.target.closest && e.target.closest(".nom-journal, [data-survol]"); if(el && e.pointerType!=="touch") survolCarte(el); });
+document.addEventListener("pointerout", e => { if(e.target.closest && e.target.closest(".nom-journal, [data-survol]")) survolCarte(null); });
 document.addEventListener("focusin", e => { if(e.target.classList && e.target.classList.contains("nom-journal")) survolCarte(e.target); });
 document.addEventListener("focusout", e => { if(e.target.classList && e.target.classList.contains("nom-journal")) survolCarte(null); });
 document.addEventListener("click", e => {
@@ -6711,6 +6800,128 @@ function htmlDevotionDeck(cartes){
     <span class="barre-devotion"><span style="width:${Math.min(100, 100*n[f]/s2)}%"></span><i style="left:${100*s1/s2}%"></i></span>
     <span>Divinité : <b>${esc(h.nom || "")}</b>${p ? ` (palier ${p})` : ""}.${hs ? ` Encore ${suivant - n[f]} carte${suivant - n[f]>1 ? "s" : ""} ${esc(FACTIONS[f].f)}${suivant - n[f]>1 ? "s" : ""} pour ${esc(hs.nom || "le palier suivant")}.` : " Palier maximal atteint."}</span>
   </div>`;
+}
+
+/* ============================================================
+   ÉDITEUR DE DECK : l’atelier
+   ============================================================ */
+const TYPES_CARTES = [["creature", "Créatures", "❖"], ["sort", "Sorts", "✧"], ["arme", "Équipements", "⚔"]];
+const coutTranche = id => Math.min(7, Math.max(1, (CARTES[id] && CARTES[id].prix) || 1));
+const resteDispo = (id, compte) => Math.min(PROG.collection[id] || 0, maxCopies(id)) - (compte[id] || 0);
+function puceFiltre(cle, val, libelle, actif, extra){
+  return `<button type="button" class="puce-filtre ${actif ? "actif" : ""} ${extra || ""}" data-act="filtre" data-id="${cle}:${val}" aria-pressed="${actif}">${libelle}</button>`;
+}
+function htmlOutilsAtelier(nb){
+  const f = PROG.filtres;
+  return `<div class="outils-atelier">
+    <div class="ligne-outils">
+      <input type="search" placeholder="Rechercher une carte" aria-label="Rechercher une carte" data-prog="rech" value="${esc(f.rech)}">
+      <label class="tri-atelier">Trier par <select data-prog="tri" aria-label="Trier les cartes">${[["pantheon","Panthéon"],["cout","Coût croissant"],["cout-desc","Coût décroissant"],["nom","Nom"],["rarete","Rareté"]].map(([v, l]) => `<option value="${v}" ${f.tri===v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+      <select data-prog="rar" aria-label="Rareté"><option value="toutes">Toutes raretés</option>${RARETES.map(([k, l]) => `<option value="${k}" ${f.rar===k ? "selected" : ""}>${l}</option>`).join("")}</select>
+    </div>
+    <div class="ligne-outils puces-outils" role="group" aria-label="Filtres">
+      ${Object.entries(FACTIONS).map(([k, x]) => puceFiltre("fac", k, `<span class="sym f-${k}">${x.sym}</span>${esc(x.nom)}`, f.fac===k, `f-${k}`)).join("")}
+      <span class="sep-outils"></span>
+      ${TYPES_CARTES.map(([k, l, s]) => puceFiltre("type", k, `${s} ${l}`, f.type===k)).join("")}
+    </div>
+    <div class="ligne-outils puces-outils">
+      <span class="aide">Coût</span>${[1, 2, 3, 4, 5, 6, 7].map(n => puceFiltre("cout", n, n===7 ? "7+" : String(n), f.cout===n, "puce-cout")).join("")}
+      <span class="sep-outils"></span>
+      <label class="case"><input type="checkbox" data-act="filtre-masquer" ${f.masquerMax ? "checked" : ""}> Masquer les cartes épuisées</label>
+      <span class="aide resultats">${nb} carte${nb>1 ? "s" : ""}</span>
+      ${(f.fac!=="toutes" || f.type!=="tous" || f.cout || f.rar!=="toutes" || f.rech) ? `<button type="button" class="btn-discret" data-act="filtres-raz">Effacer les filtres</button>` : ""}
+    </div>
+  </div>`;
+}
+function htmlTuileAtelier(id, compte){
+  const n = compte[id] || 0, poss = Math.min(PROG.collection[id] || 0, maxCopies(id)), max = maxCopies(id), reste = poss - n;
+  const points = Array.from({length:max}, (_, i) => `<i class="${i<n ? "plein" : i<poss ? "libre" : "absent"}"></i>`).join("");
+  return `<div class="tuile-atelier ${n ? "dans-deck" : ""} ${reste<=0 ? "epuisee" : ""}">
+    ${htmlCarte({id, uid:id}, {act:"deck-ajouter", id})}
+    <div class="pied-tuile">
+      ${n ? `<button type="button" class="moins-tuile" data-act="deck-retirer" data-id="${id}" aria-label="Retirer ${esc(CARTES[id].nom)} du deck">−</button>` : `<span class="moins-vide"></span>`}
+      <span class="points-copies" title="${n} dans le deck, ${Math.max(0, reste)} disponible${reste>1 ? "s" : ""}${poss<max ? `, ${max - poss} non possédée${max - poss>1 ? "s" : ""}` : ""}">${points}</span>
+      ${n ? `<span class="nb-tuile">×${n}</span>` : `<span class="moins-vide"></span>`}
+    </div>
+  </div>`;
+}
+function htmlStatsAtelier(cartes){
+  const types = TYPES_CARTES.map(([k, l, s]) => [k, l, s, cartes.filter(id => CARTES[id] && CARTES[id].type===k).length]);
+  const prix = [1, 2, 3, 4, 5, 6, 7].map(n => cartes.filter(id => coutTranche(id)===n).length), mx = Math.max(1, ...prix);
+  const parFaction = {};
+  cartes.forEach(id => { const f = (CARTES[id] && CARTES[id].faction) || "neutre"; parFaction[f] = (parFaction[f] || 0) + 1; });
+  const total = Math.max(1, cartes.length);
+  return `<div class="stats-atelier">
+    <div class="types-deck">${types.map(([k, l, s, n]) => `<div class="type-deck t-${k}"><span class="sym-type">${s}</span><b>${n}</b><span>${l}</span><span class="barre-type"><span style="width:${100*n/total}%"></span></span></div>`).join("")}</div>
+    <div class="courbe courbe-atelier" aria-label="Courbe des coûts (cliquez pour filtrer)">${prix.map((n, i) => `<button type="button" class="colonne ${PROG.filtres.cout===i+1 ? "actif" : ""}" data-act="filtre" data-id="cout:${i+1}" title="${n} carte${n>1 ? "s" : ""} à ${i===6 ? "7 or ou plus" : (i+1) + " or"}"><span class="nb">${n || ""}</span><span class="b" style="height:${Math.round(46*n/mx)}px"></span><span class="x">${i===6 ? "7+" : i+1}</span></button>`).join("")}</div>
+    <div class="factions-deck">${Object.entries(parFaction).map(([f, n]) => `<span class="puce-fac f-${f}"><span class="pastille"></span>${f==="neutre" ? "Neutre" : esc(FACTIONS[f] ? FACTIONS[f].nom : f)} ${n}</span>`).join("")}</div>
+    ${htmlDevotionDeck(cartes)}
+  </div>`;
+}
+function htmlListeAtelier(compte){
+  const ids = Object.keys(compte);
+  if(!ids.length) return `<p class="aide vide-deck">Votre deck est vide. Cliquez sur une carte de la collection pour l’ajouter.</p>`;
+  return TYPES_CARTES.map(([k, l, s]) => {
+    const groupe = ids.filter(id => CARTES[id] && CARTES[id].type===k).sort((a, b) => ((CARTES[a].prix || 0) - (CARTES[b].prix || 0)) || CARTES[a].nom.localeCompare(CARTES[b].nom, "fr"));
+    if(!groupe.length) return "";
+    const n = groupe.reduce((t, id) => t + compte[id], 0);
+    return `<div class="groupe-deck"><h3>${s} ${l} <span>${n}</span></h3><ul>${groupe.map(id => {
+      const d = CARTES[id], plus = resteDispo(id, compte)>0 && Object.values(compte).reduce((a, b) => a + b, 0) < REGLES.tailleDeck;
+      return `<li class="ligne-atelier r-${d.rarete || "commune"}" data-survol data-carte="${id}">
+        <span class="prix-mini">${d.prix ?? "–"}</span><span class="pastille f-${d.faction || "neutre"}"></span><span class="nom-ligne">${esc(d.nom)}</span><span class="x-nb">×${compte[id]}</span>
+        <button type="button" class="pm" data-act="deck-retirer" data-id="${id}" aria-label="Retirer un exemplaire de ${esc(d.nom)}">−</button>
+        <button type="button" class="pm" data-act="deck-ajouter" data-id="${id}" ${plus ? "" : "disabled"} aria-label="Ajouter un exemplaire de ${esc(d.nom)}">+</button></li>`;
+    }).join("")}</ul></div>`;
+  }).join("");
+}
+function pageEditeur(){
+  const e = PROG.deckEdit, compte = compter(e.cartes), pb = problemesDeck(e.cartes), f = PROG.filtres;
+  const ids = filtrerCartes(true).filter(id => !f.masquerMax || resteDispo(id, compte)>0);
+  const t = REGLES.tailleDeck, vue = PROG.ongletEditeur || "collection";
+  return `${entete("Éditeur de deck")}
+    <div class="atelier vue-${vue}">
+      <nav class="onglets-atelier" aria-label="Affichage">
+        <button type="button" data-act="edit-onglet" data-id="collection" aria-pressed="${vue==="collection"}">Collection</button>
+        <button type="button" data-act="edit-onglet" data-id="deck" aria-pressed="${vue==="deck"}">Mon deck <b class="${pb.length ? "invalide" : "valide"}">${e.cartes.length}/${t}</b></button>
+      </nav>
+      <section class="atelier-collection" aria-label="Votre collection">
+        ${htmlOutilsAtelier(ids.length)}
+        <div class="grille-atelier">${ids.map(id => htmlTuileAtelier(id, compte)).join("") || `<p class="aide">Aucune carte possédée ne correspond à ces filtres.</p>`}</div>
+      </section>
+      <aside class="atelier-deck" aria-label="Votre deck">
+        <div class="tete-atelier">
+          <input type="text" class="nom-atelier" maxlength="40" data-prog="nomDeck" value="${esc(e.nom)}" aria-label="Nom du deck" placeholder="Nom du deck">
+          <div class="compteur-atelier ${pb.length ? "invalide" : "valide"}"><span><b>${e.cartes.length}</b> / ${t} cartes</span><span class="barre-compteur"><span style="width:${Math.min(100, 100*e.cartes.length/t)}%"></span></span></div>
+          <p class="etat-deck ${pb.length ? "invalide" : "valide"}">${pb.length ? pb.map(esc).join(" ") : "✓ Deck prêt à jouer."}</p>
+        </div>
+        ${htmlStatsAtelier(e.cartes)}
+        <div class="liste-atelier">${htmlListeAtelier(compte)}</div>
+        <div class="actions actions-atelier">
+          <button type="button" class="btn" data-act="deck-sauver" ${PROG.occupe ? "disabled" : ""}>Enregistrer</button>
+          <button type="button" class="btn second" data-act="prog-decks">Annuler</button>
+          <button type="button" class="btn-discret" data-act="deck-completer" ${e.cartes.length>=t ? "disabled" : ""}>Compléter automatiquement</button>
+          <button type="button" class="btn-discret" data-act="deck-vider" ${e.cartes.length ? "" : "disabled"}>Vider</button>
+        </div>
+        <p class="aide">Vous pouvez enregistrer un deck incomplet et le terminer plus tard.</p>
+      </aside>
+    </div>`;
+}
+// Remplit les places libres : panthéon principal d’abord, puis créatures, puis cartes chères
+function completerDeck(){
+  const e = PROG.deckEdit, t = REGLES.tailleDeck, n = {};
+  e.cartes.forEach(id => { const f = CARTES[id] && CARTES[id].faction; if(f) n[f] = (n[f] || 0) + 1; });
+  const fav = Object.keys(n).sort((a, b) => n[b] - n[a])[0];
+  const cand = Object.keys(PROG.collection).filter(id => estCollectionnable(CARTES[id]))
+    .sort((a, b) => ((CARTES[b].faction===fav) - (CARTES[a].faction===fav)) || ((CARTES[b].type==="creature") - (CARTES[a].type==="creature")) || ((CARTES[b].prix || 0) - (CARTES[a].prix || 0)));
+  let ajoutees = 0, encore = true;
+  while(e.cartes.length < t && encore){
+    encore = false;
+    for(const id of cand){
+      if(e.cartes.length >= t) break;
+      if(resteDispo(id, compter(e.cartes))>0){ e.cartes.push(id); ajoutees++; encore = true; }
+    }
+  }
+  erreur(ajoutees ? `${ajoutees} carte${ajoutees>1 ? "s" : ""} ajoutée${ajoutees>1 ? "s" : ""}.` : "Aucune carte disponible pour compléter le deck.");
 }
 
 chargerConfig();
