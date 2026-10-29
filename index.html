@@ -2429,6 +2429,10 @@ function renderCouche(){
   const regles = "";
   if(S && ui.voirDefausse!=null && S.joueurs[ui.voirDefausse]){
     h = htmlVoirDefausse();
+  } else if(!S && ui.ecran!=="jeu"){
+    // Profil, collection, decks, boutique… : l’accueil ne doit jamais se poser par-dessus,
+    // même si un chargement en arrière-plan demande un nouvel affichage
+    h = "";
   } else if(!S){
     h = `<div class="boite" role="dialog" aria-label="Nouvelle partie">
       <h2 class="logo">${NOM_JEU}</h2><span class="sous-logo">Le choc des panthéons</span>
@@ -4751,7 +4755,7 @@ async function enregistrerDuel(){
 }
 async function chargerQuete(){ try { PROG.quete = await rpc("mes_quete"); } catch(e) { PROG.quete = null; } }
 async function chargerMesStats(annoncer){
-  chargerQuete().then(() => { if(!S && PROG.pret) renderCouche(); });
+  chargerQuete().then(() => { if(!S && PROG.pret && ui.ecran==="jeu") renderCouche(); });
   try { PROG.mesStats = await rpc("mes_stats"); } catch(e) { return; }
   verifierTrophees(annoncer);
 }
