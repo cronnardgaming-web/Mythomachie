@@ -1297,7 +1297,7 @@ const DEFAUT = {
   // Valeurs d’origine = config.json du site (GitHub), sans les images
   musiques:{menu:"", duel:[]}, variantes:{}, boosters:{},
   credits:{musiques:[{titre:"Battle Cinematic Heroic Orchestra", artiste:"Echoes of Lumen"}, {titre:"Battle Music", artiste:"PaulYudin"}, {titre:"Battle", artiste:"NastelBom"}, {titre:"Epic Battle", artiste:"YevhenAstafiev"}, {titre:"Cinematic Powerful Battle Music", artiste:"Tunetank"}, {titre:"Epic Cinematic Battle Music", artiste:"Tunetank"}]},
-  regles:{devotionSeuils:[16, 30], devotionNbTresors:2, devotionTresor:"piece", devotionCreature:"dague", armesHeros:true, armesImmediat:true, armesPermanentes:true, armesVie:true, pvDepart:40, seuilPouvoir:10, mainDepart:5, piocheParTour:5, tailleMarche:5, plateauMax:7, tailleDeck:30, copiesMax:2, copiesLegendaire:1, carteBase:"pierre", deckDepart:{piece:7, rubis:1, dague:1, epee:1}},
+  regles:{devotionSeuils:[16, 30], devotionNbTresors:2, devotionTresor:"piece", devotionCreature:"dague", armesHeros:true, armesImmediat:true, armesPermanentes:true, armesVie:true, pvDepart:40, seuilPouvoir:10, mainDepart:5, mainPremier:3, piocheParTour:5, tailleMarche:5, plateauMax:7, tailleDeck:30, copiesMax:2, copiesLegendaire:1, carteBase:"pierre", deckDepart:{piece:7, rubis:1, dague:1, epee:1}},
   mots:{provocation:"Provocation", rapidite:"Rapidité", resistance:"Résistance", ethere:"Ethéré"},
   termes:{conjuration:"Conjuration", echo:"Echo", allie:"Combo", sacrifice:"Sacrifice"},
   heros:{
@@ -1676,7 +1676,8 @@ function nouvellePartie(mode, decks, variantesJeu, opts = {}){
   S.stats = [0, 1].map(() => ({creatures:0, sorts:0, achats:0, degats:0, soins:0, pouvoirs:0, jouees:{}, achetees:{}}));
   S.debut = Date.now();
   for(let i=0;i<REGLES.tailleMarche && S.marcheDeck.length;i++) S.marche.push(S.marcheDeck.pop());
-  S.joueurs.forEach(j => piocher(j, REGLES.mainDepart, true));
+  // Le premier joueur pioche moins de cartes : il compense l’avantage de choisir le premier au marché
+  S.joueurs.forEach((j, k) => piocher(j, k===S.courant ? (REGLES.mainPremier ?? REGLES.mainDepart) : REGLES.mainDepart, true));
   S.joueurs[S.courant].plateau.forEach(c => c.peutAttaquer = true);
   S.joueurs.forEach(logDevotion);
   log(`${S.joueurs[S.courant].nom} commence.`);
@@ -2744,6 +2745,7 @@ function admRegles(){
     <div class="champs">
       ${champNombre("Points de vie de départ", p+".pvDepart", r.pvDepart)}
       ${champNombre("Cartes en main au début", p+".mainDepart", r.mainDepart)}
+      ${champNombre("Main de départ du premier joueur", p+".mainPremier", r.mainPremier ?? 3)}
       ${champNombre("Cartes piochées par tour", p+".piocheParTour", r.piocheParTour)}
       ${champNombre("Créatures max sur le plateau", p+".plateauMax", r.plateauMax)}
       ${champNombre("Créatures ennemies à détruire pour charger le pouvoir du héros", p+".seuilPouvoir", r.seuilPouvoir || 10)}
@@ -5233,7 +5235,7 @@ function pageRegles(){
       <li><b>Votre héros</b> est une divinité du panthéon le plus représenté dans le deck que vous avez choisi (en cas d’égalité, il est tiré au sort). Laquelle dépend de votre Dévotion : voir plus bas.</li>
       <li><b>Votre deck de départ</b> compte ${nbDepart} cartes, identiques pour les deux joueurs : ${depart}. Avec la Dévotion, certaines prennent la couleur de votre panthéon.</li>
       <li><b>Le marché commun</b> est formé des deux decks choisis par les joueurs, mélangés. ${R.tailleMarche} cartes sont visibles${base ? `, plus ${esc(base.nom)}, toujours disponible` : ""}.</li>
-      <li>Chaque joueur pioche ${R.mainDepart} cartes, puis le premier joueur est tiré au sort.</li></ul>`],
+      <li>Le premier joueur est tiré au sort. Il ne pioche que <b>${R.mainPremier ?? R.mainDepart} cartes</b> pour son premier tour, et l’autre joueur ${R.mainDepart} : jouer en premier permet de choisir le premier au marché, un gros avantage que cette main réduite compense. Ensuite, chacun pioche ${R.piocheParTour} cartes à la fin de chaque tour.</li></ul>`],
     ["tour", "Le déroulement d’un tour", `<p>Pendant votre tour, vous faites ce que vous voulez, dans l’ordre que vous voulez :</p>
       <ol><li><b>Jouer vos cartes.</b> C’est gratuit : chaque carte rapporte de l’or, de la puissance, du soin, une pioche ou pose une créature.</li>
       <li><b>Acheter au marché</b> avec votre or.</li>
@@ -5385,7 +5387,7 @@ function construireEtapes(){
   const prixAchat = CARTES[c.achat] ? CARTES[c.achat].prix : 3;
   const nomsOr = c.nbOr1>1 ? `vos ${c.nbOr1} cartes ${nC(c.or1)}` : laCarte(c.or1);
   return [
-  {titre:"Bienvenue !", texte:`Vous incarnez <b>${esc(moiH.nom)}</b>, ${esc((moiH.titre || "").toLowerCase())}. Votre adversaire, <b>${esc(luiH.nom)}</b>, n’a que ${TUTO.pvAdverse} points de vie pour ce tutoriel : faites-le tomber à 0 pour gagner.<br><br>Votre héros et ses points de vie sont en bas, ceux de l’adversaire en haut. En dehors du tutoriel, votre divinité dépend du panthéon le plus représenté dans votre deck : vous découvrirez la Dévotion à la fin.`,
+  {titre:"Bienvenue !", texte:`Vous incarnez <b>${esc(moiH.nom)}</b>, ${esc((moiH.titre || "").toLowerCase())}. Votre adversaire, <b>${esc(luiH.nom)}</b>, n’a que ${TUTO.pvAdverse} points de vie pour ce tutoriel : faites-le tomber à 0 pour gagner.<br><br>Votre héros et ses points de vie sont en bas, ceux de l’adversaire en haut. Votre main est préparée pour ce tutoriel ; en partie normale, le joueur qui commence ne pioche que ${REGLES.mainPremier ?? REGLES.mainDepart} cartes au lieu de ${REGLES.mainDepart}, pour compenser l’avantage de choisir le premier au marché. En dehors du tutoriel, votre divinité dépend du panthéon le plus représenté dans votre deck : vous découvrirez la Dévotion à la fin.`,
     info:true, cible:() => [".medaillon-bloc.moi .medaillon", ".medaillon-bloc.adv .medaillon"]},
   {titre:"Jouez votre or", texte:`Jouer une carte est <b>gratuit</b>. Cliquez sur ${nomsOr} et sur ${laCarte(c.or2)} : elles vous donnent de l’or ${icone("or")} pour ce tour.`,
     cible:() => I.ors.filter(enMain).map(u => `.main .carte[data-id="${u}"]`),
