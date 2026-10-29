@@ -727,7 +727,8 @@ body.compact .devotion-palier{font-size:9px}
 .heros-deck{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center;padding:12px;border-radius:10px;
   background:radial-gradient(120% 120% at 0% 0%,color-mix(in srgb, var(--fc) 26%, transparent),color-mix(in srgb, var(--fc) 6%, transparent) 70%);border:1px solid color-mix(in srgb, var(--fc) 45%, transparent)}
 .heros-deck .medaillon{width:84px;height:84px}
-.heros-deck .medaillon .visage{width:68px;height:68px;font-size:32px}
+.heros-deck .medaillon{display:grid;place-items:center;position:relative;flex:none}
+.heros-deck .medaillon .visage{display:grid;place-items:center;width:68px;height:68px;font-size:32px}
 .heros-deck .medaillon-mini{width:52px;height:52px}
 .heros-deck .medaillon-mini .visage{width:42px;height:42px;font-size:20px}
 .infos-heros-deck{display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -987,6 +988,9 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
 .medaillon.pret .anneau{filter:drop-shadow(0 0 6px var(--or))}
 .medaillon .visage.portrait-heros{overflow:hidden;box-shadow:0 0 0 3px var(--fc),inset 0 0 0 3px rgba(0,0,0,.22),0 8px 22px var(--ombre)}
 .medaillon .visage.portrait-heros img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.medaillon .visage{overflow:hidden}
+.medaillon .visage.portrait-heros{display:block}
+.medaillon .visage img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
 .medaillon.cible{cursor:pointer}
 .medaillon.cible .visage{box-shadow:0 0 0 4px var(--cible),0 0 26px var(--cible)}
 button.medaillon[data-act="pouvoir"]{cursor:pointer}
@@ -6622,7 +6626,7 @@ function htmlMedaillon2v2(k, inter, visee){
     : j.reserve ? `+${j.reserve} puissance en réserve` : "";
   return `<div class="medaillon-bloc ${moi ? "moi" : ennemi ? "adv" : "allie"} ${j.esprit ? "esprit" : ""} ${S.courant===k && S.vainqueur===null ? "actif" : ""}">
     <${balise} ${attrs} class="medaillon f-${j.heros || "neutre"} ${ciblable ? "cible" : ""} ${activable ? "pret" : ""}" data-joueur="${k}" style="--p:${Math.min(1, S.jauge[j.eq]/R2.seuilJauge).toFixed(3)}">
-      <span class="anneau" aria-hidden="true"></span><span class="visage" aria-hidden="true">${h.image ? `<img src="${h.image}" alt="">` : sym}</span><span class="pv-ecu" title="Points de vie">${j.esprit ? "✝" : j.pv}</span>
+      <span class="anneau" aria-hidden="true"></span><span class="visage ${h.image ? "portrait-heros" : ""}" aria-hidden="true">${h.image ? `<img src="${h.image}" alt="">` : sym}</span><span class="pv-ecu" title="Points de vie">${j.esprit ? "✝" : j.pv}</span>
     </${balise}>
     <div class="plaque"><b>${esc(h.nom)}</b>${j.palier ? `<span class="devotion-palier">${"✦".repeat(j.palier)} Dévotion</span>` : ""}<span class="qui">${esc(role)}</span>${etat ? `<span class="charge ${j.esprit ? "" : "ok"}">${etat}</span>` : ""}
       ${activable ? `<button type="button" class="btn btn-pouvoir" data-act="pouvoir">Activer</button>` : ""}</div>
@@ -6948,7 +6952,7 @@ function completerDeck(){
 // Atelier : la divinité que le deck obtiendra (panthéon majoritaire et palier de Dévotion)
 function portraitDivinite(f, h, petit){
   const sym = FACTIONS[f] ? FACTIONS[f].sym : "✦";
-  return `<span class="medaillon f-${f} ${petit ? "medaillon-mini" : ""}" style="--p:1" aria-hidden="true"><span class="anneau"></span><span class="visage">${h && h.image ? `<img src="${h.image}" alt="">` : sym}</span></span>`;
+  return `<span class="medaillon f-${f} ${petit ? "medaillon-mini" : ""}" style="--p:1" aria-hidden="true"><span class="anneau"></span><span class="visage ${h && h.image ? "portrait-heros" : ""}">${h && h.image ? `<img src="${h.image}" alt="">` : sym}</span></span>`;
 }
 function htmlHerosDeck(cartes){
   const n = {};
