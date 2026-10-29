@@ -84,6 +84,14 @@ ou changé leur faction, renvoyez le catalogue depuis l’administration (onglet
 `supabase-admin-joueurs.sql` permet à l’administrateur de corriger l’or et l’encre d’un joueur depuis l’onglet
 « Statistiques » de l’administration (bouton « Modifier » dans la liste des joueurs).
 
+## Quêtes du jour et trophées
+
+`supabase-recompenses.sql` (à exécuter après `supabase-variantes.sql`) met en place :
+- 3 quêtes du jour par joueur (15 or chacune, une quête remplaçable par jour), calculées par le serveur ;
+- des trophées à 4 rangs (bronze, argent, or, platine), dont 4 trophées de panthéon, avec des récompenses
+  en or ou en paquets offerts, réclamables une seule fois ;
+- une réserve de paquets offerts, qui s’ouvrent gratuitement dans la boutique.
+
 ## Illustrations alternatives, cartes promotionnelles et boosters spéciaux
 
 `supabase-variantes.sql` (à exécuter après `supabase-surveillance.sql`) ajoute :

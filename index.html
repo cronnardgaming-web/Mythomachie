@@ -745,6 +745,36 @@ body.compact .heros-deck .medaillon{width:60px;height:60px}
 body.compact .heros-deck .medaillon .visage{width:48px;height:48px;font-size:22px}
 body.compact .nom-heros-deck{font-size:17px}
 
+/* Quêtes du jour et trophées */
+.quetes-jour{display:flex;flex-direction:column;gap:8px}
+.titre-quetes{font-family:Cinzel,serif;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ligne-quete{display:grid;grid-template-columns:1fr auto auto;grid-template-rows:auto auto;column-gap:10px;row-gap:3px;align-items:center}
+.ligne-quete .texte-quete{font-size:14px}
+.ligne-quete .barre{grid-column:1/2;grid-row:2;height:6px}
+.ligne-quete .progres-quete{grid-row:1/3;grid-column:2;font-size:13px;color:var(--ink-2);min-width:42px;text-align:right}
+.ligne-quete > :last-child{grid-row:1/3;grid-column:3}
+.ligne-quete.faite .texte-quete{color:var(--ink-2);text-decoration:line-through}
+.ligne-quete.faite .progres-quete{color:#4fd18b;font-weight:700}
+.btn-quete{margin:0;padding:5px 10px;font-size:13px;animation:jeton-dispo 1.4s ease-in-out infinite}
+.pastille-recompense{display:block;width:fit-content;font-size:11px;font-weight:700;color:#fff;background:#b8402f;border-radius:99px;padding:1px 8px;margin-bottom:3px}
+.trophee .corps-trophee{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.rangs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin-top:6px}
+.rang{display:flex;flex-direction:column;gap:2px;align-items:center;text-align:center;border-radius:6px;padding:4px 2px;background:var(--table);border:1px solid var(--line);opacity:.6;font-size:11px}
+.rang.atteint{opacity:1}
+.rang.r1.atteint{border-color:#b07a4a}.rang.r2.atteint{border-color:#b9c3cc}.rang.r3.atteint{border-color:#e0b13d}.rang.r4.atteint{border-color:#9fe3ff;box-shadow:0 0 8px rgba(159,227,255,.4)}
+.nom-rang{font-weight:700}
+.seuil-rang{color:var(--ink-2)}
+.rec-rang{font-size:10px;color:var(--ink-2)}
+.rang.recu .rec-rang{color:#4fd18b}
+.btn-rang{margin:0;padding:3px 4px;font-size:10px;line-height:1.2;white-space:nowrap;width:100%;box-sizing:border-box}
+.trophee.niveau-4 .medaille{background:radial-gradient(circle at 35% 30%,#ffffff,#9fe3ff 55%,#3d7fa0);color:#123}
+.paquets-offerts{background:var(--zone);border:1px solid color-mix(in srgb, var(--or) 45%, var(--line));border-radius:12px;padding:12px 16px;margin:10px 0}
+.paquets-offerts h2{margin:0 0 4px}
+.liste-offerts{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.offert{display:flex;align-items:center;gap:8px;background:var(--table);border:1px solid var(--line);border-left:4px solid var(--fc, var(--or));border-radius:8px;padding:6px 10px}
+.offert .btn{margin:0;padding:5px 12px}
+.sym-offert{font-size:20px;color:var(--fc, var(--or))}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -4284,8 +4314,9 @@ function pageBoutique(){
   return `${entete("Boutique")}
     <div class="boutique">
       <p class="aide">Chaque paquet contient ${n} cartes, dont au moins une rare. Chances par carte : commune ${Math.round((pr.commune||0)*100)} %, rare ${Math.round((pr.rare||0)*100)} %, épique ${Math.round((pr.epique||0)*100)} %, légendaire ${Math.round((pr.legendaire||0)*100)} %.</p>
-      ${manque ? `<p class="avertissement">Il vous faut ${prix} or pour acheter un paquet. Gagnez de l’or en jouant des parties et en réussissant la quête du jour.</p>` : ""}
+      ${manque ? `<p class="avertissement">Il vous faut ${prix} or pour acheter un paquet. Gagnez de l’or en jouant des parties et en réussissant les quêtes du jour.</p>` : ""}
       ${contenu}
+      ${PROG.paquet ? "" : htmlPaquetsOfferts()}
       <div class="offres">${offres.map(o => `<div class="offre ${o.f ? "f-" + o.f : ""} ${o.special ? "offre-speciale" : ""}" ${o.couleur ? `style="--fc:${esc(o.couleur)};--fci:#fff"` : ""}>
         <div class="paquet-visuel ${o.f || o.special ? "paquet-faction" : ""}" aria-hidden="true"><span>${esc(o.sym)}</span></div>
         <div class="offre-texte"><h2>${esc(o.nom)}</h2><p class="aide">${esc(o.desc)}</p>
@@ -4401,6 +4432,24 @@ function actionProg(act, id){
       });
       return true;
     }
+    case "quete-jour-reclamer": action(async () => { const r = await rpc("reclamer_quete_jour", {p_id:id}); if(r && r.erreur) throw new Error(r.erreur); await chargerQuete(); await rafraichir(); return r.gain; }, g => `+${g} or : quête réussie !`); return true;
+    case "quete-remplacer": action(async () => { const r = await rpc("remplacer_quete", {p_id:id}); if(r && r.erreur) throw new Error(r.erreur); await chargerQuete(); }, "Quête remplacée."); return true;
+    case "trophee-reclamer": {
+      const [t, p] = String(id).split("|");
+      action(async () => { const r = await rpc("reclamer_trophee", {p_trophee:t, p_palier:Number(p)}); if(r && r.erreur) throw new Error(r.erreur); await Promise.all([chargerTrophees(), chargerPaquetsOfferts(), rafraichir()]); return r; },
+             r => r.or ? `+${r.or} or !` : `${(r.paquets || []).map(NOM_PAQUET).join(" et ")} offert${(r.paquets || []).length>1 ? "s" : ""} : à ouvrir dans la boutique !`);
+      return true;
+    }
+    case "paquet-offert": {
+      const avant = {...PROG.collection}, f = id && FACTIONS[id] ? id : null;
+      action(async () => {
+        const cartes = await rpc("ouvrir_paquet", {p_faction:f, p_offert:true});
+        PROG.paquet = {cartes, faction:f, titre:`${NOM_PAQUET(id)} (offert)`, reveles:new Set(), anim:new Set(), nouvelles:new Set(cartes.filter(c => !avant[c]))};
+        await chargerPaquetsOfferts();
+        try { window.scrollTo({top:0, behavior:"auto"}); } catch(e) {}
+      });
+      return true;
+    }
     case "col-variante-voir": PROG.zoomV = id || null; break;
     case "col-variante-choisir": {
       const [carte, vid] = String(id).split("|");
@@ -4454,7 +4503,7 @@ function admServeur(){
     <p class="aide">Le serveur doit connaître vos cartes et leur rareté pour les paquets, la fabrication et les cartes offertes. Envoyez le catalogue après avoir ajouté, supprimé ou changé la rareté de cartes.</p>
     <div class="adm-actions"><button type="button" class="btn" data-act="srv-catalogue">Envoyer le catalogue (${Object.keys(CARTES).length} cartes)</button></div>
     <h2>Économie</h2>
-    <div class="champs">${n("Or offert au départ","or_depart")}${n("Or par victoire","or_victoire")}${n("Or par défaite","or_defaite")}${n("Plafond d’or par jour","plafond_or_jour")}${n("Or de la quête du jour","or_quete")}${n("Prix d’un paquet","prix_paquet")}${n("Cartes par paquet","cartes_paquet")}</div>
+    <div class="champs">${n("Or offert au départ","or_depart")}${n("Or par victoire","or_victoire")}${n("Or par défaite","or_defaite")}${n("Plafond d’or par jour","plafond_or_jour")}${n("Or par quête du jour","or_quete")}${n("Prix d’un paquet","prix_paquet")}${n("Cartes par paquet","cartes_paquet")}</div>
     <h2>Chances par carte dans un paquet</h2>
     <p class="aide">Entre 0 et 1, le total doit faire 1. Exemple : 0.72 pour 72 %.</p>
     <div class="champs">${rar.map(([k,l]) => n(l.charAt(0).toUpperCase()+l.slice(1), "probabilites."+k)).join("")}</div>
@@ -4753,28 +4802,38 @@ async function enregistrerDuel(){
     catch(e) { if(essai>=2 || /ticket|Ticket|courte|invalides|mode|expiré|Connexion/.test(e.message)) throw e; await new Promise(r => setTimeout(r, 1500*(essai+1))); }
   }
 }
-async function chargerQuete(){ try { PROG.quete = await rpc("mes_quete"); } catch(e) { PROG.quete = null; } }
+async function chargerQuete(){
+  try { PROG.quetes = await rpc("mes_quetes"); PROG.quete = null; }
+  catch(e) { PROG.quetes = null; try { PROG.quete = await rpc("mes_quete"); } catch(e2) { PROG.quete = null; } }
+}
 async function chargerMesStats(annoncer){
   chargerQuete().then(() => { if(!S && PROG.pret && ui.ecran==="jeu") renderCouche(); });
+  Promise.all([chargerTrophees(), chargerPaquetsOfferts()]).then(() => {
+    if(!S && PROG.pret){ if(ui.ecran==="jeu") renderCouche(); else if(["profil", "boutique"].includes(ui.ecran)) renderProg(); }
+  });
   try { PROG.mesStats = await rpc("mes_stats"); } catch(e) { return; }
   verifierTrophees(annoncer);
 }
 
 // ----- Trophées : trois paliers chacun
 const TROPHEES = [
-  {id:"parties", nom:"Combattant", desc:"Parties jouées", sym:"⚔", paliers:[10, 50, 200], val:s => s.parties},
-  {id:"victoires", nom:"Conquérant", desc:"Victoires", sym:"♛", paliers:[5, 25, 100], val:s => s.victoires},
-  {id:"serie", nom:"Invaincu", desc:"Victoires d’affilée", sym:"✶", paliers:[3, 5, 10], val:s => s.serie_max},
-  {id:"degats", nom:"Fléau", desc:"Dégâts infligés à l’adversaire", sym:"✹", paliers:[500, 3000, 15000], val:s => s.degats},
-  {id:"soins", nom:"Guérisseur", desc:"Points de vie soignés", sym:"✚", paliers:[200, 1500, 6000], val:s => s.soins},
-  {id:"creatures", nom:"Invocateur", desc:"Créatures jouées", sym:"❖", paliers:[50, 300, 1500], val:s => s.creatures},
-  {id:"achats", nom:"Marchand", desc:"Cartes achetées au marché", sym:"⚖", paliers:[50, 300, 1500], val:s => s.achats},
-  {id:"pouvoirs", nom:"Puissance divine", desc:"Pouvoirs de héros utilisés", sym:"☀", paliers:[5, 25, 100], val:s => s.pouvoirs},
-  {id:"pantheons", nom:"Maître des panthéons", desc:"Héros différents avec au moins une victoire", sym:"✦", paliers:[2, 3, 4], val:s => Object.values(s.par_heros || {}).filter(x => x.victoires>0).length},
-  {id:"collection", nom:"Collectionneur", desc:"Cartes différentes possédées", sym:"❦", paliers:[40, 80, 120], val:() => Object.keys(PROG.collection).filter(id => estCollectionnable(CARTES[id])).length}
+  {id:"parties", nom:"Combattant", desc:"Parties jouées", sym:"⚔", paliers:[10, 50, 200, 500], val:s => s.parties},
+  {id:"victoires", nom:"Conquérant", desc:"Victoires", sym:"♛", paliers:[5, 25, 100, 300], val:s => s.victoires},
+  {id:"serie", nom:"Invaincu", desc:"Victoires d’affilée", sym:"✶", paliers:[3, 5, 10, 15], val:s => s.serie_max},
+  {id:"degats", nom:"Fléau", desc:"Dégâts infligés à l’adversaire", sym:"✹", paliers:[500, 3000, 15000, 40000], val:s => s.degats},
+  {id:"soins", nom:"Guérisseur", desc:"Points de vie soignés", sym:"✚", paliers:[200, 1500, 6000, 15000], val:s => s.soins},
+  {id:"creatures", nom:"Invocateur", desc:"Créatures jouées", sym:"❖", paliers:[50, 300, 1500, 4000], val:s => s.creatures},
+  {id:"achats", nom:"Marchand", desc:"Cartes achetées au marché", sym:"⚖", paliers:[50, 300, 1500, 4000], val:s => s.achats},
+  {id:"pouvoirs", nom:"Puissance divine", desc:"Pouvoirs de divinité utilisés", sym:"☀", paliers:[5, 25, 100, 250], val:s => s.pouvoirs},
+  {id:"pantheons", nom:"Maître des panthéons", desc:"Victoires avec chacun des quatre panthéons", sym:"✦", paliers:[1, 5, 20, 50], val:s => Math.min(...Object.keys(FACTIONS).map(f => ((s.par_heros || {})[f] || {}).victoires || 0))},
+  {id:"collection", nom:"Collectionneur", desc:"Cartes différentes possédées, puis toutes au maximum d’exemplaires", sym:"❦", paliers:[40, 80, 120, 120], val:() => Object.keys(PROG.collection).filter(id => estCollectionnable(CARTES[id])).length},
+  {id:"champion_egy", nom:"Champion d’Égypte", desc:"Victoires avec une divinité égyptienne", sym:"☥", paliers:[5, 25, 75, 200], val:s => ((s.par_heros || {}).egy || {}).victoires || 0},
+  {id:"champion_hin", nom:"Champion d’Inde", desc:"Victoires avec une divinité hindoue", sym:"✿", paliers:[5, 25, 75, 200], val:s => ((s.par_heros || {}).hin || {}).victoires || 0},
+  {id:"champion_nor", nom:"Champion du Nord", desc:"Victoires avec une divinité nordique", sym:"⚔", paliers:[5, 25, 75, 200], val:s => ((s.par_heros || {}).nor || {}).victoires || 0},
+  {id:"champion_gre", nom:"Champion de l’Olympe", desc:"Victoires avec une divinité grecque", sym:"Ω", paliers:[5, 25, 75, 200], val:s => ((s.par_heros || {}).gre || {}).victoires || 0}
 ];
-const NOMS_PALIERS = ["Bronze", "Argent", "Or"];
-const palierAtteint = (t, s) => t.paliers.filter(p => (t.val(s) || 0) >= p).length;
+const NOMS_PALIERS = ["Bronze", "Argent", "Or", "Platine"];
+const palierAtteint = (t, s) => PROG.trophees ? rangsAtteints(t) : t.paliers.filter(p => (t.val(s) || 0) >= p).length;
 function verifierTrophees(annoncer){
   const s = PROG.mesStats; if(!s || !EN.monId) return;
   const cle = "trophees-" + EN.monId;
@@ -4800,16 +4859,7 @@ function pageProfil(){
     const x = (s.par_heros || {})[k] || {parties:0, victoires:0};
     return `<tr><td><span class="pastille f-${k}"></span> ${esc(heroDe({heros:k}).nom)} <span class="aide">(${esc(fac.nom)})</span></td><td>${nf(x.parties)}</td><td>${nf(x.victoires)}</td><td>${pct(x.victoires, x.parties)}</td></tr>`;
   }).join("") : "";
-  const trophees = s ? TROPHEES.map(t => {
-    const v = t.val(s) || 0, n = palierAtteint(t, s), prochain = t.paliers[n];
-    const avant = n ? t.paliers[n-1] : 0;
-    return `<div class="trophee niveau-${n}" title="${esc(t.desc)}">
-      <span class="medaille" aria-hidden="true">${t.sym}</span>
-      <div><b>${esc(t.nom)}</b><span class="aide">${esc(t.desc)}</span>
-        <span class="niveau">${n ? NOMS_PALIERS[n-1] : "Pas encore obtenu"}</span>
-        ${prochain ? `<span class="barre"><span style="width:${Math.min(100, 100*(v-avant)/(prochain-avant))}%"></span></span><span class="aide">${nf(v)} / ${nf(prochain)} pour ${NOMS_PALIERS[n].toLowerCase()}</span>` : `<span class="aide">${nf(v)} : palier maximum atteint</span>`}
-      </div></div>`;
-  }).join("") : "";
+  const trophees = s ? htmlTropheesProfil() : "";
   return `${entete("Mon profil")}
     <div class="page-profil">
       <section class="bloc-profil">
@@ -5157,7 +5207,7 @@ function pageCredits(){
     </div>`;
 }
 function pageRegles(){
-  const R = REGLES, eco = (typeof PROG!=="undefined" && PROG.eco) || {or_depart:100, or_victoire:10, or_defaite:3, plafond_or_jour:100, or_quete:40, prix_paquet:100, cartes_paquet:5,
+  const R = REGLES, eco = (typeof PROG!=="undefined" && PROG.eco) || {or_depart:100, or_victoire:10, or_defaite:3, plafond_or_jour:100, or_quete:15, prix_paquet:100, cartes_paquet:5,
     probabilites:{commune:.72, rare:.22, epique:.05, legendaire:.01}, depart:{commune:20, rare:9, epique:1},
     encre_recyclage:{commune:5, rare:20, epique:100, legendaire:400}, encre_fabrication:{commune:40, rare:100, epique:400, legendaire:1600}};
   const nbDepart = Object.values(R.deckDepart || {}).reduce((a,b) => a+b, 0);
@@ -5216,7 +5266,7 @@ function pageRegles(){
     ["collection", "Collection et progression", `<ul>
       <li><b>Cartes offertes :</b> à votre arrivée, vous recevez ${eco.depart ? Object.values(eco.depart).reduce((a,b) => a+b, 0) : 30} cartes pour former votre premier deck, et ${eco.or_depart} or afin d’ouvrir un booster.</li>
       <li><b>Decks :</b> ${R.tailleDeck} cartes, ${R.copiesMax} exemplaires au maximum par carte et ${R.copiesLegendaire} pour une légendaire. Vous pouvez en enregistrer jusqu’à 9.</li>
-      <li><b>Or :</b> une victoire rapporte ${eco.or_victoire} or, une défaite ${eco.or_defaite} (au maximum ${eco.plafond_or_jour} or par jour). La quête du jour rapporte ${eco.or_quete} or.</li>
+      <li><b>Or :</b> une victoire rapporte ${eco.or_victoire} or, une défaite ${eco.or_defaite} (au maximum ${eco.plafond_or_jour} or par jour). Chaque jour, 3 quêtes rapportent ${eco.or_quete} or chacune (une quête peut être changée une fois par jour). Les trophées ont 4 rangs (bronze, argent, or, platine) qui rapportent de l’or ou des paquets offerts.</li>
       <li><b>Boutique :</b> un paquet coûte ${eco.prix_paquet} or et contient ${eco.cartes_paquet} cartes, dont au moins une rare. Le paquet classique mélange toutes les factions ; chaque faction a aussi son paquet, qui ne contient que ses cartes. Chances par carte : commune ${pct(eco.probabilites.commune)}, rare ${pct(eco.probabilites.rare)}, épique ${pct(eco.probabilites.epique)}, légendaire ${pct(eco.probabilites.legendaire)}.</li>
       <li><b>Encre :</b> recyclez vos exemplaires en trop pour obtenir de l’encre (${eco.encre_recyclage.commune} pour une commune, jusqu’à ${eco.encre_recyclage.legendaire} pour une légendaire), et fabriquez les cartes qui vous manquent (de ${eco.encre_fabrication.commune} à ${eco.encre_fabrication.legendaire} encre).</li>
       <li><b>Profil et trophées :</b> choisissez votre pseudo, suivez vos statistiques et débloquez des trophées en bronze, argent et or.</li></ul>`],
@@ -6182,12 +6232,12 @@ function htmlHall(){
           ${mode2v2Visible() ? `<button type="button" class="btn second" data-act="jouer-2v2">${ico("duo")} 2 contre 2 avec un allié <span class="pastille-test">Test</span></button>` : ""}
         </div>
       </section>
-      <section class="hall-quete" aria-label="Quête du jour">${htmlQuete()}</section>
+      <section class="hall-quete" aria-label="Quêtes du jour">${htmlQuetesJour()}</section>
       <nav class="hall-tuiles" aria-label="Ma collection">
         ${tuile("prog-collection", "collection", "Collection", `${possedees} / ${total} cartes`)}
         ${tuile("prog-decks", "decks", "Decks", `${PROG.decks.length} / 9 decks`)}
         ${tuile("prog-boutique", "boutique", "Boutique", `Paquets à ${prixPaquet} or`)}
-        ${tuile("prog-profil", "profil", "Profil", trophees===null ? "Statistiques et trophées" : `${trophees} / ${(typeof TROPHEES!=="undefined" ? TROPHEES.length : 10)*3} paliers de trophées`)}
+        ${tuile("prog-profil", "profil", "Profil", (recompensesEnAttente() ? `<span class="pastille-recompense">${recompensesEnAttente()} récompense${recompensesEnAttente()>1 ? "s" : ""} à réclamer</span>` : "") + (trophees===null ? "Statistiques et trophées" : `${trophees} / ${TROPHEES.length*4} rangs de trophées`))}
       </nav>
       <nav class="hall-apprendre" aria-label="Apprendre">
         <button type="button" class="lien-hall" data-act="tuto">${ico("tuto")} Tutoriel ${tutoFait ? "" : `<span class="pastille-nouveau">Nouveau</span>`}</button>
@@ -6985,6 +7035,79 @@ function htmlHerosDeck(cartes){
       <span class="aide">${n[f]} / ${s2} cartes ${esc(FACTIONS[f].f)}s. ${hs ? `Encore ${manque} pour ${esc(hs.nom || "la divinité suivante")}${p===0 ? ` et ${REGLES.devotionNbTresors ?? 2} cartes de départ à ses couleurs` : " et une créature de départ du panthéon"}.` : "Divinité primordiale atteinte."}</span>
     </div>
   </div>`;
+}
+
+/* ============================================================
+   QUÊTES DU JOUR ET TROPHÉES À 4 RANGS (récompenses vérifiées par le serveur)
+   ============================================================ */
+const NOM_PAQUET = t => t==="classique" ? "Paquet classique" : FACTIONS[t] ? `Paquet ${FACTIONS[t].m}` : "Paquet";
+const texteRecompense = r => !r ? "" : r.or ? `${r.or} or` : (r.paquets || []).map(NOM_PAQUET).join(" + ");
+function infoTrophee(t){
+  // Données du serveur si disponibles, sinon calcul local (prototype)
+  const srv = PROG.trophees && PROG.trophees.find(x => x.id===t.id);
+  if(srv) return {valeurs:srv.valeurs || [srv.valeur, srv.valeur, srv.valeur, srv.valeur], paliers:srv.paliers, reclames:srv.reclames || [], recompenses:srv.recompenses || []};
+  const v = (PROG.mesStats && t.val(PROG.mesStats)) || 0;
+  return {valeurs:[v, v, v, v], paliers:t.paliers, reclames:[], recompenses:[]};
+}
+const rangsAtteints = t => { const i = infoTrophee(t); return i.paliers.filter((p, k) => (i.valeurs[k] || 0) >= p).length; };
+function recompensesEnAttente(){
+  if(!PROG.trophees) return 0;
+  return TROPHEES.reduce((n, t) => { const i = infoTrophee(t); return n + i.paliers.filter((p, k) => (i.valeurs[k] || 0) >= p && !i.reclames.includes(k + 1)).length; }, 0);
+}
+async function chargerTrophees(){ try { PROG.trophees = await rpc("mes_trophees"); } catch(e) { PROG.trophees = null; } }
+async function chargerPaquetsOfferts(){
+  try { const c = sbc(); const r = c ? await c.from("paquets_offerts").select("type,nb") : null; PROG.paquetsOfferts = r && !r.error ? Object.fromEntries((r.data || []).filter(x => x.nb>0).map(x => [x.type, x.nb])) : {}; }
+  catch(e) { PROG.paquetsOfferts = {}; }
+}
+// ----- Accueil : les 3 quêtes du jour
+function htmlQuetesJour(){
+  const Q = PROG.quetes;
+  if(!Q || !Array.isArray(Q.quetes)) return htmlQuete();
+  const toutes = Q.quetes.every(q => q.faite);
+  return `<div class="quete quetes-jour">
+    <b class="titre-quetes">Quêtes du jour ${toutes ? `<span class="aide">toutes réussies, à demain !</span>` : ""}</b>
+    ${Q.quetes.map(q => {
+      const fini = q.progres >= q.but;
+      return `<div class="ligne-quete ${q.faite ? "faite" : fini ? "finie" : ""}">
+        <span class="texte-quete">${esc(q.texte)}</span>
+        <span class="barre"><span style="width:${Math.min(100, 100*q.progres/q.but)}%"></span></span>
+        <span class="progres-quete">${q.faite ? "✓" : `${q.progres} / ${q.but}`}</span>
+        ${q.faite ? `<span class="aide">+${Q.gain} or reçus</span>`
+          : fini ? `<button type="button" class="btn btn-quete" data-act="quete-jour-reclamer" data-id="${q.id}">+${Q.gain} or</button>`
+          : Q.remplacee ? `<span class="aide">${Q.gain} or</span>` : `<button type="button" class="btn-discret" data-act="quete-remplacer" data-id="${q.id}" title="Remplacer cette quête (une fois par jour)">Changer</button>`}
+      </div>`;
+    }).join("")}
+  </div>`;
+}
+// ----- Profil : 4 rangs par trophée
+function htmlTropheesProfil(){
+  return TROPHEES.map(t => {
+    const i = infoTrophee(t), n = rangsAtteints(t), prochain = n<4 ? i.paliers[n] : null;
+    const vProchain = prochain!==null ? (i.valeurs[n] || 0) : null, avant = n ? (n<4 && t.id==="collection" && n===3 ? 0 : i.paliers[n-1]) : 0;
+    const rangs = i.paliers.map((p, k) => {
+      const atteint = (i.valeurs[k] || 0) >= p, recu = i.reclames.includes(k + 1), rec = texteRecompense(i.recompenses[k]);
+      return `<div class="rang r${k+1} ${atteint ? "atteint" : ""} ${recu ? "recu" : ""}">
+        <span class="nom-rang">${NOMS_PALIERS[k]}</span><span class="seuil-rang">${t.id==="collection" && k===3 ? "toutes au max." : nf(p)}</span>
+        ${rec ? (recu ? `<span class="rec-rang">✓ ${esc(rec)}</span>` : atteint && PROG.trophees ? `<button type="button" class="btn btn-rang" data-act="trophee-reclamer" data-id="${t.id}|${k+1}">${esc(rec)}</button>` : `<span class="rec-rang">${esc(rec)}</span>`) : ""}
+      </div>`;
+    }).join("");
+    return `<div class="trophee niveau-${n}" title="${esc(t.desc)}">
+      <span class="medaille" aria-hidden="true">${t.sym}</span>
+      <div class="corps-trophee"><b>${esc(t.nom)}</b><span class="aide">${esc(t.desc)}</span>
+        ${prochain!==null ? `<span class="barre"><span style="width:${Math.max(0, Math.min(100, 100*(vProchain - avant)/Math.max(1, prochain - avant)))}%"></span></span><span class="aide">${nf(vProchain)} / ${nf(prochain)} pour le rang ${NOMS_PALIERS[n].toLowerCase()}</span>` : `<span class="aide">Rang platine atteint</span>`}
+        <div class="rangs">${rangs}</div>
+      </div></div>`;
+  }).join("");
+}
+// ----- Boutique : paquets offerts
+function htmlPaquetsOfferts(){
+  const P = PROG.paquetsOfferts || {}, types = Object.keys(P).filter(k => P[k]>0);
+  if(!types.length) return "";
+  return `<section class="paquets-offerts"><h2>Paquets offerts</h2>
+    <p class="aide">Gagnés avec vos trophées. Ils s’ouvrent gratuitement, avec les mêmes chances qu’un paquet acheté.</p>
+    <div class="liste-offerts">${types.map(k => `<div class="offert ${k!=="classique" ? "f-" + k : ""}">
+      <span class="sym-offert">${k==="classique" ? "✦" : FACTIONS[k] ? FACTIONS[k].sym : "✦"}</span><b>${esc(NOM_PAQUET(k))}</b><span class="aide">× ${P[k]}</span>
+      <button type="button" class="btn" data-act="paquet-offert" data-id="${k}">Ouvrir</button></div>`).join("")}</div></section>`;
 }
 
 chargerConfig();
