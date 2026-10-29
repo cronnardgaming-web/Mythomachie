@@ -723,6 +723,27 @@ body.compact .devotion-palier{font-size:9px}
   .courbe-atelier .b{max-height:32px}
 }
 
+/* Atelier : divinité du deck */
+.heros-deck{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center;padding:12px;border-radius:10px;
+  background:radial-gradient(120% 120% at 0% 0%,color-mix(in srgb, var(--fc) 26%, transparent),color-mix(in srgb, var(--fc) 6%, transparent) 70%);border:1px solid color-mix(in srgb, var(--fc) 45%, transparent)}
+.heros-deck .medaillon{width:84px;height:84px}
+.heros-deck .medaillon .visage{width:68px;height:68px;font-size:32px}
+.heros-deck .medaillon-mini{width:52px;height:52px}
+.heros-deck .medaillon-mini .visage{width:42px;height:42px;font-size:20px}
+.infos-heros-deck{display:flex;flex-direction:column;gap:2px;min-width:0}
+.nom-heros-deck{font-family:Cinzel,serif;font-size:22px;line-height:1.1}
+.titre-heros-deck{font-size:13px;color:var(--ink-2)}
+.pouvoir-heros-deck{font-size:13px;margin-top:4px}
+.progres-heros-deck{grid-column:1/3;display:flex;flex-direction:column;gap:5px}
+.heros-deck.vide,.heros-deck.egalite{--fc:var(--bronze)}
+.heros-deck.vide p,.heros-deck.egalite p{margin:0}
+.heros-deck.egalite{grid-template-columns:1fr}
+.portraits-egalite{display:flex;gap:16px;justify-content:center}
+.choix-egalite{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:14px}
+body.compact .heros-deck .medaillon{width:60px;height:60px}
+body.compact .heros-deck .medaillon .visage{width:48px;height:48px;font-size:22px}
+body.compact .nom-heros-deck{font-size:17px}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -1486,7 +1507,7 @@ function decrire(e){
   if(e.combat) p.push(`+${e.combat} puissance`);
   if(e.soin) p.push(`+${e.soin} soin`);
   if(e.pioche) p.push(`piochez ${e.pioche} carte${e.pioche>1?"s":""}`);
-  if(e.bannir) p.push(`bannissez ${e.bannir} carte de votre main ou défausse`);
+  if(e.bannir) p.push(`bannissez ${e.bannir} carte${e.bannir>1 ? "s" : ""} de votre main ou défausse`);
   if(e.degatsTous) p.push(`${e.degatsTous} dégâts à chaque créature adverse`);
   if(e.degatsHasard) p.push(`${e.degatsHasard} dégâts à une créature adverse au hasard`);
   if(e.renfort) p.push(`vos créatures gagnent +${e.renfort.atk}/+${e.renfort.vie}`);
@@ -6855,7 +6876,6 @@ function htmlStatsAtelier(cartes){
     <div class="types-deck">${types.map(([k, l, s, n]) => `<div class="type-deck t-${k}"><span class="sym-type">${s}</span><b>${n}</b><span>${l}</span><span class="barre-type"><span style="width:${100*n/total}%"></span></span></div>`).join("")}</div>
     <div class="courbe courbe-atelier" aria-label="Courbe des coûts (cliquez pour filtrer)">${prix.map((n, i) => `<button type="button" class="colonne ${PROG.filtres.cout===i+1 ? "actif" : ""}" data-act="filtre" data-id="cout:${i+1}" title="${n} carte${n>1 ? "s" : ""} à ${i===6 ? "7 or ou plus" : (i+1) + " or"}"><span class="nb">${n || ""}</span><span class="b" style="height:${Math.round(46*n/mx)}px"></span><span class="x">${i===6 ? "7+" : i+1}</span></button>`).join("")}</div>
     <div class="factions-deck">${Object.entries(parFaction).map(([f, n]) => `<span class="puce-fac f-${f}"><span class="pastille"></span>${f==="neutre" ? "Neutre" : esc(FACTIONS[f] ? FACTIONS[f].nom : f)} ${n}</span>`).join("")}</div>
-    ${htmlDevotionDeck(cartes)}
   </div>`;
 }
 function htmlListeAtelier(compte){
@@ -6894,6 +6914,7 @@ function pageEditeur(){
           <div class="compteur-atelier ${pb.length ? "invalide" : "valide"}"><span><b>${e.cartes.length}</b> / ${t} cartes</span><span class="barre-compteur"><span style="width:${Math.min(100, 100*e.cartes.length/t)}%"></span></span></div>
           <p class="etat-deck ${pb.length ? "invalide" : "valide"}">${pb.length ? pb.map(esc).join(" ") : "✓ Deck prêt à jouer."}</p>
         </div>
+        ${htmlHerosDeck(e.cartes)}
         ${htmlStatsAtelier(e.cartes)}
         <div class="liste-atelier">${htmlListeAtelier(compte)}</div>
         <div class="actions actions-atelier">
@@ -6922,6 +6943,40 @@ function completerDeck(){
     }
   }
   erreur(ajoutees ? `${ajoutees} carte${ajoutees>1 ? "s" : ""} ajoutée${ajoutees>1 ? "s" : ""}.` : "Aucune carte disponible pour compléter le deck.");
+}
+
+// Atelier : la divinité que le deck obtiendra (panthéon majoritaire et palier de Dévotion)
+function portraitDivinite(f, h, petit){
+  const sym = FACTIONS[f] ? FACTIONS[f].sym : "✦";
+  return `<span class="medaillon f-${f} ${petit ? "medaillon-mini" : ""}" style="--p:1" aria-hidden="true"><span class="anneau"></span><span class="visage">${h && h.image ? `<img src="${h.image}" alt="">` : sym}</span></span>`;
+}
+function htmlHerosDeck(cartes){
+  const n = {};
+  cartes.forEach(id => { const f = CARTES[id] && CARTES[id].faction; if(f && FACTIONS[f] && estCollectionnable(CARTES[id])) n[f] = (n[f] || 0) + 1; });
+  const max = Math.max(0, ...Object.values(n)), egaux = Object.keys(n).filter(f => n[f]===max);
+  if(!egaux.length) return `<div class="heros-deck vide"><span class="medaillon medaillon-mini" style="--p:0"><span class="anneau"></span><span class="visage">?</span></span>
+    <p class="aide">Ajoutez des cartes : votre divinité sera celle du panthéon le plus représenté dans votre deck.</p></div>`;
+  const [s1, s2] = seuilsDevotion();
+  if(egaux.length>1){
+    return `<div class="heros-deck egalite"><div class="portraits-egalite">${egaux.map(f => { const h = HEROS[cleHeros(f, palierDevotion(f, cartes))] || {}; return `<span class="choix-egalite">${portraitDivinite(f, h, true)}<b>${esc(h.nom || "")}</b></span>`; }).join("")}</div>
+      <p class="aide">Égalité entre ${egaux.map(f => esc(FACTIONS[f].nom)).join(" et ")} (${max} cartes chacun) : la divinité sera tirée au sort au début de chaque partie. Ajoutez une carte de l’un d’eux pour la fixer.</p></div>`;
+  }
+  const f = egaux[0], p = palierDevotion(f, cartes), h = HEROS[cleHeros(f, p)] || {};
+  const suivant = p===0 ? s1 : p===1 ? s2 : null, hs = suivant ? (HEROS[cleHeros(f, p + 1)] || {}) : null, manque = suivant ? suivant - n[f] : 0;
+  const pv = h.pouvoir || {};
+  return `<div class="heros-deck f-${f}">
+    ${portraitDivinite(f, h)}
+    <div class="infos-heros-deck">
+      <span class="aide">Votre divinité</span>
+      <b class="nom-heros-deck">${esc(h.nom || "")}</b>
+      <span class="titre-heros-deck">${esc(h.titre || "")}${p ? ` <span class="devotion-palier">${"✦".repeat(p)} Dévotion</span>` : ""}</span>
+      <span class="pouvoir-heros-deck"><b>${esc(pv.nom || "Pouvoir")}</b> : ${esc(decrire(pv.effet || {}))}</span>
+    </div>
+    <div class="progres-heros-deck">
+      <span class="barre-devotion"><span style="width:${Math.min(100, 100*n[f]/s2)}%"></span><i style="left:${100*s1/s2}%"></i></span>
+      <span class="aide">${n[f]} / ${s2} cartes ${esc(FACTIONS[f].f)}s. ${hs ? `Encore ${manque} pour ${esc(hs.nom || "la divinité suivante")}${p===0 ? ` et ${REGLES.devotionNbTresors ?? 2} cartes de départ à ses couleurs` : " et une créature de départ du panthéon"}.` : "Divinité primordiale atteinte."}</span>
+    </div>
+  </div>`;
 }
 
 chargerConfig();
