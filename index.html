@@ -764,9 +764,9 @@ body.compact .nom-heros-deck{font-size:17px}
 .rang.r1.atteint{border-color:#b07a4a}.rang.r2.atteint{border-color:#b9c3cc}.rang.r3.atteint{border-color:#e0b13d}.rang.r4.atteint{border-color:#9fe3ff;box-shadow:0 0 8px rgba(159,227,255,.4)}
 .nom-rang{font-weight:700}
 .seuil-rang{color:var(--ink-2)}
-.rec-rang{font-size:10px;color:var(--ink-2)}
+.rec-rang{display:block;width:100%;text-align:center;font-size:10px;color:var(--ink-2)}
 .rang.recu .rec-rang{color:#4fd18b}
-.btn-rang{margin:0;padding:3px 4px;font-size:10px;line-height:1.2;white-space:nowrap;width:100%;box-sizing:border-box}
+.btn-rang{margin:0;padding:3px 4px;font-size:10px;line-height:1.2;white-space:nowrap;width:100%;box-sizing:border-box;display:flex;justify-content:center;text-align:center}
 .trophee.niveau-4 .medaille{background:radial-gradient(circle at 35% 30%,#ffffff,#9fe3ff 55%,#3d7fa0);color:#123}
 .paquets-offerts{background:var(--zone);border:1px solid color-mix(in srgb, var(--or) 45%, var(--line));border-radius:12px;padding:12px 16px;margin:10px 0}
 .paquets-offerts h2{margin:0 0 4px}
@@ -774,6 +774,16 @@ body.compact .nom-heros-deck{font-size:17px}
 .offert{display:flex;align-items:center;gap:8px;background:var(--table);border:1px solid var(--line);border-left:4px solid var(--fc, var(--or));border-radius:8px;padding:6px 10px}
 .offert .btn{margin:0;padding:5px 12px}
 .sym-offert{font-size:20px;color:var(--fc, var(--or))}
+
+/* Tutoriel : pages de fin */
+.boite-guide{max-width:620px}
+.points-guide{display:flex;gap:6px;justify-content:center;margin-bottom:6px}
+.points-guide i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.points-guide i.actif{background:var(--or)}
+.boite-guide .tableau{font-size:14px;width:100%;table-layout:fixed}
+.boite-guide .tableau th,.boite-guide .tableau td,#regle-heros .tableau th,#regle-heros .tableau td{white-space:normal;vertical-align:top}
+.boite-guide .tableau th:first-child,.boite-guide .tableau td:first-child{width:26%}
+.defile-tableau{overflow-x:auto}
 
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
@@ -3618,6 +3628,7 @@ document.addEventListener("click", e => {
   if(act==="credits"){ if(tutoActif()) S = null; ui.ecran = "credits"; window.scrollTo(0, 0); return render(); }
   if(act==="tuto-quitter"){ S = null; ui.ecran = "jeu"; const p = document.getElementById("tuto-panneau"); if(p) p.remove(); return render(); }
   if(act==="tuto-suivant"){ TUTO.etape++; return render(); }
+  if(act==="tuto-page"){ TUTO.finPage = Number(id) || 0; return renderCouche(); }
   if(act==="admin" && !accesAdmin()) return erreur("L’administration est réservée à l’administrateur du jeu.");
   if(ui.ecran==="admin" && !accesAdmin()){ ui.ecran = "jeu"; return render(); }
   if(ui.ecran==="admin" || act==="admin"){ return actionAdmin(act, id, el); }
@@ -5219,8 +5230,8 @@ function pageRegles(){
     ["but", "Le but du jeu", `<p>Deux héros s’affrontent. Chacun commence avec <b>${R.pvDepart} points de vie</b>. Le premier qui fait tomber le héros adverse à 0 remporte la partie.</p>
       <p>Pendant la partie, vous ne jouez pas avec un deck figé : vous partez d’un petit deck de départ et vous le renforcez en achetant des cartes au marché.</p>`],
     ["mise", "La mise en place", `<ul>
-      <li><b>Votre héros</b> est le dieu primordial du panthéon le plus représenté dans le deck que vous avez choisi (en cas d’égalité, il est tiré au sort).</li>
-      <li><b>Votre deck de départ</b> compte ${nbDepart} cartes, identiques pour les deux joueurs : ${depart}.</li>
+      <li><b>Votre héros</b> est une divinité du panthéon le plus représenté dans le deck que vous avez choisi (en cas d’égalité, il est tiré au sort). Laquelle dépend de votre Dévotion : voir plus bas.</li>
+      <li><b>Votre deck de départ</b> compte ${nbDepart} cartes, identiques pour les deux joueurs : ${depart}. Avec la Dévotion, certaines prennent la couleur de votre panthéon.</li>
       <li><b>Le marché commun</b> est formé des deux decks choisis par les joueurs, mélangés. ${R.tailleMarche} cartes sont visibles${base ? `, plus ${esc(base.nom)}, toujours disponible` : ""}.</li>
       <li>Chaque joueur pioche ${R.mainDepart} cartes, puis le premier joueur est tiré au sort.</li></ul>`],
     ["tour", "Le déroulement d’un tour", `<p>Pendant votre tour, vous faites ce que vous voulez, dans l’ordre que vous voulez :</p>
@@ -5239,7 +5250,7 @@ function pageRegles(){
       <li>L’emplacement libéré est aussitôt rempli par une nouvelle carte.</li>
       <li>Le marché est <b>commun</b> : votre adversaire peut acheter les cartes de votre deck, et vous les siennes.</li></ul>`],
     ["combat", "Les créatures et le combat", `<ul>
-      <li>Une créature posée reste sur le plateau jusqu’à sa mort. Elle a une <b>attaque</b> (médaillon doré) et des <b>points de vie</b> (écu rouge). Les dégâts subis restent d’un tour sur l’autre.</li>
+      <li>Une créature posée reste sur le plateau jusqu’à sa mort. Elle a une <b>attaque</b> (médaillon rouge, en bas à gauche) et des <b>points de vie</b> (écu rouge, en bas à droite). Le médaillon doré en haut indique son prix. Les dégâts subis restent d’un tour sur l’autre.</li>
       <li>Une créature ne peut pas attaquer le tour où elle arrive, sauf avec ${symMot("rapidite")} Rapidité. Ensuite, elle attaque une fois par tour.</li>
       <li>Quand deux créatures se battent, elles s’infligent leurs dégâts <b>en même temps</b>.</li>
       <li><b>Votre héros</b> attaque avec votre puissance. S’il frappe une créature, il subit sa <b>riposte</b> (l’attaque de la créature). S’il frappe le héros adverse, il ne subit rien.</li>
@@ -5247,17 +5258,28 @@ function pageRegles(){
       <li>Un <b>équipement</b> donne immédiatement sa valeur en puissance à votre héros. Si vous avez une créature, vous l’équipez en plus : elle gagne autant d’attaque et de PV, pour toujours (tant qu’elle vit). Sans créature, l’équipement reste donc utile.</li>
       <li>Le plateau d’un joueur ne peut pas contenir plus de ${R.plateauMax} créatures. Une créature détruite part dans la défausse de son propriétaire.</li></ul>`],
     ["heros", "Les héros et leurs pouvoirs", `<p>Le pouvoir d’un héros se charge à chaque créature ennemie détruite. Après <b>${R.seuilPouvoir || 10} créatures ennemies</b>, il est prêt : cliquez sur votre médaillon pour l’activer. Il se recharge ensuite.</p>
-      <table class="tableau"><thead><tr><th>Panthéon</th><th>Héros</th><th>Pouvoir</th></tr></thead><tbody>
-      ${Object.entries(FACTIONS).map(([k,f]) => { const h = heroDe({heros:k}); return `<tr><td>${symCombo(k)} ${esc(f.nom)}</td><td><b>${esc(h.nom)}</b></td><td>${esc(h.pouvoir ? h.pouvoir.nom : "")} : ${decrireHTML((h.pouvoir && h.pouvoir.effet) || {})}</td></tr>`; }).join("")}
-      </tbody></table>`],
+      <p>Chaque panthéon a trois divinités, selon le nombre de cartes de ce panthéon dans votre deck (voir Dévotion) :</p>
+      <div class="defile-tableau"><table class="tableau"><thead><tr><th>Panthéon</th><th>Moins de ${seuilsDevotion()[0]} cartes</th><th>${seuilsDevotion()[0]} à ${seuilsDevotion()[1]-1} cartes</th><th>${seuilsDevotion()[1]} cartes</th></tr></thead><tbody>
+      ${Object.entries(FACTIONS).map(([k,f]) => `<tr><td>${symCombo(k)} ${esc(f.nom)}</td>${[0, 1, 2].map(p => { const h = HEROS[cleHeros(k, p)] || heroDe({heros:k}); return `<td><b>${esc(h.nom || "")}</b><br><span class="aide">${esc(h.pouvoir ? h.pouvoir.nom : "")} : ${decrireHTML((h.pouvoir && h.pouvoir.effet) || {})}</span></td>`; }).join("")}</tr>`).join("")}
+      </tbody></table></div>`],
     ["mots", "Les mots-clés", `<table class="tableau"><tbody>${mots.map(k => `<tr><td>${symMot(k)} <b>${esc(nomMot(k))}</b></td><td>${esc(TEXTES_AIDE[k] || "")}</td></tr>`).join("")}</tbody></table>`],
     ["combos", "Les combos", `<p>Un effet précédé d’un <b>symbole de faction</b> est un combo : il se déclenche si une <b>autre</b> carte de cette faction est jouée dans le même tour, avant ou après. Une carte ne déclenche jamais son propre combo.</p>
       <p>${Object.keys(FACTIONS).map(k => `${symCombo(k)} ${esc(FACTIONS[k].nom)}`).join(" &nbsp; ")}</p>`],
+    ["decks", "Construire son deck", `<ul>
+      <li>Un deck compte <b>${R.tailleDeck} cartes</b> de votre collection : ${R.copiesMax} exemplaires au maximum par carte, et ${R.copiesLegendaire} pour une légendaire. Vous pouvez en enregistrer jusqu’à 9, et enregistrer un deck incomplet pour le finir plus tard.</li>
+      <li>En partie, votre deck ne vous appartient pas tout à fait : il rejoint celui de l’adversaire pour former le <b>marché commun</b>. Votre propre deck de jeu commence toujours avec les mêmes cartes de départ.</li>
+      <li>Le panthéon le plus représenté détermine votre <b>divinité</b>, et son nombre de cartes votre <b>Dévotion</b>.</li>
+      <li>Dans l’<b>atelier de deck</b> : filtrez par panthéon, type et coût, triez par panthéon, coût, nom ou rareté, suivez le nombre de créatures, de sorts et d’équipements et la courbe des coûts, voyez en direct votre divinité, et laissez « Compléter automatiquement » remplir les places libres.</li></ul>`],
     ["devotion", "Dévotion : se spécialiser dans un panthéon", `<p>Votre héros est une divinité du panthéon le plus représenté dans votre deck. Plus votre deck est spécialisé, plus la divinité est importante, et plus vos cartes de départ prennent la couleur de son panthéon :</p>
       <ul><li><b>Moins de ${seuilsDevotion()[0]} cartes du panthéon :</b> la 3<sup>e</sup> divinité du panthéon, et vos cartes de départ habituelles.</li>
       <li><b>De ${seuilsDevotion()[0]} à ${seuilsDevotion()[1]-1} cartes :</b> la 2<sup>e</sup> divinité, au pouvoir un peu plus fort, et ${REGLES.devotionNbTresors ?? 2} de vos ${esc((CARTES[REGLES.devotionTresor || "piece"] || {}).nom || "Trésors")}s prennent la couleur du panthéon : elles comptent comme des cartes du panthéon et peuvent déclencher vos combos.</li>
       <li><b>${seuilsDevotion()[1]} cartes :</b> la divinité primordiale, au pouvoir encore plus fort, et votre ${esc((CARTES[REGLES.devotionCreature || "dague"] || {}).nom || "créature de départ")} devient une créature du panthéon, avec un effet et un combo.</li></ul>
       <p>Ces avantages restent volontairement modestes : un deck mélangé reste parfaitement capable de gagner. Le palier de chaque joueur s’affiche sous le nom de sa divinité (✦ ou ✦✦).</p>`],
+    ["plateau", "Lire le plateau", `<ul>
+      <li>Pendant votre tour, ce que vous pouvez faire <b>brille</b> : les cartes jouables de votre main en jaune, les créatures prêtes à attaquer en vert (avec une petite épée), les cibles possibles en rouge, et les cartes du marché que vous pouvez acheter en vert. Le jeton de puissance pulse quand votre héros peut attaquer.</li>
+      <li>Cliquez sur une <b>défausse</b>, la vôtre ou celle de l’adversaire, pour voir les cartes qu’elle contient.</li>
+      <li>L’<b>or et la puissance de l’adversaire</b> s’affichent à côté de son médaillon, en temps réel.</li>
+      <li>Dans le <b>journal</b>, les noms de cartes sont en gras : survolez-les (ou touchez-les sur téléphone) pour voir la carte. Un appui long sur n’importe quelle carte l’affiche en grand.</li></ul>`],
     ["conseils", "Conseils pour bien débuter", `<ul>
       <li><b>Les créatures sont le cœur d’un deck.</b> Un sort sert une fois, puis part à la défausse ; une créature reste sur le plateau, attaque à chaque tour et protège votre héros, puisque l’adversaire doit la détruire avant de vous toucher. Un deck sans créatures perd presque toujours. Les sorts restent indispensables pour produire l’or et la puissance du tour : le meilleur deck mélange les deux, avec une majorité de créatures.</li>
       <li><b>Une carte chère vaut mieux que deux cartes bon marché.</b> Ce qui vous limite, ce ne sont pas vos pièces mais les ${REGLES.piocheParTour} cartes que vous piochez par tour : chaque carte achetée prend une place dans votre deck. Une créature à 6 or est bien plus forte qu’une créature à 3, et ne prend qu’une place au lieu de deux.</li>
@@ -5266,8 +5288,10 @@ function pageRegles(){
     ["collection", "Collection et progression", `<ul>
       <li><b>Cartes offertes :</b> à votre arrivée, vous recevez ${eco.depart ? Object.values(eco.depart).reduce((a,b) => a+b, 0) : 30} cartes pour former votre premier deck, et ${eco.or_depart} or afin d’ouvrir un booster.</li>
       <li><b>Decks :</b> ${R.tailleDeck} cartes, ${R.copiesMax} exemplaires au maximum par carte et ${R.copiesLegendaire} pour une légendaire. Vous pouvez en enregistrer jusqu’à 9.</li>
-      <li><b>Or :</b> une victoire rapporte ${eco.or_victoire} or, une défaite ${eco.or_defaite} (au maximum ${eco.plafond_or_jour} or par jour). Chaque jour, 3 quêtes rapportent ${eco.or_quete} or chacune (une quête peut être changée une fois par jour). Les trophées ont 4 rangs (bronze, argent, or, platine) qui rapportent de l’or ou des paquets offerts.</li>
-      <li><b>Boutique :</b> un paquet coûte ${eco.prix_paquet} or et contient ${eco.cartes_paquet} cartes, dont au moins une rare. Le paquet classique mélange toutes les factions ; chaque faction a aussi son paquet, qui ne contient que ses cartes. Chances par carte : commune ${pct(eco.probabilites.commune)}, rare ${pct(eco.probabilites.rare)}, épique ${pct(eco.probabilites.epique)}, légendaire ${pct(eco.probabilites.legendaire)}.</li>
+      <li><b>Or :</b> une victoire rapporte ${eco.or_victoire} or, une défaite ${eco.or_defaite} (au maximum ${eco.plafond_or_jour} or par jour). Chaque jour, 3 quêtes rapportent ${eco.or_quete} or chacune (une quête peut être changée une fois par jour).</li>
+      <li><b>Trophées :</b> chaque trophée a 4 rangs (bronze, argent, or, platine). Les rangs bronze, argent et or rapportent 15, 30 puis 60 or, et le rang platine un paquet classique. Les trophées de panthéon (Champion d’Égypte, d’Inde, du Nord, de l’Olympe) rapportent un paquet de leur panthéon aux rangs or et platine. Réclamez vos récompenses dans votre profil.</li>
+      <li><b>Paquets offerts :</b> ils s’ouvrent gratuitement dans la boutique, avec les mêmes chances qu’un paquet acheté.</li>
+      <li><b>Boutique :</b> un paquet coûte ${eco.prix_paquet} or et contient ${eco.cartes_paquet} cartes, dont au moins une rare. Le paquet classique mélange toutes les factions ; chaque faction a aussi son paquet, qui ne contient que ses cartes. Des boosters spéciaux peuvent proposer des cartes promotionnelles (absentes des autres paquets et non fabricables) et des illustrations alternatives (même carte, apparence différente, à choisir dans votre collection). Chances par carte : commune ${pct(eco.probabilites.commune)}, rare ${pct(eco.probabilites.rare)}, épique ${pct(eco.probabilites.epique)}, légendaire ${pct(eco.probabilites.legendaire)}.</li>
       <li><b>Encre :</b> recyclez vos exemplaires en trop pour obtenir de l’encre (${eco.encre_recyclage.commune} pour une commune, jusqu’à ${eco.encre_recyclage.legendaire} pour une légendaire), et fabriquez les cartes qui vous manquent (de ${eco.encre_fabrication.commune} à ${eco.encre_fabrication.legendaire} encre).</li>
       <li><b>Profil et trophées :</b> choisissez votre pseudo, suivez vos statistiques et débloquez des trophées en bronze, argent et or.</li></ul>`],
     ["enligne", "Jouer en ligne", `<ol><li>Choisissez « En ligne », puis « Créer une partie » : un code de 5 caractères s’affiche.</li>
@@ -5343,7 +5367,7 @@ function lancerTuto(){
   S.marche = [c.achat, "apsara", "hoplite", "valkyrie", "oracle"].filter(id => CARTES[id]).map(inst);
   const jet = creature(inst(c.jeton)); o.plateau = [jet]; o.main = [];
   TUTO.ids = {ors:ors.map(x => x.uid), rap:rap.uid, puiss:pu.uid, achat:S.marche[0].uid, jeton:jet.uid};
-  TUTO.etape = 0; TUTO.pouvoirPret = false; ETAPES_CACHE = null;
+  TUTO.etape = 0; TUTO.pouvoirPret = false; TUTO.finPage = 0; ETAPES_CACHE = null;
   S.journal = ["Tutoriel : à vous de jouer !"];
   Object.assign(ui, {ecran:"jeu", attaquant:null, armeEnAttente:null, choixPierre:null, couvert:false, aiEnCours:false});
   if(typeof PROG!=="undefined"){ PROG.choixDeck = null; PROG.accueilEtape = null; }
@@ -5361,7 +5385,7 @@ function construireEtapes(){
   const prixAchat = CARTES[c.achat] ? CARTES[c.achat].prix : 3;
   const nomsOr = c.nbOr1>1 ? `vos ${c.nbOr1} cartes ${nC(c.or1)}` : laCarte(c.or1);
   return [
-  {titre:"Bienvenue !", texte:`Vous incarnez <b>${esc(moiH.nom)}</b>, ${esc((moiH.titre || "").toLowerCase())}. Votre adversaire, <b>${esc(luiH.nom)}</b>, n’a que ${TUTO.pvAdverse} points de vie pour ce tutoriel : faites-le tomber à 0 pour gagner.<br><br>Votre héros et ses points de vie sont en bas, ceux de l’adversaire en haut.`,
+  {titre:"Bienvenue !", texte:`Vous incarnez <b>${esc(moiH.nom)}</b>, ${esc((moiH.titre || "").toLowerCase())}. Votre adversaire, <b>${esc(luiH.nom)}</b>, n’a que ${TUTO.pvAdverse} points de vie pour ce tutoriel : faites-le tomber à 0 pour gagner.<br><br>Votre héros et ses points de vie sont en bas, ceux de l’adversaire en haut. En dehors du tutoriel, votre divinité dépend du panthéon le plus représenté dans votre deck : vous découvrirez la Dévotion à la fin.`,
     info:true, cible:() => [".medaillon-bloc.moi .medaillon", ".medaillon-bloc.adv .medaillon"]},
   {titre:"Jouez votre or", texte:`Jouer une carte est <b>gratuit</b>. Cliquez sur ${nomsOr} et sur ${laCarte(c.or2)} : elles vous donnent de l’or ${icone("or")} pour ce tour.`,
     cible:() => I.ors.filter(enMain).map(u => `.main .carte[data-id="${u}"]`),
@@ -5456,19 +5480,54 @@ function avancerTuto(){
   let e = etapesTuto()[TUTO.etape], n = 0;
   while(e && !e.info && e.fini && e.fini() && n++ < 20){ TUTO.etape++; e = etapesTuto()[TUTO.etape]; }
 }
+/* ----- Tutoriel : pages après la victoire (decks, Dévotion, équipements, progression) ----- */
 function htmlFinTuto(){
   try { localStorage.setItem("tuto-fini", "1"); } catch(e) {}
-  return `<div class="boite" role="dialog" aria-label="Tutoriel terminé">
-    <h2 class="logo" style="font-size:34px">Victoire !</h2>
-    <p class="intro">Vous connaissez maintenant l’essentiel :</p>
-    <ul class="etapes-liste">
-      <li>jouer ses cartes et acheter au marché avec son or ;</li>
+  const p = TUTO.finPage || 0, [s1, s2] = seuilsDevotion(), nb = 5;
+  const tresor = (CARTES[REGLES.devotionTresor || "piece"] || {}).nom || "Trésor", crea = (CARTES[REGLES.devotionCreature || "dague"] || {}).nom || "créature de départ";
+  const div = f => [0, 1, 2].map(k => (HEROS[cleHeros(f, k)] || {}).nom || "");
+  const pages = [
+    ["Victoire !", `<p class="intro">Vous connaissez maintenant l’essentiel d’une partie :</p>
+      <ul class="etapes-liste"><li>jouer ses cartes et acheter au marché avec son or ;</li>
       <li>poser des créatures et attaquer, en détruisant d’abord les défenseurs ;</li>
       <li>attaquer avec son héros grâce à la puissance ;</li>
-      <li>déclencher des combos et le pouvoir de son héros.</li></ul>
-    <p>Les règles complètes (mots-clés, héros, collection…) sont dans le menu « Règles du jeu ».</p>
-    <div class="actions"><button type="button" class="btn" data-act="tuto-quitter">Retour à l’accueil</button>
-      <button type="button" class="btn second" data-act="regles">Lire les règles</button></div></div>`;
+      <li>déclencher des combos et le pouvoir de sa divinité.</li></ul>
+      <p>Encore quatre pages pour découvrir vos decks, la Dévotion et votre progression.</p>`],
+    ["Vos decks", `<ul class="etapes-liste">
+      <li>Un deck compte <b>${REGLES.tailleDeck} cartes</b> de votre collection, avec ${REGLES.copiesMax} exemplaires au maximum par carte (${REGLES.copiesLegendaire} pour une légendaire).</li>
+      <li>En partie, votre deck rejoint celui de l’adversaire pour former le <b>marché commun</b> ; vous commencez toujours avec les mêmes cartes de départ.</li>
+      <li>Votre <b>divinité</b> est celle du panthéon le plus représenté dans votre deck.</li>
+      <li><b>Conseils :</b> mettez une majorité de créatures (elles agissent à chaque tour et protègent votre héros), et préférez une carte chère à deux cartes bon marché.</li>
+      <li>Dans l’<b>atelier de deck</b>, filtrez et triez vos cartes, suivez le nombre de créatures, de sorts et d’équipements, et voyez en direct la divinité que vous obtiendrez.</li></ul>`],
+    ["La Dévotion", `<p>Plus votre deck est spécialisé dans un panthéon, plus votre divinité est importante&nbsp;:</p>
+      <table class="tableau"><thead><tr><th>Cartes du panthéon</th><th>Divinité (ex. Égyptiens)</th><th>Bonus</th></tr></thead><tbody>
+        <tr><td>Moins de ${s1}</td><td>${esc(div("egy")[0])}</td><td>Aucun</td></tr>
+        <tr><td>${s1} à ${s2-1}</td><td>${esc(div("egy")[1])}</td><td>Pouvoir un peu plus fort, ${REGLES.devotionNbTresors ?? 2} ${esc(tresor)}s aux couleurs du panthéon</td></tr>
+        <tr><td>${s2}</td><td>${esc(div("egy")[2])}</td><td>Pouvoir encore plus fort, et votre ${esc(crea)} devient une créature du panthéon</td></tr></tbody></table>
+      <p class="aide">Les cartes de départ colorées comptent comme des cartes du panthéon : elles déclenchent vos combos. Ces bonus restent modestes, un deck mélangé peut parfaitement gagner.</p>`],
+    ["Équipements et plateau", `<ul class="etapes-liste">
+      <li>Un <b>équipement</b> donne aussitôt sa valeur en puissance à votre héros, et si vous avez une créature, elle gagne autant d’attaque et de points de vie pour toujours.</li>
+      <li>Ce que vous pouvez faire <b>brille</b> : cartes jouables en jaune, créatures prêtes à attaquer en vert, cibles en rouge, cartes achetables en vert.</li>
+      <li>Cliquez sur une <b>défausse</b> pour voir ses cartes. L’or et la puissance de l’adversaire s’affichent à côté de son médaillon.</li>
+      <li>Dans le <b>journal</b>, survolez le nom d’une carte pour la voir. Sur téléphone, un appui long sur une carte l’affiche en grand.</li></ul>`],
+    ["Progresser", `<ul class="etapes-liste">
+      <li><b>Chaque partie</b> rapporte de l’or, et <b>3 quêtes du jour</b> en rapportent davantage (vous pouvez en changer une par jour).</li>
+      <li>Les <b>trophées</b> ont 4 rangs, de bronze à platine : ils rapportent de l’or et des <b>paquets offerts</b>, à ouvrir dans la boutique.</li>
+      <li>À la <b>boutique</b>, le paquet classique mélange tous les panthéons, et chaque panthéon a son paquet : idéal pour viser la Dévotion.</li>
+      <li>Recyclez vos exemplaires en trop pour obtenir de l’<b>encre</b>, et fabriquez les cartes qui vous manquent.</li></ul>`]
+  ];
+  const [titre, corps] = pages[Math.min(p, nb - 1)];
+  return `<div class="boite boite-guide" role="dialog" aria-label="Tutoriel terminé : ${esc(titre)}">
+    <span class="points-guide" aria-hidden="true">${pages.map((_, k) => `<i class="${k===p ? "actif" : ""}"></i>`).join("")}</span>
+    <h2 class="${p===0 ? "logo" : ""}" ${p===0 ? 'style="font-size:34px"' : ""}>${esc(titre)}</h2>
+    ${corps}
+    <div class="actions">
+      ${p>0 ? `<button type="button" class="btn second" data-act="tuto-page" data-id="${p-1}">Précédent</button>` : ""}
+      ${p<nb-1 ? `<button type="button" class="btn" data-act="tuto-page" data-id="${p+1}">Suivant</button>
+                  <button type="button" class="btn-discret" data-act="tuto-quitter">Passer</button>`
+               : `<button type="button" class="btn" data-act="tuto-quitter">Retour à l’accueil</button>
+                  <button type="button" class="btn second" data-act="regles">Lire les règles</button>`}
+    </div></div>`;
 }
 
 /* ============================================================
