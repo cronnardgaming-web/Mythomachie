@@ -1564,7 +1564,7 @@ function decrire(e){
 function texteArme(d, html){
   const b = d.bonus || 0, pu = html ? icone("puissance") : " puissance";
   const equipe = REGLES.armesPermanentes
-    ? (REGLES.armesVie ? `Équipe une créature : +${b}/+${b} pour toujours.` : `Équipe une créature : +${b} attaque pour toujours.`)
+    ? (REGLES.armesVie ? `Équipe une créature : +${b}/+${b}.` : `Équipe une créature : +${b} attaque.`)
     : `Équipe une créature : +${b} attaque, ${d.durabilite} attaques.`;
   if(REGLES.armesImmediat) return html ? `<span class="effet-part">+${b}${pu}</span><br>${equipe}` : `+${b}${pu}. ${equipe}`;
   if(REGLES.armesHeros) return `${equipe} Sans créature : +${b}${pu}${html ? "" : "."}`;
@@ -2247,7 +2247,7 @@ function htmlCrea(c, act, classes){
   if(aMot(c,"ethere") && !c.revele) puces.push(puce("ethere"));
   if(c.arme){ const da = CARTES[c.arme.id], b = da.bonus || 0;
     puces.push(REGLES.armesPermanentes
-      ? `<span class="puce" data-aide="carte" data-titre="${esc(da.nom)}" data-texte="+${b} attaque${REGLES.armesVie ? ` et +${b} PV` : ""}, pour toujours.">⚔\u00a0+${b}</span>`
+      ? `<span class="puce" data-aide="carte" data-titre="${esc(da.nom)}" data-texte="+${b} attaque${REGLES.armesVie ? ` et +${b} PV` : ""}, tant qu’elle reste en vie.">⚔\u00a0+${b}</span>`
       : `<span class="puce" data-aide="carte" data-titre="${esc(da.nom)}" data-texte="+${b} attaque, encore ${c.arme.dur} attaque${c.arme.dur>1 ? "s" : ""}.">⚔\u00a0${c.arme.dur}</span>`); }
   const detail = texteCarte(d).join(" ").replace(/"/g,"");
   return `<button type="button" class="crea f-${f} r-${d.rarete || "base"} ${classesVariante(c)} ${classes}" data-act="${act}" data-id="${c.uid}" data-aide="carte" data-titre="${esc(d.nom)}" data-texte="${esc(detail)}">
@@ -5255,7 +5255,7 @@ function pageRegles(){
       <li>Quand deux créatures se battent, elles s’infligent leurs dégâts <b>en même temps</b>.</li>
       <li><b>Votre héros</b> attaque avec votre puissance. S’il frappe une créature, il subit sa <b>riposte</b> (l’attaque de la créature). S’il frappe le héros adverse, il ne subit rien.</li>
       <li><b>Pour viser le héros adverse, il faut d’abord détruire toutes ses créatures visibles.</b> Les créatures avec ${symMot("provocation")} Provocation doivent être visées en premier, et celles avec ${symMot("ethere")} Ethéré ne peuvent pas être visées tant qu’elles n’ont pas attaqué (elles ne protègent pas leur héros).</li>
-      <li>Un <b>équipement</b> donne immédiatement sa valeur en puissance à votre héros. Si vous avez une créature, vous l’équipez en plus : elle gagne autant d’attaque et de PV, pour toujours (tant qu’elle vit). Sans créature, l’équipement reste donc utile.</li>
+      <li>Un <b>équipement</b> donne immédiatement sa valeur en puissance à votre héros. Si vous avez une créature, vous l’équipez en plus : elle gagne autant d’attaque et de PV, tant qu’elle reste en vie. Sans créature, l’équipement reste donc utile.</li>
       <li>Le plateau d’un joueur ne peut pas contenir plus de ${R.plateauMax} créatures. Une créature détruite part dans la défausse de son propriétaire.</li></ul>`],
     ["heros", "Les héros et leurs pouvoirs", `<p>Le pouvoir d’un héros se charge à chaque créature ennemie détruite. Après <b>${R.seuilPouvoir || 10} créatures ennemies</b>, il est prêt : cliquez sur votre médaillon pour l’activer. Il se recharge ensuite.</p>
       <p>Chaque panthéon a trois divinités, selon le nombre de cartes de ce panthéon dans votre deck (voir Dévotion) :</p>
@@ -5506,7 +5506,7 @@ function htmlFinTuto(){
         <tr><td>${s2}</td><td>${esc(div("egy")[2])}</td><td>Pouvoir encore plus fort, et votre ${esc(crea)} devient une créature du panthéon</td></tr></tbody></table>
       <p class="aide">Les cartes de départ colorées comptent comme des cartes du panthéon : elles déclenchent vos combos. Ces bonus restent modestes, un deck mélangé peut parfaitement gagner.</p>`],
     ["Équipements et plateau", `<ul class="etapes-liste">
-      <li>Un <b>équipement</b> donne aussitôt sa valeur en puissance à votre héros, et si vous avez une créature, elle gagne autant d’attaque et de points de vie pour toujours.</li>
+      <li>Un <b>équipement</b> donne aussitôt sa valeur en puissance à votre héros, et si vous avez une créature, elle gagne autant d’attaque et de points de vie, tant qu’elle reste en vie.</li>
       <li>Ce que vous pouvez faire <b>brille</b> : cartes jouables en jaune, créatures prêtes à attaquer en vert, cibles en rouge, cartes achetables en vert.</li>
       <li>Cliquez sur une <b>défausse</b> pour voir ses cartes. L’or et la puissance de l’adversaire s’affichent à côté de son médaillon.</li>
       <li>Dans le <b>journal</b>, survolez le nom d’une carte pour la voir. Sur téléphone, un appui long sur une carte l’affiche en grand.</li></ul>`],
