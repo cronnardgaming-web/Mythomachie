@@ -84,6 +84,18 @@ ou changé leur faction, renvoyez le catalogue depuis l’administration (onglet
 `supabase-admin-joueurs.sql` permet à l’administrateur de corriger l’or et l’encre d’un joueur depuis l’onglet
 « Statistiques » de l’administration (bouton « Modifier » dans la liste des joueurs).
 
+## Alertes détaillées
+
+`supabase-alertes-detaillees.sql` (à exécuter après tous les autres scripts) : chaque alerte liée à une partie
+note le numéro de ticket et la cause exacte du blocage (champ hors limites, carte absente du catalogue, durée…).
+Les parties acceptées ou refusées restent les mêmes ; seules les informations des alertes sont plus précises.
+
+## Correctif des statistiques
+
+`supabase-correctif-stats.sql` (à exécuter après `supabase-recompenses.sql`) : une carte absente du catalogue du
+serveur (ajoutée dans l’administration sans « Envoyer le catalogue ») ne fait plus refuser la partie ni déclencher
+d’alerte ; elle est simplement ignorée dans les statistiques. L’administration signale les cartes manquantes.
+
 ## Quêtes du jour et trophées
 
 `supabase-recompenses.sql` (à exécuter après `supabase-variantes.sql`) met en place :

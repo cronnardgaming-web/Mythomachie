@@ -802,6 +802,10 @@ body.compact .nom-heros-deck{font-size:17px}
 .alerte-catalogue span{font-size:14px;flex:1 1 300px}
 .alerte-catalogue .btn{margin:0}
 
+/* Surveillance : ticket et cause du blocage */
+.ticket-alerte{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--ink-2);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:2px 8px;user-select:all}
+.cause-alerte{margin:0;font-size:14px;line-height:1.5;padding:8px 10px;border-radius:8px;background:color-mix(in srgb, #b8402f 12%, var(--table));border-left:4px solid #b8402f}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -6210,7 +6214,7 @@ const LIBELLES_DETAILS = {ticket:"Ticket", ticket_d_un_autre_joueur:"Ticket d’
   parties_ensemble:"Parties ensemble", victoires_du_meme_joueur:"Victoires du même joueur", adversaire:"Adversaire"};
 const NOMS_MODES = {ia:"contre l’ordinateur", enligne:"en ligne", duo:"même écran"};
 function htmlDetails(d){
-  return Object.entries(d || {}).filter(([k]) => k!=="hote").map(([k, v]) => {
+  return Object.entries(d || {}).filter(([k]) => !["hote", "cause", "ticket", "cartes_inconnues"].includes(k)).map(([k, v]) => {
     let val = v && typeof v==="object" ? Object.entries(v).filter(([, x]) => x!==0 && x!=="" && !(x && typeof x==="object" && !Object.keys(x).length)).map(([a, b]) => `${a} ${typeof b==="object" ? JSON.stringify(b) : b}`).join(", ") || "rien"
       : k==="mode" || k.startsWith("mode_") ? (NOMS_MODES[v] || v) : v===true ? "oui" : v===false ? "non" : v;
     return `<span class="detail-alerte"><b>${esc(LIBELLES_DETAILS[k] || k)}</b> ${esc(String(val ?? "–")).slice(0, 160)}</span>`;
@@ -6222,6 +6226,7 @@ function ficheJoueur(f){
   return `<span class="aide">${nf(f.parties)} parties, ${nf(f.victoires)} victoires, ${nf(f.pieces_or)} or, ${nf(f.encre)} encre, ${nf(f.nb_alertes)} alerte${f.nb_alertes>1 ? "s" : ""}, inscrit le ${f.cree ? new Date(f.cree).toLocaleDateString("fr-FR") : "–"}</span>`;
 }
 async function chargerSurveillance(){
+  if(PROG.catalogueServeur===undefined){ PROG.catalogueServeur = null; rpc("cartes_du_catalogue").then(l => { PROG.catalogueServeur = new Set(l || []); }, () => {}); }
   const jours = (PROG.surv && PROG.surv.jours) || 30;
   try {
     const r = await rpc("admin_surveillance", {p_jours:jours});
@@ -6258,8 +6263,10 @@ function admSurveillance(){
       const m = MOTIFS[a.motif] || [a.motif, ""];
       return `<article class="alerte ${a.traite ? "traitee" : ""}">
         <header>${badgeGravite(a.gravite)}<b class="joueur-alerte">${nomJ(a)}</b>${a.email && a.pseudo ? `<span class="aide">${esc(a.email)}</span>` : ""}
+          ${a.details && a.details.ticket ? `<span class="ticket-alerte" title="Numéro du ticket de la partie">Ticket ${esc(String(a.details.ticket))}</span>` : ""}
           <span class="quand">${a.compteur>1 ? `${nf(a.compteur)} fois, ` : ""}${new Date(a.derniere).toLocaleString("fr-FR", {dateStyle:"short", timeStyle:"short"})}</span></header>
         <p class="motif-alerte"><b>${esc(m[0])}</b>${m[1] ? ` : ${esc(m[1])}` : ""}</p>
+        ${causeAlerte(a) ? `<p class="cause-alerte"><b>Cause du blocage :</b> ${esc(causeAlerte(a))}</p>` : ""}
         <div class="details-alerte">${htmlDetails(a.details)}</div>
         <footer>${ficheJoueur(V.joueurs[a.joueur])}
           <button type="button" class="btn-discret" data-act="surv-traiter" data-id="${a.id}">${a.traite ? "Rouvrir" : "Marquer comme traitée"}</button></footer>
@@ -7239,6 +7246,54 @@ function htmlVersionsDepart(id){
   return `<div class="choix-illustrations"><h3>Versions de Dévotion</h3>
     <div class="rangee-vignettes">${vignette(null, "Version de base")}${vs.map(k => vignette(k, `Version ${FACTIONS[CARTES[k].faction] ? FACTIONS[CARTES[k].faction].f : ""}`)).join("")}</div>
     <p class="aide">${vue ? `${esc(CARTES[vue].nom)}, version ${esc(FACTIONS[CARTES[vue].faction] ? FACTIONS[CARTES[vue].faction].f : "")}. ${regle}` : "Version de base, utilisée sans Dévotion. " + regle}</p></div>`;
+}
+
+// ----- Surveillance : cause du blocage écrite en clair (reconstituée pour les anciennes alertes)
+const LIMITES_STATS = {degats:[2000, "dégâts infligés"], soins:[2000, "points de vie soignés"], creatures:[300, "créatures jouées"], sorts:[400, "sorts joués"], achats:[300, "cartes achetées"], pouvoirs:[60, "pouvoirs utilisés"]};
+const nomCarteOuId = k => CARTES[k] ? `${CARTES[k].nom}` : k;
+function causeAlerte(a){
+  const d = a.details || {};
+  const inconnues = (d.cartes_inconnues || []).map(nomCarteOuId);
+  if(d.cause){
+    let c = String(d.cause).replace(/« ([a-z0-9_]+) »/g, (m, k) => CARTES[k] ? `« ${CARTES[k].nom} »` : m);
+    return c;
+  }
+  switch(a.motif){
+    case "partie_trop_courte": return `La partie a été envoyée ${d.duree_s ?? "?"} secondes après son ouverture, alors qu’une partie doit durer au moins ${d.minimum_s ?? 120} secondes.`;
+    case "mode_falsifie": return `Mode envoyé « ${d.mode_envoye} », alors que la partie a été ouverte en mode « ${d.mode_du_ticket} ».`;
+    case "partie_sans_ticket": return "Aucun ticket valide n’a été fourni : cette partie n’a jamais été ouverte par le serveur.";
+    case "ticket_invente": return "Le ticket envoyé n’existe pas ou appartient à un autre joueur.";
+    case "recompense_sans_partie": return d.ticket_d_un_autre_joueur ? "Récompense demandée avec le ticket d’une partie appartenant à un autre joueur." : "Récompense demandée pour un ticket de partie qui n’existe pas.";
+    case "double_recompense": return "La récompense de cette partie avait déjà été versée (souvent un rechargement de la page en fin de partie).";
+    case "quete_non_terminee": return `Quête « ${d.quete} » réclamée avec une progression de ${d.progres} sur ${d.objectif}.`;
+    case "quete_inconnue": return `Quête « ${d.quete} » réclamée alors qu’elle ne fait pas partie des quêtes du jour du joueur.`;
+    case "quete_deja_recompensee": return "Quête du jour réclamée une seconde fois.";
+    case "trophee_non_atteint": return `Rang ${d.palier} du trophée « ${d.trophee} » réclamé avec une valeur de ${d.valeur}, alors qu’il faut ${d.seuil}.`;
+    case "trophee_inconnu": return `Trophée « ${d.trophee} » (rang ${d.palier}) inexistant.`;
+    case "deck_illegal": case "deck_illegal_en_ligne": return `Deck refusé : ${String(d.refus || "").replace(/: ([a-z0-9_]+)\./, (m, k) => `: ${nomCarteOuId(k)}.`)}`;
+    case "deck_d_un_autre": return "Tentative de modifier un deck appartenant à un autre joueur.";
+    case "trop_de_parties": return `${d.parties_en_une_heure} parties commencées en une heure (limite : ${d.limite}).`;
+    case "paquet_offert_inexistant": return `Ouverture d’un paquet offert (« ${d.type} ») que le joueur ne possède pas.`;
+    case "variante_non_possedee": return `Affichage demandé d’une illustration non possédée (« ${d.variante} » pour la carte « ${nomCarteOuId(d.carte)} »).`;
+    case "adversaire_invente": return "Partie en ligne ouverte avec un adversaire inexistant (ou avec soi-même).";
+    case "mode_inconnu": return `Partie ouverte avec un mode inconnu (« ${d.mode} »).`;
+    case "ancienne_version": return "Le joueur utilisait une ancienne version de la page, qui appelait une fonction supprimée.";
+    case "statistiques_impossibles": {
+      const r = [];
+      const t = Number(d.tours); if(!(t>=1 && t<=400)) r.push(`Nombre de tours déclaré : ${d.tours ?? "aucun"} (attendu entre 1 et 400).`);
+      [["Camp du joueur", d.camp_joueur], ["Camp adverse", d.camp_adverse]].forEach(([camp, c]) => {
+        if(!c || typeof c!=="object"){ r.push(`${camp} : statistiques absentes ou mal formées.`); return; }
+        for(const [k, [mx, nom]] of Object.entries(LIMITES_STATS)){ const v = Number(c[k] || 0); if(v<0 || v>mx) r.push(`${camp} : ${v} ${nom} (maximum autorisé : ${mx}).`); }
+        for(const cle of ["jouees", "achetees"]) for(const [k, n] of Object.entries(c[cle] || {})) if(!/^\d{1,3}$/.test(String(n))) r.push(`${camp} : nombre d’exemplaires invalide pour « ${nomCarteOuId(k)} » (${n}).`);
+      });
+      if(r.length) return r.join(" ");
+      // Aucune valeur hors limites : la seule cause possible est une carte absente du catalogue du serveur
+      const cartes = [...new Set([d.camp_joueur, d.camp_adverse].flatMap(c => c ? [...Object.keys(c.jouees || {}), ...Object.keys(c.achetees || {})] : []))];
+      const suspectes = PROG.catalogueServeur ? cartes.filter(k => !PROG.catalogueServeur.has(k)) : cartes.filter(k => /^carte_/.test(k) || (CARTES[k] && CARTES[k].versionDe));
+      return `Aucune valeur n’était hors limites : la partie contenait au moins une carte absente du catalogue du serveur (catalogue non envoyé depuis l’ajout de cartes).${suspectes.length ? ` Cartes concernées${PROG.catalogueServeur ? "" : " probables"} : ${suspectes.map(nomCarteOuId).join(", ")}.` : ""}`;
+    }
+    default: return "";
+  }
 }
 
 chargerConfig();
