@@ -785,6 +785,23 @@ body.compact .nom-heros-deck{font-size:17px}
 .boite-guide .tableau th:first-child,.boite-guide .tableau td:first-child{width:26%}
 .defile-tableau{overflow-x:auto}
 
+/* Collection : cartes non possédées floutées, cartes de départ */
+.col-item.manque .carte{filter:none;opacity:.9}
+.col-item.manque .carte .illu{filter:blur(5px) saturate(.6) brightness(.85);transform:scale(1.12)}
+.col-item.manque .carte .art{overflow:hidden}
+.carte-ouverte.non-possedee .z-illu{overflow:hidden}
+.carte-ouverte.non-possedee .z-illu img{filter:blur(9px) saturate(.6) brightness(.85);transform:scale(1.1)}
+.titre-section-col{font-size:17px;margin:14px 0 4px}
+.grille-depart{margin-bottom:6px}
+.badge-versions{position:absolute;top:-6px;right:-6px;z-index:3;font-size:11px;font-weight:700;color:var(--btn-texte);background:linear-gradient(180deg,var(--btn-haut),var(--btn-bas));border-radius:99px;padding:1px 8px}
+.col-item{position:relative}
+
+/* Administration : cartes absentes du catalogue */
+.alerte-catalogue{display:flex;align-items:center;gap:6px 14px;flex-wrap:wrap;margin:10px 0 0;padding:10px 14px;border-radius:10px;
+  background:color-mix(in srgb, #b8402f 18%, var(--zone));border:1px solid #b8402f}
+.alerte-catalogue span{font-size:14px;flex:1 1 300px}
+.alerte-catalogue .btn{margin:0}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -822,7 +839,7 @@ body.compact .nom-heros-deck{font-size:17px}
 .grille{display:flex;flex-wrap:wrap;gap:14px;padding:6px}
 .grille .carte{--w:132px}
 .col-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px}
-.col-item.manque .carte{filter:grayscale(1);opacity:.45}
+.col-item.manque .carte{opacity:.92}
 .col-item.choisie .carte{box-shadow:0 0 0 3px var(--choix)}
 .badge-nb{background:var(--ink);color:var(--table);font-weight:700;font-size:13px;border-radius:99px;padding:1px 10px}
 .col-item.manque .badge-nb{opacity:.5}
@@ -2614,7 +2631,7 @@ function renderAdmin(){
     cle = actif.dataset.chemin ? `[data-chemin="${actif.dataset.chemin}"]` : actif.dataset.adm ? `[data-adm="${actif.dataset.adm}"]` : null;
     try { pos = actif.selectionStart; } catch(e) { pos = null; }
   }
-  const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:admStats, musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters};
+  const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters};
   // Mémoriser la position des listes et de la page avant de réafficher
   const defil = {}; app.querySelectorAll(".adm-items, .adm-menu, .grille-choix").forEach((el, k) => { defil[el.className + k] = el.scrollTop; });
   const yPage = window.scrollY;
@@ -2622,10 +2639,20 @@ function renderAdmin(){
   const groupes = [
     ["Contenu du jeu", [["cartes","Cartes"],["boosters","Boosters"],["heros","Héros"],["factions","Factions"],["regles","Règles"],["musiques","Musiques"]]],
     ["Publication", [["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"]] : [])]],
-    ...(PROG.actif ? [["Joueurs", [["stats","Statistiques"],["surveillance","Surveillance", nbAlertes]]]] : [])
+    ...(PROG.actif ? [["Joueurs", [["stats","Vue d’ensemble"],["stats-heros","Statistiques des héros"],["stats-cartes","Statistiques des cartes"],["stats-joueurs","Liste des joueurs"],["surveillance","Surveillance", nbAlertes]]]] : [])
   ];
   const titres = Object.fromEntries(groupes.flatMap(([, l]) => l.map(([k, t]) => [k, t])));
+  // Cartes de la configuration que le serveur ne connaît pas encore
+  if(PROG.actif && PROG.pret && !window.claude && PROG.catalogueServeur===undefined){
+    PROG.catalogueServeur = null;
+    rpc("cartes_du_catalogue").then(l => { PROG.catalogueServeur = new Set(l || []); if(ui.ecran==="admin") renderAdmin(); }, () => {});
+  }
+  const absentes = PROG.catalogueServeur ? Object.keys(CARTES).filter(k => !PROG.catalogueServeur.has(k)) : [];
   app.innerHTML = `<div class="adm-coque">
+  ${absentes.length ? `<div class="alerte-catalogue" role="alert">
+    <b>${absentes.length} carte${absentes.length>1 ? "s" : ""} manque${absentes.length>1 ? "nt" : ""} au catalogue du serveur</b>
+    <span>${absentes.slice(0, 5).map(k => esc(CARTES[k].nom)).join(", ")}${absentes.length>5 ? "…" : ""}. Tant qu’elles n’y sont pas, elles n’apparaissent pas dans les paquets et ne comptent pas dans les statistiques.</span>
+    <button type="button" class="btn" data-act="srv-catalogue">Envoyer le catalogue</button></div>` : ""}
   <header class="adm-barre">
     <h1>Administration</h1>
     <span class="adm-statut">${window.claude ? "Prototype : les changements restent dans ce navigateur." : "Enregistré dans ce navigateur. Exportez config.json pour publier vos changements."}</span>
@@ -4106,6 +4133,7 @@ async function verifierRecompense(){
   if(S && S.idPartie===cle) renderCouche();
 }
 function htmlGainFin(){
+  if(PROG.actif && S && S.mode==="duo") return `<p class="aide">Les parties à deux sur le même écran ne comptent pas pour les quêtes, les trophées et les récompenses.</p>`;
   if(!PROG.actif || !S || S.mode==="duo") return "";
   const g = PROG.dernierGain;
   if(!g || g.cle!==S.idPartie) return `<p class="attente">Calcul des récompenses…</p>`;
@@ -4241,6 +4269,7 @@ function pageCollection(){
   return `${entete("Collection")}
     <p class="aide">${possedees} cartes différentes sur ${total}. Cliquez sur une carte pour la voir en grand, la fabriquer ou recycler ses exemplaires en trop.</p>
     ${htmlFiltres(true)}
+    ${htmlCartesDepart()}
     <div class="grille">${ids.map(id => {
       const nb = PROG.collection[id] || 0;
       return `<div class="col-item ${nb ? "" : "manque"}">${htmlCarte({id, uid:id, v:prefVariantes()[id]}, {act:"col-sel", id})}<span class="badge-nb">${nb ? "×" + nb : "0"}</span></div>`;
@@ -4274,17 +4303,20 @@ function htmlZoom(){
   return `<div class="zoom-fond" data-act="zoom-fermer">
     <button type="button" class="zoom-fermer" data-act="zoom-fermer" aria-label="Fermer">×</button>
     <div class="zoom ${anim ? "anim" : ""}" data-act="zoom-rien" role="dialog" aria-label="${esc(d.nom)}">
-      ${htmlCarteOuverte(d, id, PROG.zoomV===undefined ? prefVariantes()[id] : PROG.zoomV)}
+      ${(() => { const depart = d.depart || d.base, vd = depart && PROG.zoomVersion && CARTES[PROG.zoomVersion];
+           const o = vd ? htmlCarteOuverte(CARTES[PROG.zoomVersion], PROG.zoomVersion) : htmlCarteOuverte(d, id, PROG.zoomV===undefined ? prefVariantes()[id] : PROG.zoomV);
+           return nb || depart ? o : o.replace('class="carte-ouverte', 'class="carte-ouverte non-possedee'); })()}
       <div class="zoom-info">
-        <h2>${esc(d.nom)}</h2>${htmlChoixIllustrations(id)}
+        <h2>${esc(d.nom)}</h2>${d.depart || d.base ? htmlVersionsDepart(id) : htmlChoixIllustrations(id)}
         <p class="meta">${NOMS_RARETE[r]}, ${esc(fac)}</p>
-        <p>Vous en possédez <b>${nb}</b>. Un deck peut en contenir ${mx}.</p>
+        ${d.depart || d.base ? `<p>${d.base ? "Toujours disponible au marché, à chaque partie." : `Carte de départ : vous commencez chaque partie avec <b>${(REGLES.deckDepart || {})[id] || 0}</b> exemplaire${((REGLES.deckDepart || {})[id] || 0)>1 ? "s" : ""}.`} Elle ne se fabrique pas et ne se recycle pas.</p>` : `
+        <p>Vous en possédez <b>${nb}</b>${nb ? "" : " : son illustration est floutée tant que vous ne l’avez pas"}. Un deck peut en contenir ${mx}.</p>
         <p class="meta">Votre encre : ${encre}</p>
         <div class="actions">
           ${d.promo ? `<p class="meta">Carte promotionnelle : elle ne se fabrique pas et ne se recycle pas.</p>` : `<button type="button" class="btn" data-act="col-fabriquer" data-id="${id}" ${nb>=mx || encre<cout || PROG.occupe ? "disabled" : ""}>Fabriquer (${cout} encre)</button>`}
           ${nb>mx && !d.promo ? `<button type="button" class="btn second" data-act="col-recycler" data-id="${id}" ${PROG.occupe ? "disabled" : ""}>Recycler 1 exemplaire en trop (+${gain} encre)</button>` : ""}
         </div>
-        ${nb>=mx ? `<p class="meta">Vous avez déjà le nombre maximum d’exemplaires utiles.</p>` : encre<cout ? `<p class="meta">Il vous manque ${cout - encre} encre pour la fabriquer.</p>` : ""}
+        ${nb>=mx ? `<p class="meta">Vous avez déjà le nombre maximum d’exemplaires utiles.</p>` : encre<cout ? `<p class="meta">Il vous manque ${cout - encre} encre pour la fabriquer.</p>` : ""}`}
         ${liste.length>1 && pos>=0 ? `<div class="zoom-nav"><button type="button" class="btn second" data-act="zoom-prec" aria-label="Carte précédente">←</button><button type="button" class="btn second" data-act="zoom-suiv" aria-label="Carte suivante">→</button></div>` : ""}
       </div>
     </div></div>`;
@@ -4387,7 +4419,7 @@ function actionProg(act, id){
       if(g===-2) throw new Error("La quête du jour a déjà été récompensée.");
       await chargerQuete(); return g;
     }, g => `+${g} or : quête du jour réussie !`); return true;
-    case "col-sel": PROG.zoomV = undefined; PROG.sel = id; PROG.zoom = true; PROG.zoomAnim = true; break;
+    case "col-sel": PROG.zoomV = undefined; PROG.zoomVersion = null; PROG.sel = id; PROG.zoom = true; PROG.zoomAnim = true; break;
     case "zoom-rien": return true;
     case "zoom-fermer": PROG.zoom = false; break;
     case "zoom-prec": case "zoom-suiv": {
@@ -4464,6 +4496,7 @@ function actionProg(act, id){
       return true;
     }
     case "col-variante-voir": PROG.zoomV = id || null; break;
+    case "col-version-voir": PROG.zoomVersion = id || null; break;
     case "col-variante-choisir": {
       const [carte, vid] = String(id).split("|");
       action(async () => { await rpc("choisir_variante", {p_carte:carte, p_variante:vid || null}); PROG.zoomV = undefined; }, "Illustration mise à jour.");
@@ -4540,6 +4573,7 @@ async function actionServeur(act){
       try { const r = await rpc("admin_maj_contenu", {p_variantes:vars, p_boosters:CONFIG.boosters || {}}); suite = `, ${r.variantes} illustrations alternatives et ${r.boosters} boosters spéciaux`; }
       catch(e) { suite = " (illustrations et boosters non envoyés : exécutez supabase-variantes.sql)"; }
       erreur(`Catalogue envoyé : ${n} cartes${suite}.`);
+      PROG.catalogueServeur = undefined; renderAdmin();
     } catch(e) { erreur(e.message); } return;
     case "srv-eco": {
       const e = PROG.ecoEdit, s = Object.values(e.probabilites || {}).reduce((a,b) => a + Number(b||0), 0);
@@ -4816,6 +4850,7 @@ async function enregistrerDuel(){
   }
 }
 async function chargerQuete(){
+  PROG.quetesQuand = Date.now();
   try { PROG.quetes = await rpc("mes_quetes"); PROG.quete = null; }
   catch(e) { PROG.quetes = null; try { PROG.quete = await rpc("mes_quete"); } catch(e2) { PROG.quete = null; } }
 }
@@ -4930,7 +4965,7 @@ async function chargerAdminStats(){
   } catch(e) {
     PROG.adminStats = {...(PROG.adminStats || {}), jours, erreur:messageScriptManquant(e.message)};
   }
-  if(ui.ecran==="admin" && adm.onglet==="stats") renderAdmin();
+  if(ui.ecran==="admin" && String(adm.onglet).startsWith("stats")) renderAdmin();
 }
 function ilYa(date){
   if(!date) return "jamais";
@@ -4942,7 +4977,7 @@ function ilYa(date){
 }
 const nomJoueur = j => j.pseudo || j.email || "Invité " + String(j.id).slice(0, 6);
 function trier(liste, cle, sens){ return [...liste].sort((a,b) => { const x = a[cle] ?? -Infinity, y = b[cle] ?? -Infinity; return (x>y ? 1 : x<y ? -1 : 0) * sens; }); }
-function admStats(){
+function admStats(vueStats = "resume"){
   if(!PROG.actif || !PROG.pret) return `<div class="adm-page"><p>Les statistiques sont disponibles sur votre site GitHub.</p></div>`;
   const A = PROG.adminStats;
   if(!A || (!A.resume && !A.erreur)){ if(!A || !A.chargement){ PROG.adminStats = {...(A || {}), chargement:true}; chargerAdminStats(); } return `<div class="adm-page"><p class="attente">Chargement des statistiques…</p></div>`; }
@@ -4969,7 +5004,7 @@ function admStats(){
       <span class="aide">Mis à jour ${ilYa(new Date(A.quand).toISOString())}. Actualisation automatique toutes les 30 secondes.</span>
     </div>
 
-    <h2>Résumé</h2>
+${vueStats==="resume" ? `    <h2>Résumé</h2>
     <div class="tuiles">
       <div class="tuile"><b>${nf(enLigneMaint.length)}</b><span>en ligne maintenant</span></div>
       <div class="tuile"><b>${nf(visibles.length)}</b><span>joueurs inscrits</span></div>
@@ -4982,7 +5017,7 @@ function admStats(){
     </div>
     <h2>En ligne maintenant</h2>
     ${enLigneMaint.length ? `<ul class="liste-en-ligne">${enLigneMaint.map(j => `<li><span class="point-vert" aria-hidden="true"></span><b>${esc(nomJoueur(j))}</b><span>${esc(NOMS_ECRANS[j.ecran] || j.ecran || "?")}</span><span class="aide">${ilYa(j.derniere_vue)}</span></li>`).join("")}</ul>` : `<p class="aide">Personne n’est connecté en ce moment.</p>`}
-    <h2>Héros</h2>
+` : ""}${vueStats==="heros" ? `    <h2>Héros</h2>
     <div class="tableau-defile"><table class="tableau"><thead><tr><th>Héros</th><th>Parties</th><th>Victoires</th><th>Taux</th><th>Tours moyens</th></tr></thead><tbody>
       ${facs.map(k => { const x = hs[k] || {parties:0, victoires:0}; const t = x.parties ? x.victoires/x.parties : null;
         return `<tr><td><span class="pastille f-${k}"></span> ${esc(heroDe({heros:k}).nom)}</td><td>${nf(x.parties)}</td><td>${nf(x.victoires)}</td><td class="${couleurTaux(t)}">${pct(x.victoires, x.parties)}</td><td>${x.tours!=null ? Number(x.tours).toLocaleString("fr-FR") : "–"}</td></tr>`; }).join("")}
@@ -4992,14 +5027,14 @@ function admStats(){
       ${facs.map(a => `<tr><th>${esc(heroDe({heros:a}).nom)}</th>${facs.map(b => { const d = duel(a, b); const t = d && d.parties ? d.victoires/d.parties : null;
         return `<td class="${couleurTaux(t)}">${d ? `${pct(d.victoires, d.parties)} <span class="aide">(${d.parties})</span>` : "–"}</td>`; }).join("")}</tr>`).join("")}
     </tbody></table></div>
-    <h2>Cartes</h2>
+` : ""}${vueStats==="cartes" ? `    <h2>Cartes</h2>
     <p class="aide">Toutes les parties sont comptées, avec leurs deux camps : joueurs, ordinateur et parties sur un même écran.</p>
     <p class="aide">« % de victoire » : parmi les parties où un camp a joué cette carte, la part que ce camp a gagnées. Vers 50 %, la carte est équilibrée. Au-dessus de 60 % (en rouge), elle est peut-être trop forte ; sous 40 % (en bleu), trop faible. Méfiez-vous des cartes jouées dans moins de 20 parties.</p>
     <div class="adm-actions" style="margin-top:0"><select data-stats="fac"><option value="toutes">Toutes les factions</option>${facs.map(k => `<option value="${k}" ${facFiltre===k ? "selected" : ""}>${esc(FACTIONS[k].nom)}</option>`).join("")}</select></div>
     <div class="tableau-defile"><table class="tableau"><thead><tr>${th("nom","Carte","c")}${th("rarete","Rareté","c")}${th("prix","Prix","c")}${th("jouee","Jouée","c")}${th("achetee","Achetée","c")}${th("parties","Parties","c")}${th("taux","% de victoire","c")}</tr></thead><tbody>
       ${cartes.map(c => `<tr><td><span class="pastille f-${CARTES[c.carte].faction || "neutre"}"></span> ${esc(c.nom)}</td><td>${NOMS_RARETE[c.rarete] || "–"}</td><td>${c.prix ?? "–"}</td><td>${nf(c.jouee)}</td><td>${nf(c.achetee)}</td><td>${nf(c.parties)}</td><td class="${c.parties>=20 ? couleurTaux(c.taux) : ""}">${c.taux==null ? "–" : Math.round(c.taux*100) + " %"}</td></tr>`).join("")}
     </tbody></table></div>
-    <h2>Joueurs</h2>
+` : ""}${vueStats==="joueurs" ? `    <h2>Joueurs</h2>
     <div class="tableau-defile"><table class="tableau"><thead><tr>${th("nom","Joueur")}${th("email","Compte")}${th("cree","Inscrit")}${th("derniere_vue","Dernière visite")}${th("ecran","Écran")}${th("parties","Parties")}${th("taux","Victoires")}${th("cartes","Cartes")}${th("pieces_or","Or")}${th("encre","Encre")}<th></th></tr></thead><tbody>
       ${joueurs.map(j => `<tr><td>${esc(j.nom)}</td><td>${j.email ? esc(j.email) : `<span class="aide">invité</span>`}</td><td>${j.cree ? new Date(j.cree).toLocaleDateString("fr-FR") : "–"}</td><td>${ilYa(j.derniere_vue)}</td><td>${esc(NOMS_ECRANS[j.ecran] || j.ecran || "–")}</td><td>${nf(j.parties)}</td><td>${nf(j.victoires)} (${pct(j.victoires, j.parties)})</td><td>${nf(j.cartes)}</td>${A.edition===j.id
         ? `<td><input type="number" min="0" step="1" class="champ-res" data-stats-res="or" value="${A.formRes.or}" aria-label="Or de ${esc(j.nom)}"></td>
@@ -5007,9 +5042,10 @@ function admStats(){
            <td class="actions-res"><button type="button" class="btn" data-act="stats-res-ok" data-id="${j.id}">Enregistrer</button><button type="button" class="btn-discret" data-act="stats-res-annuler">Annuler</button></td>`
         : `<td>${nf(j.pieces_or)}</td><td>${nf(j.encre)}</td><td><button type="button" class="btn-discret" data-act="stats-res" data-id="${j.id}">Modifier</button></td>`}</tr>`).join("")}
     </tbody></table></div>
+    ` : ""}
   </div>`;
 }
-setInterval(() => { if(ui.ecran==="admin" && adm.onglet==="stats" && PROG.pret && !document.hidden && !(PROG.adminStats && PROG.adminStats.edition)) chargerAdminStats(); }, 30000);
+setInterval(() => { if(ui.ecran==="admin" && String(adm.onglet).startsWith("stats") && PROG.pret && !document.hidden && !(PROG.adminStats && PROG.adminStats.edition)) chargerAdminStats(); }, 30000);
 document.addEventListener("input", e => {
   const k = e.target.dataset && e.target.dataset.statsRes;
   if(k && PROG.adminStats && PROG.adminStats.formRes) PROG.adminStats.formRes[k] = e.target.value;
@@ -6836,6 +6872,7 @@ function htmlFin2v2(){
   return `<div class="boite" role="dialog" aria-label="Fin de partie">
     <h2>${gagne ? "Victoire de votre équipe !" : "Défaite"}</h2>
     <p>${gagne ? "Les deux héros adverses sont tombés." : "Votre héros et celui de votre allié sont tombés."} Partie terminée au tour ${Math.ceil(S.tour/4)}.</p>
+    <p class="aide">Mode en test : cette partie ne compte pas encore pour les quêtes, les trophées et les récompenses.</p>
     <div class="actions"><button type="button" class="btn" data-act="rejouer">Rejouer</button><button type="button" class="btn second" data-act="nouvelle">Changer de mode</button></div>
   </div>`;
 }
@@ -7122,11 +7159,15 @@ async function chargerPaquetsOfferts(){
 }
 // ----- Accueil : les 3 quêtes du jour
 function htmlQuetesJour(){
+  // Rechargement à chaque retour à l’accueil (au plus toutes les 15 secondes)
+  if(PROG.pret && PROG.actif && Date.now() - (PROG.quetesQuand || 0) > 15000){
+    chargerQuete().then(() => { if(!S && ui.ecran==="jeu") renderCouche(); });
+  }
   const Q = PROG.quetes;
   if(!Q || !Array.isArray(Q.quetes)) return htmlQuete();
   const toutes = Q.quetes.every(q => q.faite);
   return `<div class="quete quetes-jour">
-    <b class="titre-quetes">Quêtes du jour ${toutes ? `<span class="aide">toutes réussies, à demain !</span>` : ""}</b>
+    <b class="titre-quetes">Quêtes du jour ${toutes ? `<span class="aide">toutes réussies, à demain !</span>` : `<span class="aide">parties contre l’ordinateur ou en ligne</span>`}</b>
     ${Q.quetes.map(q => {
       const fini = q.progres >= q.but;
       return `<div class="ligne-quete ${q.faite ? "faite" : fini ? "finie" : ""}">
@@ -7169,6 +7210,35 @@ function htmlPaquetsOfferts(){
     <div class="liste-offerts">${types.map(k => `<div class="offert ${k!=="classique" ? "f-" + k : ""}">
       <span class="sym-offert">${k==="classique" ? "✦" : FACTIONS[k] ? FACTIONS[k].sym : "✦"}</span><b>${esc(NOM_PAQUET(k))}</b><span class="aide">× ${P[k]}</span>
       <button type="button" class="btn" data-act="paquet-offert" data-id="${k}">Ouvrir</button></div>`).join("")}</div></section>`;
+}
+
+/* ----- Collection : cartes de départ et leurs versions de Dévotion ----- */
+const idsDepart = () => [...new Set([...Object.keys(REGLES.deckDepart || {}), REGLES.carteBase])].filter(id => CARTES[id]);
+const versionsDe = id => Object.keys(CARTES).filter(k => CARTES[k].versionDe===id).sort((a, b) => Object.keys(FACTIONS).indexOf(CARTES[a].faction) - Object.keys(FACTIONS).indexOf(CARTES[b].faction));
+function htmlCartesDepart(){
+  const f = PROG.filtres;
+  if(f.fac!=="toutes" || f.rar!=="toutes" || f.cout || f.possedees) return "";
+  const ids = idsDepart().filter(id => (f.type==="tous" || CARTES[id].type===f.type) && (!f.rech || CARTES[id].nom.toLowerCase().includes(f.rech.toLowerCase())));
+  if(!ids.length) return "";
+  return `<h2 class="titre-section-col">Cartes de départ</h2>
+    <p class="aide">Chaque joueur commence ses parties avec ces cartes. Avec la Dévotion, certaines prennent la couleur de votre panthéon : ouvrez-les pour voir leurs versions.</p>
+    <div class="grille grille-depart">${ids.map(id => {
+      const n = (REGLES.deckDepart || {})[id], v = versionsDe(id).length;
+      return `<div class="col-item">${htmlCarte({id, uid:"dep-" + id}, {act:"col-sel", id})}<span class="badge-nb">${id===REGLES.carteBase ? "Marché" : "×" + n}</span>${v ? `<span class="badge-versions">${v} versions</span>` : ""}</div>`;
+    }).join("")}</div>
+    <h2 class="titre-section-col">Cartes à collectionner</h2>`;
+}
+function htmlVersionsDepart(id){
+  const vs = versionsDe(id);
+  if(!vs.length) return "";
+  const vue = PROG.zoomVersion || null, [s1, s2] = seuilsDevotion();
+  const regle = id===(REGLES.devotionTresor || "piece")
+    ? `Avec ${s1} cartes d’un même panthéon ou plus dans votre deck, ${REGLES.devotionNbTresors ?? 2} de vos ${esc(CARTES[id].nom)}s prennent cette version.`
+    : `Avec ${s2} cartes d’un même panthéon dans votre deck, votre ${esc(CARTES[id].nom)} prend cette version.`;
+  const vignette = (k, titre) => `<div role="button" tabindex="0" class="vignette-choix ${vue===k ? "vue" : ""}" data-act="col-version-voir" data-id="${k || ""}" title="${esc(titre)}" aria-label="${esc(titre)}">${htmlCarte({id:k || id, uid:"vv-" + (k || "o")})}</div>`;
+  return `<div class="choix-illustrations"><h3>Versions de Dévotion</h3>
+    <div class="rangee-vignettes">${vignette(null, "Version de base")}${vs.map(k => vignette(k, `Version ${FACTIONS[CARTES[k].faction] ? FACTIONS[CARTES[k].faction].f : ""}`)).join("")}</div>
+    <p class="aide">${vue ? `${esc(CARTES[vue].nom)}, version ${esc(FACTIONS[CARTES[vue].faction] ? FACTIONS[CARTES[vue].faction].f : "")}. ${regle}` : "Version de base, utilisée sans Dévotion. " + regle}</p></div>`;
 }
 
 chargerConfig();
