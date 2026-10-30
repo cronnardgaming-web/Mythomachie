@@ -84,6 +84,14 @@ ou changé leur faction, renvoyez le catalogue depuis l’administration (onglet
 `supabase-admin-joueurs.sql` permet à l’administrateur de corriger l’or et l’encre d’un joueur depuis l’onglet
 « Statistiques » de l’administration (bouton « Modifier » dans la liste des joueurs).
 
+## Saisons
+
+`supabase-saisons.sql` (à exécuter après `supabase-alertes-detaillees.sql`) : saisons de 12 travaux (deux ouverts par
+semaine), quêtes de saison calculées par le serveur depuis l’ouverture de leur travail, 4 paliers de récompenses
+(or, encre, carte, paquet, illustration, titre), cartes de saison absentes des paquets et non fabricables jusqu’à la
+fin de la saison. Chaque partie enregistre aussi les combos, équipements, cartes bannies, palier de Dévotion et PV
+de fin de partie. Les saisons se créent dans l’administration (onglet Saisons), puis « Envoyer la saison au serveur ».
+
 ## Alertes détaillées
 
 `supabase-alertes-detaillees.sql` (à exécuter après tous les autres scripts) : chaque alerte liée à une partie

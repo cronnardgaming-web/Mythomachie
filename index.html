@@ -806,6 +806,16 @@ body.compact .nom-heros-deck{font-size:17px}
 .ticket-alerte{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--ink-2);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:2px 8px;user-select:all}
 .cause-alerte{margin:0;font-size:14px;line-height:1.5;padding:8px 10px;border-radius:8px;background:color-mix(in srgb, #b8402f 12%, var(--table));border-left:4px solid #b8402f}
 
+/* Administration : saisons */
+.editeur-saison{border-top:1px solid var(--line);padding-top:12px}
+.palier-admin,.travail-admin{margin:8px 0}
+.travail-admin{background:var(--table-2);border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.travail-admin summary{cursor:pointer;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.quete-admin{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px 10px;align-items:end;padding:8px 0;border-top:1px dashed var(--line)}
+.texte-quete-admin{grid-column:1/-1;font-style:italic;color:var(--ink-2);font-size:13px}
+.recompense-admin{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px 10px}
+.adm-saisons select,.adm-saisons input[type=date]{font:inherit;font-size:14px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -1316,7 +1326,7 @@ if(!window.claude) document.title = NOM_JEU;
 const DEFAUT = {
   version:3,
   // Valeurs d’origine = config.json du site (GitHub), sans les images
-  musiques:{menu:"", duel:[]}, variantes:{}, boosters:{},
+  musiques:{menu:"", duel:[]}, variantes:{}, boosters:{}, saisons:{},
   credits:{musiques:[{titre:"Battle Cinematic Heroic Orchestra", artiste:"Echoes of Lumen"}, {titre:"Battle Music", artiste:"PaulYudin"}, {titre:"Battle", artiste:"NastelBom"}, {titre:"Epic Battle", artiste:"YevhenAstafiev"}, {titre:"Cinematic Powerful Battle Music", artiste:"Tunetank"}, {titre:"Epic Cinematic Battle Music", artiste:"Tunetank"}]},
   regles:{devotionSeuils:[16, 30], devotionNbTresors:2, devotionTresor:"piece", devotionCreature:"dague", armesHeros:true, armesImmediat:true, armesPermanentes:true, armesVie:true, pvDepart:40, seuilPouvoir:10, mainDepart:5, mainPremier:3, piocheParTour:5, tailleMarche:5, plateauMax:7, tailleDeck:30, copiesMax:2, copiesLegendaire:1, carteBase:"pierre", deckDepart:{piece:7, rubis:1, dague:1, epee:1}},
   mots:{provocation:"Provocation", rapidite:"Rapidité", resistance:"Résistance", ethere:"Ethéré"},
@@ -1517,6 +1527,7 @@ function fusionner(obj){
           musiques:{menu:(obj.musiques && obj.musiques.menu) || "", duel:(obj.musiques && Array.isArray(obj.musiques.duel)) ? [...obj.musiques.duel] : []},
           variantes:(obj.variantes && typeof obj.variantes==="object") ? copie(obj.variantes) : {},
           boosters:(obj.boosters && typeof obj.boosters==="object") ? copie(obj.boosters) : {},
+          saisons:(obj.saisons && typeof obj.saisons==="object") ? copie(obj.saisons) : {},
           credits:{musiques:(obj.credits && Array.isArray(obj.credits.musiques)) ? copie(obj.credits.musiques) : copie(d.credits.musiques)},
           regles:{...reglesObj, deckDepart:{...((obj.regles && obj.regles.deckDepart) || d.regles.deckDepart)}},
           mots:{...d.mots, ...(obj.mots||{})}, termes:renommerTermes({...d.termes, ...(obj.termes||{})})};
@@ -1860,6 +1871,7 @@ function verifierAllies(i){
       // En 2 contre 2, les cartes jouées par l’allié pendant son dernier tour comptent aussi
       if(j.tour.some(o => o!==t && CARTES[o.id] && CARTES[o.id].faction===cible) || (est2v2() && (S.joueurs[allieDe(i)].factionsTour || []).includes(cible))){
         t.allieFait = true; encore = true;
+        if(S.stats && S.stats[i]) S.stats[i].combos = (S.stats[i].combos || 0) + 1;
         fxEvt({t:"combo", j:i, src:t.uid, faction:cible});
         log(`${TERMES.allie || "Combo"} : ${d.nom} (${decrire(d.allie)})`);
         appliquer(i, d.allie, t.uid);
@@ -1914,6 +1926,7 @@ function jouer(id, opts={}){
     if(S.stats[i].jouees) S.stats[i].jouees[c.id] = (S.stats[i].jouees[c.id] || 0) + 1;
     if(d.type==="creature") S.stats[i].creatures++;
     else if(d.type==="sort" && !d.depart && !d.base) S.stats[i].sorts++;
+    else if(d.type==="arme") S.stats[i].equipements = (S.stats[i].equipements || 0) + 1;
   }
   verifierAllies(i);
   verifierVictoire();
@@ -1940,6 +1953,7 @@ function bannir(id){
     if(k>=0){
       const [c] = j[zone].splice(k,1);
       j.bannies.push(c);
+      if(S.stats && S.stats[S.courant]) S.stats[S.courant].bannis = (S.stats[S.courant].bannis || 0) + 1;
       fxEvt({t:"bannir", j:S.courant, uid:c.uid});
       log(`${j.nom} bannit ${def(c).nom}.`);
       S.bannirEnAttente = Math.max(0, S.bannirEnAttente-1);
@@ -2635,13 +2649,13 @@ function renderAdmin(){
     cle = actif.dataset.chemin ? `[data-chemin="${actif.dataset.chemin}"]` : actif.dataset.adm ? `[data-adm="${actif.dataset.adm}"]` : null;
     try { pos = actif.selectionStart; } catch(e) { pos = null; }
   }
-  const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters};
+  const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons};
   // Mémoriser la position des listes et de la page avant de réafficher
   const defil = {}; app.querySelectorAll(".adm-items, .adm-menu, .grille-choix").forEach((el, k) => { defil[el.className + k] = el.scrollTop; });
   const yPage = window.scrollY;
   const nbAlertes = PROG.surv && PROG.surv.alertes ? PROG.surv.alertes.filter(a => !a.traite).length : 0;
   const groupes = [
-    ["Contenu du jeu", [["cartes","Cartes"],["boosters","Boosters"],["heros","Héros"],["factions","Factions"],["regles","Règles"],["musiques","Musiques"]]],
+    ["Contenu du jeu", [["cartes","Cartes"],["boosters","Boosters"],["saisons","Saisons"],["heros","Héros"],["factions","Factions"],["regles","Règles"],["musiques","Musiques"]]],
     ["Publication", [["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"]] : [])]],
     ...(PROG.actif ? [["Joueurs", [["stats","Vue d’ensemble"],["stats-heros","Statistiques des héros"],["stats-cartes","Statistiques des cartes"],["stats-joueurs","Liste des joueurs"],["surveillance","Surveillance", nbAlertes]]]] : [])
   ];
@@ -2947,6 +2961,7 @@ function actionAdmin(act, id, el){
   if(act.startsWith("srv-")){ actionServeur(act); return; }
   if(act.startsWith("mus-")){ actionMusiques(act, id); return; }
   if(act.startsWith("variante-") || act.startsWith("booster-") || act==="carte-promo"){ actionVariantes(act, id); return; }
+  if(act.startsWith("saison-")){ actionSaisons(act, id); return; }
   if(act==="devotion-creer"){ const [b, f] = String(id).split("|"); creerVersionDevotion(b, f); return; }
   if(act==="son"){ basculerSon(); return renderAdmin(); }
   if(act==="stats-rafraichir"){ chargerAdminStats(); erreur("Actualisation…"); return; }
@@ -4844,7 +4859,8 @@ async function enregistrerDuel(){
     const st = (S.stats && S.stats[i]) || {};
     return {heros:S.joueurs[i].heros || null,
             degats:st.degats || 0, soins:st.soins || 0, creatures:st.creatures || 0, sorts:st.sorts || 0,
-            achats:st.achats || 0, pouvoirs:st.pouvoirs || 0, jouees:versionsVersBase(st.jouees), achetees:versionsVersBase(st.achetees)};
+            achats:st.achats || 0, pouvoirs:st.pouvoirs || 0, jouees:versionsVersBase(st.jouees), achetees:versionsVersBase(st.achetees),
+            combos:st.combos || 0, equipements:st.equipements || 0, bannis:st.bannis || 0, palier:S.joueurs[i].palier || 0, pv_fin:S.joueurs[i].pv};
   };
   const nomV = S.vainqueur, v = nomV===S.joueurs[0].nom ? 0 : nomV===S.joueurs[1].nom ? 1 : null;
   const d = {id_partie:S.ticket, mode:S.mode, vainqueur:v, tours:S.tour, cotes:[camp(0), camp(1)]};
@@ -6423,6 +6439,8 @@ function htmlAdminVariantes(id){
     </fieldset>
     <fieldset><legend>Boosters</legend>
       <label class="case"><input type="checkbox" data-act="carte-promo" data-id="${id}" ${d.promo ? "checked" : ""}> Carte promotionnelle</label>
+      <label class="champ champ-saison"><span>Carte de saison : exclusive jusqu’au (vide = carte normale)</span><input type="date" data-chemin="cartes.${id}.saisonFin" value="${esc(d.saisonFin || "")}"></label>
+      ${d.saisonFin ? `<p class="aide">Carte de saison : absente des paquets et non fabricable jusqu’au ${new Date(d.saisonFin + "T00:00:00").toLocaleDateString("fr-FR")}, puis elle rejoint automatiquement les paquets. Pensez à « Envoyer le catalogue ».</p>` : ""}
       <p class="aide">${d.promo
         ? "Carte promotionnelle : absente du booster principal et des boosters de panthéon, elle ne se fabrique pas et ne se recycle pas. Les joueurs l’obtiennent uniquement dans les boosters spéciaux cochés ci-dessous."
         : `Présente automatiquement dans le booster principal${fac ? ` et dans le booster ${esc(fac.m)}` : ""}.`}</p>
@@ -7295,6 +7313,149 @@ function causeAlerte(a){
     default: return "";
   }
 }
+
+/* ============================================================
+   ADMINISTRATION : SAISONS
+   ============================================================ */
+const TYPES_QUETES_SAISON = {
+  parties:["Jouer des parties", n => `Jouer ${n} partie${n>1 ? "s" : ""}`],
+  victoires:["Gagner des parties", n => `Gagner ${n} partie${n>1 ? "s" : ""}`],
+  parties_enligne:["Jouer en ligne", n => `Jouer ${n} partie${n>1 ? "s" : ""} en ligne`],
+  victoires_enligne:["Gagner en ligne", n => `Gagner ${n} partie${n>1 ? "s" : ""} en ligne`],
+  vic_pantheon:["Gagner avec un panthéon", (n, p) => `Gagner ${n} partie${n>1 ? "s" : ""} avec les ${FACTIONS[p] ? FACTIONS[p].nom : "?"}`, "pantheon"],
+  vic_devotion:["Gagner avec la Dévotion", (n, p) => `Gagner ${n} partie${n>1 ? "s" : ""} avec une Dévotion de palier ${p || 1} ou plus`, "nombre"],
+  vic_pv:["Gagner en gardant des PV", (n, p) => `Gagner ${n} partie${n>1 ? "s" : ""} en terminant avec au moins ${p || 20} PV`, "nombre"],
+  vic_rapide:["Gagner rapidement", (n, p) => `Gagner ${n} partie${n>1 ? "s" : ""} en ${p || 20} tours ou moins`, "nombre"],
+  creatures:["Poser des créatures", n => `Poser ${n} créatures`],
+  sorts:["Jouer des sorts", n => `Jouer ${n} sorts`],
+  achats:["Acheter des cartes", n => `Acheter ${n} cartes au marché`],
+  degats:["Infliger des dégâts", n => `Infliger ${n} dégâts à l’adversaire`],
+  soins:["Soigner", n => `Soigner ${n} points de vie`],
+  pouvoirs:["Utiliser le pouvoir", n => `Utiliser ${n} fois le pouvoir de votre divinité`],
+  combos:["Déclencher des combos", n => `Déclencher ${n} combos`],
+  equipements:["Jouer des équipements", n => `Jouer ${n} équipement${n>1 ? "s" : ""}`],
+  bannis:["Bannir des cartes", n => `Bannir ${n} cartes`]
+};
+const texteQueteSaison = q => (TYPES_QUETES_SAISON[q.type] || ["", () => ""])[1](q.but, q.param);
+const ouvertureTravail = k => Math.floor(k/2)*7 + (k%2)*3;   // lundi et jeudi si la saison commence un lundi
+function prochainLundi(){ const d = new Date(); d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7)); return d.toISOString().slice(0, 10); }
+function saisonDouzeTravaux(){
+  const T = [
+    ["Le Lion de Némée", "Sa peau est impénétrable : seule la persévérance en vient à bout.", [["victoires", 2], ["degats", 60], ["creatures", 6]]],
+    ["L’Hydre de Lerne", "Pour chaque tête tranchée, deux repoussent : enchaînez les coups.", [["combos", 4], ["degats", 80], ["vic_pantheon", 1, "gre"]]],
+    ["La Biche de Cérynie", "La plus rapide des créatures : soyez plus vif qu’elle.", [["vic_rapide", 1, 18], ["parties", 3], ["achats", 10]]],
+    ["Le Sanglier d’Érymanthe", "Une bête furieuse, à affronter bien armé.", [["equipements", 2], ["creatures", 8], ["victoires", 2]]],
+    ["Les Écuries d’Augias", "Trente ans de fumier à nettoyer en un jour : faites le vide.", [["bannis", 5], ["sorts", 12], ["parties", 3]]],
+    ["Les Oiseaux du lac Stymphale", "Des nuées aux plumes de bronze qui obscurcissent le ciel.", [["degats", 100], ["vic_pantheon", 1, "nor"], ["combos", 5]]],
+    ["Le Taureau de Crète", "Le domptez sans y laisser votre vie.", [["vic_pv", 1, 20], ["creatures", 10], ["pouvoirs", 2]]],
+    ["Les Juments de Diomède", "Des cavales mangeuses d’hommes, à nourrir sans cesse.", [["vic_pantheon", 1, "hin"], ["achats", 12], ["victoires", 3]]],
+    ["La Ceinture d’Hippolyte", "Le présent d’Arès à la reine des Amazones.", [["vic_pantheon", 1, "egy"], ["soins", 30], ["sorts", 15]]],
+    ["Les Troupeaux de Géryon", "Un géant à trois corps et ses bœufs rouges, au bout du monde.", [["achats", 15], ["victoires", 2], ["combos", 6]]],
+    ["Les Pommes d’or des Hespérides", "Le jardin des dieux, gardé par un dragon.", [["vic_devotion", 1, 1], ["pouvoirs", 3], ["degats", 120]]],
+    ["Cerbère", "Le chien à trois têtes, gardien des Enfers : le dernier et le plus terrible.", [["victoires", 3], ["vic_pv", 1, 25], ["creatures", 15]]]
+  ];
+  return {nom:"Les Douze Travaux d’Héraclès", debut:prochainLundi(), duree_jours:42, active:false,
+    travaux:T.map(([nom, description, qs], k) => ({nom, description, ouverture_jour:ouvertureTravail(k),
+      quetes:qs.map(([type, but, param], n) => { const q = {id:`t${k+1}q${n+1}`, type, but, recompense:n===1 ? {encre:10} : {or:20}}; if(param!==undefined) q.param = String(param); q.texte = texteQueteSaison(q); return q; })})),
+    paliers:[{travaux:4, recompense:{paquets:["classique"]}}, {travaux:8, recompense:{paquets:["classique"], or:50}},
+             {travaux:11, recompense:{paquets:["classique"]}}, {travaux:12, recompense:{titre:"Héros de la saison 1"}}]};
+}
+const dateSaison = (s, jours) => { const d = new Date(s.debut + "T00:00:00"); d.setDate(d.getDate() + jours); return d.toLocaleDateString("fr-FR", {weekday:"short", day:"numeric", month:"short"}); };
+function htmlRecompenseAdmin(chemin, r){
+  const cartes = Object.keys(CARTES).filter(k => estCollectionnable(CARTES[k])).sort((a, b) => ((CARTES[b].saisonFin ? 1 : 0) - (CARTES[a].saisonFin ? 1 : 0)) || CARTES[a].nom.localeCompare(CARTES[b].nom, "fr"));
+  const vars = Object.entries(CONFIG.variantes || {});
+  return `<div class="recompense-admin">
+    ${champNombre("Or", chemin + ".or", r.or || 0)}${champNombre("Encre", chemin + ".encre", r.encre || 0)}
+    <label class="champ"><span>Carte offerte</span><select data-saison-liste="${chemin}.cartes"><option value="">Aucune</option>${cartes.map(k => `<option value="${k}" ${(r.cartes || [])[0]===k ? "selected" : ""}>${esc(CARTES[k].nom)}${CARTES[k].saisonFin ? " (carte de saison)" : ""}</option>`).join("")}</select></label>
+    <label class="champ"><span>Paquet offert</span><select data-saison-liste="${chemin}.paquets"><option value="">Aucun</option><option value="classique" ${(r.paquets || [])[0]==="classique" ? "selected" : ""}>Paquet classique</option>${Object.entries(FACTIONS).map(([k, f]) => `<option value="${k}" ${(r.paquets || [])[0]===k ? "selected" : ""}>Paquet ${esc(f.m)}</option>`).join("")}</select></label>
+    <label class="champ"><span>Illustration offerte</span><select data-saison-liste="${chemin}.variantes"><option value="">Aucune</option>${vars.map(([k, v]) => `<option value="${k}" ${(r.variantes || [])[0]===k ? "selected" : ""}>${esc((CARTES[v.carte] || {}).nom || v.carte)} : ${esc(v.nom || k)}</option>`).join("")}</select></label>
+    ${champTexte("Titre offert", chemin + ".titre", r.titre || "")}
+  </div>`;
+}
+function admSaisons(){
+  if(!CONFIG.saisons) CONFIG.saisons = {};
+  const ids = Object.keys(CONFIG.saisons);
+  if(!adm.saison || !CONFIG.saisons[adm.saison]) adm.saison = ids[0] || null;
+  const s = adm.saison ? CONFIG.saisons[adm.saison] : null, sid = adm.saison;
+  const fin = s ? dateSaison(s, s.duree_jours || 42) : "";
+  return `<div class="adm-page adm-saisons">
+    <h2>Saisons</h2>
+    <p class="aide">Une saison dure ${s ? s.duree_jours || 42 : 42} jours. Ses 12 travaux s’ouvrent deux par semaine ; chaque travail compte des quêtes, et 4 paliers récompensent le nombre de travaux finis. Une quête ne compte que les parties jouées après l’ouverture de son travail, contre l’ordinateur ou en ligne. Après vos changements : « Envoyer la saison au serveur », puis exportez config.json.</p>
+    <div class="liste-boosters">
+      ${ids.map(k => `<button type="button" class="adm-lien" data-act="saison-sel" data-id="${k}" ${k===sid ? 'aria-current="page"' : ""}>${esc(CONFIG.saisons[k].nom || k)}${CONFIG.saisons[k].active ? "" : ` <span class="aide">(inactive)</span>`}</button>`).join("")}
+      <button type="button" class="btn second" data-act="saison-modele">Créer « Les Douze Travaux d’Héraclès »</button>
+      <button type="button" class="btn-discret" data-act="saison-vide">Nouvelle saison vide</button>
+    </div>
+    ${s ? `<div class="editeur-saison">
+      <div class="champs">${champTexte("Nom de la saison", `saisons.${sid}.nom`, s.nom || "")}
+        <label class="champ"><span>Date de début (un lundi de préférence)</span><input type="date" data-chemin="saisons.${sid}.debut" value="${esc(s.debut || "")}"></label>
+        ${champNombre("Durée (jours)", `saisons.${sid}.duree_jours`, s.duree_jours || 42)}</div>
+      <p class="resume-booster">Du ${dateSaison(s, 0)} au ${fin} : ${(s.travaux || []).length} travaux, ${(s.travaux || []).reduce((n, t) => n + (t.quetes || []).length, 0)} quêtes.</p>
+      <label class="case"><input type="checkbox" data-act="saison-active" data-id="${sid}" ${s.active ? "checked" : ""}> Saison active (visible des joueurs pendant ses dates)</label>
+      <div class="adm-actions"><button type="button" class="btn" data-act="saison-envoyer" data-id="${sid}">Envoyer la saison au serveur</button>
+        <button type="button" class="btn-discret" data-act="saison-suppr" data-id="${sid}">Supprimer cette saison</button></div>
+      <h3>Paliers de récompenses</h3>
+      ${(s.paliers || []).map((pl, k) => `<fieldset class="palier-admin"><legend>Palier ${k+1}</legend>
+        ${champNombre("Travaux finis requis", `saisons.${sid}.paliers.${k}.travaux`, pl.travaux)}
+        ${htmlRecompenseAdmin(`saisons.${sid}.paliers.${k}.recompense`, pl.recompense || {})}</fieldset>`).join("")}
+      <h3>Les travaux</h3>
+      ${(s.travaux || []).map((t, k) => `<details class="travail-admin" ${adm.travailOuvert===k ? "open" : ""} data-travail="${k}">
+        <summary><b>${k+1}. ${esc(t.nom || "Travail")}</b> <span class="aide">ouverture le ${dateSaison(s, t.ouverture_jour ?? ouvertureTravail(k))}, ${(t.quetes || []).length} quêtes</span></summary>
+        <div class="champs">${champTexte("Nom", `saisons.${sid}.travaux.${k}.nom`, t.nom || "")}${champTexte("Description", `saisons.${sid}.travaux.${k}.description`, t.description || "")}
+          ${champNombre("Ouverture (jours après le début)", `saisons.${sid}.travaux.${k}.ouverture_jour`, t.ouverture_jour ?? ouvertureTravail(k))}</div>
+        ${(t.quetes || []).map((q, n) => { const tq = TYPES_QUETES_SAISON[q.type] || []; const base = `saisons.${sid}.travaux.${k}.quetes.${n}`; return `<div class="quete-admin">
+          <label class="champ"><span>Type</span><select data-saison-type="${base}">${Object.entries(TYPES_QUETES_SAISON).map(([v, [l]]) => `<option value="${v}" ${q.type===v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+          ${champNombre("Objectif", base + ".but", q.but)}
+          ${tq[2]==="pantheon" ? `<label class="champ"><span>Panthéon</span><select data-chemin="${base}.param">${Object.entries(FACTIONS).map(([f, x]) => `<option value="${f}" ${q.param===f ? "selected" : ""}>${esc(x.nom)}</option>`).join("")}</select></label>`
+            : tq[2]==="nombre" ? champTexte(q.type==="vic_devotion" ? "Palier minimum" : q.type==="vic_pv" ? "PV minimum" : "Tours maximum", base + ".param", q.param || "") : ""}
+          <label class="champ"><span>Récompense</span><select data-saison-rec="${base}.recompense"><option value="or" ${q.recompense && q.recompense.or!==undefined ? "selected" : ""}>Or</option><option value="encre" ${q.recompense && q.recompense.encre!==undefined ? "selected" : ""}>Encre</option></select></label>
+          ${champNombre("Quantité", base + ".recompense." + (q.recompense && q.recompense.encre!==undefined ? "encre" : "or"), (q.recompense || {}).or ?? (q.recompense || {}).encre ?? 20)}
+          <span class="texte-quete-admin">« ${esc(texteQueteSaison(q))} »</span>
+          <button type="button" class="btn-discret" data-act="saison-quete-suppr" data-id="${sid}|${k}|${n}">Retirer</button></div>`; }).join("")}
+        <div class="adm-actions"><button type="button" class="btn second" data-act="saison-quete-ajouter" data-id="${sid}|${k}">Ajouter une quête</button></div>
+      </details>`).join("")}
+    </div>` : `<p class="aide">Aucune saison. Créez la première à partir du modèle des Douze Travaux.</p>`}
+  </div>`;
+}
+function actionSaisons(act, id){
+  if(!CONFIG.saisons) CONFIG.saisons = {};
+  switch(act){
+    case "saison-sel": adm.saison = id; break;
+    case "saison-modele": { const k = idUnique("saison"); CONFIG.saisons[k] = saisonDouzeTravaux(); adm.saison = k; sauver(); erreur("Saison créée : vérifiez la date de début, puis envoyez-la au serveur."); break; }
+    case "saison-vide": { const k = idUnique("saison"); CONFIG.saisons[k] = {nom:"Nouvelle saison", debut:prochainLundi(), duree_jours:42, active:false,
+        travaux:Array.from({length:12}, (_, n) => ({nom:`Travail ${n+1}`, description:"", ouverture_jour:ouvertureTravail(n), quetes:[]})),
+        paliers:[4, 8, 11, 12].map(t => ({travaux:t, recompense:{}}))}; adm.saison = k; sauver(); break; }
+    case "saison-active": CONFIG.saisons[id].active = !CONFIG.saisons[id].active; sauver(); break;
+    case "saison-suppr": if(confirm("Supprimer cette saison de la configuration ?")){ delete CONFIG.saisons[id]; adm.saison = null; sauver(); } break;
+    case "saison-quete-ajouter": { const [sid, k] = id.split("|"); const t = CONFIG.saisons[sid].travaux[k]; t.quetes = t.quetes || [];
+        const q = {id:`t${Number(k)+1}q${Date.now().toString(36)}`, type:"parties", but:3, recompense:{or:20}}; q.texte = texteQueteSaison(q); t.quetes.push(q); adm.travailOuvert = Number(k); sauver(); break; }
+    case "saison-quete-suppr": { const [sid, k, n] = id.split("|"); CONFIG.saisons[sid].travaux[k].quetes.splice(Number(n), 1); adm.travailOuvert = Number(k); sauver(); break; }
+    case "saison-envoyer": {
+      const s = CONFIG.saisons[id];
+      // Textes des quêtes regénérés pour suivre leur type et leur objectif
+      (s.travaux || []).forEach(t => (t.quetes || []).forEach(q => { q.texte = texteQueteSaison(q); }));
+      rpc("admin_maj_saison", {p:{id, ...s}}).then(() => erreur(`Saison « ${s.nom} » envoyée au serveur.`), e => erreur(messageScriptManquant ? messageScriptManquant(e.message).replace("supabase-stats.sql", "supabase-saisons.sql") : e.message));
+      return true;
+    }
+    default: return false;
+  }
+  renderAdmin();
+  return true;
+}
+// Champs propres à l’éditeur de saison (type de quête, récompense, listes)
+document.addEventListener("change", e => {
+  const el = e.target, ds = el.dataset || {};
+  if(!(ds.saisonType || ds.saisonRec || ds.saisonListe) || ui.ecran!=="admin") return;
+  const chemin = ds.saisonType || ds.saisonRec || ds.saisonListe, parts = chemin.split(".");
+  let o = CONFIG; for(const k of parts.slice(0, -1)) o = o[k];
+  const cle = parts[parts.length - 1];
+  if(ds.saisonType){ const q = o[cle]; q.type = el.value; if(TYPES_QUETES_SAISON[q.type][2]==="pantheon" && !FACTIONS[q.param]) q.param = Object.keys(FACTIONS)[0]; else if(!TYPES_QUETES_SAISON[q.type][2]) delete q.param; q.texte = texteQueteSaison(q); }
+  else if(ds.saisonRec){ const v = (o[cle] || {}).or ?? (o[cle] || {}).encre ?? 20; o[cle] = el.value==="encre" ? {encre:v} : {or:v}; }
+  else { if(el.value) o[cle] = [el.value]; else delete o[cle]; }
+  const t = el.closest("[data-travail]"); if(t) adm.travailOuvert = Number(t.dataset.travail);
+  sauver(); renderAdmin();
+});
+document.addEventListener("toggle", e => { const t = e.target; if(t.classList && t.classList.contains("travail-admin") && t.open) adm.travailOuvert = Number(t.dataset.travail); }, true);
 
 chargerConfig();
 appliquerReglageAnimations();
