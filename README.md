@@ -84,6 +84,12 @@ ou changé leur faction, renvoyez le catalogue depuis l’administration (onglet
 `supabase-admin-joueurs.sql` permet à l’administrateur de corriger l’or et l’encre d’un joueur depuis l’onglet
 « Statistiques » de l’administration (bouton « Modifier » dans la liste des joueurs).
 
+## Fiche joueur (administration)
+
+`supabase-fiche-joueur.sql` (à exécuter après les autres scripts) : depuis la liste des joueurs, le bouton « Fiche »
+ouvre le profil complet d’un joueur (statistiques, dernières parties, collection, illustrations) et permet de modifier
+son or et son encre, de lui ajouter ou retirer des cartes, et de lui offrir ou retirer une illustration alternative.
+
 ## Saisons
 
 `supabase-saisons.sql` (à exécuter après `supabase-alertes-detaillees.sql`) : saisons de 12 travaux (deux ouverts par

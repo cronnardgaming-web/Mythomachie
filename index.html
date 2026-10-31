@@ -530,11 +530,13 @@ body.compact .adm-statut{display:none}
 .adm-boosters select{font:inherit;font-size:15px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
 .choix-illustrations{margin:6px 0 10px}
 .choix-illustrations h3{font-family:Cinzel,serif;font-size:15px;margin:0 0 6px}
-.rangee-vignettes{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px}
+.rangee-vignettes{display:grid;grid-template-columns:repeat(3,max-content);gap:10px 8px;padding:4px 2px 8px}
 .vignette-choix{position:relative;flex:none;background:none;border:2px solid transparent;border-radius:10px;padding:2px;cursor:pointer}
 .vignette-choix .carte,.zoom .zoom-info .vignette-choix .carte{--w:72px;width:72px;pointer-events:none;animation:none}
 .vignette-choix.vue{border-color:var(--bronze)}
-.vignette-choix.verrouillee .carte{filter:grayscale(1) brightness(.55)}
+.vignette-choix.verrouillee .carte{filter:grayscale(.6) brightness(.6)}
+.vignette-choix.verrouillee .carte .illu{filter:blur(3px)}
+.vignette-choix.verrouillee .carte .art{overflow:hidden}
 .cadenas{position:absolute;inset:0;display:grid;place-items:center;font-size:22px}
 .marque-choisie{position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);font-size:10px;font-weight:700;color:#fff;background:#3f9d6b;border-radius:99px;padding:0 7px;white-space:nowrap}
 .nouvelle.illustration{background:linear-gradient(135deg,#f0c64e,#b07a1e);color:#2b1a04}
@@ -869,6 +871,22 @@ body.compact .nom-heros-deck{font-size:17px}
 .option-niveau input{position:absolute;opacity:0;pointer-events:none}
 .option-niveau span{font-size:12px;color:var(--ink-2)}
 .option-niveau.choisi{border-color:var(--or);box-shadow:0 0 0 1px var(--or) inset}
+
+/* Collection : étoile des illustrations alternatives */
+.etoile-alt{position:absolute;top:-7px;left:-7px;z-index:3;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:13px;line-height:1;
+  background:var(--table);border:1px solid var(--line);color:var(--ink-2);box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.etoile-alt.possedee{color:#2b1a04;background:linear-gradient(180deg,#ffe28a,#e0b13d);border-color:#b07a1e}
+/* Administration : fiche joueur */
+.fiche-joueur section{border-top:1px solid var(--line);padding-top:10px;margin-top:12px}
+.tete-fiche{border-top:none !important}
+.tete-fiche h2{margin:6px 0 2px}
+.ligne-fiche{display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin:6px 0}
+.ligne-fiche .btn{margin:0}
+.ligne-fiche select,.ligne-fiche input{font:inherit;font-size:14px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:6px 8px;max-width:420px}
+.liste-fiche{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.puce-fiche{display:inline-flex;align-items:center;gap:6px;background:var(--table);border:1px solid var(--line);border-radius:99px;padding:2px 4px 2px 10px;font-size:13px}
+.puce-fiche .pm{width:22px;height:22px;border-radius:50%;border:1px solid var(--line);background:var(--zone);color:var(--ink);cursor:pointer;padding:0;line-height:1}
+.fiche-joueur h3 .aide{font-weight:400;margin-left:6px}
 
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
@@ -2716,7 +2734,7 @@ function renderAdmin(){
     cle = actif.dataset.chemin ? `[data-chemin="${actif.dataset.chemin}"]` : actif.dataset.adm ? `[data-adm="${actif.dataset.adm}"]` : null;
     try { pos = actif.selectionStart; } catch(e) { pos = null; }
   }
-  const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons};
+  const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => PROG.fiche ? admFicheJoueur() : admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons};
   // Mémoriser la position des listes et de la page avant de réafficher
   const defil = {}; app.querySelectorAll(".adm-items, .adm-menu, .grille-choix").forEach((el, k) => { defil[el.className + k] = el.scrollTop; });
   const yPage = window.scrollY;
@@ -3038,6 +3056,7 @@ function actionAdmin(act, id, el){
     rpc("admin_traiter_alerte", {p_id:a.id, p_traite:!a.traite}).then(() => { a.traite = !a.traite; renderAdmin(); }, e => erreur(e.message));
     return;
   }
+  if(act.startsWith("fiche-")){ actionFiche(act, id); return; }
   if(act==="stats-res"){
     const j = PROG.adminStats.joueurs.find(x => x.id===id); if(!j) return;
     PROG.adminStats.edition = id; PROG.adminStats.formRes = {or:j.pieces_or || 0, encre:j.encre || 0};
@@ -4372,7 +4391,8 @@ function pageCollection(){
     ${htmlCartesDepart()}
     <div class="grille">${ids.map(id => {
       const nb = PROG.collection[id] || 0;
-      return `<div class="col-item ${nb ? "" : "manque"}">${htmlCarte({id, uid:id, v:prefVariantes()[id]}, {act:"col-sel", id})}<span class="badge-nb">${nb ? "×" + nb : "0"}</span></div>`;
+      const alts = Object.keys(CONFIG.variantes || {}).filter(v => CONFIG.variantes[v].carte===id), altPossedee = alts.some(v => (PROG.variantes || {})[v]);
+      return `<div class="col-item ${nb ? "" : "manque"}">${alts.length ? `<span class="etoile-alt ${altPossedee ? "possedee" : ""}" title="${altPossedee ? "Vous possédez une illustration alternative de cette carte" : "Illustration alternative à découvrir"}" aria-label="Illustration alternative">${altPossedee ? "★" : "☆"}</span>` : ""}${htmlCarte({id, uid:id, v:prefVariantes()[id]}, {act:"col-sel", id})}<span class="badge-nb">${nb ? "×" + nb : "0"}</span></div>`;
     }).join("") || `<p class="aide">Aucune carte ne correspond à ces filtres.</p>`}</div>`;
 }
 // Grande vue : l’illustration seule, puis le texte de la carte en dessous
@@ -4405,7 +4425,8 @@ function htmlZoom(){
     <div class="zoom ${anim ? "anim" : ""}" data-act="zoom-rien" role="dialog" aria-label="${esc(d.nom)}">
       ${(() => { const depart = d.depart || d.base, vd = depart && PROG.zoomVersion && CARTES[PROG.zoomVersion];
            const o = vd ? htmlCarteOuverte(CARTES[PROG.zoomVersion], PROG.zoomVersion) : htmlCarteOuverte(d, id, PROG.zoomV===undefined ? prefVariantes()[id] : PROG.zoomV);
-           return nb || depart ? o : o.replace('class="carte-ouverte', 'class="carte-ouverte non-possedee'); })()}
+           const vueNonObtenue = !depart && PROG.zoomV && !(PROG.variantes || {})[PROG.zoomV];
+           return (nb || depart) && !vueNonObtenue ? o : o.replace('class="carte-ouverte', 'class="carte-ouverte non-possedee'); })()}
       <div class="zoom-info">
         <h2>${esc(d.nom)}</h2>${d.depart || d.base ? htmlVersionsDepart(id) : htmlChoixIllustrations(id)}
         <p class="meta">${NOMS_RARETE[r]}, ${esc(fac)}</p>
@@ -5145,12 +5166,12 @@ ${vueStats==="resume" ? `    <h2>Résumé</h2>
         ? `<td><input type="number" min="0" step="1" class="champ-res" data-stats-res="or" value="${A.formRes.or}" aria-label="Or de ${esc(j.nom)}"></td>
            <td><input type="number" min="0" step="1" class="champ-res" data-stats-res="encre" value="${A.formRes.encre}" aria-label="Encre de ${esc(j.nom)}"></td>
            <td class="actions-res"><button type="button" class="btn" data-act="stats-res-ok" data-id="${j.id}">Enregistrer</button><button type="button" class="btn-discret" data-act="stats-res-annuler">Annuler</button></td>`
-        : `<td>${nf(j.pieces_or)}</td><td>${nf(j.encre)}</td><td><button type="button" class="btn-discret" data-act="stats-res" data-id="${j.id}">Modifier</button></td>`}</tr>`).join("")}
+        : `<td>${nf(j.pieces_or)}</td><td>${nf(j.encre)}</td><td class="actions-res"><button type="button" class="btn" data-act="fiche-joueur" data-id="${j.id}">Fiche</button><button type="button" class="btn-discret" data-act="stats-res" data-id="${j.id}">Modifier</button></td>`}</tr>`).join("")}
     </tbody></table></div>
     ` : ""}
   </div>`;
 }
-setInterval(() => { if(ui.ecran==="admin" && String(adm.onglet).startsWith("stats") && PROG.pret && !document.hidden && !(PROG.adminStats && PROG.adminStats.edition)) chargerAdminStats(); }, 30000);
+setInterval(() => { if(ui.ecran==="admin" && String(adm.onglet).startsWith("stats") && PROG.pret && !document.hidden && !(PROG.adminStats && PROG.adminStats.edition) && !PROG.fiche) chargerAdminStats(); }, 30000);
 document.addEventListener("input", e => {
   const k = e.target.dataset && e.target.dataset.statsRes;
   if(k && PROG.adminStats && PROG.adminStats.formRes) PROG.adminStats.formRes[k] = e.target.value;
@@ -7722,6 +7743,84 @@ function executerActionExpert(i, a){
   else if(a.type==="attaquer") attaquer(a.att, a.cible);
   else if(a.type==="combat") utiliserCombat(a.cible);
   return JSON.stringify([j.main.length, j.or, j.combat, j.plateau.map(c => c.uid + c.aAttaque + c.deg), adversaire(i).pv, adversaire(i).plateau.length, S.bannirEnAttente])!==avant;
+}
+
+/* ----- Administration : fiche complète d’un joueur ----- */
+async function chargerFicheJoueur(id){
+  PROG.fiche = {id, chargement:true};
+  renderAdmin();
+  try { PROG.fiche = {id, ...(await rpc("admin_fiche_joueur", {p_joueur:id}))}; }
+  catch(e) { PROG.fiche = {id, erreur:/function|does not exist|schema cache/i.test(e.message) ? "Exécutez d’abord le script supabase-fiche-joueur.sql dans Supabase." : e.message}; }
+  if(ui.ecran==="admin") renderAdmin();
+}
+function admFicheJoueur(){
+  const f = PROG.fiche;
+  const retour = `<button type="button" class="btn-discret" data-act="fiche-retour">← Retour à la liste des joueurs</button>`;
+  if(f.chargement) return `<div class="adm-page">${retour}<p class="attente">Chargement de la fiche…</p></div>`;
+  if(f.erreur) return `<div class="adm-page">${retour}<p style="color:var(--danger)">${esc(f.erreur)}</p></div>`;
+  const s = f.stats || {}, coll = f.collection || {};
+  const tuile = (v, l) => `<div class="tuile"><b>${v}</b><span>${l}</span></div>`;
+  const cartesColl = Object.keys(CARTES).filter(k => estCollectionnable(CARTES[k]));
+  const possedees = Object.keys(coll).filter(k => CARTES[k] && estCollectionnable(CARTES[k]));
+  const vars = Object.entries(CONFIG.variantes || {}), possV = new Set(f.variantes || []);
+  return `<div class="adm-page fiche-joueur">
+    ${retour}
+    <section class="tete-fiche">
+      <div><h2>${esc(f.pseudo || "Sans pseudo")}</h2>
+        <p class="aide">${esc(f.email || "")}${f.titre ? ` · titre : <b>${esc(f.titre)}</b>` : ""} · inscrit le ${f.cree ? new Date(f.cree).toLocaleDateString("fr-FR") : "–"} · dernière visite : ${ilYa(f.derniere_vue)}${f.alertes ? ` · <b style="color:var(--danger)">${f.alertes} alerte${f.alertes>1 ? "s" : ""}</b> (onglet Surveillance)` : ""}</p></div>
+    </section>
+    <section><h3>Ressources</h3>
+      <div class="ligne-fiche">
+        <label class="champ"><span>Or</span><input type="number" min="0" step="1" id="fiche-or" value="${f.or ?? 0}"></label>
+        <label class="champ"><span>Encre</span><input type="number" min="0" step="1" id="fiche-encre" value="${f.encre ?? 0}"></label>
+        <button type="button" class="btn" data-act="fiche-ressources">Enregistrer</button>
+      </div>
+      ${Object.keys(f.paquets_offerts || {}).length ? `<p class="aide">Paquets offerts en attente : ${Object.entries(f.paquets_offerts).map(([t, n]) => `${esc(NOM_PAQUET(t))} × ${n}`).join(", ")}.</p>` : ""}
+    </section>
+    <section><h3>Statistiques</h3>
+      <div class="tuiles">${tuile(nf(s.parties || 0), "parties")}${tuile(`${nf(s.victoires || 0)} <small>(${pct(s.victoires || 0, s.parties || 0)})</small>`, "victoires")}${tuile(nf(s.serie_max || 0), "série maximale")}${tuile(nf(s.en_ligne || 0), "parties en ligne")}${tuile(nf(s.degats || 0), "dégâts infligés")}${tuile(nf(s.soins || 0), "PV soignés")}${tuile(nf(s.creatures || 0), "créatures jouées")}${tuile(nf(s.achats || 0), "cartes achetées")}${tuile(nf(s.pouvoirs || 0), "pouvoirs utilisés")}</div>
+      <div class="defile-tableau"><table class="tableau"><thead><tr><th>Panthéon</th><th>Parties</th><th>Victoires</th><th>Taux</th></tr></thead><tbody>
+        ${Object.entries(FACTIONS).map(([k, x]) => { const v = (s.par_heros || {})[k] || {parties:0, victoires:0}; return `<tr><td><span class="pastille f-${k}"></span> ${esc(x.nom)}</td><td>${nf(v.parties)}</td><td>${nf(v.victoires)}</td><td>${pct(v.victoires, v.parties)}</td></tr>`; }).join("")}
+      </tbody></table></div>
+      ${(f.dernieres || []).length ? `<h3>Dernières parties</h3><div class="defile-tableau"><table class="tableau"><thead><tr><th>Date</th><th>Mode</th><th>Résultat</th><th>Panthéon</th><th>Adversaire</th><th>Tours</th><th>Dégâts</th></tr></thead><tbody>
+        ${f.dernieres.map(p => `<tr><td>${new Date(p.cree).toLocaleString("fr-FR", {dateStyle:"short", timeStyle:"short"})}</td><td>${esc(NOMS_MODES[p.mode] || p.mode)}</td><td>${p.victoire ? "Victoire" : "Défaite"}</td><td>${esc((FACTIONS[p.heros] || {}).nom || p.heros || "–")}</td><td>${esc((FACTIONS[p.heros_adverse] || {}).nom || p.heros_adverse || "–")}</td><td>${p.tours ?? "–"}</td><td>${p.degats ?? "–"}</td></tr>`).join("")}
+      </tbody></table></div>` : ""}
+    </section>
+    <section><h3>Collection <span class="aide">${possedees.length} / ${cartesColl.length} cartes différentes, ${(f.decks || []).length} deck${(f.decks || []).length>1 ? "s" : ""}</span></h3>
+      <div class="ligne-fiche">
+        <label class="champ"><span>Carte</span><select id="fiche-carte">${trierCartes(cartesColl).map(k => `<option value="${k}">${esc(CARTES[k].nom)} (${esc((FACTIONS[CARTES[k].faction] || {}).nom || "neutre")}, ${esc(NOMS_RARETE[CARTES[k].rarete || "commune"] || "")})</option>`).join("")}</select></label>
+        <label class="champ"><span>Exemplaires</span><input type="number" min="1" max="10" step="1" id="fiche-nb" value="1"></label>
+        <button type="button" class="btn" data-act="fiche-carte-ajouter">Ajouter</button>
+      </div>
+      <div class="liste-fiche">${trierCartes(possedees).map(k => `<span class="puce-fiche f-${CARTES[k].faction || "neutre"}"><span class="pastille"></span>${esc(CARTES[k].nom)} <b>×${coll[k]}</b><button type="button" class="pm" data-act="fiche-carte-retirer" data-id="${k}" aria-label="Retirer un exemplaire de ${esc(CARTES[k].nom)}">−</button></span>`).join("") || `<span class="aide">Aucune carte.</span>`}</div>
+    </section>
+    <section><h3>Illustrations alternatives <span class="aide">${possV.size} / ${vars.length}</span></h3>
+      ${vars.length ? `<div class="ligne-fiche">
+        <label class="champ"><span>Illustration</span><select id="fiche-variante">${vars.filter(([k]) => !possV.has(k)).map(([k, v]) => `<option value="${k}">${esc((CARTES[v.carte] || {}).nom || v.carte)} : ${esc(v.nom || k)}</option>`).join("")}</select></label>
+        <button type="button" class="btn" data-act="fiche-variante-ajouter" ${vars.length===possV.size ? "disabled" : ""}>Offrir</button></div>` : `<p class="aide">Aucune illustration alternative n’existe encore.</p>`}
+      <div class="liste-fiche">${[...possV].map(k => { const v = (CONFIG.variantes || {})[k]; return `<span class="puce-fiche">${esc(v ? `${(CARTES[v.carte] || {}).nom || v.carte} : ${v.nom || k}` : k)}<button type="button" class="pm" data-act="fiche-variante-retirer" data-id="${k}" aria-label="Retirer">−</button></span>`; }).join("")}</div>
+    </section>
+  </div>`;
+}
+function actionFiche(act, id){
+  const f = PROG.fiche, j = f && f.id;
+  const faire = (promesse, message) => promesse.then(async () => { await chargerFicheJoueur(j); if(j===EN.monId) await rafraichir(); erreur(message); }, e => erreur(e.message));
+  switch(act){
+    case "fiche-joueur": chargerFicheJoueur(id); return;
+    case "fiche-retour": PROG.fiche = null; renderAdmin(); return;
+    case "fiche-ressources": {
+      const o = Number(document.getElementById("fiche-or").value), e = Number(document.getElementById("fiche-encre").value);
+      if(!Number.isInteger(o) || !Number.isInteger(e) || o<0 || e<0) return erreur("L’or et l’encre doivent être des nombres entiers positifs.");
+      faire(rpc("admin_modifier_ressources", {p_joueur:j, p_or:o, p_encre:e}), `Enregistré : ${nf(o)} or et ${nf(e)} encre.`); return;
+    }
+    case "fiche-carte-ajouter": {
+      const c = document.getElementById("fiche-carte").value, n = Math.max(1, Math.min(10, Number(document.getElementById("fiche-nb").value) || 1));
+      faire(rpc("admin_donner_carte", {p_joueur:j, p_carte:c, p_nb:n}), `${n} × ${CARTES[c].nom} ajouté${n>1 ? "s" : ""}.`); return;
+    }
+    case "fiche-carte-retirer": faire(rpc("admin_donner_carte", {p_joueur:j, p_carte:id, p_nb:-1}), `Un exemplaire de ${CARTES[id].nom} retiré.`); return;
+    case "fiche-variante-ajouter": { const v = document.getElementById("fiche-variante").value; if(!v) return; faire(rpc("admin_donner_variante", {p_joueur:j, p_variante:v, p_donner:true}), "Illustration offerte."); return; }
+    case "fiche-variante-retirer": faire(rpc("admin_donner_variante", {p_joueur:j, p_variante:id, p_donner:false}), "Illustration retirée."); return;
+  }
 }
 
 chargerConfig();
