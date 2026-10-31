@@ -435,7 +435,7 @@ body.sans-animations *,body.sans-animations *::before,body.sans-animations *::af
 .hall-modes .btn{display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:11px 12px}
 .hall-quete{grid-area:quete;display:flex}
 .hall-quete .quete{flex:1;margin:0;display:flex;flex-direction:column;justify-content:center;gap:10px;border-radius:12px;padding:18px}
-.hall-tuiles{grid-area:tuiles;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.hall-tuiles{grid-area:tuiles;display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));grid-auto-flow:column;gap:12px}
 .tuile-hall{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;padding:16px;border-radius:12px;background:var(--zone);border:1px solid var(--line);color:var(--ink);font:inherit;cursor:pointer;transition:border-color .15s, transform .15s}
 .tuile-hall:hover,.tuile-hall:focus-visible{border-color:var(--bronze);transform:translateY(-2px)}
 .ico-tuile{width:34px;height:34px;color:var(--or)}
@@ -815,6 +815,60 @@ body.compact .nom-heros-deck{font-size:17px}
 .texte-quete-admin{grid-column:1/-1;font-style:italic;color:var(--ink-2);font-size:13px}
 .recompense-admin{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px 10px}
 .adm-saisons select,.adm-saisons input[type=date]{font:inherit;font-size:14px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+
+/* Saison */
+.page-saison{display:flex;flex-direction:column;gap:16px}
+.tete-saison{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb, var(--or) 22%, var(--zone)),var(--zone) 60%);border:1px solid color-mix(in srgb, var(--or) 45%, var(--line));border-radius:12px;padding:16px 18px}
+.tete-saison h2{font-size:24px;margin:0 0 4px}
+.tete-saison p{margin:0;max-width:720px}
+.compte-saison{display:flex;flex-direction:column;align-items:center;font-size:15px;color:var(--ink-2)}
+.compte-saison b{font-family:Cinzel,serif;font-size:42px;line-height:1;color:var(--or)}
+.frise-saison{background:var(--zone);border:1px solid var(--line);border-radius:12px;padding:30px 30px 16px;display:flex;flex-direction:column;gap:30px}
+.piste{position:relative;height:10px;border-radius:5px;background:var(--line)}
+.piste .remplie{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:linear-gradient(90deg,var(--bronze),var(--or))}
+.palier-saison{position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center}
+.palier-saison .borne{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-family:Cinzel,serif;font-weight:700;background:var(--table);border:3px solid var(--line);color:var(--ink-2)}
+.palier-saison.atteint .borne{border-color:var(--or);color:var(--or);box-shadow:0 0 12px color-mix(in srgb, var(--or) 50%, transparent)}
+.palier-saison.recu .borne{background:var(--or);color:#2b1a04}
+.recompenses-paliers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.info-palier{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;font-size:13px;color:var(--ink-2);background:var(--table);border:1px solid var(--line);border-radius:10px;padding:10px 8px}
+.info-palier b{color:var(--ink);font-size:14px}
+.info-palier.atteint{border-color:var(--or)}
+.info-palier.recu{border-color:#2f9e63}
+.info-palier .btn-rang{width:auto;padding:4px 14px;font-size:12px}
+.recu-palier{color:#4fd18b;font-weight:700}
+.travaux{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.travail{background:var(--zone);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.travail header{display:flex;align-items:center;gap:10px}
+.num-travail{min-width:34px;height:34px;padding:0 6px;border-radius:17px;display:grid;place-items:center;font-family:Cinzel,serif;font-weight:700;background:var(--table);border:2px solid var(--line);font-size:13px}
+.travail header b{font-family:Cinzel,serif;font-size:15px;flex:1}
+.sceau{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#2f9e63;color:#fff;font-weight:700}
+.travail.ouvert{border-color:color-mix(in srgb, var(--or) 55%, var(--line))}
+.travail.ouvert .num-travail{border-color:var(--or);color:var(--or)}
+.travail.fini{border-color:#2f9e63;background:color-mix(in srgb, #2f9e63 10%, var(--zone))}
+.travail.verrouille{opacity:.65}
+.desc-travail{margin:0;font-size:13px;font-style:italic;color:var(--ink-2)}
+.verrou{margin:0;font-size:14px;color:var(--ink-2)}
+.quetes-travail{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.quetes-travail li{display:grid;grid-template-columns:1fr auto;column-gap:8px;row-gap:3px;align-items:center;font-size:14px}
+.quetes-travail .barre{grid-column:1/2;height:6px}
+.quetes-travail .prog-q{grid-row:1;grid-column:2;font-size:12px;color:var(--ink-2)}
+.quetes-travail li > :last-child{grid-column:2;grid-row:2;justify-self:end;font-size:11px}
+.quetes-travail li.faite .texte-q{text-decoration:line-through;color:var(--ink-2)}
+.quetes-travail li.faite .prog-q{color:#4fd18b;font-weight:700}
+.titre-joueur{display:block;font-size:11px;font-weight:400;color:var(--or);white-space:nowrap}
+.titre-joueur-profil{margin:0 0 6px}
+@media (max-width:760px){ .recompenses-paliers{grid-template-columns:repeat(2,minmax(0,1fr))} }
+
+[data-depot].cible-collage{outline:3px dashed var(--or);outline-offset:4px;border-radius:8px}
+
+/* Niveau de l’ordinateur */
+.choix-niveau{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:12px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.choix-niveau legend{font-size:13px;color:var(--ink-2);padding:0 4px}
+.option-niveau{display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer;background:var(--table)}
+.option-niveau input{position:absolute;opacity:0;pointer-events:none}
+.option-niveau span{font-size:12px;color:var(--ink-2)}
+.option-niveau.choisi{border-color:var(--or);box-shadow:0 0 0 1px var(--or) inset}
 
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
@@ -1712,6 +1766,8 @@ function nouvellePartie(mode, decks, variantesJeu, opts = {}){
   S.joueurs.forEach((j, k) => piocher(j, k===S.courant ? (REGLES.mainPremier ?? REGLES.mainDepart) : REGLES.mainDepart, true));
   S.joueurs[S.courant].plateau.forEach(c => c.peutAttaquer = true);
   S.joueurs.forEach(logDevotion);
+  if(mode==="ia") S.niveauIA = niveauIA();
+  if(S.niveauIA==="expert") S.joueurs[1].nom = "Ordinateur (Expert)";
   log(`${S.joueurs[S.courant].nom} commence.`);
 }
 
@@ -2085,6 +2141,16 @@ async function tourIAInterne(partie){
   ui.aiEnCours = true; render();
   await pauseIA(700);
   const i = S.courant, j = S.joueurs[i];
+  if(S.niveauIA==="expert"){
+    let garde = 80;
+    while(S.vainqueur===null && garde-->0){
+      const a = prochaineActionExpert(i);
+      if(a.type==="fin" || !executerActionExpert(i, a)) break;
+      render(); await pauseIA(a.type==="acheter" || a.type==="jouer" ? 420 : 520);
+    }
+    if(S.vainqueur===null) finTour();
+    return;
+  }
   if(pouvoirPret(j)){ activerPouvoir(); if(S.bannirEnAttente>0) iaBannir(j); render(); await pauseIA(600); }
   let progres = true;
   while(progres && S.vainqueur===null){
@@ -2369,7 +2435,7 @@ function render(){
   if(ui.ecran!=="jeu" || !tutoActif()){ const p = document.getElementById("tuto-panneau"); if(p) p.remove(); }
   if(ui.ecran==="credits"){ INSTANT = null; app.innerHTML = pageCredits(); document.getElementById("couche").innerHTML = ""; document.getElementById("couche").classList.remove("accueil"); return; }
   if(ui.ecran==="regles"){ INSTANT = null; app.innerHTML = pageRegles(); document.getElementById("couche").innerHTML = ""; document.getElementById("couche").classList.remove("accueil"); return; }
-  if(["collection","decks","editeur","boutique","profil"].includes(ui.ecran)){ INSTANT = null; renderProg(); return; }
+  if(["collection","decks","editeur","boutique","profil","saison"].includes(ui.ecran)){ INSTANT = null; renderProg(); return; }
   if(!S){ INSTANT = null; app.innerHTML = ""; renderCouche(); if(PROG.pret) signaler(); return; }
   if(est2v2()) return render2v2();
   const me = vue(), moi = S.joueurs[me], lui = S.joueurs[1-me];
@@ -2515,6 +2581,7 @@ function renderCouche(){
       <p>Un premier essai jouable : quatre factions, un marché commun et des créatures sur le plateau. Choisissez un mode pour commencer.</p>
       <div class="actions">
         <button type="button" class="btn" data-act="mode-ia">Jouer contre l’ordinateur</button>
+        ${htmlChoixNiveau()}
         <button type="button" class="btn second" data-act="mode-duo">Deux joueurs sur cet écran</button>
         <button type="button" class="btn second" data-act="mode-2v2">2 contre 2</button>
         <button type="button" class="btn second" data-act="tuto">Tutoriel</button>
@@ -3002,7 +3069,7 @@ function actionAdmin(act, id, el){
     case "admin": ui.ecran = "admin"; break;
     case "admin-quitter": ui.ecran = "jeu"; S = null; break;
     case "onglet": adm.onglet = id; adm.reset = false; break;
-    case "carte-sel": adm.sel = id; adm.suppr = null; break;
+    case "carte-sel": adm.cibleCollage = null; adm.sel = id; adm.suppr = null; break;
     case "carte-nouvelle": {
       const nid = idUnique("carte");
       const f = adm.filtre!=="toutes" && adm.filtre!=="aucune" ? adm.filtre : Object.keys(FACTIONS)[0];
@@ -3022,7 +3089,9 @@ function actionAdmin(act, id, el){
     }
     case "images-transfert": if(ASSETS) transfererImages(); return;
     case "image-coller": {
-      const repli = () => erreur("Appuyez sur Ctrl+V (Cmd+V sur Mac) pour coller l’image copiée.");
+      viserCollage(id);
+      const nomCible = id.startsWith("variante:") ? `l’illustration alternative « ${((CONFIG.variantes || {})[id.slice(9)] || {}).nom || ""} »` : "l’illustration de la carte";
+      const repli = () => erreur(`Appuyez maintenant sur Ctrl+V (Cmd+V sur Mac) : l’image ira dans ${nomCible}.`);
       if(!navigator.clipboard || !navigator.clipboard.read){ repli(); return; }
       navigator.clipboard.read().then(async items => {
         for(const it of items){
@@ -3305,11 +3374,22 @@ function chargerImage(cle, fichier){
   lecteur.readAsDataURL(fichier);
 }
 
+// Zone d’image visée (illustration de la carte ou d’une de ses variantes) : c’est elle qui reçoit le prochain Ctrl+V
+function viserCollage(cible){
+  adm.cibleCollage = cible;
+  document.querySelectorAll("[data-depot]").forEach(z => z.classList.toggle("cible-collage", z.dataset.depot===cible));
+}
+document.addEventListener("pointerdown", e => {
+  if(ui.ecran!=="admin") return;
+  const z = e.target.closest && e.target.closest("[data-depot]");
+  if(z) viserCollage(z.dataset.depot);
+}, true);
 document.addEventListener("paste", e => {
   if(ui.ecran!=="admin" || adm.onglet!=="cartes" || !adm.sel) return;
   const items = [...((e.clipboardData && e.clipboardData.items) || [])];
   const it = items.find(i => i.kind==="file" && i.type.startsWith("image/"));
-  if(it){ e.preventDefault(); chargerImage(adm.sel, it.getAsFile()); return; }
+  const cible = adm.cibleCollage && (adm.cibleCollage===adm.sel || (adm.cibleCollage.startsWith("variante:") && CONFIG.variantes && CONFIG.variantes[adm.cibleCollage.slice(9)] && CONFIG.variantes[adm.cibleCollage.slice(9)].carte===adm.sel)) ? adm.cibleCollage : adm.sel;
+  if(it){ e.preventDefault(); chargerImage(cible, it.getAsFile()); return; }
   const champ = e.target.closest && e.target.closest("input, textarea");
   if(!champ) erreur("Le presse-papiers ne contient pas d’image : faites un clic droit sur l’image du site, puis « Copier l’image ».");
 });
@@ -4231,6 +4311,7 @@ function htmlChoixDeck(){
     <p>Les deux decks sont mélangés pour former le marché commun de la partie.</p>
     <label class="champ"><span>${c.mode==="duo" ? "Joueur 1" : "Votre deck"}</span>${selectDeck("d1", c.d1)}</label>
     ${c.mode==="duo" ? `<label class="champ" style="margin-top:10px"><span>Joueur 2</span>${selectDeck("d2", c.d2)}</label>` : `<p class="aide">L’ordinateur joue avec un deck tiré au hasard dans toutes les cartes.</p>`}
+    ${c.mode==="ia" ? htmlChoixNiveau() : ""}
     <div class="actions" style="margin-top:16px"><button type="button" class="btn" data-act="choix-lancer">Lancer la partie</button><button type="button" class="btn second" data-act="choix-retour">Retour</button></div></div>`;
 }
 function lancerAvecDecks(){
@@ -4394,7 +4475,7 @@ function renderProg(){
   const actif = document.activeElement;
   const cle = actif && actif.dataset && actif.dataset.prog ? actif.dataset.prog : null;
   let pos = null; try { pos = actif.selectionStart; } catch(e) {}
-  const pages = {collection:pageCollection, decks:pageDecks, editeur:pageEditeur, boutique:pageBoutique, profil:pageProfil};
+  const pages = {collection:pageCollection, decks:pageDecks, editeur:pageEditeur, boutique:pageBoutique, profil:pageProfil, saison:pageSaison};
   const defil = {}; app.querySelectorAll(".grille-atelier, .liste-atelier, .atelier-deck").forEach(el => { defil[el.className.split(" ")[0]] = el.scrollTop; });
   const yPage = window.scrollY;
   app.innerHTML = PROG.pret ? pages[ui.ecran]() : `${entete(NOM_JEU)}<p class="attente">Chargement…</p>`;
@@ -4496,6 +4577,9 @@ function actionProg(act, id){
       });
       return true;
     }
+    case "prog-saison": ui.ecran = "saison"; chargerSaison().then(() => { if(ui.ecran==="saison") renderProg(); }); break;
+    case "saison-quete": action(async () => { const r = await rpc("reclamer_quete_saison", {p_quete:id}); if(r && r.erreur) throw new Error(r.erreur); await Promise.all([chargerSaison(), rafraichir()]); return r; }, r => `+${texteRecompenseSaison(r)} !`); return true;
+    case "saison-palier": action(async () => { const r = await rpc("reclamer_palier_saison", {p_index:Number(id)}); if(r && r.erreur) throw new Error(r.erreur); await Promise.all([chargerSaison(), chargerPaquetsOfferts(), rafraichir()]); return r; }, r => `Récompense obtenue : ${texteRecompenseSaison(r)} !`); return true;
     case "quete-jour-reclamer": action(async () => { const r = await rpc("reclamer_quete_jour", {p_id:id}); if(r && r.erreur) throw new Error(r.erreur); await chargerQuete(); await rafraichir(); return r.gain; }, g => `+${g} or : quête réussie !`); return true;
     case "quete-remplacer": action(async () => { const r = await rpc("remplacer_quete", {p_id:id}); if(r && r.erreur) throw new Error(r.erreur); await chargerQuete(); }, "Quête remplacée."); return true;
     case "trophee-reclamer": {
@@ -4806,7 +4890,7 @@ const NOMS_ECRANS = {"accueil":"Accueil", "partie-ia":"Partie contre l’ordinat
   "boutique":"Boutique", "profil":"Profil", "admin":"Administration", "tutoriel":"Tutoriel", "regles":"Règles du jeu", "credits":"Crédits"};
 function ecranActuel(){
   if(ui.ecran==="admin") return "admin";
-  if(["collection","decks","editeur","boutique","profil"].includes(ui.ecran)) return ui.ecran;
+  if(["collection","decks","editeur","boutique","profil","saison"].includes(ui.ecran)) return ui.ecran;
   if(S && S.tuto) return "tutoriel";
   if(ui.ecran==="regles") return "regles";
   if(ui.ecran==="credits") return "credits";
@@ -4876,8 +4960,8 @@ async function chargerQuete(){
 }
 async function chargerMesStats(annoncer){
   chargerQuete().then(() => { if(!S && PROG.pret && ui.ecran==="jeu") renderCouche(); });
-  Promise.all([chargerTrophees(), chargerPaquetsOfferts()]).then(() => {
-    if(!S && PROG.pret){ if(ui.ecran==="jeu") renderCouche(); else if(["profil", "boutique"].includes(ui.ecran)) renderProg(); }
+  Promise.all([chargerTrophees(), chargerPaquetsOfferts(), chargerSaison()]).then(() => {
+    if(!S && PROG.pret){ if(ui.ecran==="jeu") renderCouche(); else if(["profil", "boutique", "saison"].includes(ui.ecran)) renderProg(); }
   });
   try { PROG.mesStats = await rpc("mes_stats"); } catch(e) { return; }
   verifierTrophees(annoncer);
@@ -4932,6 +5016,7 @@ function pageProfil(){
     <div class="page-profil">
       <section class="bloc-profil">
         <h2>Pseudo</h2>
+        ${PROG.profil && PROG.profil.titre ? `<p class="titre-joueur-profil">Titre : <b>${esc(PROG.profil.titre)}</b></p>` : ""}
         <p class="aide">Votre adversaire le voit pendant les parties en ligne.</p>
         <div class="ligne-pseudo"><input type="text" maxlength="20" data-prog="pseudo" value="${esc(f)}" placeholder="Choisissez un pseudo" aria-label="Pseudo">
           <button type="button" class="btn" data-act="pseudo-sauver" ${PROG.occupe ? "disabled" : ""}>Enregistrer</button></div>
@@ -5338,6 +5423,11 @@ function pageRegles(){
       <li>Cliquez sur une <b>défausse</b>, la vôtre ou celle de l’adversaire, pour voir les cartes qu’elle contient.</li>
       <li>L’<b>or et la puissance de l’adversaire</b> s’affichent à côté de son médaillon, en temps réel.</li>
       <li>Dans le <b>journal</b>, les noms de cartes sont en gras : survolez-les (ou touchez-les sur téléphone) pour voir la carte. Un appui long sur n’importe quelle carte l’affiche en grand.</li></ul>`],
+    ["saisons", "Les saisons", `<ul>
+      <li>Une <b>saison</b> dure environ six semaines et propose <b>12 travaux</b>, ouverts au rythme de deux par semaine. Un travail ouvert le reste jusqu’à la fin de la saison : vous pouvez rattraper votre retard.</li>
+      <li>Chaque travail compte plusieurs <b>quêtes</b>, qui rapportent un peu d’or ou d’encre. Elles comptent les parties jouées contre l’ordinateur ou en ligne depuis l’ouverture du travail. Un travail est accompli quand toutes ses quêtes sont réclamées.</li>
+      <li>Des <b>paliers</b> récompensent le nombre de travaux accomplis (par exemple 4, 8, 11 et 12) : cartes de saison, paquets offerts, illustrations exclusives, titres.</li>
+      <li>Les <b>cartes de saison</b> ne s’obtiennent qu’en accomplissant les travaux pendant la saison ; elles rejoignent ensuite les paquets.</li></ul>`],
     ["conseils", "Conseils pour bien débuter", `<ul>
       <li><b>Les créatures sont le cœur d’un deck.</b> Un sort sert une fois, puis part à la défausse ; une créature reste sur le plateau, attaque à chaque tour et protège votre héros, puisque l’adversaire doit la détruire avant de vous toucher. Un deck sans créatures perd presque toujours. Les sorts restent indispensables pour produire l’or et la puissance du tour : le meilleur deck mélange les deux, avec une majorité de créatures.</li>
       <li><b>Une carte chère vaut mieux que deux cartes bon marché.</b> Ce qui vous limite, ce ne sont pas vos pièces mais les ${REGLES.piocheParTour} cartes que vous piochez par tour : chaque carte achetée prend une place dans votre deck. Une créature à 6 or est bien plus forte qu’une créature à 3, et ne prend qu’une place au lieu de deux.</li>
@@ -5415,6 +5505,7 @@ function lancerTuto(){
   preparerTuto();
   const c = TUTO.c;
   nouvellePartie("ia");
+  S.niveauIA = "normal"; S.joueurs[1].nom = S.joueurs[1].nom.replace(" (Expert)", "");
   S.tuto = true; S.courant = 0; S.tour = 1;
   const j = S.joueurs[0], o = S.joueurs[1];
   j.nom = "Joueur 1"; j.heros = "egy"; o.heros = "nor"; j.morts = 0; o.morts = 0;
@@ -5572,7 +5663,8 @@ function htmlFinTuto(){
       <li><b>Chaque partie</b> rapporte de l’or, et <b>3 quêtes du jour</b> en rapportent davantage (vous pouvez en changer une par jour).</li>
       <li>Les <b>trophées</b> ont 4 rangs, de bronze à platine : ils rapportent de l’or et des <b>paquets offerts</b>, à ouvrir dans la boutique.</li>
       <li>À la <b>boutique</b>, le paquet classique mélange tous les panthéons, et chaque panthéon a son paquet : idéal pour viser la Dévotion.</li>
-      <li>Recyclez vos exemplaires en trop pour obtenir de l’<b>encre</b>, et fabriquez les cartes qui vous manquent.</li></ul>`]
+      <li>Recyclez vos exemplaires en trop pour obtenir de l’<b>encre</b>, et fabriquez les cartes qui vous manquent.</li>
+      <li>Pendant une <b>saison</b>, accomplissez ses 12 travaux pour gagner des cartes exclusives et une illustration unique.</li></ul>`]
   ];
   const [titre, corps] = pages[Math.min(p, nb - 1)];
   return `<div class="boite boite-guide" role="dialog" aria-label="Tutoriel terminé : ${esc(titre)}">
@@ -6314,6 +6406,7 @@ const ICO = {
   collection:'<rect x="3" y="5" width="11" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.8" transform="rotate(-8 8.5 12.5)"/><rect x="10" y="4" width="11" height="15" rx="2" fill="currentColor" opacity=".85" transform="rotate(8 15.5 11.5)"/>',
   decks:'<rect x="6" y="2.5" width="12" height="15" rx="2" fill="currentColor" opacity=".45"/><rect x="4.5" y="4.5" width="12" height="15" rx="2" fill="currentColor" opacity=".7"/><rect x="3" y="6.5" width="12" height="15" rx="2" fill="currentColor"/>',
   boutique:'<path d="M5 8h14l-1.2 12.5a1.6 1.6 0 0 1-1.6 1.5H7.8a1.6 1.6 0 0 1-1.6-1.5z" fill="currentColor"/><path d="M8.5 9V6.5a3.5 3.5 0 0 1 7 0V9" fill="none" stroke="currentColor" stroke-width="1.8"/>',
+  saison:'<path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.4l-4.8 2.5.9-5.4L4.2 7.7l5.4-.8z" fill="currentColor"/><path d="M5 20h14v2H5z" fill="currentColor"/>',
   profil:'<path d="M7 3h10v3a5 5 0 0 1-10 0zM7 4H4v2a3 3 0 0 0 3 3M17 4h3v2a3 3 0 0 1-3 3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 11.5h4v3l2 3H8l2-3zM7 19h10v2H7z" fill="currentColor"/>',
   tuto:'<path d="M12 4 2 9l10 5 10-5zM6 11.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5l-6 3z" fill="currentColor"/>',
   regles:'<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5zM4 21.5A2.5 2.5 0 0 1 6.5 19H20v3H6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 7h8M8 10.5h6" stroke="currentColor" stroke-width="1.6"/>',
@@ -6336,7 +6429,7 @@ function htmlHall(){
       <div class="hall-logo"><h1 class="logo">${NOM_JEU}</h1><span class="sous-logo">Le choc des panthéons</span></div>
       <div class="hall-droite">
         ${bourse()}
-        <button type="button" class="hall-profil" data-act="prog-profil" title="Mon profil"><span class="avatar" aria-hidden="true">${esc((pseudo || "?").charAt(0).toUpperCase())}</span><span class="nom-profil">${pseudo ? esc(pseudo) : "Choisir un pseudo"}</span></button>
+        <button type="button" class="hall-profil" data-act="prog-profil" title="Mon profil"><span class="avatar" aria-hidden="true">${esc((pseudo || "?").charAt(0).toUpperCase())}</span><span class="nom-profil">${pseudo ? esc(pseudo) : "Choisir un pseudo"}${p.titre ? `<small class="titre-joueur">${esc(p.titre)}</small>` : ""}</span></button>
         <button type="button" class="hall-icone" data-act="reglages-ouvrir" aria-label="Réglages" title="Réglages">${ico("reglages")}</button>
         ${accesAdmin() ? `<button type="button" class="hall-icone" data-act="admin" aria-label="Administration" title="Administration">${ico("admin")}</button>` : ""}
       </div>
@@ -6357,6 +6450,7 @@ function htmlHall(){
         ${tuile("prog-collection", "collection", "Collection", `${possedees} / ${total} cartes`)}
         ${tuile("prog-decks", "decks", "Decks", `${PROG.decks.length} / 9 decks`)}
         ${tuile("prog-boutique", "boutique", "Boutique", `Paquets à ${prixPaquet} or`)}
+        ${PROG.saison ? tuile("prog-saison", "saison", "Saison", (recompensesSaisonEnAttente() ? `<span class="pastille-recompense">${recompensesSaisonEnAttente()} récompense${recompensesSaisonEnAttente()>1 ? "s" : ""} à réclamer</span>` : "") + `${PROG.saison.finis} / ${PROG.saison.travaux.length} travaux, encore ${joursRestants(PROG.saison.fin)} j`) : ""}
         ${tuile("prog-profil", "profil", "Profil", (recompensesEnAttente() ? `<span class="pastille-recompense">${recompensesEnAttente()} récompense${recompensesEnAttente()>1 ? "s" : ""} à réclamer</span>` : "") + (trophees===null ? "Statistiques et trophées" : `${trophees} / ${TROPHEES.length*4} rangs de trophées`))}
       </nav>
       <nav class="hall-apprendre" aria-label="Apprendre">
@@ -7456,6 +7550,179 @@ document.addEventListener("change", e => {
   sauver(); renderAdmin();
 });
 document.addEventListener("toggle", e => { const t = e.target; if(t.classList && t.classList.contains("travail-admin") && t.open) adm.travailOuvert = Number(t.dataset.travail); }, true);
+
+/* ============================================================
+   SAISON : page des joueurs
+   ============================================================ */
+async function chargerSaison(){
+  try { PROG.saison = await rpc("ma_saison"); } catch(e) { PROG.saison = null; }
+  PROG.saisonQuand = Date.now();
+}
+const joursRestants = d => Math.max(0, Math.ceil((new Date(d) - Date.now()) / 864e5));
+function texteRecompenseSaison(r){
+  if(!r) return "";
+  const l = [];
+  if(r.or) l.push(`${r.or} or`);
+  if(r.encre) l.push(`${r.encre} encre`);
+  (r.cartes || []).forEach(k => l.push(`la carte « ${CARTES[k] ? CARTES[k].nom : k} »`));
+  (r.paquets || []).forEach(t => l.push(NOM_PAQUET(t)));
+  (r.variantes || []).forEach(v => { const x = CONFIG.variantes && CONFIG.variantes[v]; l.push(x ? `l’illustration « ${x.nom || "alternative"} » (${(CARTES[x.carte] || {}).nom || ""})` : "une illustration exclusive"); });
+  if(r.titre) l.push(`le titre « ${r.titre} »`);
+  return l.join(", ");
+}
+function recompensesSaisonEnAttente(){
+  const s = PROG.saison; if(!s) return 0;
+  let n = 0;
+  s.travaux.forEach(t => t.ouvert && t.quetes.forEach(q => { if(!q.faite && q.progres>=q.but) n++; }));
+  (s.paliers || []).forEach((p, k) => { if(s.finis>=p.travaux && !(s.paliers_reclames || []).includes(String(k))) n++; });
+  return n;
+}
+function pageSaison(){
+  const s = PROG.saison;
+  if(!s) return `${entete("Saison")}<div class="page-saison"><p class="aide">Aucune saison n’est en cours pour le moment. Revenez bientôt !</p></div>`;
+  const total = s.travaux.length, jr = joursRestants(s.fin);
+  const etatPalier = (p, k) => ({atteint:s.finis>=p.travaux, recu:(s.paliers_reclames || []).includes(String(k))});
+  const paliers = (s.paliers || []).map((p, k) => { const e = etatPalier(p, k);
+    return `<span class="palier-saison ${e.atteint ? "atteint" : ""} ${e.recu ? "recu" : ""}" style="left:${100*p.travaux/total}%"><span class="borne">${p.travaux}</span></span>`; }).join("");
+  const cartesPaliers = (s.paliers || []).map((p, k) => { const e = etatPalier(p, k);
+    return `<div class="info-palier ${e.atteint ? "atteint" : ""} ${e.recu ? "recu" : ""}"><b>${p.travaux} travaux accomplis</b><span>${esc(texteRecompenseSaison(p.recompense))}</span>
+      ${e.recu ? `<span class="recu-palier">✓ Obtenue</span>` : e.atteint ? `<button type="button" class="btn btn-rang" data-act="saison-palier" data-id="${k}">Réclamer</button>` : `<span class="aide">Encore ${p.travaux - s.finis}</span>`}</div>`; }).join("");
+  const travaux = s.travaux.map((t, k) => {
+    const ouv = new Date(t.ouverture), etat = t.fini ? "fini" : t.ouvert ? "ouvert" : "verrouille";
+    const quetes = t.ouvert ? t.quetes.map(q => {
+      const fini = q.progres>=q.but;
+      return `<li class="${q.faite ? "faite" : fini ? "finie" : ""}"><span class="texte-q">${esc(q.texte)}</span>
+        <span class="barre"><span style="width:${Math.min(100, 100*q.progres/q.but)}%"></span></span>
+        <span class="prog-q">${q.faite ? "✓" : `${q.progres} / ${q.but}`}</span>
+        ${q.faite ? `<span class="aide">${esc(texteRecompenseSaison(q.recompense))}</span>`
+          : fini ? `<button type="button" class="btn btn-rang" data-act="saison-quete" data-id="${esc(q.id)}">+${esc(texteRecompenseSaison(q.recompense))}</button>`
+          : `<span class="aide">${esc(texteRecompenseSaison(q.recompense))}</span>`}</li>`;
+    }).join("") : "";
+    return `<article class="travail ${etat}">
+      <header><span class="num-travail">${["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"][k] || k + 1}</span><b>${esc(t.nom)}</b>${t.fini ? `<span class="sceau" aria-label="Travail accompli">✓</span>` : ""}</header>
+      ${t.description ? `<p class="desc-travail">${esc(t.description)}</p>` : ""}
+      ${t.ouvert ? `<ul class="quetes-travail">${quetes}</ul>` : `<p class="verrou">🔒 S’ouvre le ${ouv.toLocaleDateString("fr-FR", {weekday:"long", day:"numeric", month:"long"})}${joursRestants(ouv) ? ` (dans ${joursRestants(ouv)} jour${joursRestants(ouv)>1 ? "s" : ""})` : ""}</p>`}
+    </article>`;
+  }).join("");
+  return `${entete("Saison")}
+    <div class="page-saison">
+      <section class="tete-saison">
+        <div><h2>${esc(s.nom)}</h2><p class="aide">Du ${new Date(s.debut + "T00:00:00").toLocaleDateString("fr-FR", {day:"numeric", month:"long"})} au ${new Date(s.fin).toLocaleDateString("fr-FR", {day:"numeric", month:"long"})}. ${jr ? `Encore ${jr} jour${jr>1 ? "s" : ""}.` : "Dernier jour !"} Deux travaux s’ouvrent chaque semaine ; une quête compte les parties jouées contre l’ordinateur ou en ligne depuis l’ouverture de son travail.</p></div>
+        <div class="compte-saison"><b>${s.finis}</b> / ${total}<span>travaux accomplis</span></div>
+      </section>
+      <section class="frise-saison" aria-label="Paliers de récompenses">
+        <div class="piste"><span class="remplie" style="width:${100*s.finis/total}%"></span>${paliers}</div>
+        <div class="recompenses-paliers">${cartesPaliers}</div>
+      </section>
+      <section class="travaux">${travaux}</section>
+    </div>`;
+}
+
+/* ============================================================
+   ORDINATEUR EXPERT : choisit la meilleure action suivante
+   (le même cerveau sert en partie et en simulation)
+   ============================================================ */
+const niveauIA = () => { try { return localStorage.getItem("niveau-ia")==="expert" ? "expert" : "normal"; } catch(e) { return "normal"; } };
+function htmlChoixNiveau(){
+  const n = niveauIA();
+  return `<fieldset class="choix-niveau"><legend>Niveau de l’ordinateur</legend>
+    <label class="option-niveau ${n==="normal" ? "choisi" : ""}"><input type="radio" name="niveau-ia" value="normal" ${n==="normal" ? "checked" : ""}><b>Normal</b><span>Idéal pour découvrir le jeu.</span></label>
+    <label class="option-niveau ${n==="expert" ? "choisi" : ""}"><input type="radio" name="niveau-ia" value="expert" ${n==="expert" ? "checked" : ""}><b>Expert</b><span>Achats réfléchis, échanges rentables, attaques calculées.</span></label>
+  </fieldset>`;
+}
+document.addEventListener("change", e => {
+  if(e.target.name!=="niveau-ia") return;
+  try { localStorage.setItem("niveau-ia", e.target.value); } catch(err) {}
+  document.querySelectorAll(".option-niveau").forEach(l => l.classList.toggle("choisi", l.querySelector("input").checked));
+});
+const valeurCrea = c => atkTotal(c)*1.5 + vieRestante(c) + (def(c).prix || 0)*0.5 + (aMot(c, "provocation") ? 1 : 0);
+function scoreAchat(d, j){
+  if(!d) return -1;
+  let s = (d.prix || 0) * 1.0;
+  if(d.type==="creature") s += 0.8;
+  if(d.type==="arme") s += 0.3;
+  if(d.faction && d.faction===j.heros) s += 0.8;                       // panthéon de sa divinité : Dévotion et combos
+  if(d.allie && factionCombo(d)===j.heros) s += 0.6;
+  if((d.prix || 0)<=1) s -= 0.8;                                         // une petite carte dilue le deck
+  return s;
+}
+function prochaineActionExpert(i){
+  const j = S.joueurs[i], opp = adversaire(i);
+  if(S.bannirEnAttente>0) return {type:"bannir"};
+  if(pouvoirPret(j)) return {type:"pouvoir"};
+  // 1. Jouer ses cartes : créatures, puis sorts, puis équipements
+  const main = [...j.main].map(c => [c, def(c)]);
+  const crea = main.filter(([, d]) => d.type==="creature").sort((a, b) => (b[1].prix || 0) - (a[1].prix || 0));
+  if(crea.length && j.plateau.length<REGLES.plateauMax) return {type:"jouer", uid:crea[0][0].uid};
+  const sort = main.find(([, d]) => d.type==="sort");
+  if(sort) return {type:"jouer", uid:sort[0].uid};
+  const arme = main.find(([, d]) => d.type==="arme");
+  if(arme){
+    const pretes = j.plateau.filter(c => c.peutAttaquer && !c.aAttaque), cible = (pretes.length ? pretes : j.plateau).sort((a, b) => valeurCrea(b) - valeurCrea(a))[0];
+    if(cible) return {type:"jouer", uid:arme[0].uid, opts:{cible:cible.uid}};
+    if(REGLES.armesHeros) return {type:"jouer", uid:arme[0].uid, opts:{}};
+  }
+  // 2. Acheter : la meilleure carte abordable, puis dépenser le reste
+  const offres = S.marche.map((c, k) => ({k, d:def(c)})).filter(o => (o.d.prix || 0)<=j.or).sort((a, b) => scoreAchat(b.d, j) - scoreAchat(a.d, j));
+  if(offres.length) return {type:"acheter", k:offres[0].k};
+  const base = CARTES[REGLES.carteBase];
+  if(base && (base.prix || 0)>0 && j.or>=base.prix) return {type:"acheter", k:"base"};
+  // 3. Combat
+  const t = cibles(i), pretes = j.plateau.filter(c => c.peutAttaquer && !c.aAttaque);
+  if(t.face){
+    if(pretes.length) return {type:"attaquer", att:pretes.sort((a, b) => atkTotal(b) - atkTotal(a))[0].uid, cible:"face"};
+    if(j.combat>0) return {type:"combat", cible:"face"};
+    return {type:"fin"};
+  }
+  const visibles = opp.plateau.filter(v => !(aMot(v, "ethere") && !v.revele));
+  const cand = opp.plateau.filter(v => t.creatures.has(v.uid));
+  // a) La puissance du héros peut-elle nettoyer tout le plateau adverse visible, pour ouvrir la voie aux créatures ?
+  if(j.combat>0 && cand.length){
+    const pvTotal = visibles.reduce((s, v) => s + vieRestante(v) + (v.bouclier ? 1 : 0), 0);
+    const riposte = visibles.reduce((s, v) => s + atkTotal(v), 0);
+    if(j.combat>=pvTotal && riposte < j.pv - 4 && (pretes.length || j.combat>pvTotal)){
+      const v = cand.sort((a, b) => vieRestante(a) - vieRestante(b))[0];
+      return {type:"combat", cible:v.uid};
+    }
+  }
+  // b) Les échanges des créatures : rentables, ou nécessaires pour ouvrir la voie ou se défendre
+  const pvVisibles = visibles.reduce((s, v) => s + vieRestante(v) + (v.bouclier ? 1 : 0), 0);
+  const potentiel = pretes.reduce((s, a) => s + atkTotal(a), 0) + j.combat;
+  const ouvrirVoie = potentiel >= pvVisibles + Math.min(opp.pv, 6);                       // assez de dégâts pour nettoyer et frapper le héros
+  const danger = opp.plateau.reduce((s, v) => s + atkTotal(v), 0) >= j.pv - 2;             // le prochain tour adverse peut être fatal
+  let meilleur = null;
+  for(const a of pretes) for(const v of cand){
+    const tue = !v.bouclier && atkTotal(a)>=vieRestante(v), survit = v.bouclier ? true : atkTotal(v) < vieRestante(a);
+    let s;
+    if(tue && survit) s = 10 + valeurCrea(v);
+    else if(tue && (ouvrirVoie || danger)) s = 6 + atkTotal(v)*2 - valeurCrea(a)*0.3;
+    else if(tue) s = valeurCrea(v) - valeurCrea(a);
+    else if(v.bouclier && survit) s = 2 + valeurCrea(v) * 0.2;
+    else s = -1;
+    if(s>0 && (!meilleur || s>meilleur.s)) meilleur = {s, att:a.uid, cible:v.uid};
+  }
+  if(meilleur && meilleur.s>=1) return {type:"attaquer", att:meilleur.att, cible:meilleur.cible};
+  // c) La puissance du héros sur la créature la plus dangereuse qu’elle peut tuer
+  if(j.combat>0 && cand.length){
+    const tuables = cand.filter(v => (v.bouclier ? j.combat>=1 : vieRestante(v)<=j.combat) && atkTotal(v) < j.pv - 4).sort((a, b) => valeurCrea(b) - valeurCrea(a));
+    if(tuables.length) return {type:"combat", cible:tuables[0].uid};
+    const blesse = cand.filter(v => atkTotal(v) < j.pv - 4).sort((a, b) => vieRestante(a) - vieRestante(b))[0];
+    if(blesse) return {type:"combat", cible:blesse.uid};
+  }
+  if(meilleur) return {type:"attaquer", att:meilleur.att, cible:meilleur.cible};
+  return {type:"fin"};
+}
+// Exécute une action ; renvoie faux si rien n’a changé (pour éviter les boucles)
+function executerActionExpert(i, a){
+  const j = S.joueurs[i], avant = JSON.stringify([j.main.length, j.or, j.combat, j.plateau.map(c => c.uid + c.aAttaque + c.deg), adversaire(i).pv, adversaire(i).plateau.length, S.bannirEnAttente]);
+  if(a.type==="bannir") iaBannir(j);
+  else if(a.type==="pouvoir") activerPouvoir();
+  else if(a.type==="jouer") jouer(a.uid, a.opts);
+  else if(a.type==="acheter") acheter(a.k);
+  else if(a.type==="attaquer") attaquer(a.att, a.cible);
+  else if(a.type==="combat") utiliserCombat(a.cible);
+  return JSON.stringify([j.main.length, j.or, j.combat, j.plateau.map(c => c.uid + c.aAttaque + c.deg), adversaire(i).pv, adversaire(i).plateau.length, S.bannirEnAttente])!==avant;
+}
 
 chargerConfig();
 appliquerReglageAnimations();
