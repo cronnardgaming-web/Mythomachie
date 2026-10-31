@@ -84,6 +84,11 @@ ou changé leur faction, renvoyez le catalogue depuis l’administration (onglet
 `supabase-admin-joueurs.sql` permet à l’administrateur de corriger l’or et l’encre d’un joueur depuis l’onglet
 « Statistiques » de l’administration (bouton « Modifier » dans la liste des joueurs).
 
+## Correctif des quêtes remplacées
+
+`supabase-correctif-quetes.sql` (à exécuter après `supabase-recompenses.sql`) : une quête du jour obtenue en
+remplacement ne compte que les parties jouées après le remplacement (les 3 quêtes du jour comptent dès minuit).
+
 ## Classement Elo
 
 `supabase-classement.sql` (à exécuter après les autres scripts) : chaque partie en ligne (avec un code ou par la

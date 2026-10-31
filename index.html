@@ -2466,6 +2466,7 @@ function render(){
   const app = document.getElementById("app");
   document.body.classList.toggle("en-partie", !!S && ui.ecran==="jeu");
   if(typeof majCompact==="function") majCompact();
+  if(typeof prevoirAjustement==="function") prevoirAjustement();
   queueMicrotask(majMusique);
   if(ui.ecran==="admin"){ INSTANT = null; renderAdmin(); return; }
   if(ui.ecran!=="jeu" || !tutoActif()){ const p = document.getElementById("tuto-panneau"); if(p) p.remove(); }
@@ -6349,11 +6350,32 @@ function majCompact(){
     app.style.transform = `scale(${s})`;
     document.body.style.setProperty("--h-jeu", hv + "px");
     window.scrollTo(0, 0);
-  } else if(app.style.transform){
+  } else if(app.style.transform && !app.dataset.ajuste){
     ["position","left","top","width","height","transformOrigin","transform"].forEach(k => app.style[k] = "");
     document.body.style.removeProperty("--h-jeu");
   }
+  if(typeof prevoirAjustement==="function") prevoirAjustement();
 }
+// Ordinateur : si le plateau dépasse la hauteur de la fenêtre, il est réduit juste assez pour tenir entièrement
+function ajusterBureau(){
+  const app = document.getElementById("app");
+  if(!app) return;
+  const actif = !document.body.classList.contains("compact") && document.body.classList.contains("en-partie");
+  if(!actif){
+    if(app.dataset.ajuste){ app.style.transform = ""; app.style.transformOrigin = ""; app.style.marginBottom = ""; delete app.dataset.ajuste; }
+    return;
+  }
+  app.style.transform = ""; app.style.marginBottom = "";
+  const r = app.getBoundingClientRect(), dispo = innerHeight - Math.max(0, r.top + scrollY) - 6;
+  if(r.height <= dispo){ delete app.dataset.ajuste; return; }
+  const s = Math.max(0.42, dispo / r.height);
+  app.style.transformOrigin = "50% 0";
+  app.style.transform = `scale(${s.toFixed(4)})`;
+  app.style.marginBottom = `${-(r.height * (1 - s)).toFixed(1)}px`;
+  app.dataset.ajuste = "1";
+}
+let ajustementPrevu = false;
+function prevoirAjustement(){ if(ajustementPrevu) return; ajustementPrevu = true; requestAnimationFrame(() => { ajustementPrevu = false; ajusterBureau(); }); }
 addEventListener("resize", () => { majCompact(); if(S) ajusterEventail(); });
 addEventListener("orientationchange", () => setTimeout(() => { majCompact(); if(S) ajusterEventail(); }, 250));
 if(window.visualViewport) visualViewport.addEventListener("resize", () => { majCompact(); if(S) ajusterEventail(); });
@@ -7315,7 +7337,7 @@ function htmlHerosDeck(cartes){
     </div>
     <div class="progres-heros-deck">
       <span class="barre-devotion"><span style="width:${Math.min(100, 100*n[f]/s2)}%"></span><i style="left:${100*s1/s2}%"></i></span>
-      <span class="aide">${n[f]} / ${s2} cartes ${esc(FACTIONS[f].f)}s. ${hs ? `Encore ${manque} pour ${esc(hs.nom || "la divinité suivante")}${p===0 ? ` et ${REGLES.devotionNbTresors ?? 2} cartes de départ à ses couleurs` : " et une créature de départ du panthéon"}.` : "Divinité primordiale atteinte."}</span>
+      <span class="aide">${n[f]} / ${s2} cartes ${esc(FACTIONS[f].f)}s. ${hs ? `Encore ${manque} carte${manque>1 ? "s" : ""} ${esc(FACTIONS[f].f)}${manque>1 ? "s" : ""} pour gagner en dévotion et faire évoluer ton dieu et ${p===0 ? `tes cartes ${esc((CARTES[REGLES.devotionTresor || "piece"] || {}).nom || "Trésor")}` : `ta carte ${esc((CARTES[REGLES.devotionCreature || "dague"] || {}).nom || "Vagabon")}`}.` : "Dévotion maximale : ton dieu primordial et tes cartes de départ ont atteint leur forme la plus puissante."}</span>
     </div>
   </div>`;
 }
