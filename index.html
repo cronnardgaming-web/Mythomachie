@@ -435,7 +435,7 @@ body.sans-animations *,body.sans-animations *::before,body.sans-animations *::af
 .hall-modes .btn{display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:11px 12px}
 .hall-quete{grid-area:quete;display:flex}
 .hall-quete .quete{flex:1;margin:0;display:flex;flex-direction:column;justify-content:center;gap:10px;border-radius:12px;padding:18px}
-.hall-tuiles{grid-area:tuiles;display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));grid-auto-flow:column;gap:12px}
+.hall-tuiles{grid-area:tuiles;display:grid;grid-template-columns:none;grid-auto-columns:minmax(0,1fr);grid-auto-flow:column;gap:12px}
 .tuile-hall{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;padding:16px;border-radius:12px;background:var(--zone);border:1px solid var(--line);color:var(--ink);font:inherit;cursor:pointer;transition:border-color .15s, transform .15s}
 .tuile-hall:hover,.tuile-hall:focus-visible{border-color:var(--bronze);transform:translateY(-2px)}
 .ico-tuile{width:34px;height:34px;color:var(--or)}
@@ -452,7 +452,7 @@ body.sans-animations *,body.sans-animations *::before,body.sans-animations *::af
 .boite-reglages h3{margin:0 0 8px}
 @media (max-width:760px){
   .hall-grille{grid-template-columns:1fr;grid-template-areas:"jouer" "quete" "tuiles" "apprendre"}
-  .hall-tuiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hall-tuiles{grid-auto-flow:row;grid-template-columns:repeat(3,minmax(0,1fr))}
   .hall-modes{grid-template-columns:1fr}
 }
 body.compact .hall{gap:8px}
@@ -466,7 +466,7 @@ body.compact .btn-geant small{display:none}
 body.compact .ico-geant{width:32px;height:32px}
 body.compact .hall-modes .btn{padding:7px 8px;font-size:13px}
 body.compact .hall-quete .quete{padding:10px 12px;gap:6px}
-body.compact .hall-tuiles{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+body.compact .hall-tuiles{grid-template-columns:none;grid-auto-flow:column;gap:8px}
 body.compact .tuile-hall{padding:8px 10px;gap:2px;flex-direction:row;align-items:center;flex-wrap:wrap}
 body.compact .ico-tuile{width:22px;height:22px}
 body.compact .tuile-titre{font-size:15px}
@@ -887,6 +887,24 @@ body.compact .nom-heros-deck{font-size:17px}
 .puce-fiche{display:inline-flex;align-items:center;gap:6px;background:var(--table);border:1px solid var(--line);border-radius:99px;padding:2px 4px 2px 10px;font-size:13px}
 .puce-fiche .pm{width:22px;height:22px;border-radius:50%;border:1px solid var(--line);background:var(--zone);color:var(--ink);cursor:pointer;padding:0;line-height:1}
 .fiche-joueur h3 .aide{font-weight:400;margin-left:6px}
+
+/* Classement */
+.page-classement{display:flex;flex-direction:column;gap:16px}
+.ma-cote{display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb, var(--or) 20%, var(--zone)),var(--zone) 60%);border:1px solid color-mix(in srgb, var(--or) 45%, var(--line));border-radius:12px;padding:16px 18px}
+.cote-grande{display:flex;flex-direction:column;align-items:center;min-width:110px}
+.cote-grande b{font-family:Cinzel,serif;font-size:44px;line-height:1;color:var(--or)}
+.cote-grande span{font-size:13px;color:var(--ink-2)}
+.infos-cote{flex:1 1 280px}
+.infos-cote p{margin:2px 0}
+.ma-cote .btn{margin:0}
+.historique-elo{display:flex;flex-wrap:wrap;gap:6px}
+.pastille-elo{font-weight:700;font-size:13px;border-radius:99px;padding:3px 10px;background:var(--table);border:1px solid var(--line)}
+.pastille-elo.elo-gain{color:#4fd18b;border-color:#2f9e63}
+.pastille-elo.elo-perte{color:#ff7a6e;border-color:#b8402f}
+.pastille-elo.annule{color:var(--ink-2);text-decoration:line-through}
+.tableau-classement tr.moi td{background:color-mix(in srgb, var(--or) 16%, transparent)}
+.ligne-elo .elo-gain{color:#4fd18b;font-weight:700}
+.ligne-elo .elo-perte{color:#ff7a6e;font-weight:700}
 
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
@@ -2453,7 +2471,7 @@ function render(){
   if(ui.ecran!=="jeu" || !tutoActif()){ const p = document.getElementById("tuto-panneau"); if(p) p.remove(); }
   if(ui.ecran==="credits"){ INSTANT = null; app.innerHTML = pageCredits(); document.getElementById("couche").innerHTML = ""; document.getElementById("couche").classList.remove("accueil"); return; }
   if(ui.ecran==="regles"){ INSTANT = null; app.innerHTML = pageRegles(); document.getElementById("couche").innerHTML = ""; document.getElementById("couche").classList.remove("accueil"); return; }
-  if(["collection","decks","editeur","boutique","profil","saison"].includes(ui.ecran)){ INSTANT = null; renderProg(); return; }
+  if(["collection","decks","editeur","boutique","profil","saison","classement"].includes(ui.ecran)){ INSTANT = null; renderProg(); return; }
   if(!S){ INSTANT = null; app.innerHTML = ""; renderCouche(); if(PROG.pret) signaler(); return; }
   if(est2v2()) return render2v2();
   const me = vue(), moi = S.joueurs[me], lui = S.joueurs[1-me];
@@ -3526,10 +3544,10 @@ function quitterEnLigne(){
 }
 
 // ----- Hôte
-async function creerPartie(){
+async function creerPartie(codeImpose){
   EN.erreurMenu = "";
-  let code = genererCode();
-  try { if((await EN.db.doc(`salle/${code}`).get()).exists) code = genererCode(); } catch(e) {}
+  let code = codeImpose || genererCode();
+  if(!codeImpose) try { if((await EN.db.doc(`salle/${code}`).get()).exists) code = genererCode(); } catch(e) {}
   Object.assign(EN, {code, role:"hote", hoteId:EN.monId, inviteId:null, ecran:"attente", version:0, cfg:configPublique()});
   renderCouche();
   try { await EN.db.doc(`salle/${code}`).set({hote:EN.monId, statut:"attente", cree:Date.now()}); }
@@ -3617,15 +3635,16 @@ function reprendre(code){
 }
 
 // ----- Invité
-async function rejoindre(){
+async function rejoindre(codeImpose, essais = 0){
   EN.erreurMenu = "";
-  const code = (EN.saisie || "").trim().toLowerCase();
+  const code = (codeImpose || EN.saisie || "").trim().toLowerCase();
   if(!/^[a-z0-9]{5}$/.test(code)){ EN.erreurMenu = "Le code fait 5 caractères (lettres et chiffres)."; return renderCouche(); }
   EN.ecran = "connexion"; renderCouche();
   const echec = msg => { EN.ecran = "choix"; EN.erreurMenu = msg; renderCouche(); };
   let d;
   try { const s = await EN.db.doc(`salle/${code}`).get(); d = s.exists ? s.data() : null; }
   catch(e) { return echec("Connexion impossible pour le moment. Réessayez dans un instant."); }
+  if((!d || d.statut==="annulee") && essais>0){ setTimeout(() => { if(EN.ecran==="connexion") rejoindre(code, essais - 1); }, 1500); return; }
   if(!d || d.statut==="annulee") return echec("Aucune partie ne correspond à ce code.");
   if(d.hote===EN.monId) return echec("C’est votre propre partie : votre adversaire doit la rejoindre depuis son compte.");
   if(d.invite && d.invite!==EN.monId) return echec("Cette partie a déjà deux joueurs.");
@@ -3691,6 +3710,7 @@ function htmlEnLigne(){
     <div class="code-partie">${EN.code}</div>
     <p class="attente">En attente de votre adversaire…</p>
     <div class="actions"><button type="button" class="btn" data-act="en-copier">Copier le code</button><button type="button" class="btn second" data-act="en-annuler">Annuler</button></div></div>`;
+  if(EN.ecran==="file") return htmlFileClassee();
   if(EN.ecran==="connexion") return `<div class="boite" role="dialog" aria-label="Connexion">
     <h2>Connexion…</h2><p class="attente">Connexion à la partie ${esc(EN.code || EN.saisie)}, en attente de l’hôte…</p>
     <div class="actions"><button type="button" class="btn second" data-act="en-annuler">Annuler</button></div></div>`;
@@ -3703,8 +3723,11 @@ function htmlEnLigne(){
     ${PROG.actif && PROG.pret ? (decksValides().length
       ? `<label class="champ"><span>Votre deck</span>${selectDeck("deckEnLigne", decksValides().some(d => d.id===EN.deckId) ? EN.deckId : (EN.deckId = decksValides()[0].id))}</label>`
       : `<p style="color:var(--danger)">Il vous faut un deck complet de ${REGLES.tailleDeck} cartes pour jouer en ligne.</p>`) : ""}
+    ${PROG.actif && PROG.pret ? `<h3>Partie classée</h3>
+    <p class="aide">Le jeu vous trouve un adversaire de votre niveau. Toutes les parties en ligne, classées ou avec un code, comptent pour le classement.</p>
+    <div class="actions"><button type="button" class="btn" data-act="en-classee">Chercher un adversaire</button></div>` : ""}
     <h3>Créer une partie</h3>
-    <div class="actions"><button type="button" class="btn" data-act="en-creer">Créer une partie</button></div>
+    <div class="actions"><button type="button" class="btn ${PROG.actif && PROG.pret ? "second" : ""}" data-act="en-creer">Créer une partie avec un code</button></div>
     <h3>Rejoindre une partie</h3>
     <div class="ligne-code"><input type="text" maxlength="5" autocomplete="off" spellcheck="false" placeholder="code" aria-label="Code de la partie" data-en="code" value="${esc(EN.saisie)}">
       <button type="button" class="btn" data-act="en-rejoindre">Rejoindre</button></div>
@@ -3716,6 +3739,8 @@ function actionEnLigne(act, id){
     case "en-ligne": EN.ecran = "choix"; EN.erreurMenu = ""; if(EN.db) chargerReprises(); break;
     case "en-retour": quitterEnLigne(); break;
     case "en-creer": creerPartie(); return;
+    case "en-classee": lancerFileClassee(); return;
+    case "en-file-annuler": EN.ecran = "choix"; rpc("quitter_file").catch(() => {}); break;
     case "en-rejoindre": rejoindre(); return;
     case "en-reprendre": reprendre(id); return;
     case "en-copier":
@@ -3994,11 +4019,11 @@ if(!window.claude && SUPA.url){
   }
   const minuteurHote = () => minuteurs.push(setInterval(() => envoyerEtat(), 8000));
 
-  creerPartie = async function(){
+  creerPartie = async function(codeImpose){
     EN.erreurMenu = "";
     if(PROG.pret && !deckChoisi()) return erreur(`Il vous faut un deck complet de ${REGLES.tailleDeck} cartes pour jouer en ligne.`);
     EN.deckHote = deckChoisi(); EN.deckInvite = null;
-    Object.assign(EN, {code:genererCode(), role:"hote", hoteId:EN.monId, inviteId:null, ecran:"attente", version:0, cfg:configPublique()});
+    Object.assign(EN, {code:codeImpose || genererCode(), role:"hote", hoteId:EN.monId, inviteId:null, ecran:"attente", version:0, cfg:configPublique()});
     renderCouche();
     const ok = await ouvrirCanal(EN.code, gestionHote());
     if(!ok){ fermerCanal(); EN.role = null; EN.ecran = "choix"; EN.erreurMenu = "Le serveur de jeu ne répond pas. Réessayez dans un instant."; return renderCouche(); }
@@ -4069,11 +4094,11 @@ if(!window.claude && SUPA.url){
     if(S.courant!==1){ ui.attaquant = null; ui.armeEnAttente = null; ui.choixPierre = null; }
     render();
   }
-  rejoindre = async function(){
+  rejoindre = async function(codeImpose){
     EN.erreurMenu = "";
     if(PROG.pret && !deckChoisi()) return erreur(`Il vous faut un deck complet de ${REGLES.tailleDeck} cartes pour jouer en ligne.`);
     const monDeck = deckChoisi();
-    const code = (EN.saisie || "").trim().toLowerCase();
+    const code = ((typeof codeImpose==="string" && codeImpose) || EN.saisie || "").trim().toLowerCase();
     if(!/^[a-z0-9]{5}$/.test(code)){ EN.erreurMenu = "Le code fait 5 caractères (lettres et chiffres)."; return renderCouche(); }
     Object.assign(EN, {code, role:"invite", inviteId:EN.monId, hoteId:null, ordres:[], seqEnvoye:0, refusVu:0,
                        cfgRecu:false, sessionVue:null, versionRecue:0, enAttente:false, ecran:"connexion"});
@@ -4244,8 +4269,19 @@ async function verifierRecompense(){
       try { const r = await rpc("fin_partie_ticket", {p_ticket:ticket}); if(r && r.erreur) throw new Error(r.erreur); gain = r ? r.gain : 0; break; }
       catch(e) { if(/pas encore enregistrée/.test(e.message) && essai<5){ await new Promise(r => setTimeout(r, 1500*(essai+1))); continue; } throw e; }
     }
+    const eloAvant = PROG.profil && PROG.profil.elo;
     PROG.dernierGain = {cle, gain};
+    if(S.mode==="enligne" && !hoteOuSeul){
+      // L’invité confirme le résultat déclaré par l’hôte ; en cas de désaccord, les points de classement sont annulés
+      const victoire = S.vainqueur===S.joueurs[vue()].nom;
+      for(let essai=0; essai<5; essai++){
+        try { const c = await rpc("confirmer_resultat", {p_ticket:ticket, p_victoire:victoire}); if(c && c.attente){ await pause(1500); continue; } if(c && c.conteste) PROG.dernierGain.conteste = true; } catch(e) {}
+        break;
+      }
+    }
     await rafraichir();
+    if(S && S.mode==="enligne" && PROG.profil && eloAvant!=null && PROG.profil.elo!=null) PROG.dernierGain.elo = {cote:PROG.profil.elo, delta:PROG.profil.elo - eloAvant};
+    PROG.classement = null;
     chargerMesStats(true);
   } catch(e) { PROG.dernierGain = {cle, gain:0, erreur:messageServeur(e.message)}; }
   if(S && S.idPartie===cle) renderCouche();
@@ -4256,10 +4292,12 @@ function htmlGainFin(){
   const g = PROG.dernierGain;
   if(!g || g.cle!==S.idPartie) return `<p class="attente">Calcul des récompenses…</p>`;
   if(g.erreur) return `<p class="avertissement">Pas de récompense : ${esc(String(g.erreur).replace(/\.+$/, ""))}.</p>`;
+  const lElo = g.conteste ? `<p class="avertissement">Résultat contesté : les points de classement de cette partie sont annulés, l’administrateur est prévenu.</p>`
+    : g.elo ? `<p class="ligne-elo">Classement : <b>${nf(g.elo.cote)}</b> <span class="${g.elo.delta>=0 ? "elo-gain" : "elo-perte"}">(${g.elo.delta>=0 ? "+" : ""}${g.elo.delta})</span></p>` : "";
   const st = S.stats ? S.stats[vue()] : null;
   const pl = (n, un, plusieurs) => `${nf(n)} ${(n || 0) > 1 ? plusieurs : un}`;
   const resume = st ? `<p class="aide">Dans cette partie : ${pl(st.degats, "dégât infligé", "dégâts infligés")}, ${pl(st.soins || 0, "point de vie soigné", "points de vie soignés")}, ${pl(st.creatures, "créature jouée", "créatures jouées")}, ${pl(st.achats, "carte achetée", "cartes achetées")}.</p>` : "";
-  return `<p class="gain">${g.gain ? `+${g.gain} or` : "Plafond d’or du jour atteint : revenez demain pour gagner plus d’or."}</p>${resume}`;
+  return `<p class="gain">${g.gain ? `+${g.gain} or` : "Plafond d’or du jour atteint : revenez demain pour gagner plus d’or."}</p>${lElo}${resume}`;
 }
 
 // ----- Affichage commun
@@ -4496,7 +4534,7 @@ function renderProg(){
   const actif = document.activeElement;
   const cle = actif && actif.dataset && actif.dataset.prog ? actif.dataset.prog : null;
   let pos = null; try { pos = actif.selectionStart; } catch(e) {}
-  const pages = {collection:pageCollection, decks:pageDecks, editeur:pageEditeur, boutique:pageBoutique, profil:pageProfil, saison:pageSaison};
+  const pages = {collection:pageCollection, decks:pageDecks, editeur:pageEditeur, boutique:pageBoutique, profil:pageProfil, saison:pageSaison, classement:pageClassement};
   const defil = {}; app.querySelectorAll(".grille-atelier, .liste-atelier, .atelier-deck").forEach(el => { defil[el.className.split(" ")[0]] = el.scrollTop; });
   const yPage = window.scrollY;
   app.innerHTML = PROG.pret ? pages[ui.ecran]() : `${entete(NOM_JEU)}<p class="attente">Chargement…</p>`;
@@ -4598,6 +4636,7 @@ function actionProg(act, id){
       });
       return true;
     }
+    case "prog-classement": ui.ecran = "classement"; PROG.classement = null; break;
     case "prog-saison": ui.ecran = "saison"; chargerSaison().then(() => { if(ui.ecran==="saison") renderProg(); }); break;
     case "saison-quete": action(async () => { const r = await rpc("reclamer_quete_saison", {p_quete:id}); if(r && r.erreur) throw new Error(r.erreur); await Promise.all([chargerSaison(), rafraichir()]); return r; }, r => `+${texteRecompenseSaison(r)} !`); return true;
     case "saison-palier": action(async () => { const r = await rpc("reclamer_palier_saison", {p_index:Number(id)}); if(r && r.erreur) throw new Error(r.erreur); await Promise.all([chargerSaison(), chargerPaquetsOfferts(), rafraichir()]); return r; }, r => `Récompense obtenue : ${texteRecompenseSaison(r)} !`); return true;
@@ -4911,7 +4950,7 @@ const NOMS_ECRANS = {"accueil":"Accueil", "partie-ia":"Partie contre l’ordinat
   "boutique":"Boutique", "profil":"Profil", "admin":"Administration", "tutoriel":"Tutoriel", "regles":"Règles du jeu", "credits":"Crédits"};
 function ecranActuel(){
   if(ui.ecran==="admin") return "admin";
-  if(["collection","decks","editeur","boutique","profil","saison"].includes(ui.ecran)) return ui.ecran;
+  if(["collection","decks","editeur","boutique","profil","saison","classement"].includes(ui.ecran)) return ui.ecran;
   if(S && S.tuto) return "tutoriel";
   if(ui.ecran==="regles") return "regles";
   if(ui.ecran==="credits") return "credits";
@@ -5444,6 +5483,10 @@ function pageRegles(){
       <li>Cliquez sur une <b>défausse</b>, la vôtre ou celle de l’adversaire, pour voir les cartes qu’elle contient.</li>
       <li>L’<b>or et la puissance de l’adversaire</b> s’affichent à côté de son médaillon, en temps réel.</li>
       <li>Dans le <b>journal</b>, les noms de cartes sont en gras : survolez-les (ou touchez-les sur téléphone) pour voir la carte. Un appui long sur n’importe quelle carte l’affiche en grand.</li></ul>`],
+    ["classement", "Le classement", `<ul>
+      <li>Toutes les <b>parties en ligne</b> comptent pour le classement, qu’elles soient lancées avec un code ou par la <b>partie classée</b>, qui vous trouve un adversaire de votre niveau.</li>
+      <li>Chaque joueur a une <b>cote</b> (1 200 au départ). Le gagnant prend des points au perdant : battre un joueur mieux classé rapporte beaucoup, battre un joueur moins bien classé rapporte peu. Vos 20 premières parties comptent double, pour trouver vite votre niveau.</li>
+      <li>À la fin de chaque partie, le résultat est confirmé par les deux joueurs. En cas de désaccord, les points de la partie sont annulés.</li></ul>`],
     ["saisons", "Les saisons", `<ul>
       <li>Une <b>saison</b> dure environ six semaines et propose <b>12 travaux</b>, ouverts au rythme de deux par semaine. Un travail ouvert le reste jusqu’à la fin de la saison : vous pouvez rattraper votre retard.</li>
       <li>Chaque travail compte plusieurs <b>quêtes</b>, qui rapportent un peu d’or ou d’encre. Elles comptent les parties jouées contre l’ordinateur ou en ligne depuis l’ouverture du travail. Un travail est accompli quand toutes ses quêtes sont réclamées.</li>
@@ -6427,6 +6470,7 @@ const ICO = {
   collection:'<rect x="3" y="5" width="11" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.8" transform="rotate(-8 8.5 12.5)"/><rect x="10" y="4" width="11" height="15" rx="2" fill="currentColor" opacity=".85" transform="rotate(8 15.5 11.5)"/>',
   decks:'<rect x="6" y="2.5" width="12" height="15" rx="2" fill="currentColor" opacity=".45"/><rect x="4.5" y="4.5" width="12" height="15" rx="2" fill="currentColor" opacity=".7"/><rect x="3" y="6.5" width="12" height="15" rx="2" fill="currentColor"/>',
   boutique:'<path d="M5 8h14l-1.2 12.5a1.6 1.6 0 0 1-1.6 1.5H7.8a1.6 1.6 0 0 1-1.6-1.5z" fill="currentColor"/><path d="M8.5 9V6.5a3.5 3.5 0 0 1 7 0V9" fill="none" stroke="currentColor" stroke-width="1.8"/>',
+  classement:'<path d="M3 21V12h5v9zM9.5 21V7h5v14zM16 21v-6h5v6z" fill="currentColor"/>',
   saison:'<path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.4l-4.8 2.5.9-5.4L4.2 7.7l5.4-.8z" fill="currentColor"/><path d="M5 20h14v2H5z" fill="currentColor"/>',
   profil:'<path d="M7 3h10v3a5 5 0 0 1-10 0zM7 4H4v2a3 3 0 0 0 3 3M17 4h3v2a3 3 0 0 1-3 3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 11.5h4v3l2 3H8l2-3zM7 19h10v2H7z" fill="currentColor"/>',
   tuto:'<path d="M12 4 2 9l10 5 10-5zM6 11.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5l-6 3z" fill="currentColor"/>',
@@ -6472,6 +6516,7 @@ function htmlHall(){
         ${tuile("prog-decks", "decks", "Decks", `${PROG.decks.length} / 9 decks`)}
         ${tuile("prog-boutique", "boutique", "Boutique", `Paquets à ${prixPaquet} or`)}
         ${PROG.saison ? tuile("prog-saison", "saison", "Saison", (recompensesSaisonEnAttente() ? `<span class="pastille-recompense">${recompensesSaisonEnAttente()} récompense${recompensesSaisonEnAttente()>1 ? "s" : ""} à réclamer</span>` : "") + `${PROG.saison.finis} / ${PROG.saison.travaux.length} travaux, encore ${joursRestants(PROG.saison.fin)} j`) : ""}
+        ${tuile("prog-classement", "classement", "Classement", p.elo_parties ? `Cote ${nf(p.elo)}` : "Parties en ligne")}
         ${tuile("prog-profil", "profil", "Profil", (recompensesEnAttente() ? `<span class="pastille-recompense">${recompensesEnAttente()} récompense${recompensesEnAttente()>1 ? "s" : ""} à réclamer</span>` : "") + (trophees===null ? "Statistiques et trophées" : `${trophees} / ${TROPHEES.length*4} rangs de trophées`))}
       </nav>
       <nav class="hall-apprendre" aria-label="Apprendre">
@@ -7821,6 +7866,68 @@ function actionFiche(act, id){
     case "fiche-variante-ajouter": { const v = document.getElementById("fiche-variante").value; if(!v) return; faire(rpc("admin_donner_variante", {p_joueur:j, p_variante:v, p_donner:true}), "Illustration offerte."); return; }
     case "fiche-variante-retirer": faire(rpc("admin_donner_variante", {p_joueur:j, p_variante:id, p_donner:false}), "Illustration retirée."); return;
   }
+}
+
+/* ============================================================
+   CLASSEMENT ELO : page, file d’attente, confirmation du résultat
+   ============================================================ */
+async function chargerClassement(){
+  try { PROG.classement = await rpc("classement", {p_limite:100}); } catch(e) { PROG.classement = {erreur:true}; }
+  if(ui.ecran==="classement") renderProg();
+}
+function pageClassement(){
+  const C = PROG.classement;
+  if(!C) { chargerClassement(); return `${entete("Classement")}<p class="attente">Chargement…</p>`; }
+  if(C.erreur) return `${entete("Classement")}<p class="aide">Le classement n’est pas encore disponible.</p>`;
+  const m = C.moi || {};
+  const calibrage = (m.parties || 0) < 10;
+  return `${entete("Classement")}
+    <div class="page-classement">
+      <section class="ma-cote">
+        <div class="cote-grande"><b>${nf(m.elo ?? 1200)}</b><span>votre cote</span></div>
+        <div class="infos-cote">
+          <p>${m.rang ? `<b>${m.rang}<sup>${m.rang===1 ? "er" : "e"}</sup></b> sur ${nf(C.total)} joueurs classés` : "Pas encore classé : jouez une partie en ligne."}</p>
+          <p class="aide">${nf(m.parties || 0)} partie${(m.parties || 0)>1 ? "s" : ""} classée${(m.parties || 0)>1 ? "s" : ""} · meilleure cote : ${nf(m.max ?? 1200)}${calibrage && m.parties ? ` · cote en calibrage (les ${20 - Math.min(20, m.parties)} prochaines parties comptent double)` : ""}</p>
+          <p class="aide">Toutes les parties en ligne comptent, avec un code ou en partie classée. Battre un joueur mieux classé rapporte davantage.</p>
+        </div>
+        <button type="button" class="btn" data-act="en-ligne">Jouer en ligne</button>
+      </section>
+      ${(m.historique || []).length ? `<section><h2>Vos dernières parties classées</h2><div class="historique-elo">${m.historique.map(h =>
+        `<span class="pastille-elo ${h.annule ? "annule" : h.delta>0 ? "elo-gain" : h.delta<0 ? "elo-perte" : ""}" title="${h.annule ? "Résultat contesté : points annulés" : `${h.resultat>0.5 ? "Victoire" : h.resultat<0.5 ? "Défaite" : "Égalité"} contre ${esc(h.adversaire || "un joueur")}`}">${h.annule ? "annulé" : (h.delta>0 ? "+" : "") + h.delta}</span>`).join("")}</div></section>` : ""}
+      <section><h2>Les meilleurs joueurs</h2>
+        ${(C.joueurs || []).length ? `<div class="defile-tableau"><table class="tableau tableau-classement"><thead><tr><th>Rang</th><th>Joueur</th><th>Cote</th><th>Parties</th></tr></thead><tbody>
+          ${C.joueurs.map(j => `<tr class="${j.moi ? "moi" : ""}"><td>${j.rang<=3 ? ["🥇","🥈","🥉"][j.rang-1] : j.rang}</td><td><b>${esc(j.pseudo)}</b>${j.titre ? ` <span class="aide">${esc(j.titre)}</span>` : ""}</td><td><b>${nf(j.elo)}</b></td><td>${nf(j.parties)}</td></tr>`).join("")}
+        </tbody></table></div>` : `<p class="aide">Personne n’est encore classé. Soyez le premier !</p>`}
+      </section>
+    </div>`;
+}
+// ----- File d’attente « Partie classée »
+async function lancerFileClassee(){
+  if(!deckChoisi()) return erreur(`Il vous faut un deck complet de ${REGLES.tailleDeck} cartes pour jouer en ligne.`);
+  Object.assign(EN, {ecran:"file", erreurMenu:"", fileDepuis:Date.now(), fileInfo:null});
+  renderCouche();
+  while(EN.ecran==="file"){
+    let r;
+    try { r = await rpc("chercher_adversaire"); }
+    catch(e) { EN.ecran = "choix"; EN.erreurMenu = /function|does not exist|schema cache/i.test(e.message) ? "La partie classée n’est pas encore disponible sur ce serveur." : e.message; return renderCouche(); }
+    if(EN.ecran!=="file") return;
+    if(r && r.code){
+      EN.adversaireFile = r.adversaire || null;
+      if(r.role==="hote") creerPartie(r.code);
+      else { EN.saisie = r.code; await pause(1200); rejoindre(r.code, 8); }
+      return;
+    }
+    EN.fileInfo = r; renderCouche();
+    await pause(2000);
+  }
+}
+function htmlFileClassee(){
+  const s = Math.round((Date.now() - (EN.fileDepuis || Date.now())) / 1000), ecart = Math.min(1000, 100 + 5 * s);
+  return `<div class="boite" role="dialog" aria-label="Recherche d’un adversaire">
+    <h2>Partie classée</h2>
+    <p class="attente">Recherche d’un adversaire de votre niveau…</p>
+    <p class="aide">Attente : ${s} s. Écart de cote accepté : ±${ecart} (il s’élargit avec l’attente).${PROG.profil && PROG.profil.elo ? ` Votre cote : ${nf(PROG.profil.elo)}.` : ""}</p>
+    <div class="actions"><button type="button" class="btn second" data-act="en-file-annuler">Annuler</button></div></div>`;
 }
 
 chargerConfig();

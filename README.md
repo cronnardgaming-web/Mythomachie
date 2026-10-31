@@ -84,6 +84,13 @@ ou changé leur faction, renvoyez le catalogue depuis l’administration (onglet
 `supabase-admin-joueurs.sql` permet à l’administrateur de corriger l’or et l’encre d’un joueur depuis l’onglet
 « Statistiques » de l’administration (bouton « Modifier » dans la liste des joueurs).
 
+## Classement Elo
+
+`supabase-classement.sql` (à exécuter après les autres scripts) : chaque partie en ligne (avec un code ou par la
+« Partie classée ») met à jour la cote Elo des deux joueurs (1 200 au départ, K = 40 sur les 20 premières parties,
+puis 20). L’invité confirme le résultat ; en cas de désaccord, les points sont annulés et l’onglet Surveillance
+le signale. La « Partie classée » associe automatiquement deux joueurs de niveau proche.
+
 ## Fiche joueur (administration)
 
 `supabase-fiche-joueur.sql` (à exécuter après les autres scripts) : depuis la liste des joueurs, le bouton « Fiche »
