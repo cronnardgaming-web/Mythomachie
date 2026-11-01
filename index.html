@@ -1566,6 +1566,106 @@ body.compact:not(.en-partie) .tuile-hall .tuile-titre{font-size:12.5px;letter-sp
 body.compact:not(.en-partie) .tuile-hall .tuile-info{font-size:11px;line-height:1.2;width:100%}
 body.compact:not(.en-partie) .tuile-hall .pastille-recompense{font-size:10px;padding:1px 6px;white-space:normal}
 @media (max-width:760px){ body:not(.en-partie) .hall-quete{margin-top:0 !important} }
+
+/* =====================================================================
+   PAGE SAISON (v2) : bandeau, récompenses en éventail, colonnes des travaux
+   ===================================================================== */
+.page-saison.v2{display:flex;flex-direction:column;gap:16px}
+.bandeau-saison{position:relative;display:flex;gap:20px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:18px 22px;border-radius:5px;overflow:hidden;
+  background:radial-gradient(120% 160% at 0% 0%, color-mix(in srgb, var(--bronze) 30%, var(--zone)), var(--zone) 62%);
+  border:1px solid var(--filet, var(--line));box-shadow:inset 0 0 0 4px var(--zone), inset 0 0 0 5px var(--filet-doux, transparent), 0 14px 28px -18px rgba(0,0,0,.65)}
+.bandeau-saison::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,transparent,var(--bronze),transparent)}
+.sur-titre{font-family:Cinzel,serif;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2)}
+.titre-bandeau h2{margin:2px 0 6px;font-family:Cinzel,serif;font-size:clamp(22px,2.6vw,30px);background:var(--or-feuille, none);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 1px 0 rgba(0,0,0,.4))}
+.regle-saison{margin:0;max-width:720px;font-size:14px;line-height:1.5}
+.compteurs-bandeau{display:flex;gap:22px}
+.compteurs-bandeau > div{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:110px}
+.compteurs-bandeau b{font-family:Cinzel,serif;font-size:40px;line-height:1;color:color-mix(in srgb, var(--or, var(--bronze)) 85%, var(--ink))}
+.compteurs-bandeau span{font-size:13px;color:var(--ink-2)}
+.compteurs-bandeau small{font-size:12px;color:var(--ink-2);margin-top:2px}
+.corps-saison{display:grid;grid-template-columns:250px minmax(0,1fr);gap:16px;align-items:start}
+/* Récompenses : un éventail vivant, chaque lot légèrement décalé et incliné */
+.recompenses-saison{display:flex;flex-direction:column;gap:10px;padding:12px 12px 16px;border-radius:5px;border:1px solid var(--filet, var(--line));
+  background:linear-gradient(180deg, color-mix(in srgb, var(--bronze) 10%, var(--zone)), var(--zone))}
+.recompenses-saison > h2{margin:0 0 2px;text-align:center;font-family:Cinzel,serif;font-size:18px}
+.lot-saison{position:relative;margin-left:var(--decal);margin-right:calc(18px - var(--decal));padding:10px 10px 8px 46px;border-radius:6px;background:color-mix(in srgb, var(--table) 70%, transparent);border:1px solid var(--filet-doux, var(--line))}
+.lot-saison.atteint{border-color:var(--or, var(--bronze));box-shadow:0 0 18px -6px color-mix(in srgb, var(--or, var(--bronze)) 70%, transparent)}
+.lot-saison.recu{border-color:#2f9e63}
+.seuil-lot{position:absolute;left:-6px;top:10px;width:44px;height:44px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;
+  color:#2b1a06;background:radial-gradient(circle at 35% 30%,#fbe3a4,#c99647 60%,#7d5520);box-shadow:0 0 0 1px #6a4616, 0 3px 8px -2px rgba(0,0,0,.6)}
+.seuil-lot b{font-family:Cinzel,serif;font-size:17px}
+.seuil-lot span{font-size:8px;text-transform:uppercase;letter-spacing:.05em}
+.visuels-lot{display:flex;justify-content:center;padding:4px 0 2px}
+.lot-carte{position:relative;width:96px;transform:rotate(var(--r,0deg));transition:transform .25s;animation:flotter 6s ease-in-out infinite}
+.lot-carte + .lot-carte{margin-left:-36px}
+.lot-saison:nth-child(odd) .lot-carte{animation-delay:-3s}
+.lot-carte .carte{width:96px;font-size:6.4px;box-shadow:0 10px 18px -8px rgba(0,0,0,.75)}
+.lot-carte:hover{transform:rotate(0deg) scale(1.08);z-index:2}
+.lot-illustration .carte{box-shadow:0 0 16px 2px color-mix(in srgb, var(--or, var(--bronze)) 55%, transparent), 0 10px 18px -8px rgba(0,0,0,.75)}
+.ruban{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);white-space:nowrap;font-size:9px;font-weight:700;letter-spacing:.03em;padding:2px 7px;border-radius:99px;color:#2b1a06;background:linear-gradient(180deg,#ffe28a,#e0b13d)}
+.medaillons-lot{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:6px}
+.medaillons-lot span{font-size:12px;padding:2px 9px;border-radius:99px;background:var(--table);border:1px solid var(--filet-doux, var(--line))}
+.etat-lot{display:flex;justify-content:center;margin-top:6px;min-height:4px}
+.etat-lot .btn-rang{width:auto;padding:4px 14px}
+@keyframes flotter{0%,100%{translate:0 0}50%{translate:0 -4px}}
+/* Les travaux : des colonnes illustrées, sur toute la hauteur */
+.travaux-colonnes{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 12px;scroll-snap-type:x proximity}
+.colonne-travail{position:relative;flex:0 0 200px;height:clamp(460px, 64vh, 640px);border-radius:6px;overflow:hidden;scroll-snap-align:start;display:flex;flex-direction:column;
+  background:linear-gradient(180deg, color-mix(in srgb, var(--bronze) 18%, var(--zone)), var(--zone));border:1px solid var(--filet, var(--line));
+  box-shadow:inset 0 0 0 3px rgba(0,0,0,.18), 0 14px 26px -16px rgba(0,0,0,.7)}
+.fond-travail{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.72) brightness(.78) contrast(1.02);transform:scale(1.02)}
+.colonne-travail::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg, rgba(12,10,8,.72) 0%, rgba(12,10,8,.05) 26%, rgba(12,10,8,.05) 46%, rgba(12,10,8,.86) 78%, rgba(12,10,8,.94) 100%)}
+.filigrane{position:absolute;inset:0;display:grid;place-items:center;font-family:Cinzel,serif;font-size:96px;font-weight:700;color:color-mix(in srgb, var(--bronze) 30%, transparent);pointer-events:none}
+.colonne-travail > header{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 10px 0;text-align:center}
+.colonne-travail .num-travail{min-width:38px;height:38px;border-radius:19px;display:grid;place-items:center;font-family:Cinzel,serif;font-weight:700;font-size:14px;color:#2b1a06;
+  background:radial-gradient(circle at 35% 30%,#fbe3a4,#c99647 60%,#7d5520);box-shadow:0 0 0 1px #6a4616, 0 3px 8px -2px rgba(0,0,0,.6)}
+.colonne-travail h3{margin:0;font-family:Cinzel,serif;font-size:15px;line-height:1.25;color:#f4ead2;text-shadow:0 1px 3px rgba(0,0,0,.9)}
+.colonne-travail .sceau{position:absolute;top:10px;right:10px}
+.corps-travail{position:relative;z-index:1;margin-top:auto;padding:10px;color:#efe6d2}
+.corps-travail .desc-travail{color:#d9cfb8;font-size:12px;margin:0 0 8px}
+.corps-travail .quetes-travail{list-style:none;margin:0;padding:8px;display:flex;flex-direction:column;gap:8px;border-radius:5px;background:rgba(10,8,6,.55);backdrop-filter:blur(2px)}
+.corps-travail .quetes-travail li{display:flex !important;flex-direction:column;align-items:stretch;gap:4px;text-align:left;grid-template-columns:none}
+.corps-travail .quetes-travail li > *{grid-column:auto !important;grid-row:auto !important;justify-self:auto !important}
+.corps-travail .quetes-travail .texte-q{font-size:12.5px;line-height:1.3;color:#f1e8d4}
+.corps-travail .quetes-travail .barre{display:block;width:100%;height:5px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,.16)}
+.corps-travail .quetes-travail .barre > span{display:block;height:100%;background:linear-gradient(90deg,#2f9e63,#55d68f)}
+.corps-travail .quetes-travail li.faite .barre > span{background:#7d8a80}
+.corps-travail .quetes-travail{gap:7px}
+.corps-travail .quetes-travail li{display:flex;flex-direction:column;gap:3px;font-size:12.5px}
+.corps-travail .barre{height:5px;background:rgba(255,255,255,.14)}
+.pied-q{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.pied-q .aide{color:#cfc4ac;font-size:11px}
+.pied-q .prog-q{font-size:11px;color:#cfc4ac}
+.corps-travail .btn-rang{width:auto;padding:3px 9px;font-size:11px}
+.corps-travail li.faite .texte-q{text-decoration:line-through;opacity:.7}
+.verrou-travail{position:relative;z-index:1;margin-top:auto;padding:14px 10px 18px;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;color:#efe6d2}
+.verrou-travail .cadenas-travail{font-size:26px;line-height:1;filter:drop-shadow(0 2px 3px rgba(0,0,0,.8))}
+.verrou-travail b{font-family:Cinzel,serif;font-size:16px;letter-spacing:.06em}
+.verrou-travail span{font-size:13px}
+.verrou-travail small{font-size:11px;color:#cfc4ac}
+.colonne-travail.ferme .fond-travail{filter:grayscale(.85) brightness(.5)}
+.colonne-travail.ferme .filigrane{opacity:.55}
+.colonne-travail.ouvert{border-color:var(--or, var(--bronze))}
+.colonne-travail.fini{border-color:#2f9e63}
+.colonne-travail.fini .fond-travail{filter:saturate(.9) brightness(.8)}
+/* Accueil et collection */
+.pastille-ouverture{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px;margin-right:6px;background:var(--table);border:1px solid var(--filet, var(--line));color:var(--ink-2)}
+.badge-saison{position:absolute;top:-7px;left:50%;transform:translateX(-50%);z-index:3;font-size:10px;font-weight:700;letter-spacing:.04em;padding:1px 8px;border-radius:99px;color:#2b1a06;background:linear-gradient(180deg,#ffe28a,#e0b13d);box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.note-saison{padding:8px 10px;border-radius:6px;border-left:3px solid var(--or, var(--bronze));background:color-mix(in srgb, var(--bronze) 12%, var(--table));font-size:14px}
+.illustration-travail-admin{display:flex;gap:12px;align-items:flex-start;margin:8px 0;padding:8px;border:1px dashed var(--line);border-radius:8px}
+.apercu-travail{flex:0 0 70px;height:160px;border-radius:6px;overflow:hidden;display:grid;place-items:center;background:var(--table);font-family:Cinzel,serif;font-size:22px;color:var(--ink-2)}
+.apercu-travail img{width:100%;height:100%;object-fit:cover}
+@media (max-width:900px){
+  .corps-saison{grid-template-columns:1fr}
+  .recompenses-saison{flex-direction:row;overflow-x:auto;align-items:stretch}
+  .recompenses-saison > h2{writing-mode:vertical-rl;transform:rotate(180deg);margin:0}
+  .lot-saison{flex:0 0 200px;margin:0}
+  .colonne-travail{flex-basis:170px;height:420px}
+}
+body.compact .colonne-travail{height:300px;flex-basis:150px}
+body.compact .compteurs-bandeau b{font-size:28px}
+@media (prefers-reduced-motion: reduce){ .lot-carte{animation:none} }
 </style>
 </head>
 <body>
@@ -3511,6 +3611,10 @@ function cibleImage(cle){
     const v = CONFIG.variantes && CONFIG.variantes[id];
     return {obj:v, focusY:0.5, formats:[{cle:"imageHD", L:896, H:1152, q:0.9, hd:true}, {cle:"image", L:448, H:576, q:0.85}]};
   }
+  if(type==="travail"){
+    const [sid, k] = id.split("|"), s = CONFIG.saisons && CONFIG.saisons[sid];
+    return {obj:s && s.travaux && s.travaux[k], focusY:0.35, formats:[{cle:"image", L:520, H:1200, q:0.85, hd:true}]};
+  }
   if(type==="heros"){
     if(!CONFIG.heros) CONFIG.heros = {};
     if(!CONFIG.heros[id]) CONFIG.heros[id] = copie(HEROS_DEFAUT);
@@ -3604,6 +3708,11 @@ document.addEventListener("pointerdown", e => {
   if(z) viserCollage(z.dataset.depot);
 }, true);
 document.addEventListener("paste", e => {
+  if(ui.ecran==="admin" && adm.onglet==="saisons" && adm.cibleCollage && adm.cibleCollage.startsWith("travail:")){
+    const it2 = [...((e.clipboardData && e.clipboardData.items) || [])].find(i => i.kind==="file" && i.type.startsWith("image/"));
+    if(it2){ e.preventDefault(); adm.travailOuvert = Number(adm.cibleCollage.split("|")[1]); chargerImage(adm.cibleCollage, it2.getAsFile()); }
+    return;
+  }
   if(ui.ecran!=="admin" || adm.onglet!=="cartes" || !adm.sel) return;
   const items = [...((e.clipboardData && e.clipboardData.items) || [])];
   const it = items.find(i => i.kind==="file" && i.type.startsWith("image/"));
@@ -4622,7 +4731,8 @@ function pageCollection(){
     <div class="grille">${ids.map(id => {
       const nb = PROG.collection[id] || 0;
       const alts = Object.keys(CONFIG.variantes || {}).filter(v => CONFIG.variantes[v].carte===id), altPossedee = alts.some(v => (PROG.variantes || {})[v]);
-      return `<div class="col-item ${nb ? "" : "manque"}">${alts.length ? `<span class="etoile-alt ${altPossedee ? "possedee" : ""}" title="${altPossedee ? "Vous possédez une illustration alternative de cette carte" : "Illustration alternative à découvrir"}" aria-label="Illustration alternative">${altPossedee ? "★" : "☆"}</span>` : ""}${htmlCarte({id, uid:id, v:prefVariantes()[id]}, {act:"col-sel", id})}<span class="badge-nb">${nb ? "×" + nb : "0"}</span></div>`;
+      const saisonEnCours = CARTES[id].saisonFin && new Date(CARTES[id].saisonFin + "T23:59:59") > new Date();
+      return `<div class="col-item ${nb ? "" : "manque"}">${saisonEnCours ? `<span class="badge-saison" title="Carte de saison : dans les paquets à la fin de la saison">Saison</span>` : ""}${alts.length ? `<span class="etoile-alt ${altPossedee ? "possedee" : ""}" title="${altPossedee ? "Vous possédez une illustration alternative de cette carte" : "Illustration alternative à découvrir"}" aria-label="Illustration alternative">${altPossedee ? "★" : "☆"}</span>` : ""}${htmlCarte({id, uid:id, v:prefVariantes()[id]}, {act:"col-sel", id})}<span class="badge-nb">${nb ? "×" + nb : "0"}</span></div>`;
     }).join("") || `<p class="aide">Aucune carte ne correspond à ces filtres.</p>`}</div>`;
 }
 // Grande vue : l’illustration seule, puis le texte de la carte en dessous
@@ -4662,6 +4772,7 @@ function htmlZoom(){
         <p class="meta">${NOMS_RARETE[r]}, ${esc(fac)}</p>
         ${d.depart || d.base ? `<p>${d.base ? "Toujours disponible au marché, à chaque partie." : `Carte de départ : vous commencez chaque partie avec <b>${(REGLES.deckDepart || {})[id] || 0}</b> exemplaire${((REGLES.deckDepart || {})[id] || 0)>1 ? "s" : ""}.`} Elle ne se fabrique pas et ne se recycle pas.</p>` : `
         <p>Vous en possédez <b>${nb}</b>${nb ? "" : " : son illustration est floutée tant que vous ne l’avez pas"}. Un deck peut en contenir ${mx}.</p>
+        ${d.saisonFin && new Date(d.saisonFin + "T23:59:59") > new Date() ? `<p class="note-saison"><b>Carte de saison.</b> Elle s’obtient en accomplissant les travaux de la saison en cours, et sera disponible dans les boosters à la fin de la saison, le ${new Date(d.saisonFin + "T00:00:00").toLocaleDateString("fr-FR", {day:"numeric", month:"long", year:"numeric"})}. D’ici là, elle ne se fabrique pas.</p>` : ""}
         <p class="meta">Votre encre : ${encre}</p>
         <div class="actions">
           ${d.promo ? `<p class="meta">Carte promotionnelle : elle ne se fabrique pas et ne se recycle pas.</p>` : `<button type="button" class="btn" data-act="col-fabriquer" data-id="${id}" ${nb>=mx || encre<cout || PROG.occupe ? "disabled" : ""}>Fabriquer (${cout} encre)</button>`}
@@ -6752,7 +6863,8 @@ function htmlHall(){
         ${tuile("prog-collection", "collection", "Collection", `${possedees} / ${total} cartes`)}
         ${tuile("prog-decks", "decks", "Decks", `${PROG.decks.length} / 9 decks`)}
         ${tuile("prog-boutique", "boutique", "Boutique", `Paquets à ${prixPaquet} or`)}
-        ${PROG.saison ? tuile("prog-saison", "saison", "Saison", (recompensesSaisonEnAttente() ? `<span class="pastille-recompense">${recompensesSaisonEnAttente()} récompense${recompensesSaisonEnAttente()>1 ? "s" : ""} à réclamer</span>` : "") + `${PROG.saison.finis} / ${PROG.saison.travaux.length} travaux, encore ${joursRestants(PROG.saison.fin)} j`) : ""}
+        ${PROG.saison ? tuile("prog-saison", "saison", "Saison", PROG.saison.a_venir ? `<span class="pastille-ouverture">Fermée</span>Ouverture le ${new Date(PROG.saison.debut + "T00:00:00").toLocaleDateString("fr-FR", {day:"numeric", month:"long"})}`
+          : (recompensesSaisonEnAttente() ? `<span class="pastille-recompense">${recompensesSaisonEnAttente()} récompense${recompensesSaisonEnAttente()>1 ? "s" : ""} à réclamer</span>` : "") + `${PROG.saison.finis} / ${PROG.saison.travaux.length} travaux, encore ${joursRestants(PROG.saison.fin)} j`) : ""}
         ${PROG.actif && PROG.pret ? tuile("prog-amis", "amis", "Amis", (demandesAmis() ? `<span class="pastille-recompense">${demandesAmis()} demande${demandesAmis()>1 ? "s" : ""}</span>` : "") + (SOC.amis && (SOC.amis.amis || []).length ? `${(SOC.amis.amis || []).filter(a => a.en_ligne).length} en ligne sur ${SOC.amis.amis.length}` : "Défiez vos amis")) : ""}
         ${tuile("prog-classement", "classement", "Classement", p.elo_parties ? `Cote ${nf(p.elo)}` : "Parties en ligne")}
         ${tuile("prog-profil", "profil", "Profil", (recompensesEnAttente() ? `<span class="pastille-recompense">${recompensesEnAttente()} récompense${recompensesEnAttente()>1 ? "s" : ""} à réclamer</span>` : "") + (trophees===null ? "Statistiques et trophées" : `${trophees} / ${TROPHEES.length*4} rangs de trophées`))}
@@ -7802,6 +7914,14 @@ function admSaisons(){
         <summary><b>${k+1}. ${esc(t.nom || "Travail")}</b> <span class="aide">ouverture le ${dateSaison(s, t.ouverture_jour ?? ouvertureTravail(k))}, ${(t.quetes || []).length} quêtes</span></summary>
         <div class="champs">${champTexte("Nom", `saisons.${sid}.travaux.${k}.nom`, t.nom || "")}${champTexte("Description", `saisons.${sid}.travaux.${k}.description`, t.description || "")}
           ${champNombre("Ouverture (jours après le début)", `saisons.${sid}.travaux.${k}.ouverture_jour`, t.ouverture_jour ?? ouvertureTravail(k))}</div>
+        <div class="illustration-travail-admin" data-depot="travail:${sid}|${k}">
+          <div class="apercu-travail">${t.image ? `<img src="${t.image}" alt="Illustration du travail ${k+1}">` : `<span>${ROMAINS[k] || k + 1}</span>`}</div>
+          <div><p class="aide">Illustration verticale (elle occupe toute la hauteur de la colonne, recadrée si besoin). Copiez une image puis cliquez sur « Coller », ou cliquez dans ce cadre et faites Ctrl+V.</p>
+            <input type="file" accept="image/*" data-image="travail:${sid}|${k}" hidden>
+            <div class="adm-actions"><button type="button" class="btn second" data-act="image-choisir" data-id="travail:${sid}|${k}">${t.image ? "Changer l’illustration" : "Choisir un fichier"}</button>
+              <button type="button" class="btn second" data-act="image-coller" data-id="travail:${sid}|${k}">Coller l’image copiée</button>
+              ${t.image ? `<button type="button" class="btn-discret" data-act="saison-image-suppr" data-id="${sid}|${k}">Retirer</button>` : ""}</div></div>
+        </div>
         ${(t.quetes || []).map((q, n) => { const tq = TYPES_QUETES_SAISON[q.type] || []; const base = `saisons.${sid}.travaux.${k}.quetes.${n}`; return `<div class="quete-admin">
           <label class="champ"><span>Type</span><select data-saison-type="${base}">${Object.entries(TYPES_QUETES_SAISON).map(([v, [l]]) => `<option value="${v}" ${q.type===v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
           ${champNombre("Objectif", base + ".but", q.but)}
@@ -7828,12 +7948,13 @@ function actionSaisons(act, id){
     case "saison-suppr": if(confirm("Supprimer cette saison de la configuration ?")){ delete CONFIG.saisons[id]; adm.saison = null; sauver(); } break;
     case "saison-quete-ajouter": { const [sid, k] = id.split("|"); const t = CONFIG.saisons[sid].travaux[k]; t.quetes = t.quetes || [];
         const q = {id:`t${Number(k)+1}q${Date.now().toString(36)}`, type:"parties", but:3, recompense:{or:20}}; q.texte = texteQueteSaison(q); t.quetes.push(q); adm.travailOuvert = Number(k); sauver(); break; }
+    case "saison-image-suppr": { const [sid, k] = id.split("|"); delete CONFIG.saisons[sid].travaux[k].image; adm.travailOuvert = Number(k); sauver(); break; }
     case "saison-quete-suppr": { const [sid, k, n] = id.split("|"); CONFIG.saisons[sid].travaux[k].quetes.splice(Number(n), 1); adm.travailOuvert = Number(k); sauver(); break; }
     case "saison-envoyer": {
       const s = CONFIG.saisons[id];
       // Textes des quêtes regénérés pour suivre leur type et leur objectif
       (s.travaux || []).forEach(t => (t.quetes || []).forEach(q => { q.texte = texteQueteSaison(q); }));
-      rpc("admin_maj_saison", {p:{id, ...s}}).then(() => erreur(`Saison « ${s.nom} » envoyée au serveur.`), e => erreur(messageScriptManquant ? messageScriptManquant(e.message).replace("supabase-stats.sql", "supabase-saisons.sql") : e.message));
+      rpc("admin_maj_saison", {p:{id, ...s, travaux:(s.travaux || []).map(({image, ...t}) => t)}}).then(() => erreur(`Saison « ${s.nom} » envoyée au serveur.`), e => erreur(messageScriptManquant ? messageScriptManquant(e.message).replace("supabase-stats.sql", "supabase-saisons.sql") : e.message));
       return true;
     }
     default: return false;
@@ -7859,10 +7980,6 @@ document.addEventListener("toggle", e => { const t = e.target; if(t.classList &&
 /* ============================================================
    SAISON : page des joueurs
    ============================================================ */
-async function chargerSaison(){
-  try { PROG.saison = await rpc("ma_saison"); } catch(e) { PROG.saison = null; }
-  PROG.saisonQuand = Date.now();
-}
 const joursRestants = d => Math.max(0, Math.ceil((new Date(d) - Date.now()) / 864e5));
 function texteRecompenseSaison(r){
   if(!r) return "";
@@ -7876,51 +7993,11 @@ function texteRecompenseSaison(r){
   return l.join(", ");
 }
 function recompensesSaisonEnAttente(){
-  const s = PROG.saison; if(!s) return 0;
+  const s = PROG.saison; if(!s || s.a_venir) return 0;
   let n = 0;
   s.travaux.forEach(t => t.ouvert && t.quetes.forEach(q => { if(!q.faite && q.progres>=q.but) n++; }));
   (s.paliers || []).forEach((p, k) => { if(s.finis>=p.travaux && !(s.paliers_reclames || []).includes(String(k))) n++; });
   return n;
-}
-function pageSaison(){
-  const s = PROG.saison;
-  if(!s) return `${entete("Saison")}<div class="page-saison"><p class="aide">Aucune saison n’est en cours pour le moment. Revenez bientôt !</p></div>`;
-  const total = s.travaux.length, jr = joursRestants(s.fin);
-  const etatPalier = (p, k) => ({atteint:s.finis>=p.travaux, recu:(s.paliers_reclames || []).includes(String(k))});
-  const paliers = (s.paliers || []).map((p, k) => { const e = etatPalier(p, k);
-    return `<span class="palier-saison ${e.atteint ? "atteint" : ""} ${e.recu ? "recu" : ""}" style="left:${100*p.travaux/total}%"><span class="borne">${p.travaux}</span></span>`; }).join("");
-  const cartesPaliers = (s.paliers || []).map((p, k) => { const e = etatPalier(p, k);
-    return `<div class="info-palier ${e.atteint ? "atteint" : ""} ${e.recu ? "recu" : ""}"><b>${p.travaux} travaux accomplis</b><span>${esc(texteRecompenseSaison(p.recompense))}</span>
-      ${e.recu ? `<span class="recu-palier">✓ Obtenue</span>` : e.atteint ? `<button type="button" class="btn btn-rang" data-act="saison-palier" data-id="${k}">Réclamer</button>` : `<span class="aide">Encore ${p.travaux - s.finis}</span>`}</div>`; }).join("");
-  const travaux = s.travaux.map((t, k) => {
-    const ouv = new Date(t.ouverture), etat = t.fini ? "fini" : t.ouvert ? "ouvert" : "verrouille";
-    const quetes = t.ouvert ? t.quetes.map(q => {
-      const fini = q.progres>=q.but;
-      return `<li class="${q.faite ? "faite" : fini ? "finie" : ""}"><span class="texte-q">${esc(q.texte)}</span>
-        <span class="barre"><span style="width:${Math.min(100, 100*q.progres/q.but)}%"></span></span>
-        <span class="prog-q">${q.faite ? "✓" : `${q.progres} / ${q.but}`}</span>
-        ${q.faite ? `<span class="aide">${esc(texteRecompenseSaison(q.recompense))}</span>`
-          : fini ? `<button type="button" class="btn btn-rang" data-act="saison-quete" data-id="${esc(q.id)}">+${esc(texteRecompenseSaison(q.recompense))}</button>`
-          : `<span class="aide">${esc(texteRecompenseSaison(q.recompense))}</span>`}</li>`;
-    }).join("") : "";
-    return `<article class="travail ${etat}">
-      <header><span class="num-travail">${["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"][k] || k + 1}</span><b>${esc(t.nom)}</b>${t.fini ? `<span class="sceau" aria-label="Travail accompli">✓</span>` : ""}</header>
-      ${t.description ? `<p class="desc-travail">${esc(t.description)}</p>` : ""}
-      ${t.ouvert ? `<ul class="quetes-travail">${quetes}</ul>` : `<p class="verrou">🔒 S’ouvre le ${ouv.toLocaleDateString("fr-FR", {weekday:"long", day:"numeric", month:"long"})}${joursRestants(ouv) ? ` (dans ${joursRestants(ouv)} jour${joursRestants(ouv)>1 ? "s" : ""})` : ""}</p>`}
-    </article>`;
-  }).join("");
-  return `${entete("Saison")}
-    <div class="page-saison">
-      <section class="tete-saison">
-        <div><h2>${esc(s.nom)}</h2><p class="aide">Du ${new Date(s.debut + "T00:00:00").toLocaleDateString("fr-FR", {day:"numeric", month:"long"})} au ${new Date(s.fin).toLocaleDateString("fr-FR", {day:"numeric", month:"long"})}. ${jr ? `Encore ${jr} jour${jr>1 ? "s" : ""}.` : "Dernier jour !"} Deux travaux s’ouvrent chaque semaine ; une quête compte les parties jouées contre l’ordinateur ou en ligne depuis l’ouverture de son travail.</p></div>
-        <div class="compte-saison"><b>${s.finis}</b> / ${total}<span>travaux accomplis</span></div>
-      </section>
-      <section class="frise-saison" aria-label="Paliers de récompenses">
-        <div class="piste"><span class="remplie" style="width:${100*s.finis/total}%"></span>${paliers}</div>
-        <div class="recompenses-paliers">${cartesPaliers}</div>
-      </section>
-      <section class="travaux">${travaux}</section>
-    </div>`;
 }
 
 /* ============================================================
@@ -8455,6 +8532,71 @@ document.addEventListener("change", async e => {
   }
   PROG.importSim = null; chargerAdminStats();
 });
+
+/* ============================================================
+   SAISON : page des joueurs (bandeau, récompenses, colonnes des travaux)
+   ============================================================ */
+async function chargerSaison(){
+  let s = null;
+  try { s = await rpc("ma_saison"); } catch(e) {}
+  if(!s) { try { s = await rpc("saison_a_venir"); } catch(e) {} }
+  PROG.saison = s || null;
+  PROG.saisonQuand = Date.now();
+}
+const ROMAINS = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
+const imageTravail = (sid, k) => { const s = CONFIG.saisons && CONFIG.saisons[sid]; const t = s && (s.travaux || [])[k]; return t && t.image || ""; };
+const dateLongue = d => new Date(d).toLocaleDateString("fr-FR", {weekday:"long", day:"numeric", month:"long"});
+function htmlRecompensesSaison(s){
+  const recu = k => (s.paliers_reclames || []).includes(String(k));
+  return (s.paliers || []).map((p, k) => {
+    const r = p.recompense || {}, atteint = s.finis>=p.travaux && !s.a_venir;
+    const visuels = [
+      ...(r.cartes || []).filter(c => CARTES[c]).map((c, n) => `<div class="lot-carte" style="--r:${(n%2 ? 5 : -6) + k*2}deg">${htmlCarte({id:c, uid:`rec-${k}-${n}`})}</div>`),
+      ...(r.variantes || []).filter(v => CONFIG.variantes && CONFIG.variantes[v] && CARTES[CONFIG.variantes[v].carte]).map((v, n) =>
+        `<div class="lot-carte lot-illustration" style="--r:${(n%2 ? -4 : 6)}deg">${htmlCarte({id:CONFIG.variantes[v].carte, v, uid:`recv-${k}-${n}`})}<span class="ruban">Illustration exclusive</span></div>`)
+    ].join("");
+    const autres = [r.or ? `${r.or} or` : "", r.encre ? `${r.encre} encre` : "", ...(r.paquets || []).map(NOM_PAQUET), r.titre ? `Titre « ${r.titre} »` : ""].filter(Boolean);
+    return `<div class="lot-saison ${atteint ? "atteint" : ""} ${recu(k) ? "recu" : ""}" style="--decal:${k%2 ? 18 : 0}px">
+      <div class="seuil-lot"><b>${p.travaux}</b><span>travaux</span></div>
+      ${visuels ? `<div class="visuels-lot">${visuels}</div>` : ""}
+      ${autres.length ? `<div class="medaillons-lot">${autres.map(a => `<span>${esc(a)}</span>`).join("")}</div>` : ""}
+      <div class="etat-lot">${recu(k) ? `<span class="recu-palier">✓ Obtenue</span>` : atteint ? `<button type="button" class="btn btn-rang" data-act="saison-palier" data-id="${k}">Réclamer</button>` : s.a_venir ? "" : `<span class="aide">Encore ${p.travaux - s.finis}</span>`}</div>
+    </div>`;
+  }).join("");
+}
+function htmlColonneTravail(s, t, k){
+  const img = imageTravail(s.id, k), etat = t.fini ? "fini" : t.ouvert ? "ouvert" : "ferme", jr = joursRestants(t.ouverture);
+  const quetes = t.ouvert ? t.quetes.map(q => { const fini = q.progres>=q.but;
+    return `<li class="${q.faite ? "faite" : fini ? "finie" : ""}"><span class="texte-q">${esc(q.texte)}</span>
+      <span class="barre"><span style="width:${Math.min(100, 100*q.progres/q.but)}%"></span></span>
+      <span class="pied-q"><span class="prog-q">${q.faite ? "✓" : `${q.progres} / ${q.but}`}</span>${q.faite ? "" : fini ? `<button type="button" class="btn btn-rang" data-act="saison-quete" data-id="${esc(q.id)}">+${esc(texteRecompenseSaison(q.recompense))}</button>` : `<span class="aide">${esc(texteRecompenseSaison(q.recompense))}</span>`}</span></li>`; }).join("") : "";
+  return `<article class="colonne-travail ${etat} ${img ? "illustree" : ""}" aria-label="Travail ${k+1} : ${esc(t.nom)}">
+    ${img ? `<img class="fond-travail" src="${img}" alt="" loading="lazy">` : `<span class="filigrane" aria-hidden="true">${ROMAINS[k] || k + 1}</span>`}
+    <header><span class="num-travail">${ROMAINS[k] || k + 1}</span><h3>${esc(t.nom)}</h3>${t.fini ? `<span class="sceau" aria-label="Travail accompli">✓</span>` : ""}</header>
+    ${t.ouvert ? `<div class="corps-travail">${t.description ? `<p class="desc-travail">${esc(t.description)}</p>` : ""}<ul class="quetes-travail">${quetes}</ul></div>`
+      : `<div class="verrou-travail"><span class="cadenas-travail" aria-hidden="true">🔒</span><b>Fermé</b><span>Ouvre le ${dateLongue(t.ouverture)}</span>${jr ? `<small>dans ${jr} jour${jr>1 ? "s" : ""}</small>` : ""}</div>`}
+  </article>`;
+}
+function pageSaison(){
+  const s = PROG.saison;
+  if(!s) return `${entete("Saison")}<div class="page-saison"><p class="aide">Aucune saison n’est prévue pour le moment. Revenez bientôt !</p></div>`;
+  const total = s.travaux.length, jrOuv = joursRestants(s.debut + "T00:00:00"), jrFin = joursRestants(s.fin);
+  return `${entete("Saison")}
+    <div class="page-saison v2">
+      <section class="bandeau-saison">
+        <div class="titre-bandeau"><span class="sur-titre">${s.a_venir ? "Prochaine saison" : "Saison en cours"}</span><h2>${esc(s.nom)}</h2>
+          <p class="regle-saison">Les travaux s’ouvrent à intervalles réguliers, deux par semaine. Chacun propose une série de quêtes : terminez-les pour accomplir le travail, et franchissez les paliers pour gagner les récompenses.</p></div>
+        <div class="compteurs-bandeau">
+          ${s.a_venir ? `<div><b>${jrOuv}</b><span>jour${jrOuv>1 ? "s" : ""} avant l’ouverture</span><small>${dateLongue(s.debut + "T00:00:00")}</small></div>`
+            : `<div><b>${s.finis}</b><span>/ ${total} travaux accomplis</span></div><div><b>${jrFin}</b><span>jour${jrFin>1 ? "s" : ""} restant${jrFin>1 ? "s" : ""}</span><small>fin le ${dateLongue(s.fin)}</small></div>`}
+        </div>
+      </section>
+      <div class="corps-saison">
+        <aside class="recompenses-saison" aria-label="Récompenses à gagner"><h2>À gagner</h2>${htmlRecompensesSaison(s)}</aside>
+        <section class="travaux-colonnes" aria-label="Les travaux">${s.travaux.map((t, k) => htmlColonneTravail(s, t, k)).join("")}</section>
+      </div>
+    </div>`;
+}
 
 chargerConfig();
 appliquerReglageAnimations();

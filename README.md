@@ -84,6 +84,12 @@ ou changé leur faction, renvoyez le catalogue depuis l’administration (onglet
 `supabase-admin-joueurs.sql` permet à l’administrateur de corriger l’or et l’encre d’un joueur depuis l’onglet
 « Statistiques » de l’administration (bouton « Modifier » dans la liste des joueurs).
 
+## Saison à venir
+
+`supabase-saison-a-venir.sql` (après `supabase-saisons.sql`) : une saison active dont la date de début n’est pas
+encore arrivée apparaît sur l’accueil (« Ouverture le … ») et sa page se visite en aperçu (travaux fermés, récompenses).
+Les illustrations des travaux s’ajoutent dans l’onglet Saisons et restent dans config.json.
+
 ## Correctif des fonctions de statistiques
 
 `supabase-correctif-fonctions-stats.sql` (après `supabase-simulations.sql`) : si les statistiques affichent
