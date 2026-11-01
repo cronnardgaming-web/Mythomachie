@@ -972,6 +972,17 @@ body.compact .nom-heros-deck{font-size:17px}
 .chiffres-valeur{display:flex;gap:16px;flex-wrap:wrap;font-size:14px}
 .valeur-carte .aide{margin:4px 0 0;font-size:12px}
 
+/* Recadrage des illustrations de la saison */
+.cadreur-bloc{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none}
+.cadreur{position:relative;overflow:hidden;border-radius:6px;background:var(--table);border:2px solid var(--line);cursor:grab;touch-action:none;user-select:none}
+.cadreur.en-glisse{cursor:grabbing;border-color:var(--or, var(--bronze))}
+.cadreur img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.cadreur-vide{position:absolute;inset:0;display:grid;place-items:center;font-size:12px;color:var(--ink-2)}
+.cadreur-aide{position:absolute;right:4px;bottom:4px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:13px;background:rgba(0,0,0,.55);color:#fff;pointer-events:none}
+.cadreur-zoom{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2)}
+.cadreur-zoom input{width:110px}
+.accueil-admin .cadreur-zoom input{width:200px}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -3664,7 +3675,13 @@ function cibleImage(cle){
     const v = CONFIG.variantes && CONFIG.variantes[id];
     return {obj:v, focusY:0.5, formats:[{cle:"imageHD", L:896, H:1152, q:0.9, hd:true}, {cle:"image", L:448, H:576, q:0.85}]};
   }
+  if(type==="accueil"){
+    const s = CONFIG.saisons && CONFIG.saisons[id];
+    if(s) s.accueilCadrage = {...cadrageVide};
+    return {obj:s, focusY:0.4, formats:[{cle:"accueilImage", L:900, H:768, q:0.85, hd:true}]};
+  }
   if(type==="travail"){
+    const [sidT, kT] = id.split("|"), tt = confTravail(sidT, kT); if(tt) tt.cadrage = {...cadrageVide};
     const [sid, k] = id.split("|"), s = CONFIG.saisons && CONFIG.saisons[sid];
     return {obj:s && s.travaux && s.travaux[k], focusY:0.35, formats:[{cle:"image", L:520, H:1200, q:0.85, hd:true}]};
   }
@@ -3761,9 +3778,9 @@ document.addEventListener("pointerdown", e => {
   if(z) viserCollage(z.dataset.depot);
 }, true);
 document.addEventListener("paste", e => {
-  if(ui.ecran==="admin" && adm.onglet==="saisons" && adm.cibleCollage && adm.cibleCollage.startsWith("travail:")){
+  if(ui.ecran==="admin" && adm.onglet==="saisons" && adm.cibleCollage && /^(travail|accueil):/.test(adm.cibleCollage)){
     const it2 = [...((e.clipboardData && e.clipboardData.items) || [])].find(i => i.kind==="file" && i.type.startsWith("image/"));
-    if(it2){ e.preventDefault(); adm.travailOuvert = Number(adm.cibleCollage.split("|")[1]); chargerImage(adm.cibleCollage, it2.getAsFile()); }
+    if(it2){ e.preventDefault(); if(adm.cibleCollage.startsWith("travail:")) adm.travailOuvert = Number(adm.cibleCollage.split("|")[1]); chargerImage(adm.cibleCollage, it2.getAsFile()); }
     return;
   }
   if(ui.ecran!=="admin" || adm.onglet!=="cartes" || !adm.sel) return;
@@ -7960,6 +7977,15 @@ function admSaisons(){
       <label class="case"><input type="checkbox" data-act="saison-active" data-id="${sid}" ${s.active ? "checked" : ""}> Saison active (visible des joueurs pendant ses dates)</label>
       <div class="adm-actions"><button type="button" class="btn" data-act="saison-envoyer" data-id="${sid}">Envoyer la saison au serveur</button>
         <button type="button" class="btn-discret" data-act="saison-suppr" data-id="${sid}">Supprimer cette saison</button></div>
+      <h3>Bloc de l’accueil</h3>
+      <div class="illustration-travail-admin accueil-admin" data-depot="accueil:${sid}">
+        ${htmlCadreur(`accueil:${sid}`, imageAccueilSaison(sid), s.accueilCadrage, 300, 256, "l’image du bloc de l’accueil")}
+        <div><p class="aide">Le grand bloc « Saison » de l’accueil. ${s.accueilImage ? "Il utilise sa propre image." : "Sans image propre, il reprend l’illustration du premier travail illustré."} Faites glisser l’image pour la cadrer, et réglez le zoom.</p>
+          <input type="file" accept="image/*" data-image="accueil:${sid}" hidden>
+          <div class="adm-actions"><button type="button" class="btn second" data-act="image-choisir" data-id="accueil:${sid}">${s.accueilImage ? "Changer l’image" : "Choisir une image propre"}</button>
+            <button type="button" class="btn second" data-act="image-coller" data-id="accueil:${sid}">Coller l’image copiée</button>
+            ${s.accueilImage ? `<button type="button" class="btn-discret" data-act="saison-accueil-suppr" data-id="${sid}">Reprendre l’illustration du premier travail</button>` : ""}</div></div>
+      </div>
       <h3>Paliers de récompenses</h3>
       ${(s.paliers || []).map((pl, k) => `<fieldset class="palier-admin"><legend>Palier ${k+1}</legend>
         ${champNombre("Travaux finis requis", `saisons.${sid}.paliers.${k}.travaux`, pl.travaux)}
@@ -7970,8 +7996,8 @@ function admSaisons(){
         <div class="champs">${champTexte("Nom", `saisons.${sid}.travaux.${k}.nom`, t.nom || "")}${champTexte("Description", `saisons.${sid}.travaux.${k}.description`, t.description || "")}
           ${champNombre("Ouverture (jours après le début)", `saisons.${sid}.travaux.${k}.ouverture_jour`, t.ouverture_jour ?? ouvertureTravail(k))}</div>
         <div class="illustration-travail-admin" data-depot="travail:${sid}|${k}">
-          <div class="apercu-travail">${t.image ? `<img src="${t.image}" alt="Illustration du travail ${k+1}">` : `<span>${ROMAINS[k] || k + 1}</span>`}</div>
-          <div><p class="aide">Illustration verticale (elle occupe toute la hauteur de la colonne, recadrée si besoin). Copiez une image puis cliquez sur « Coller », ou cliquez dans ce cadre et faites Ctrl+V.</p>
+          ${htmlCadreur(`travail:${sid}|${k}`, t.image, t.cadrage, 100, 300, `l’illustration du travail ${k+1}`)}
+          <div><p class="aide">Illustration verticale, au format de la colonne. Faites glisser l’image dans l’aperçu pour choisir la partie visible, et réglez le zoom. Pour la remplacer : copiez une image puis cliquez sur « Coller », ou cliquez dans ce cadre et faites Ctrl+V.</p>
             <input type="file" accept="image/*" data-image="travail:${sid}|${k}" hidden>
             <div class="adm-actions"><button type="button" class="btn second" data-act="image-choisir" data-id="travail:${sid}|${k}">${t.image ? "Changer l’illustration" : "Choisir un fichier"}</button>
               <button type="button" class="btn second" data-act="image-coller" data-id="travail:${sid}|${k}">Coller l’image copiée</button>
@@ -8003,13 +8029,15 @@ function actionSaisons(act, id){
     case "saison-suppr": if(confirm("Supprimer cette saison de la configuration ?")){ delete CONFIG.saisons[id]; adm.saison = null; sauver(); } break;
     case "saison-quete-ajouter": { const [sid, k] = id.split("|"); const t = CONFIG.saisons[sid].travaux[k]; t.quetes = t.quetes || [];
         const q = {id:`t${Number(k)+1}q${Date.now().toString(36)}`, type:"parties", but:3, recompense:{or:20}}; q.texte = texteQueteSaison(q); t.quetes.push(q); adm.travailOuvert = Number(k); sauver(); break; }
+    case "saison-recentrer": { const o = objetCadrage(id); if(o) Object.assign(o, cadrageVide); if(id.startsWith("travail:")) adm.travailOuvert = Number(id.split("|")[1]); sauver(); break; }
+    case "saison-accueil-suppr": { const s = CONFIG.saisons[id]; delete s.accueilImage; s.accueilCadrage = {...cadrageVide}; sauver(); break; }
     case "saison-image-suppr": { const [sid, k] = id.split("|"); delete CONFIG.saisons[sid].travaux[k].image; adm.travailOuvert = Number(k); sauver(); break; }
     case "saison-quete-suppr": { const [sid, k, n] = id.split("|"); CONFIG.saisons[sid].travaux[k].quetes.splice(Number(n), 1); adm.travailOuvert = Number(k); sauver(); break; }
     case "saison-envoyer": {
       const s = CONFIG.saisons[id];
       // Textes des quêtes regénérés pour suivre leur type et leur objectif
       (s.travaux || []).forEach(t => (t.quetes || []).forEach(q => { q.texte = texteQueteSaison(q); }));
-      rpc("admin_maj_saison", {p:{id, ...s, travaux:(s.travaux || []).map(({image, ...t}) => t)}}).then(() => erreur(`Saison « ${s.nom} » envoyée au serveur.`), e => erreur(messageScriptManquant ? messageScriptManquant(e.message).replace("supabase-stats.sql", "supabase-saisons.sql") : e.message));
+      rpc("admin_maj_saison", {p:{id, ...(({accueilImage, accueilCadrage, ...r}) => r)(s), travaux:(s.travaux || []).map(({image, cadrage, ...t}) => t)}}).then(() => erreur(`Saison « ${s.nom} » envoyée au serveur.`), e => erreur(messageScriptManquant ? messageScriptManquant(e.message).replace("supabase-stats.sql", "supabase-saisons.sql") : e.message));
       return true;
     }
     default: return false;
@@ -8626,7 +8654,7 @@ function htmlColonneTravail(s, t, k){
       <span class="barre"><span style="width:${Math.min(100, 100*q.progres/q.but)}%"></span></span>
       <span class="pied-q"><span class="prog-q">${q.faite ? "✓" : `${q.progres} / ${q.but}`}</span>${q.faite ? "" : fini ? `<button type="button" class="btn btn-rang" data-act="saison-quete" data-id="${esc(q.id)}">+${esc(texteRecompenseSaison(q.recompense))}</button>` : `<span class="aide">${esc(texteRecompenseSaison(q.recompense))}</span>`}</span></li>`; }).join("") : "";
   return `<article class="colonne-travail ${etat} ${img ? "illustree" : ""}" aria-label="Travail ${k+1} : ${esc(t.nom)}">
-    ${img ? `<img class="fond-travail" src="${img}" alt="" loading="lazy">` : `<span class="filigrane" aria-hidden="true">${ROMAINS[k] || k + 1}</span>`}
+    ${img ? `<img class="fond-travail" src="${img}" alt="" loading="lazy" style="${styleCadrage((confTravail(s.id, k) || {}).cadrage)}">` : `<span class="filigrane" aria-hidden="true">${ROMAINS[k] || k + 1}</span>`}
     <header><span class="num-travail">${ROMAINS[k] || k + 1}</span><h3>${esc(t.nom)}</h3>${t.fini ? `<span class="sceau" aria-label="Travail accompli">✓</span>` : ""}</header>
     ${t.ouvert ? `<div class="corps-travail">${t.description ? `<p class="desc-travail">${esc(t.description)}</p>` : ""}<ul class="quetes-travail">${quetes}</ul></div>`
       : `<div class="verrou-travail"><span class="cadenas-travail" aria-hidden="true">🔒</span><b>Fermé</b><span>Ouvre le ${dateLongue(t.ouverture)}</span>${jr ? `<small>dans ${jr} jour${jr>1 ? "s" : ""}</small>` : ""}</div>`}
@@ -8658,12 +8686,12 @@ const pantheonSaison = s => { const c = s && CONFIG.saisons && CONFIG.saisons[s.
 const couleurSaison = s => (FACTIONS[pantheonSaison(s)] || {}).couleur || "#2d5fbf";
 function htmlHallSaison(){
   const s = PROG.saison; if(!s) return "";
-  const img = (s.travaux || []).map((t, k) => imageTravail(s.id, k)).find(Boolean) || "";
+  const img = imageAccueilSaison(s.id), cadrageAccueil = (CONFIG.saisons && CONFIG.saisons[s.id] && CONFIG.saisons[s.id].accueilCadrage) || null;
   const total = (s.travaux || []).length || 12, attente = recompensesSaisonEnAttente();
   const jrOuv = s.a_venir ? joursRestants(s.debut + "T00:00:00") : 0, jrFin = joursRestants(s.fin);
   const sym = ({egy:"☥", hin:"✿", nor:"⚔", gre:"Ω"})[pantheonSaison(s)] || "Ω";
   return `<section class="hall-saison" style="--teinte:${couleurSaison(s)}" aria-labelledby="titre-hall-saison">
-    ${img ? `<img class="fond-hall-saison" src="${img}" alt=""><span class="teinte-hall" aria-hidden="true"></span>` : `<span class="filigrane-hall" aria-hidden="true">${esc(sym)}</span>`}
+    ${img ? `<img class="fond-hall-saison" src="${img}" alt="" style="${styleCadrage(cadrageAccueil)}"><span class="teinte-hall" aria-hidden="true"></span>` : `<span class="filigrane-hall" aria-hidden="true">${esc(sym)}</span>`}
     <div class="contenu-hall-saison">
       <span class="sur-titre">${s.a_venir ? "Prochaine saison" : "Saison en cours"}</span>
       <h2 id="titre-hall-saison">${esc(s.nom)}</h2>
@@ -8674,6 +8702,63 @@ function htmlHallSaison(){
     </div>
   </section>`;
 }
+
+/* ----- Recadrage des illustrations de la saison (colonnes des travaux, bloc de l’accueil) ----- */
+const cadrageVide = {posX:50, posY:40, zoom:1};
+function styleCadrage(c){
+  const x = c && c.posX!=null ? c.posX : 50, y = c && c.posY!=null ? c.posY : 40, z = c && c.zoom ? c.zoom : 1;
+  return `object-position:${x}% ${y}%;transform:scale(${z});transform-origin:${x}% ${y}%`;
+}
+const confTravail = (sid, k) => { const s = CONFIG.saisons && CONFIG.saisons[sid]; return (s && (s.travaux || [])[k]) || null; };
+// Image du bloc de l’accueil : la sienne, sinon celle du premier travail illustré
+function imageAccueilSaison(sid){
+  const s = CONFIG.saisons && CONFIG.saisons[sid]; if(!s) return "";
+  return s.accueilImage || (s.travaux || []).map(t => t.image).find(Boolean) || "";
+}
+// Cible d’un cadrage : "travail:sid|k" ou "accueil:sid"
+function objetCadrage(cible){
+  const [type, reste] = cible.split(":");
+  if(type==="travail"){ const [sid, k] = reste.split("|"); const t = confTravail(sid, k); if(t && !t.cadrage) t.cadrage = {...cadrageVide}; return t && t.cadrage; }
+  const s = CONFIG.saisons && CONFIG.saisons[reste]; if(s && !s.accueilCadrage) s.accueilCadrage = {...cadrageVide}; return s && s.accueilCadrage;
+}
+function htmlCadreur(cible, img, cadrage, L, H, legende){
+  return `<div class="cadreur-bloc">
+    <div class="cadreur" data-cadrage="${cible}" style="width:${L}px;height:${H}px" title="Faites glisser l’image pour choisir la partie visible">
+      ${img ? `<img src="${img}" alt="" draggable="false" style="${styleCadrage(cadrage)}">` : `<span class="cadreur-vide">Aucune image</span>`}
+      ${img ? `<span class="cadreur-aide" aria-hidden="true">✥</span>` : ""}
+    </div>
+    ${img ? `<label class="cadreur-zoom"><span>Zoom</span><input type="range" min="100" max="300" step="5" value="${Math.round(((cadrage && cadrage.zoom) || 1)*100)}" data-cadrage-zoom="${cible}" aria-label="Zoom de ${esc(legende)}"></label>
+      <button type="button" class="btn-discret" data-act="saison-recentrer" data-id="${cible}">Recentrer</button>` : ""}
+  </div>`;
+}
+// Glisser pour déplacer le cadrage
+let glisse = null;
+document.addEventListener("pointerdown", e => {
+  const c = e.target.closest && e.target.closest(".cadreur[data-cadrage]");
+  if(!c || !c.querySelector("img") || ui.ecran!=="admin") return;
+  e.preventDefault();
+  const obj = objetCadrage(c.dataset.cadrage); if(!obj) return;
+  glisse = {c, obj, x:e.clientX, y:e.clientY, px:obj.posX ?? 50, py:obj.posY ?? 40};
+  c.setPointerCapture && c.setPointerCapture(e.pointerId); c.classList.add("en-glisse");
+});
+document.addEventListener("pointermove", e => {
+  if(!glisse) return;
+  const r = glisse.c.getBoundingClientRect(), z = glisse.obj.zoom || 1;
+  const borne = v => Math.max(0, Math.min(100, Math.round(v*10)/10));
+  glisse.obj.posX = borne(glisse.px - (e.clientX - glisse.x) / r.width * 100 / z * 1.6);
+  glisse.obj.posY = borne(glisse.py - (e.clientY - glisse.y) / r.height * 100 / z * 1.6);
+  const img = glisse.c.querySelector("img"); if(img) img.style.cssText = styleCadrage(glisse.obj);
+});
+const finGlisse = () => { if(!glisse) return; glisse.c.classList.remove("en-glisse"); glisse = null; sauver(); };
+document.addEventListener("pointerup", finGlisse);
+document.addEventListener("pointercancel", finGlisse);
+document.addEventListener("input", e => {
+  const cible = e.target.dataset && e.target.dataset.cadrageZoom; if(!cible) return;
+  const obj = objetCadrage(cible); if(!obj) return;
+  obj.zoom = Number(e.target.value) / 100;
+  const img = document.querySelector(`.cadreur[data-cadrage="${cible}"] img`); if(img) img.style.cssText = styleCadrage(obj);
+});
+document.addEventListener("change", e => { if(e.target.dataset && e.target.dataset.cadrageZoom) sauver(); });
 
 chargerConfig();
 appliquerReglageAnimations();
