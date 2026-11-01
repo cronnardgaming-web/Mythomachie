@@ -1730,6 +1730,18 @@ body.compact:not(.en-partie) .hall-grille.avec-saison .hall-quete{margin-top:0}
 .page-saison.v2 .colonne-travail.ferme::after{opacity:.7}
 .page-saison.v2 .corps-travail .quetes-travail{background:rgba(5,10,26,.62)}
 .page-saison.v2 .bandeau-saison{background:radial-gradient(120% 160% at 0% 0%, color-mix(in srgb, var(--teinte) 45%, var(--zone)), var(--zone) 62%)}
+
+/* Accueil : tailles ajustées pour que les textes tiennent dans leurs cadres (police Cinzel) */
+body:not(.en-partie) .hall-modes .btn{font-size:13.5px;line-height:1.2;padding:9px 8px;gap:4px 6px;flex-wrap:wrap;text-align:center;letter-spacing:0;min-width:0;overflow-wrap:anywhere}
+body:not(.en-partie) .hall-modes .btn svg{flex:none;width:16px;height:16px}
+body:not(.en-partie) .hall-modes .pastille-test{order:3;margin-left:0;font-size:9px;padding:0 6px;line-height:1.5}
+body:not(.en-partie) .btn-geant b{font-size:clamp(17px,1.7vw,21px);line-height:1.15}
+body:not(.en-partie) .btn-geant small{font-size:13px}
+body:not(.en-partie) .titre-quetes{font-size:17px;flex-wrap:wrap}
+body:not(.en-partie) .titre-quetes .aide{font-family:"Alegreya Sans",system-ui,sans-serif;font-size:12px;font-weight:400;letter-spacing:0;text-transform:none;font-variant:normal}
+body:not(.en-partie) .contenu-hall-saison h2{font-size:clamp(17px,1.6vw,21px)}
+body.compact:not(.en-partie) .hall-modes .btn{font-size:12px;padding:6px 6px}
+body.compact:not(.en-partie) .btn-geant b{font-size:16px}
 </style>
 </head>
 <body>
