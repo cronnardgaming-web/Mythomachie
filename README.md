@@ -84,6 +84,11 @@ ou changé leur faction, renvoyez le catalogue depuis l’administration (onglet
 `supabase-admin-joueurs.sql` permet à l’administrateur de corriger l’or et l’encre d’un joueur depuis l’onglet
 « Statistiques » de l’administration (bouton « Modifier » dans la liste des joueurs).
 
+## Correctif des fonctions de statistiques
+
+`supabase-correctif-fonctions-stats.sql` (après `supabase-simulations.sql`) : si les statistiques affichent
+« Could not choose the best candidate function », ce script supprime les anciennes versions des fonctions.
+
 ## Parties simulées
 
 `supabase-simulations.sql` (à exécuter après les autres scripts) : les fichiers de simulations s’importent depuis la

@@ -5324,7 +5324,11 @@ async function chargerAdminStats(){
     const [resume, joueurs, heros, cartes] = await Promise.all([
       rpc("admin_resume"), rpc("admin_joueurs"),
       ...(() => { const avec = !(PROG.adminStats && PROG.adminStats.sansSim);
-        const essai = (f, p) => rpc(f, {...p, p_simulations:avec}).catch(() => rpc(f, p));   // ancien serveur : sans le filtre
+        // Tous les paramètres sont fournis, pour désigner sans ambiguïté la bonne version de la fonction
+        const essai = (f, p) => rpc(f, {...p, p_sans_invites:false, p_simulations:avec}).catch(err => {
+          if(/candidate function/i.test(err.message)) throw new Error("Deux versions d’une fonction de statistiques coexistent sur le serveur : exécutez le script supabase-correctif-fonctions-stats.sql dans Supabase.");
+          return rpc(f, p);   // ancien serveur, sans le filtre des simulations
+        });
         return [essai("admin_stats_heros", {p_jours:jours}), essai("admin_stats_cartes", {p_jours:jours})]; })()]);
     PROG.adminStats = {...(PROG.adminStats || {}), resume, joueurs, heros, cartes, jours, quand:Date.now(), erreur:null};
   } catch(e) {
