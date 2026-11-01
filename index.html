@@ -955,6 +955,12 @@ body.compact .nom-heros-deck{font-size:17px}
 .editeur-note{border:1px solid var(--or);border-radius:10px;padding:10px 14px;margin-bottom:12px}
 .bouton-msg-fiche{float:right;margin:0}
 
+.liste-reprises{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.liste-reprises li{display:flex;align-items:center;gap:10px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--table)}
+.liste-reprises li > span{flex:1;display:flex;flex-direction:column}
+.liste-reprises small{color:var(--ink-2)}
+.liste-reprises .btn{margin:0}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -1442,6 +1448,113 @@ body.compact .plateau.plateau-2v2 .choix-benef{font-size:10px;flex-direction:row
 body.compact .plateau.plateau-2v2 .choix-benef select{font-size:11px;padding:1px 4px}
 body.compact .plateau.plateau-2v2 .zone-main{height:auto;flex:1 1 88px;min-height:72px;margin-top:0}
 body.compact .plateau.plateau-2v2 .main.eventail{height:100%;min-height:0}
+
+/* =====================================================================
+   THÈME DES MENUS : « le temple au crépuscule »
+   Pierre de nuit (calcaire en mode clair), filets de bronze, feuille d’or.
+   Une seule audace : le fronton du bloc « Jouer ». Les combats ne sont pas concernés.
+   ===================================================================== */
+:root{
+  --filet:color-mix(in srgb, var(--bronze) 42%, var(--line));
+  --filet-doux:color-mix(in srgb, var(--bronze) 20%, transparent);
+  --pierre:color-mix(in srgb, var(--zone) 94%, var(--bronze) 6%);
+  --or-feuille:linear-gradient(180deg, #fff6d6 0%, #f3d488 36%, #c8953f 70%, #f0cf7f 100%);
+  --vignette:rgba(110,80,30,.10);
+  --lueur:color-mix(in srgb, var(--bronze) 16%, transparent);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --vignette:rgba(0,0,0,.34); --lueur:color-mix(in srgb, var(--bronze) 26%, transparent); } }
+:root[data-theme="dark"]{ --vignette:rgba(0,0,0,.34); --lueur:color-mix(in srgb, var(--bronze) 26%, transparent); }
+/* Fond : pierre, lumière chaude venue d’en haut, grain discret */
+body:not(.en-partie){
+  background:
+    radial-gradient(70% 45% at 50% -8%, var(--lueur), transparent 70%),
+    radial-gradient(120% 70% at 50% 115%, var(--vignette), transparent 65%),
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--ink) 5%, transparent) 1px, transparent 1.4px) 0 0/5px 5px,
+    var(--table) fixed;
+}
+/* Tablettes de pierre : angles presque vifs, double filet de bronze gravé */
+body:not(.en-partie) :is(.hall-jouer,.hall-quete,.tuile-hall,.bloc-profil,.deck-ligne,.offre,.tete-saison,.frise-saison,.travail,
+  .page-amis section,.message,.note-maj,.ma-cote,.info-palier,.trophee,.page-classement > section:not(.ma-cote)){
+  background:linear-gradient(180deg, color-mix(in srgb, var(--pierre) 100%, #fff 3%), var(--pierre));
+  border:1px solid var(--filet);
+  border-radius:5px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 4px var(--pierre), inset 0 0 0 5px var(--filet-doux), 0 14px 28px -18px rgba(0,0,0,.65);
+}
+body:not(.en-partie) .trophee{background:var(--table-2)}
+/* Titres gravés */
+body:not(.en-partie) :is(.page-saison,.page-amis,.page-boite,.page-nouveautes,.page-classement,.page-profil,.hall) h2{
+  font-family:Cinzel,serif;font-weight:700;letter-spacing:.02em;color:color-mix(in srgb, var(--or, var(--bronze)) 85%, var(--ink));
+}
+/* En-tête des pages : titre en feuille d’or, filet orné */
+body:not(.en-partie) .entete{position:relative;padding:4px 0 16px;margin-bottom:6px;border-bottom:1px solid var(--filet)}
+body:not(.en-partie) .entete::after{content:"◆";position:absolute;left:50%;bottom:-.62em;transform:translateX(-50%);font-size:12px;color:var(--bronze);background:var(--table);padding:0 10px;line-height:1}
+body:not(.en-partie) .entete h1{font-family:Cinzel,serif;font-weight:700;font-size:clamp(24px,3vw,32px);margin:0;letter-spacing:.03em;
+  background:var(--or-feuille);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 1px 0 rgba(0,0,0,.45))}
+/* Logo de l’accueil en feuille d’or */
+.hall-logo .logo{font-family:"Cinzel Decorative",Cinzel,serif;background:var(--or-feuille);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 1px 0 #6b4512) drop-shadow(0 2px 1px rgba(0,0,0,.35)) drop-shadow(0 0 16px color-mix(in srgb, var(--bronze) 30%, transparent))}
+.hall-logo .sous-logo{display:flex;align-items:center;gap:10px;font-family:Cinzel,serif;letter-spacing:.18em;color:var(--ink-2)}
+.hall-logo .sous-logo::before,.hall-logo .sous-logo::after{content:"";height:1px;width:28px;background:linear-gradient(90deg,transparent,var(--bronze))}
+.hall-logo .sous-logo::after{background:linear-gradient(90deg,var(--bronze),transparent)}
+/* L’audace : le fronton du temple au-dessus du bloc « Jouer » */
+body:not(.en-partie) .hall-jouer{position:relative;margin-top:44px;padding-top:22px;
+  background:radial-gradient(90% 120% at 50% 0%, color-mix(in srgb, var(--bronze) 20%, var(--pierre)), var(--pierre) 70%)}
+body:not(.en-partie) .hall-jouer::before{content:"";position:absolute;left:-1px;right:-1px;top:-42px;height:42px;
+  clip-path:polygon(50% 0,100% 100%,0 100%);
+  background:linear-gradient(180deg,#f4d892,#b8873d 70%,#7d5520);
+  filter:drop-shadow(0 -1px 0 rgba(255,255,255,.2))}
+body:not(.en-partie) .hall-jouer::after{content:"☥   ✿   ⚔   Ω";white-space:pre;position:absolute;left:50%;top:-25px;transform:translateX(-50%);
+  font-size:19px;letter-spacing:.06em;color:#2e1c05;text-shadow:0 1px 0 rgba(255,240,200,.6);pointer-events:none}
+body:not(.en-partie) .hall-jouer > h2{text-align:center;margin:0;font-size:22px;display:flex;align-items:center;gap:12px}
+body:not(.en-partie) .hall-jouer > h2::before,body:not(.en-partie) .hall-jouer > h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--filet))}
+body:not(.en-partie) .hall-jouer > h2::after{background:linear-gradient(90deg,var(--filet),transparent)}
+/* Grand bouton « Contre l’ordinateur » : plaque de bronze */
+body:not(.en-partie) .btn-geant{border-radius:5px;border:1px solid #5e3f14;
+  background:linear-gradient(180deg,#f2d38c 0%,#d6a456 45%,#9a6b2c 100%);
+  box-shadow:inset 0 1px 0 rgba(255,245,215,.7), inset 0 -2px 0 rgba(60,35,8,.35), 0 10px 22px -12px rgba(0,0,0,.7)}
+body:not(.en-partie) .btn-geant,body:not(.en-partie) .btn-geant :is(b,small,svg){color:#2b1a06}
+body:not(.en-partie) .btn-geant b{font-family:Cinzel,serif;letter-spacing:.02em}
+body:not(.en-partie) .btn-geant small{opacity:.8}
+/* Les quêtes s’alignent sur le bloc « Jouer » (décalé par son fronton) */
+body:not(.en-partie):not(.compact) .hall-quete{margin-top:44px}
+/* Stèles de l’accueil : icône dans un médaillon de bronze */
+body:not(.en-partie) .tuile-hall{transition:border-color .15s, transform .15s, box-shadow .15s}
+body:not(.en-partie) .tuile-hall:hover{transform:translateY(-2px);border-color:var(--bronze)}
+body:not(.en-partie) .tuile-hall:focus-visible{outline:2px solid var(--or, var(--bronze));outline-offset:3px}
+body:not(.en-partie) .tuile-hall .ico-tuile{box-sizing:content-box;padding:8px;border-radius:50%;color:#2b1a06;
+  background:radial-gradient(circle at 35% 30%,#fbe3a4,#c99647 60%,#7d5520);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.5), 0 0 0 1px #6a4616, 0 3px 8px -2px rgba(0,0,0,.6)}
+body:not(.en-partie) .tuile-hall .tuile-titre{font-family:Cinzel,serif;font-weight:700;letter-spacing:.02em}
+body:not(.en-partie) .tuile-hall .tuile-info{color:var(--ink-2)}
+/* Boutons secondaires des menus : filet de bronze sur la pierre */
+body:not(.en-partie) #app .btn.second{background:linear-gradient(180deg, color-mix(in srgb, var(--pierre) 100%, #fff 4%), var(--pierre));
+  border:1px solid var(--filet);color:var(--ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+body:not(.en-partie) #app .btn.second:hover{border-color:var(--bronze)}
+body:not(.en-partie) #app :is(input[type=text],input[type=search],input[type=number],input[type=email],select):not(.adm-contenu *){
+  background:color-mix(in srgb, var(--table) 80%, #000 12%);border:1px solid var(--filet);border-radius:4px}
+body:not(.en-partie) .page-classement > section:not(.ma-cote){padding:12px 16px}
+/* Tableaux : en-têtes gravés, ligne du joueur dorée */
+body:not(.en-partie) #app .tableau th{font-family:Cinzel,serif;font-weight:700;color:var(--ink-2);border-bottom:1px solid var(--filet)}
+body:not(.en-partie) #app .tableau tr:hover td{background:color-mix(in srgb, var(--bronze) 7%, transparent)}
+body:not(.en-partie) .page-profil .tuile{background:color-mix(in srgb, var(--table) 80%, #000 8%);border:1px solid var(--filet-doux);border-radius:4px}
+body:not(.en-partie) .page-profil .tuile b{font-family:Cinzel,serif;color:color-mix(in srgb, var(--or, var(--bronze)) 85%, var(--ink))}
+/* Quêtes du jour */
+body:not(.en-partie) .titre-quetes{font-family:Cinzel,serif}
+body:not(.en-partie) .barre{background:color-mix(in srgb, var(--table) 70%, #000 18%);box-shadow:inset 0 1px 2px rgba(0,0,0,.5)}
+/* Boutique : chaque offre porte la couleur de son panthéon en liseré */
+body:not(.en-partie) .offre{border-left:1px solid var(--filet);border-top:3px solid var(--fc, var(--bronze))}
+/* Mouvement réduit */
+@media (prefers-reduced-motion: reduce){ body:not(.en-partie) .tuile-hall{transition:none} body:not(.en-partie) .tuile-hall:hover{transform:none} }
+/* Petits écrans : fronton plus bas */
+body.compact:not(.en-partie) .hall-jouer{margin-top:26px;padding-top:12px}
+body.compact:not(.en-partie) .hall-jouer::before{top:-25px;height:25px}
+body.compact:not(.en-partie) .hall-jouer::after{top:-17px;font-size:11px}
+body.compact:not(.en-partie) .tuile-hall{padding:6px 7px;gap:3px 6px;min-height:0;overflow:hidden}
+body.compact:not(.en-partie) .tuile-hall .ico-tuile{width:15px;height:15px;padding:4px;flex:none}
+body.compact:not(.en-partie) .tuile-hall .tuile-titre{font-size:12.5px;letter-spacing:0}
+body.compact:not(.en-partie) .tuile-hall .tuile-info{font-size:11px;line-height:1.2;width:100%}
+body.compact:not(.en-partie) .tuile-hall .pastille-recompense{font-size:10px;padding:1px 6px;white-space:normal}
+@media (max-width:760px){ body:not(.en-partie) .hall-quete{margin-top:0 !important} }
 </style>
 </head>
 <body>
@@ -3767,8 +3880,10 @@ function htmlEnLigne(){
   if(EN.ecran==="connexion") return `<div class="boite" role="dialog" aria-label="Connexion">
     <h2>Connexion…</h2><p class="attente">Connexion à la partie ${esc(EN.code || EN.saisie)}, en attente de l’hôte…</p>
     <div class="actions"><button type="button" class="btn second" data-act="en-annuler">Annuler</button></div></div>`;
-  const reprises = EN.reprises.length ? `<h3>Vos parties en cours</h3><div class="actions">${EN.reprises.map(r =>
-    `<button type="button" class="btn second" data-act="en-reprendre" data-id="${esc(r.code)}">Reprendre la partie ${esc(r.code)}</button>`).join("")}</div>` : "";
+  const reprises = EN.reprises.length ? `<h3>Vos parties en cours</h3><ul class="liste-reprises">${EN.reprises.map(r =>
+    `<li><span><b>Partie ${esc(r.code)}</b><small>${r.maj ? `laissée ${ilYa(new Date(r.maj).toISOString())}` : ""}${r.etat && r.etat.tour ? `, tour ${r.etat.tour}` : ""}</small></span>
+      <button type="button" class="btn second" data-act="en-reprendre" data-id="${esc(r.code)}">Reprendre</button>
+      <button type="button" class="btn-discret" data-act="en-supprimer-reprise" data-id="${esc(r.code)}" aria-label="Supprimer la partie ${esc(r.code)}">Supprimer</button></li>`).join("")}</ul>` : "";
   return `<div class="boite" role="dialog" aria-label="Jouer en ligne">
     <h2>Jouer en ligne</h2>
     <p>Chaque joueur joue sur son propre écran. Celui qui crée la partie fait tourner les règles : gardez sa page ouverte jusqu’à la fin.</p>
@@ -3793,6 +3908,14 @@ function actionEnLigne(act, id){
     case "en-retour": quitterEnLigne(); break;
     case "en-creer": creerPartie(); return;
     case "en-classee": lancerFileClassee(); return;
+    case "en-supprimer-reprise": {
+      if(!confirm(`Supprimer définitivement la partie ${id} ? Elle ne pourra plus être reprise.`)) return;
+      const fin = () => { EN.reprises = EN.reprises.filter(r => r.code!==id); renderCouche(); erreur("Partie supprimée."); };
+      const c = typeof sbc==="function" ? sbc() : null;
+      if(c) c.from("parties").delete().eq("code", id).eq("hote", EN.monId).then(r => r.error ? erreur(r.error.message) : fin());
+      else if(EN.db) EN.db.doc(`salle/${id}`).set({hote:EN.monId, statut:"annulee", cree:Date.now()}).then(fin, e => erreur(e.message));
+      return;
+    }
     case "en-file-annuler": EN.ecran = "choix"; rpc("quitter_file").catch(() => {}); break;
     case "en-rejoindre": rejoindre(); return;
     case "en-reprendre": reprendre(id); return;
