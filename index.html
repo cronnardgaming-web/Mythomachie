@@ -8411,7 +8411,8 @@ function valeurCarte(d){
   let v = 0;
   const ajout = (l, x) => { if(x){ v += x; detail.push(`${l} ${x.toFixed(2).replace(".", ",")}`); } };
   if(d.type==="creature"){
-    ajout("attaque", (d.attaque || 0) * 0.6); ajout("vie", (d.vie || 0) * 0.25); ajout("mots-clés", (d.mots || []).length * 0.5);
+    // La Résistance ignore entièrement les premiers dégâts : elle vaut bien plus qu’un mot-clé ordinaire (mesuré en simulation)
+    ajout("attaque", (d.attaque || 0) * 0.6); ajout("vie", (d.vie || 0) * 0.25); ajout("mots-clés", (d.mots || []).reduce((s, m) => s + (m==="resistance" ? 1.5 : 0.5), 0));
     ajout("arrivée", valeurEffet(d.conjuration, notes));
   } else if(d.type==="arme"){
     ajout("puissance", (d.bonus || 0) * 1); ajout("équipement (60 %)", (d.bonus || 0) * 0.85 * 0.6);
@@ -8431,7 +8432,7 @@ function htmlValeurCarte(d){
   </div>`;
 }
 
-// Import d’un fichier de simulations (par lots de 1 000 parties)
+// Import d’un fichier de simulations (par lots de 300 parties, environ 300 Ko chacun)
 document.addEventListener("change", async e => {
   if(!e.target.dataset || e.target.dataset.actFichier!=="simulations-importer" || !e.target.files || !e.target.files[0]) return;
   let parties;
@@ -8440,9 +8441,9 @@ document.addEventListener("change", async e => {
   e.target.value = "";
   let faites = 0;
   try {
-    for(let k=0; k<parties.length; k+=1000){
+    for(let k=0; k<parties.length; k+=300){
       PROG.importSim = `Import en cours : ${nf(faites)} / ${nf(parties.length)} parties…`; renderAdmin();
-      faites += await rpc("admin_importer_simulations", {p:parties.slice(k, k + 1000)});
+      faites += await rpc("admin_importer_simulations", {p:parties.slice(k, k + 300)});
     }
     erreur(`${nf(faites)} parties simulées importées.`);
   } catch(err) {
