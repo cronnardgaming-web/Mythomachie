@@ -84,6 +84,13 @@ ou changé leur faction, renvoyez le catalogue depuis l’administration (onglet
 `supabase-admin-joueurs.sql` permet à l’administrateur de corriger l’or et l’encre d’un joueur depuis l’onglet
 « Statistiques » de l’administration (bouton « Modifier » dans la liste des joueurs).
 
+## Amis, boîte aux lettres et nouveautés
+
+`supabase-social.sql` (à exécuter après les autres scripts) : amis (recherche de pseudo, adversaires récents,
+demandes, présence en ligne), défis entre amis (la partie compte pour le classement), boîte aux lettres (messages
+de l’équipe avec cadeaux : or, encre, carte, paquet, illustration ; envoi à un joueur, une sélection ou tous),
+notes de mise à jour (onglet « Notes de mise à jour » de l’administration, bouton « Nouveautés » de l’accueil).
+
 ## Correctif des quêtes remplacées
 
 `supabase-correctif-quetes.sql` (à exécuter après `supabase-recompenses.sql`) : une quête du jour obtenue en

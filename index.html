@@ -906,6 +906,55 @@ body.compact .nom-heros-deck{font-size:17px}
 .ligne-elo .elo-gain{color:#4fd18b;font-weight:700}
 .ligne-elo .elo-perte{color:#ff7a6e;font-weight:700}
 
+/* Social : amis, boîte aux lettres, nouveautés */
+.hall-icone.avec-pastille{position:relative}
+.pastille-compte{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;padding:0 5px;background:#c0392b;color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;line-height:1}
+.page-amis,.page-boite,.page-nouveautes{display:flex;flex-direction:column;gap:14px;max-width:820px}
+.page-amis section{background:var(--zone);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.page-amis h2{font-size:18px;margin:0 0 8px}
+.liste-amis{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.ligne-ami{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:8px;background:var(--table)}
+.ligne-recherche-ami{display:flex;gap:8px;align-items:center}
+.ligne-recherche-ami input{flex:1;min-width:0;font:inherit;font-size:15px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:8px;padding:9px 12px}
+.ligne-recherche-ami .btn{margin:0}
+.titre-ami{display:inline;margin-left:6px}
+.presence{width:10px;height:10px;border-radius:50%;background:var(--line);flex:none}
+.presence.en-ligne{background:#3ccf7a;box-shadow:0 0 6px #3ccf7a}
+.nom-ami{flex:1;display:flex;flex-direction:column}
+.nom-ami small{color:var(--ink-2);font-size:12px}
+.boutons-ami{display:flex;gap:6px;align-items:center}
+.boutons-ami .btn-rang{width:auto;padding:5px 14px;font-size:13px}
+.message{background:var(--zone);border:1px solid var(--line);border-radius:10px;padding:0}
+.message summary{cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 14px;list-style:none}
+.message summary::-webkit-details-marker{display:none}
+.message.non-lu{border-color:var(--or)}
+.message.non-lu summary b{color:var(--or)}
+.message .quand{margin-left:auto;color:var(--ink-2);font-size:13px}
+.corps-message{padding:0 14px 12px;border-top:1px solid var(--line)}
+.cadeau{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;border-radius:8px;background:color-mix(in srgb, var(--or) 14%, var(--table));border:1px solid color-mix(in srgb, var(--or) 50%, var(--line))}
+.cadeau .btn{margin:0}
+.cadeau.recupere{opacity:.75}
+.actions-message{display:flex;justify-content:flex-end;margin-top:6px}
+.note-maj{background:var(--zone);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+.note-maj header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.note-maj h2{font-size:20px;margin:0}
+.note-maj .quand{margin-left:auto;color:var(--ink-2);font-size:13px}
+.version{font-family:Cinzel,serif;font-weight:700;font-size:13px;padding:2px 9px;border-radius:99px;background:var(--or);color:#2b1a04}
+.corps-note p,.corps-message p{margin:6px 0}
+.corps-note ul,.corps-message ul{margin:6px 0;padding-left:22px}
+#banniere-defi{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;
+  background:var(--zone);border:2px solid var(--or);border-radius:12px;padding:10px 16px;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:calc(100vw - 24px)}
+#banniere-defi .btn{margin:0}
+.ico-defi{font-size:22px;color:var(--or)}
+.choix-joueurs{max-height:240px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-top:6px;display:flex;flex-direction:column;gap:2px}
+.dest-message,.cadeau-message{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:10px 0}
+.cadeau-message{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px 10px}
+.adm-messages textarea,.adm-notes textarea,.adm-messages input[type=text],.adm-messages select,.adm-messages input[type=number]{font:inherit;font-size:14px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%;box-sizing:border-box}
+.adm-notes textarea,.adm-notes input{font:inherit;font-size:14px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%;box-sizing:border-box}
+.ligne-note{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--line)}
+.editeur-note{border:1px solid var(--or);border-radius:10px;padding:10px 14px;margin-bottom:12px}
+.bouton-msg-fiche{float:right;margin:0}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -2465,6 +2514,7 @@ function htmlMedaillon(j, estMoi, inter, cible){
 function render(){
   const app = document.getElementById("app");
   document.body.classList.toggle("en-partie", !!S && ui.ecran==="jeu");
+  if(typeof majBanniereDefi==="function" && S && ui.ecran==="jeu") majBanniereDefi();
   if(typeof majCompact==="function") majCompact();
   if(typeof prevoirAjustement==="function") prevoirAjustement();
   queueMicrotask(majMusique);
@@ -2472,7 +2522,7 @@ function render(){
   if(ui.ecran!=="jeu" || !tutoActif()){ const p = document.getElementById("tuto-panneau"); if(p) p.remove(); }
   if(ui.ecran==="credits"){ INSTANT = null; app.innerHTML = pageCredits(); document.getElementById("couche").innerHTML = ""; document.getElementById("couche").classList.remove("accueil"); return; }
   if(ui.ecran==="regles"){ INSTANT = null; app.innerHTML = pageRegles(); document.getElementById("couche").innerHTML = ""; document.getElementById("couche").classList.remove("accueil"); return; }
-  if(["collection","decks","editeur","boutique","profil","saison","classement"].includes(ui.ecran)){ INSTANT = null; renderProg(); return; }
+  if(["collection","decks","editeur","boutique","profil","saison","classement","amis","boite","nouveautes"].includes(ui.ecran)){ INSTANT = null; renderProg(); return; }
   if(!S){ INSTANT = null; app.innerHTML = ""; renderCouche(); if(PROG.pret) signaler(); return; }
   if(est2v2()) return render2v2();
   const me = vue(), moi = S.joueurs[me], lui = S.joueurs[1-me];
@@ -2753,7 +2803,7 @@ function renderAdmin(){
     cle = actif.dataset.chemin ? `[data-chemin="${actif.dataset.chemin}"]` : actif.dataset.adm ? `[data-adm="${actif.dataset.adm}"]` : null;
     try { pos = actif.selectionStart; } catch(e) { pos = null; }
   }
-  const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => PROG.fiche ? admFicheJoueur() : admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons};
+  const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => PROG.fiche ? admFicheJoueur() : admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons, messages:admMessages, notes:admNotes};
   // Mémoriser la position des listes et de la page avant de réafficher
   const defil = {}; app.querySelectorAll(".adm-items, .adm-menu, .grille-choix").forEach((el, k) => { defil[el.className + k] = el.scrollTop; });
   const yPage = window.scrollY;
@@ -2761,6 +2811,7 @@ function renderAdmin(){
   const groupes = [
     ["Contenu du jeu", [["cartes","Cartes"],["boosters","Boosters"],["saisons","Saisons"],["heros","Héros"],["factions","Factions"],["regles","Règles"],["musiques","Musiques"]]],
     ["Publication", [["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"]] : [])]],
+    ...(PROG.actif ? [["Communication", [["messages","Boîte aux lettres"],["notes","Notes de mise à jour"]]]] : []),
     ...(PROG.actif ? [["Joueurs", [["stats","Vue d’ensemble"],["stats-heros","Statistiques des héros"],["stats-cartes","Statistiques des cartes"],["stats-joueurs","Liste des joueurs"],["surveillance","Surveillance", nbAlertes]]]] : [])
   ];
   const titres = Object.fromEntries(groupes.flatMap(([, l]) => l.map(([k, t]) => [k, t])));
@@ -3066,6 +3117,7 @@ function actionAdmin(act, id, el){
   if(act.startsWith("mus-")){ actionMusiques(act, id); return; }
   if(act.startsWith("variante-") || act.startsWith("booster-") || act==="carte-promo"){ actionVariantes(act, id); return; }
   if(act.startsWith("saison-")){ actionSaisons(act, id); return; }
+  if(act.startsWith("msg-") || act.startsWith("note-")){ actionCommunication(act, id); return; }
   if(act==="devotion-creer"){ const [b, f] = String(id).split("|"); creerVersionDevotion(b, f); return; }
   if(act==="son"){ basculerSon(); return renderAdmin(); }
   if(act==="stats-rafraichir"){ chargerAdminStats(); erreur("Actualisation…"); return; }
@@ -3748,7 +3800,7 @@ function actionEnLigne(act, id){
       if(navigator.clipboard) navigator.clipboard.writeText(EN.code).then(() => erreur("Code copié."), () => erreur(`Code : ${EN.code}`));
       else erreur(`Code : ${EN.code}`);
       return;
-    case "en-annuler":
+    case "en-annuler": if(PROG.actif && PROG.pret) rpc("annuler_defi").catch(() => {});
       if(EN.role==="hote" && EN.code && !EN.inviteId) EN.db.doc(`salle/${EN.code}`).set({hote:EN.monId, statut:"annulee", cree:Date.now()}).catch(() => {});
       quitterEnLigne(); EN.ecran = "choix"; if(EN.db) chargerReprises(); break;
   }
@@ -4535,7 +4587,7 @@ function renderProg(){
   const actif = document.activeElement;
   const cle = actif && actif.dataset && actif.dataset.prog ? actif.dataset.prog : null;
   let pos = null; try { pos = actif.selectionStart; } catch(e) {}
-  const pages = {collection:pageCollection, decks:pageDecks, editeur:pageEditeur, boutique:pageBoutique, profil:pageProfil, saison:pageSaison, classement:pageClassement};
+  const pages = {collection:pageCollection, decks:pageDecks, editeur:pageEditeur, boutique:pageBoutique, profil:pageProfil, saison:pageSaison, classement:pageClassement, amis:pageAmis, boite:pageBoite, nouveautes:pageNouveautes};
   const defil = {}; app.querySelectorAll(".grille-atelier, .liste-atelier, .atelier-deck").forEach(el => { defil[el.className.split(" ")[0]] = el.scrollTop; });
   const yPage = window.scrollY;
   app.innerHTML = PROG.pret ? pages[ui.ecran]() : `${entete(NOM_JEU)}<p class="attente">Chargement…</p>`;
@@ -4548,6 +4600,12 @@ function renderProg(){
 }
 
 function actionProg(act, id){
+  if(/^(ami-|boite-|prog-amis$|prog-boite$|prog-nouveautes$)/.test(act)){
+    const el = document.querySelector(`[data-act="${act}"][data-id="${id}"]`);
+    const r = actionSociale(act, id, el);
+    if(r===true) render();
+    return r!==null;
+  }
   if(act.startsWith("compte-")) return actionCompte(act);
   if(act.startsWith("porte-")) return actionPorte(act);
   switch(act){
@@ -4951,7 +5009,7 @@ const NOMS_ECRANS = {"accueil":"Accueil", "partie-ia":"Partie contre l’ordinat
   "boutique":"Boutique", "profil":"Profil", "admin":"Administration", "tutoriel":"Tutoriel", "regles":"Règles du jeu", "credits":"Crédits"};
 function ecranActuel(){
   if(ui.ecran==="admin") return "admin";
-  if(["collection","decks","editeur","boutique","profil","saison","classement"].includes(ui.ecran)) return ui.ecran;
+  if(["collection","decks","editeur","boutique","profil","saison","classement","amis","boite","nouveautes"].includes(ui.ecran)) return ui.ecran;
   if(S && S.tuto) return "tutoriel";
   if(ui.ecran==="regles") return "regles";
   if(ui.ecran==="credits") return "credits";
@@ -5021,7 +5079,7 @@ async function chargerQuete(){
 }
 async function chargerMesStats(annoncer){
   chargerQuete().then(() => { if(!S && PROG.pret && ui.ecran==="jeu") renderCouche(); });
-  Promise.all([chargerTrophees(), chargerPaquetsOfferts(), chargerSaison()]).then(() => {
+  Promise.all([chargerTrophees(), chargerPaquetsOfferts(), chargerSaison(), chargerSocial()]).then(() => {
     if(!S && PROG.pret){ if(ui.ecran==="jeu") renderCouche(); else if(["profil", "boutique", "saison"].includes(ui.ecran)) renderProg(); }
   });
   try { PROG.mesStats = await rpc("mes_stats"); } catch(e) { return; }
@@ -6493,6 +6551,9 @@ const ICO = {
   decks:'<rect x="6" y="2.5" width="12" height="15" rx="2" fill="currentColor" opacity=".45"/><rect x="4.5" y="4.5" width="12" height="15" rx="2" fill="currentColor" opacity=".7"/><rect x="3" y="6.5" width="12" height="15" rx="2" fill="currentColor"/>',
   boutique:'<path d="M5 8h14l-1.2 12.5a1.6 1.6 0 0 1-1.6 1.5H7.8a1.6 1.6 0 0 1-1.6-1.5z" fill="currentColor"/><path d="M8.5 9V6.5a3.5 3.5 0 0 1 7 0V9" fill="none" stroke="currentColor" stroke-width="1.8"/>',
   classement:'<path d="M3 21V12h5v9zM9.5 21V7h5v14zM16 21v-6h5v6z" fill="currentColor"/>',
+  amis:'<circle cx="9" cy="8" r="3.5" fill="currentColor"/><path d="M2 20c0-4 3-6.5 7-6.5s7 2.5 7 6.5z" fill="currentColor"/><circle cx="17" cy="9" r="2.8" fill="currentColor" opacity=".75"/><path d="M15.5 13.6c3.6-.4 6.5 1.8 6.5 5.4h-4.6c0-2-0.6-3.9-1.9-5.4z" fill="currentColor" opacity=".75"/>',
+  lettre:'<path d="M3 5h18v14H3z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 6l9 7 9-7" fill="none" stroke="currentColor" stroke-width="2"/>',
+  nouveautes:'<path d="M5 3h11l4 4v14H5z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10h9M8 14h9M8 18h6" stroke="currentColor" stroke-width="2"/>',
   saison:'<path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.4l-4.8 2.5.9-5.4L4.2 7.7l5.4-.8z" fill="currentColor"/><path d="M5 20h14v2H5z" fill="currentColor"/>',
   profil:'<path d="M7 3h10v3a5 5 0 0 1-10 0zM7 4H4v2a3 3 0 0 0 3 3M17 4h3v2a3 3 0 0 1-3 3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 11.5h4v3l2 3H8l2-3zM7 19h10v2H7z" fill="currentColor"/>',
   tuto:'<path d="M12 4 2 9l10 5 10-5zM6 11.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5l-6 3z" fill="currentColor"/>',
@@ -6517,6 +6578,8 @@ function htmlHall(){
       <div class="hall-droite">
         ${bourse()}
         <button type="button" class="hall-profil" data-act="prog-profil" title="Mon profil"><span class="avatar" aria-hidden="true">${esc((pseudo || "?").charAt(0).toUpperCase())}</span><span class="nom-profil">${pseudo ? esc(pseudo) : "Choisir un pseudo"}${p.titre ? `<small class="titre-joueur">${esc(p.titre)}</small>` : ""}</span></button>
+        ${PROG.actif && PROG.pret ? `<button type="button" class="hall-icone avec-pastille" data-act="prog-nouveautes" aria-label="Nouveautés${notesNonLues() ? ` (${notesNonLues()} non lue${notesNonLues()>1 ? "s" : ""})` : ""}" title="Nouveautés">${ico("nouveautes")}${notesNonLues() ? `<span class="pastille-compte">${notesNonLues()}</span>` : ""}</button>
+        <button type="button" class="hall-icone avec-pastille" data-act="prog-boite" aria-label="Boîte aux lettres${SOC.boite && SOC.boite.non_lus ? ` (${SOC.boite.non_lus} message${SOC.boite.non_lus>1 ? "s" : ""} non lu${SOC.boite.non_lus>1 ? "s" : ""})` : ""}" title="Boîte aux lettres">${ico("lettre")}${SOC.boite && SOC.boite.non_lus ? `<span class="pastille-compte">${SOC.boite.non_lus}</span>` : ""}</button>` : ""}
         <button type="button" class="hall-icone" data-act="reglages-ouvrir" aria-label="Réglages" title="Réglages">${ico("reglages")}</button>
         ${accesAdmin() ? `<button type="button" class="hall-icone" data-act="admin" aria-label="Administration" title="Administration">${ico("admin")}</button>` : ""}
       </div>
@@ -6538,6 +6601,7 @@ function htmlHall(){
         ${tuile("prog-decks", "decks", "Decks", `${PROG.decks.length} / 9 decks`)}
         ${tuile("prog-boutique", "boutique", "Boutique", `Paquets à ${prixPaquet} or`)}
         ${PROG.saison ? tuile("prog-saison", "saison", "Saison", (recompensesSaisonEnAttente() ? `<span class="pastille-recompense">${recompensesSaisonEnAttente()} récompense${recompensesSaisonEnAttente()>1 ? "s" : ""} à réclamer</span>` : "") + `${PROG.saison.finis} / ${PROG.saison.travaux.length} travaux, encore ${joursRestants(PROG.saison.fin)} j`) : ""}
+        ${PROG.actif && PROG.pret ? tuile("prog-amis", "amis", "Amis", (demandesAmis() ? `<span class="pastille-recompense">${demandesAmis()} demande${demandesAmis()>1 ? "s" : ""}</span>` : "") + (SOC.amis && (SOC.amis.amis || []).length ? `${(SOC.amis.amis || []).filter(a => a.en_ligne).length} en ligne sur ${SOC.amis.amis.length}` : "Défiez vos amis")) : ""}
         ${tuile("prog-classement", "classement", "Classement", p.elo_parties ? `Cote ${nf(p.elo)}` : "Parties en ligne")}
         ${tuile("prog-profil", "profil", "Profil", (recompensesEnAttente() ? `<span class="pastille-recompense">${recompensesEnAttente()} récompense${recompensesEnAttente()>1 ? "s" : ""} à réclamer</span>` : "") + (trophees===null ? "Statistiques et trophées" : `${trophees} / ${TROPHEES.length*4} rangs de trophées`))}
       </nav>
@@ -7832,6 +7896,7 @@ function admFicheJoueur(){
   const vars = Object.entries(CONFIG.variantes || {}), possV = new Set(f.variantes || []);
   return `<div class="adm-page fiche-joueur">
     ${retour}
+    <button type="button" class="btn second bouton-msg-fiche" data-act="msg-joueur" data-id="${f.id}">Envoyer un message</button>
     <section class="tete-fiche">
       <div><h2>${esc(f.pseudo || "Sans pseudo")}</h2>
         <p class="aide">${esc(f.email || "")}${f.titre ? ` · titre : <b>${esc(f.titre)}</b>` : ""} · inscrit le ${f.cree ? new Date(f.cree).toLocaleDateString("fr-FR") : "–"} · dernière visite : ${ilYa(f.derniere_vue)}${f.alertes ? ` · <b style="color:var(--danger)">${f.alertes} alerte${f.alertes>1 ? "s" : ""}</b> (onglet Surveillance)` : ""}</p></div>
@@ -7950,6 +8015,233 @@ function htmlFileClassee(){
     <p class="attente">Recherche d’un adversaire de votre niveau…</p>
     <p class="aide">Attente : ${s} s. Écart de cote accepté : ±${ecart} (il s’élargit avec l’attente).${PROG.profil && PROG.profil.elo ? ` Votre cote : ${nf(PROG.profil.elo)}.` : ""}</p>
     <div class="actions"><button type="button" class="btn second" data-act="en-file-annuler">Annuler</button></div></div>`;
+}
+
+/* ============================================================
+   SOCIAL : amis et défis, boîte aux lettres, nouveautés
+   ============================================================ */
+PROG.social = {amis:null, boite:null, notes:null, defis:[], recherche:null, defiIgnores:new Set()};
+const SOC = PROG.social;
+async function chargerAmis(){ try { SOC.amis = await rpc("mes_amis"); } catch(e) { SOC.amis = null; } }
+async function chargerBoite(){ try { SOC.boite = await rpc("ma_boite"); } catch(e) { SOC.boite = null; } }
+async function chargerNotes(){
+  try { const c = sbc(); const r = c ? await c.from("notes_maj").select("id,version,titre,texte,cree").eq("publie", true).order("cree", {ascending:false}).limit(30) : null; SOC.notes = r && !r.error ? r.data : null; }
+  catch(e) { SOC.notes = null; }
+}
+async function chargerDefis(){ try { SOC.defis = (await rpc("mes_defis")) || []; } catch(e) { SOC.defis = []; } majBanniereDefi(); }
+async function chargerSocial(){ await Promise.all([chargerAmis(), chargerBoite(), chargerNotes(), chargerDefis()]); }
+const notesNonLues = () => { if(!SOC.notes || !SOC.notes.length) return 0; let vu = 0; try { vu = Number(localStorage.getItem("notes-vues") || 0); } catch(e) {} return SOC.notes.filter(n => n.id>vu).length; };
+const demandesAmis = () => SOC.amis ? (SOC.amis.recues || []).length : 0;
+// Rafraîchissement : défis toutes les 8 secondes, le reste toutes les 40 secondes (hors partie)
+let tickSocial = 0;
+setInterval(() => {
+  if(!PROG.actif || !PROG.pret || document.hidden || (S && ui.ecran==="jeu")) return;
+  tickSocial++;
+  chargerDefis();
+  if(tickSocial % 5===0) Promise.all([chargerAmis(), chargerBoite()]).then(() => { if(!S && ui.ecran==="jeu") renderCouche(); else if(["amis", "boite"].includes(ui.ecran)) renderProg(); });
+}, 8000);
+
+// ----- Bandeau de défi
+function majBanniereDefi(){
+  let b = document.getElementById("banniere-defi");
+  const d = (SOC.defis || []).find(x => !SOC.defiIgnores.has(x.id));
+  if(!d || (S && ui.ecran==="jeu")){ if(b) b.remove(); return; }
+  if(!b){ b = document.createElement("div"); b.id = "banniere-defi"; b.setAttribute("role", "alert"); document.body.appendChild(b); }
+  b.innerHTML = `<span class="ico-defi" aria-hidden="true">⚔</span><span><b>${esc(d.de)}</b> vous défie${d.elo ? ` (cote ${nf(d.elo)})` : ""} !</span>
+    <button type="button" class="btn" data-act="defi-accepter" data-id="${d.id}">Accepter</button><button type="button" class="btn second" data-act="defi-refuser" data-id="${d.id}">Refuser</button>`;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("#banniere-defi [data-act]");
+  if(!b) return;
+  e.stopPropagation();
+  const id = Number(b.dataset.id);
+  if(b.dataset.act==="defi-refuser"){ SOC.defiIgnores.add(id); rpc("repondre_defi", {p_id:id, p_accepter:false}).catch(() => {}); majBanniereDefi(); return; }
+  if(!deckChoisi()) return erreur(`Il vous faut un deck complet de ${REGLES.tailleDeck} cartes pour accepter un défi.`);
+  rpc("repondre_defi", {p_id:id, p_accepter:true}).then(r => {
+    SOC.defiIgnores.add(id); majBanniereDefi();
+    if(!r || !r.code) return erreur((r && r.erreur) || "Ce défi n’est plus disponible.");
+    S = null; ui.ecran = "jeu"; render(); actionEnLigne("en-ligne"); EN.saisie = r.code; rejoindre(r.code);
+  }, err => erreur(err.message));
+}, true);
+async function defierAmi(id, pseudo){
+  if(!deckChoisi()) return erreur(`Il vous faut un deck complet de ${REGLES.tailleDeck} cartes pour défier un ami.`);
+  let r; try { r = await rpc("defier_ami", {p_joueur:id}); } catch(e) { return erreur(e.message); }
+  if(!r || !r.code) return erreur((r && r.erreur) || "Défi impossible.");
+  S = null; ui.ecran = "jeu"; render(); actionEnLigne("en-ligne"); creerPartie(r.code);
+  erreur(`Défi envoyé à ${pseudo} : la partie commence dès qu’il accepte.`);
+}
+
+// ----- Pages
+const ligneJoueur = (j, boutons) => `<li class="ligne-ami"><span class="presence ${j.en_ligne ? "en-ligne" : ""}" title="${j.en_ligne ? "En ligne" : "Hors ligne"}"></span>
+  <span class="nom-ami"><b>${esc(j.pseudo)}${j.titre ? ` <span class="titre-joueur titre-ami">${esc(j.titre)}</span>` : ""}</b><small>cote ${nf(j.elo ?? 1200)}${j.en_ligne ? " · en ligne" : ""}</small></span><span class="boutons-ami">${boutons}</span></li>`;
+function pageAmis(){
+  const A = SOC.amis;
+  if(!A){ chargerAmis().then(() => { if(ui.ecran==="amis") renderProg(); }); return `${entete("Amis")}<p class="attente">Chargement…</p>`; }
+  const R = SOC.recherche;
+  const dejaLie = new Set([...(A.amis || []), ...(A.envoyees || []), ...(A.recues || [])].map(j => j.id));
+  return `${entete("Amis")}
+    <div class="page-amis">
+      <section><h2>Ajouter un ami</h2>
+        <div class="ligne-recherche-ami"><input type="text" id="recherche-ami" maxlength="20" autocomplete="off" placeholder="Pseudo (2 lettres minimum)" aria-label="Rechercher un pseudo" value="${esc((R && R.texte) || "")}">
+          <button type="button" class="btn" data-act="ami-chercher">Rechercher</button></div>
+        ${R && R.resultats ? (R.resultats.length ? `<ul class="liste-amis">${R.resultats.map(j => ligneJoueur(j, dejaLie.has(j.id) ? `<span class="aide">déjà dans votre liste</span>` : `<button type="button" class="btn btn-rang" data-act="ami-demander" data-id="${j.id}">Ajouter</button>`)).join("")}</ul>` : `<p class="aide">Aucun joueur ne correspond.</p>`) : ""}
+      </section>
+      ${(A.recues || []).length ? `<section><h2>Demandes reçues</h2><ul class="liste-amis">${A.recues.map(j => ligneJoueur(j, `<button type="button" class="btn btn-rang" data-act="ami-accepter" data-id="${j.id}">Accepter</button><button type="button" class="btn-discret" data-act="ami-refuser" data-id="${j.id}">Refuser</button>`)).join("")}</ul></section>` : ""}
+      <section><h2>Mes amis <span class="aide">${(A.amis || []).length}</span></h2>
+        ${(A.amis || []).length ? `<ul class="liste-amis">${A.amis.map(j => ligneJoueur(j, `<button type="button" class="btn btn-rang" data-act="ami-defier" data-id="${j.id}" data-nom="${esc(j.pseudo)}">Défier</button><button type="button" class="btn-discret" data-act="ami-retirer" data-id="${j.id}" data-nom="${esc(j.pseudo)}">Retirer</button>`)).join("")}</ul>` : `<p class="aide">Pas encore d’amis : recherchez un pseudo, ou ajoutez un adversaire récent.</p>`}
+      </section>
+      ${(A.recents || []).length ? `<section><h2>Adversaires récents</h2><ul class="liste-amis">${A.recents.map(j => ligneJoueur(j, `<button type="button" class="btn btn-rang" data-act="ami-demander" data-id="${j.id}">Ajouter</button>`)).join("")}</ul></section>` : ""}
+      ${(A.envoyees || []).length ? `<section><h2>Demandes envoyées</h2><ul class="liste-amis">${A.envoyees.map(j => ligneJoueur(j, `<span class="aide">en attente</span><button type="button" class="btn-discret" data-act="ami-retirer" data-id="${j.id}" data-nom="${esc(j.pseudo)}">Annuler</button>`)).join("")}</ul></section>` : ""}
+    </div>`;
+}
+const texteRiche = t => esc(t || "").split(/\n/).reduce((acc, l) => {
+  const li = /^\s*[-•*]\s+(.*)/.exec(l);
+  if(li){ if(!acc.liste){ acc.html += "<ul>"; acc.liste = true; } acc.html += `<li>${li[1]}</li>`; }
+  else { if(acc.liste){ acc.html += "</ul>"; acc.liste = false; } if(l.trim()) acc.html += `<p>${l}</p>`; }
+  return acc;
+}, {html:"", liste:false});
+const enHtml = t => { const r = texteRiche(t); return (r.html + (r.liste ? "</ul>" : "")).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); };
+function pageBoite(){
+  const B = SOC.boite;
+  if(!B){ chargerBoite().then(() => { if(ui.ecran==="boite") renderProg(); }); return `${entete("Boîte aux lettres")}<p class="attente">Chargement…</p>`; }
+  return `${entete("Boîte aux lettres")}
+    <div class="page-boite">
+      ${(B.messages || []).length ? B.messages.map(m => `<details class="message ${m.lu ? "" : "non-lu"}" data-message="${m.id}" ${SOC.ouvert===m.id ? "open" : ""}>
+        <summary><span class="enveloppe" aria-hidden="true">${m.lu ? "✉" : "📩"}</span><b>${esc(m.titre)}</b>${m.cadeau && !m.recupere ? `<span class="pastille-recompense">Cadeau</span>` : ""}<span class="quand">${new Date(m.cree).toLocaleDateString("fr-FR", {day:"numeric", month:"long"})}</span></summary>
+        <div class="corps-message">${enHtml(m.texte)}
+          ${m.cadeau ? `<div class="cadeau ${m.recupere ? "recupere" : ""}"><span>🎁 ${esc(texteRecompenseSaison(m.cadeau))}</span>${m.recupere ? `<span class="recu-palier">✓ Récupéré</span>` : `<button type="button" class="btn" data-act="boite-recuperer" data-id="${m.id}">Récupérer</button>`}</div>` : ""}
+          <div class="actions-message"><button type="button" class="btn-discret" data-act="boite-supprimer" data-id="${m.id}">Supprimer</button></div>
+        </div></details>`).join("") : `<p class="aide">Aucun message pour le moment.</p>`}
+    </div>`;
+}
+function pageNouveautes(){
+  const N = SOC.notes;
+  if(!N){ chargerNotes().then(() => { if(ui.ecran==="nouveautes") renderProg(); }); return `${entete("Nouveautés")}<p class="attente">Chargement…</p>`; }
+  try { if(N.length) localStorage.setItem("notes-vues", String(Math.max(...N.map(n => n.id)))); } catch(e) {}
+  return `${entete("Nouveautés")}
+    <div class="page-nouveautes">${N.length ? N.map(n => `<article class="note-maj">
+      <header>${n.version ? `<span class="version">${esc(n.version)}</span>` : ""}<h2>${esc(n.titre)}</h2><span class="quand">${new Date(n.cree).toLocaleDateString("fr-FR", {day:"numeric", month:"long", year:"numeric"})}</span></header>
+      <div class="corps-note">${enHtml(n.texte)}</div></article>`).join("") : `<p class="aide">Aucune note de mise à jour pour le moment.</p>`}</div>`;
+}
+document.addEventListener("toggle", e => {
+  const d = e.target;
+  if(!d.classList || !d.classList.contains("message") || !d.open) return;
+  const id = Number(d.dataset.message); SOC.ouvert = id;
+  const m = SOC.boite && SOC.boite.messages.find(x => x.id===id);
+  if(m && !m.lu){ m.lu = true; d.classList.remove("non-lu"); rpc("lire_message", {p_id:id}).then(() => chargerBoite()).catch(() => {}); }
+}, true);
+document.addEventListener("keydown", e => { if(e.key==="Enter" && e.target.id==="recherche-ami"){ e.preventDefault(); actionSociale("ami-chercher"); } });
+function actionSociale(act, id, el){
+  const recharger = () => chargerAmis().then(() => renderProg());
+  switch(act){
+    case "prog-amis": ui.ecran = "amis"; SOC.recherche = null; chargerAmis().then(() => { if(ui.ecran==="amis") renderProg(); }); return true;
+    case "prog-boite": ui.ecran = "boite"; chargerBoite().then(() => { if(ui.ecran==="boite") renderProg(); }); return true;
+    case "prog-nouveautes": ui.ecran = "nouveautes"; return true;
+    case "ami-chercher": {
+      const t = (document.getElementById("recherche-ami") || {}).value || "";
+      if(t.trim().length<2){ erreur("Tapez au moins 2 lettres du pseudo."); return false; }
+      rpc("chercher_joueurs", {p_texte:t}).then(r => { SOC.recherche = {texte:t, resultats:r || []}; renderProg(); }, e => erreur(e.message)); return false;
+    }
+    case "ami-demander": rpc("demander_ami", {p_joueur:id}).then(r => { erreur(r && r.erreur ? r.erreur : r && r.amis ? "Vous êtes maintenant amis !" : "Demande d’ami envoyée."); return recharger(); }, e => erreur(e.message)); return false;
+    case "ami-accepter": case "ami-refuser": rpc("repondre_ami", {p_joueur:id, p_accepter:act==="ami-accepter"}).then(recharger, e => erreur(e.message)); return false;
+    case "ami-retirer": if(confirm(`Retirer ${el && el.dataset.nom || "ce joueur"} de vos amis ?`)) rpc("retirer_ami", {p_joueur:id}).then(recharger, e => erreur(e.message)); return false;
+    case "ami-defier": defierAmi(id, el && el.dataset.nom || "votre ami"); return false;
+    case "boite-recuperer": rpc("recuperer_cadeau", {p_id:Number(id)}).then(async r => {
+        if(r && r.erreur) return erreur(r.erreur);
+        await Promise.all([chargerBoite(), rafraichir(), chargerPaquetsOfferts()]); PROG.collection = null; renderProg();
+        erreur(`Cadeau récupéré : ${texteRecompenseSaison(r)} !`);
+      }, e => erreur(e.message)); return false;
+    case "boite-supprimer": rpc("supprimer_message", {p_id:Number(id)}).then(async r => { if(r && r.erreur) return erreur(r.erreur); await chargerBoite(); renderProg(); }, e => erreur(e.message)); return false;
+  }
+  return null;
+}
+
+/* ----- Administration : boîte aux lettres et notes de mise à jour ----- */
+adm.msg = adm.msg || {dest:"tous", choix:[], filtre:"", titre:"", texte:"", or:0, encre:0, carte:"", paquet:"", variante:""};
+function admMessages(){
+  const M = adm.msg, J = (PROG.adminStats && PROG.adminStats.joueurs) || null;
+  if(!J && PROG.pret){ chargerAdminStats().then(() => { if(adm.onglet==="messages") renderAdmin(); }); }
+  const f = M.filtre.toLowerCase(), liste = (J || []).filter(j => !f || `${j.pseudo || ""} ${j.email || ""}`.toLowerCase().includes(f));
+  const cartes = trierCartes(Object.keys(CARTES).filter(k => estCollectionnable(CARTES[k])));
+  return `<div class="adm-page adm-messages">
+    <h2>Boîte aux lettres</h2>
+    <p class="aide">Envoyez un message, avec ou sans cadeau, à un joueur, à une sélection ou à tous. Le joueur le trouve dans sa boîte aux lettres (icône d’enveloppe de l’accueil) et récupère le cadeau d’un clic.</p>
+    <fieldset class="dest-message"><legend>Destinataires</legend>
+      <label class="case"><input type="radio" name="msg-dest" data-msg="dest" value="tous" ${M.dest==="tous" ? "checked" : ""}> Tous les joueurs${J ? ` (${J.length})` : ""}</label>
+      <label class="case"><input type="radio" name="msg-dest" data-msg="dest" value="selection" ${M.dest==="selection" ? "checked" : ""}> Une sélection de joueurs ${M.choix.length ? `<b>(${M.choix.length} choisi${M.choix.length>1 ? "s" : ""})</b>` : ""}</label>
+      ${M.dest==="selection" ? `<input type="text" data-msg="filtre" placeholder="Filtrer par pseudo ou e-mail" value="${esc(M.filtre)}" aria-label="Filtrer les joueurs">
+        <div class="choix-joueurs">${J ? liste.map(j => `<label class="case"><input type="checkbox" data-msg-joueur="${j.id}" ${M.choix.includes(j.id) ? "checked" : ""}> ${esc(j.pseudo || "sans pseudo")} <span class="aide">${esc(j.email || "")}</span></label>`).join("") || `<p class="aide">Aucun joueur.</p>` : `<p class="attente">Chargement des joueurs…</p>`}</div>` : ""}
+    </fieldset>
+    <label class="champ"><span>Titre</span><input type="text" data-msg="titre" maxlength="120" value="${esc(M.titre)}"></label>
+    <label class="champ"><span>Message (une ligne commençant par « - » devient une puce, **texte** en gras)</span><textarea data-msg="texte" rows="6">${esc(M.texte)}</textarea></label>
+    <fieldset class="cadeau-message"><legend>Cadeau (facultatif)</legend>
+      <label class="champ"><span>Or</span><input type="number" min="0" data-msg="or" value="${M.or}"></label>
+      <label class="champ"><span>Encre</span><input type="number" min="0" data-msg="encre" value="${M.encre}"></label>
+      <label class="champ"><span>Carte</span><select data-msg="carte"><option value="">Aucune</option>${cartes.map(k => `<option value="${k}" ${M.carte===k ? "selected" : ""}>${esc(CARTES[k].nom)}</option>`).join("")}</select></label>
+      <label class="champ"><span>Paquet</span><select data-msg="paquet"><option value="">Aucun</option><option value="classique" ${M.paquet==="classique" ? "selected" : ""}>Paquet classique</option>${Object.entries(FACTIONS).map(([k, x]) => `<option value="${k}" ${M.paquet===k ? "selected" : ""}>Paquet ${esc(x.m)}</option>`).join("")}</select></label>
+      <label class="champ"><span>Illustration</span><select data-msg="variante"><option value="">Aucune</option>${Object.entries(CONFIG.variantes || {}).map(([k, v]) => `<option value="${k}" ${M.variante===k ? "selected" : ""}>${esc((CARTES[v.carte] || {}).nom || v.carte)} : ${esc(v.nom || k)}</option>`).join("")}</select></label>
+    </fieldset>
+    <div class="adm-actions"><button type="button" class="btn" data-act="msg-envoyer">Envoyer</button></div>
+  </div>`;
+}
+function admNotes(){
+  if(!adm.notes && PROG.pret){ adm.notes = []; const c = sbc(); if(c) c.from("notes_maj").select("*").order("cree", {ascending:false}).then(r => { adm.notes = r.error ? [] : r.data; if(adm.onglet==="notes") renderAdmin(); }); }
+  const E = adm.noteEdit;
+  return `<div class="adm-page adm-notes">
+    <h2>Notes de mise à jour</h2>
+    <p class="aide">Les notes publiées apparaissent dans « Nouveautés » sur l’accueil des joueurs, avec une pastille tant qu’ils ne les ont pas lues.</p>
+    ${E ? `<div class="editeur-note">
+      <div class="champs"><label class="champ"><span>Version</span><input type="text" data-note="version" maxlength="20" value="${esc(E.version || "")}" placeholder="1.5"></label>
+        <label class="champ"><span>Titre</span><input type="text" data-note="titre" maxlength="120" value="${esc(E.titre || "")}"></label></div>
+      <label class="champ"><span>Texte (une ligne commençant par « - » devient une puce, **texte** en gras)</span><textarea data-note="texte" rows="10">${esc(E.texte || "")}</textarea></label>
+      <label class="case"><input type="checkbox" data-note="publie" ${E.publie ? "checked" : ""}> Publiée (visible des joueurs)</label>
+      <div class="adm-actions"><button type="button" class="btn" data-act="note-enregistrer">Enregistrer</button><button type="button" class="btn-discret" data-act="note-annuler">Annuler</button></div>
+    </div>` : `<div class="adm-actions"><button type="button" class="btn" data-act="note-nouvelle">Nouvelle note</button></div>`}
+    <div class="liste-notes">${(adm.notes || []).map(n => `<div class="ligne-note"><span class="version">${esc(n.version || "–")}</span><b>${esc(n.titre)}</b><span class="aide">${new Date(n.cree).toLocaleDateString("fr-FR")} · ${n.publie ? "publiée" : "brouillon"}</span>
+      <button type="button" class="btn-discret" data-act="note-modifier" data-id="${n.id}">Modifier</button><button type="button" class="btn-discret" data-act="note-supprimer" data-id="${n.id}">Supprimer</button></div>`).join("") || `<p class="aide">Aucune note.</p>`}</div>
+  </div>`;
+}
+document.addEventListener("input", e => {
+  const ds = e.target.dataset || {};
+  if(ds.msg){ adm.msg[ds.msg] = e.target.type==="number" ? Number(e.target.value) || 0 : e.target.value; if(ds.msg==="filtre" || ds.msg==="dest") { const pos = e.target.selectionStart; renderAdmin(); const el = document.querySelector(`[data-msg="${ds.msg}"]`); if(el && ds.msg==="filtre"){ el.focus(); try { el.setSelectionRange(pos, pos); } catch(err) {} } } }
+  if(ds.note && adm.noteEdit) adm.noteEdit[ds.note] = e.target.type==="checkbox" ? e.target.checked : e.target.value;
+});
+document.addEventListener("change", e => {
+  const ds = e.target.dataset || {};
+  if(ds.msg && (e.target.tagName==="SELECT" || e.target.type==="radio")){ adm.msg[ds.msg] = e.target.value; if(ds.msg==="dest") renderAdmin(); }
+  if(ds.msgJoueur){ const s = new Set(adm.msg.choix); e.target.checked ? s.add(ds.msgJoueur) : s.delete(ds.msgJoueur); adm.msg.choix = [...s]; renderAdmin(); }
+  if(ds.note==="publie" && adm.noteEdit) adm.noteEdit.publie = e.target.checked;
+});
+function actionCommunication(act, id){
+  switch(act){
+    case "msg-envoyer": {
+      const M = adm.msg;
+      if(!M.titre.trim()) return erreur("Donnez un titre au message.");
+      if(M.dest==="selection" && !M.choix.length) return erreur("Choisissez au moins un joueur.");
+      const cadeau = {};
+      if(M.or>0) cadeau.or = M.or; if(M.encre>0) cadeau.encre = M.encre;
+      if(M.carte) cadeau.cartes = [M.carte]; if(M.paquet) cadeau.paquets = [M.paquet]; if(M.variante) cadeau.variantes = [M.variante];
+      const qui = M.dest==="tous" ? "tous les joueurs" : `${M.choix.length} joueur${M.choix.length>1 ? "s" : ""}`;
+      if(!confirm(`Envoyer « ${M.titre} »${Object.keys(cadeau).length ? ` avec ${texteRecompenseSaison(cadeau)}` : ""} à ${qui} ?`)) return;
+      rpc("admin_envoyer_message", {p_dest:M.dest==="tous" ? null : M.choix, p_titre:M.titre, p_texte:M.texte, p_cadeau:Object.keys(cadeau).length ? cadeau : null}).then(n => {
+        erreur(`Message envoyé à ${n} joueur${n>1 ? "s" : ""}.`);
+        adm.msg = {dest:"tous", choix:[], filtre:"", titre:"", texte:"", or:0, encre:0, carte:"", paquet:"", variante:""}; renderAdmin();
+      }, e => erreur(/function|does not exist|schema cache/i.test(e.message) ? "Exécutez d’abord le script supabase-social.sql dans Supabase." : e.message));
+      return;
+    }
+    case "msg-joueur": adm.msg = {...adm.msg, dest:"selection", choix:[id]}; adm.onglet = "messages"; PROG.fiche = null; break;
+    case "note-nouvelle": adm.noteEdit = {version:"", titre:"", texte:"", publie:false}; break;
+    case "note-modifier": adm.noteEdit = {...(adm.notes || []).find(n => String(n.id)===String(id))}; break;
+    case "note-annuler": adm.noteEdit = null; break;
+    case "note-enregistrer": {
+      const E = adm.noteEdit; if(!E || !(E.titre || "").trim()) return erreur("Donnez un titre à la note.");
+      rpc("admin_maj_note", {p:{id:E.id ?? null, version:E.version, titre:E.titre, texte:E.texte, publie:!!E.publie}}).then(() => { adm.noteEdit = null; adm.notes = null; SOC.notes = null; erreur("Note enregistrée."); renderAdmin(); },
+        e => erreur(/function|does not exist|schema cache/i.test(e.message) ? "Exécutez d’abord le script supabase-social.sql dans Supabase." : e.message));
+      return;
+    }
+    case "note-supprimer": if(confirm("Supprimer cette note ?")) rpc("admin_suppr_note", {p_id:Number(id)}).then(() => { adm.notes = null; renderAdmin(); }, e => erreur(e.message)); return;
+  }
+  renderAdmin();
 }
 
 chargerConfig();
