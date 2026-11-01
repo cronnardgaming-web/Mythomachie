@@ -84,6 +84,13 @@ ou changé leur faction, renvoyez le catalogue depuis l’administration (onglet
 `supabase-admin-joueurs.sql` permet à l’administrateur de corriger l’or et l’encre d’un joueur depuis l’onglet
 « Statistiques » de l’administration (bouton « Modifier » dans la liste des joueurs).
 
+## Parties simulées
+
+`supabase-simulations.sql` (à exécuter après les autres scripts) : les fichiers de simulations s’importent depuis la
+vue d’ensemble des statistiques (« Importer un fichier de simulations »). Elles sont comptées à part, incluses par
+défaut dans les statistiques des héros et des cartes (case « Inclure les parties simulées »), et ne comptent jamais
+pour les joueurs (quêtes, trophées, saison, classement). Un bouton permet de toutes les effacer.
+
 ## Amis, boîte aux lettres et nouveautés
 
 `supabase-social.sql` (à exécuter après les autres scripts) : amis (recherche de pseudo, adversaires récents,

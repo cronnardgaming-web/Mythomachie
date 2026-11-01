@@ -961,6 +961,17 @@ body.compact .nom-heros-deck{font-size:17px}
 .liste-reprises small{color:var(--ink-2)}
 .liste-reprises .btn{margin:0}
 
+/* Administration : simulations et valeur des cartes */
+.case-sim{margin:6px 0 10px}
+.bloc-simulations{margin-top:18px;border-top:1px solid var(--line);padding-top:10px}
+.btn-fichier{cursor:pointer}
+.valeur-carte{border:1px solid var(--line);border-left:5px solid var(--line);border-radius:8px;padding:8px 12px;margin:8px 0;background:var(--table)}
+.valeur-carte.equilibree{border-left-color:#2f9e63}
+.valeur-carte.proche{border-left-color:#d39b2a}
+.valeur-carte.ecartee{border-left-color:#c0392b}
+.chiffres-valeur{display:flex;gap:16px;flex-wrap:wrap;font-size:14px}
+.valeur-carte .aide{margin:4px 0 0;font-size:12px}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -2074,7 +2085,7 @@ function appliquer(i, e, src){
     blesser(c, e.degatsHasard);
     log(`${def(c).nom} subit ${e.degatsHasard} dégâts.`);
   }
-  if(e.renfort){ const b = deux ? beneficiaire2v2(i, "renfort") : j; if(b) b.plateau.forEach(c => { c.atk += e.renfort.atk; c.vieMax += e.renfort.vie; }); }
+  if(e.renfort){ const b = deux ? beneficiaire2v2(i, "renfort") : j; if(b) b.plateau.forEach(c => { if(src && c.uid===src) return; c.atk += e.renfort.atk; c.vieMax += e.renfort.vie; }); }
   if(e.invoque && !(deux && j.esprit)){
     if(CARTES[e.invoque.id]) for(let k=0;k<e.invoque.n && j.plateau.length<REGLES.plateauMax;k++) j.plateau.push(creature(inst(e.invoque.id)));
   }
@@ -2161,7 +2172,7 @@ function jouer(id, opts={}){
     j.main.splice(k,1);
     j.plateau.push(creature(c));
     log(`${j.nom} invoque ${d.nom}.`);
-    if(d.conjuration) appliquer(i, d.conjuration, c.uid);
+    if(d.conjuration) appliquer(i, d.conjuration, c.uid);   // son renforcement épargne la créature elle-même
   } else {
     j.main.splice(k,1);
     if(opts.sacrifierDirect && d.choixSacrifice){
@@ -3241,6 +3252,11 @@ function actionAdmin(act, id, el){
     return;
   }
   if(act.startsWith("fiche-")){ actionFiche(act, id); return; }
+  if(act==="stats-simulations"){ PROG.adminStats = {...(PROG.adminStats || {}), sansSim:!(PROG.adminStats || {}).sansSim}; chargerAdminStats(); return; }
+  if(act==="simulations-effacer"){
+    if(!confirm("Effacer toutes les parties simulées des statistiques ?")) return;
+    rpc("admin_effacer_simulations").then(n => { erreur(`${nf(n)} parties simulées effacées.`); chargerAdminStats(); }, e => erreur(e.message)); return;
+  }
   if(act==="stats-res"){
     const j = PROG.adminStats.joueurs.find(x => x.id===id); if(!j) return;
     PROG.adminStats.edition = id; PROG.adminStats.formRes = {or:j.pieces_or || 0, encre:j.encre || 0};
@@ -5307,7 +5323,9 @@ async function chargerAdminStats(){
   try {
     const [resume, joueurs, heros, cartes] = await Promise.all([
       rpc("admin_resume"), rpc("admin_joueurs"),
-      rpc("admin_stats_heros", {p_jours:jours}), rpc("admin_stats_cartes", {p_jours:jours})]);
+      ...(() => { const avec = !(PROG.adminStats && PROG.adminStats.sansSim);
+        const essai = (f, p) => rpc(f, {...p, p_simulations:avec}).catch(() => rpc(f, p));   // ancien serveur : sans le filtre
+        return [essai("admin_stats_heros", {p_jours:jours}), essai("admin_stats_cartes", {p_jours:jours})]; })()]);
     PROG.adminStats = {...(PROG.adminStats || {}), resume, joueurs, heros, cartes, jours, quand:Date.now(), erreur:null};
   } catch(e) {
     PROG.adminStats = {...(PROG.adminStats || {}), jours, erreur:messageScriptManquant(e.message)};
@@ -5352,6 +5370,7 @@ function admStats(vueStats = "resume"){
     </div>
 
 ${vueStats==="resume" ? `    <h2>Résumé</h2>
+    <p class="aide">Ces chiffres ne comptent que les parties des joueurs.${r.parties_simulees ? ` Les ${nf(r.parties_simulees)} parties simulées sont comptées à part, plus bas.` : ""}</p>
     <div class="tuiles">
       <div class="tuile"><b>${nf(enLigneMaint.length)}</b><span>en ligne maintenant</span></div>
       <div class="tuile"><b>${nf(visibles.length)}</b><span>joueurs inscrits</span></div>
@@ -5364,7 +5383,8 @@ ${vueStats==="resume" ? `    <h2>Résumé</h2>
     </div>
     <h2>En ligne maintenant</h2>
     ${enLigneMaint.length ? `<ul class="liste-en-ligne">${enLigneMaint.map(j => `<li><span class="point-vert" aria-hidden="true"></span><b>${esc(nomJoueur(j))}</b><span>${esc(NOMS_ECRANS[j.ecran] || j.ecran || "?")}</span><span class="aide">${ilYa(j.derniere_vue)}</span></li>`).join("")}</ul>` : `<p class="aide">Personne n’est connecté en ce moment.</p>`}
-` : ""}${vueStats==="heros" ? `    <h2>Héros</h2>
+` : ""}${vueStats==="heros" || vueStats==="cartes" ? `<label class="case case-sim"><input type="checkbox" data-act="stats-simulations" ${A.sansSim ? "" : "checked"}> Inclure les parties simulées${r.parties_simulees ? ` (${nf(r.parties_simulees)})` : ""}</label>` : ""}
+${vueStats==="heros" ? `    <h2>Héros</h2>
     <div class="tableau-defile"><table class="tableau"><thead><tr><th>Héros</th><th>Parties</th><th>Victoires</th><th>Taux</th><th>Tours moyens</th></tr></thead><tbody>
       ${facs.map(k => { const x = hs[k] || {parties:0, victoires:0}; const t = x.parties ? x.victoires/x.parties : null;
         return `<tr><td><span class="pastille f-${k}"></span> ${esc(heroDe({heros:k}).nom)}</td><td>${nf(x.parties)}</td><td>${nf(x.victoires)}</td><td class="${couleurTaux(t)}">${pct(x.victoires, x.parties)}</td><td>${x.tours!=null ? Number(x.tours).toLocaleString("fr-FR") : "–"}</td></tr>`; }).join("")}
@@ -5374,7 +5394,12 @@ ${vueStats==="resume" ? `    <h2>Résumé</h2>
       ${facs.map(a => `<tr><th>${esc(heroDe({heros:a}).nom)}</th>${facs.map(b => { const d = duel(a, b); const t = d && d.parties ? d.victoires/d.parties : null;
         return `<td class="${couleurTaux(t)}">${d ? `${pct(d.victoires, d.parties)} <span class="aide">(${d.parties})</span>` : "–"}</td>`; }).join("")}</tr>`).join("")}
     </tbody></table></div>
-` : ""}${vueStats==="cartes" ? `    <h2>Cartes</h2>
+` : ""}${vueStats==="resume" ? `<section class="bloc-simulations"><h2>Parties simulées</h2>
+      <p><b>${nf(r.parties_simulees || 0)}</b> parties simulées enregistrées. Elles enrichissent les statistiques des héros et des cartes (filtre « Inclure les parties simulées »), sans compter pour les joueurs : ni quêtes, ni trophées, ni saison, ni classement.</p>
+      <div class="adm-actions"><label class="btn second btn-fichier">Importer un fichier de simulations<input type="file" accept=".json,application/json" data-act-fichier="simulations-importer" hidden></label>
+        ${r.parties_simulees ? `<button type="button" class="btn-discret" data-act="simulations-effacer">Effacer les simulations</button>` : ""}</div>
+      ${PROG.importSim ? `<p class="attente">${esc(PROG.importSim)}</p>` : ""}</section>` : ""}
+${vueStats==="cartes" ? `    <h2>Cartes</h2>
     <p class="aide">Toutes les parties sont comptées, avec leurs deux camps : joueurs, ordinateur et parties sur un même écran.</p>
     <p class="aide">« % de victoire » : parmi les parties où un camp a joué cette carte, la part que ce camp a gagnées. Vers 50 %, la carte est équilibrée. Au-dessus de 60 % (en rouge), elle est peut-être trop forte ; sous 40 % (en bleu), trop faible. Méfiez-vous des cartes jouées dans moins de 20 parties.</p>
     <div class="adm-actions" style="margin-top:0"><select data-stats="fac"><option value="toutes">Toutes les factions</option>${facs.map(k => `<option value="${k}" ${facFiltre===k ? "selected" : ""}>${esc(FACTIONS[k].nom)}</option>`).join("")}</select></div>
@@ -6807,6 +6832,7 @@ function htmlAdminVariantes(id){
       <div class="adm-actions"><button type="button" class="btn second" data-act="variante-ajouter" data-id="${id}">Ajouter une illustration alternative</button></div>
     </fieldset>
     <fieldset><legend>Boosters</legend>
+      ${htmlValeurCarte(d)}
       <label class="case"><input type="checkbox" data-act="carte-promo" data-id="${id}" ${d.promo ? "checked" : ""}> Carte promotionnelle</label>
       <label class="champ champ-saison"><span>Carte de saison : exclusive jusqu’au (vide = carte normale)</span><input type="date" data-chemin="cartes.${id}.saisonFin" value="${esc(d.saisonFin || "")}"></label>
       ${d.saisonFin ? `<p class="aide">Carte de saison : absente des paquets et non fabricable jusqu’au ${new Date(d.saisonFin + "T00:00:00").toLocaleDateString("fr-FR")}, puis elle rejoint automatiquement les paquets. Pensez à « Envoyer le catalogue ».</p>` : ""}
@@ -8366,6 +8392,64 @@ function actionCommunication(act, id){
   }
   renderAdmin();
 }
+
+/* ----- Administration : valeur estimée d’une carte, comparée à son budget ----- */
+const BONUS_RARETE = {commune:0, rare:0.25, epique:0.5, legendaire:0.75};
+function valeurEffet(e, notes){
+  if(!e || typeof e!=="object") return 0;
+  let v = 0;
+  v += (e.or || 0) * 1 + (e.combat || 0) * 1 + (e.soin || 0) * 0.6 + (e.pioche || 0) * 2 + (e.bannir || 0) * 1.5;
+  v += (e.degatsHasard || 0) * 0.7 + (e.degatsTous || 0) * 1.2;
+  if(e.renfort) v += (e.renfort.atk || 0) * 0.6 + (e.renfort.vie || 0) * 0.25;       // environ une autre créature
+  if(e.invoque){ const t = CARTES[e.invoque] || {}; v += (t.attaque || 0) * 0.6 + (t.vie || 0) * 0.25 + (t.mots || []).length * 0.5; }
+  const connus = new Set(["or","combat","soin","pioche","bannir","degatsHasard","degatsTous","renfort","invoque"]);
+  Object.keys(e).filter(k => !connus.has(k) && e[k]).forEach(k => notes.add(k));
+  return v;
+}
+function valeurCarte(d){
+  const notes = new Set(), detail = [];
+  let v = 0;
+  const ajout = (l, x) => { if(x){ v += x; detail.push(`${l} ${x.toFixed(2).replace(".", ",")}`); } };
+  if(d.type==="creature"){
+    ajout("attaque", (d.attaque || 0) * 0.6); ajout("vie", (d.vie || 0) * 0.25); ajout("mots-clés", (d.mots || []).length * 0.5);
+    ajout("arrivée", valeurEffet(d.conjuration, notes));
+  } else if(d.type==="arme"){
+    ajout("puissance", (d.bonus || 0) * 1); ajout("équipement (60 %)", (d.bonus || 0) * 0.85 * 0.6);
+  } else ajout("effet", valeurEffet(d.effet, notes));
+  ajout("combo (60 %)", valeurEffet(d.allie, notes) * 0.6);
+  if(d.echo) ajout("écho (50 %)", valeurEffet(d.echo, notes) * 0.5);
+  const budget = 1.5 + 0.95 * (d.prix || 0) + (BONUS_RARETE[d.rarete || "commune"] || 0);
+  return {valeur:v, budget, ecart:v - budget, detail, notes:[...notes]};
+}
+function htmlValeurCarte(d){
+  if(!d || d.depart || d.base || d.jeton) return "";
+  const r = valeurCarte(d), e = r.ecart, f = x => x.toFixed(2).replace(".", ",");
+  const etat = Math.abs(e)<=0.5 ? ["equilibree", "équilibrée"] : Math.abs(e)<=1.2 ? ["proche", e>0 ? "un peu forte" : "un peu faible"] : ["ecartee", e>0 ? "forte" : "faible"];
+  return `<div class="valeur-carte ${etat[0]}" role="status">
+    <div class="chiffres-valeur"><span>Valeur estimée <b>${f(r.valeur)}</b></span><span>Budget <b>${f(r.budget)}</b></span><span>Écart <b>${e>=0 ? "+" : ""}${f(e)}</b> : ${etat[1]}</span></div>
+    <p class="aide">${r.detail.join(" · ") || "aucun effet chiffré"}. Budget = 1,5 + 0,95 × prix + bonus de rareté (rare +0,25, épique +0,5, légendaire +0,75).${r.notes.length ? ` Non chiffré : ${r.notes.join(", ")}.` : ""} Une estimation : la simulation a le dernier mot.</p>
+  </div>`;
+}
+
+// Import d’un fichier de simulations (par lots de 1 000 parties)
+document.addEventListener("change", async e => {
+  if(!e.target.dataset || e.target.dataset.actFichier!=="simulations-importer" || !e.target.files || !e.target.files[0]) return;
+  let parties;
+  try { const f = e.target.files[0]; const t = await new Promise((ok, ko) => { const lr = new FileReader(); lr.onload = () => ok(lr.result); lr.onerror = ko; lr.readAsText(f); }); const o = JSON.parse(t); parties = Array.isArray(o) ? o : o.parties; if(!Array.isArray(parties)) throw new Error(); }
+  catch(err) { e.target.value = ""; return erreur("Ce fichier n’est pas un fichier de simulations valide."); }
+  e.target.value = "";
+  let faites = 0;
+  try {
+    for(let k=0; k<parties.length; k+=1000){
+      PROG.importSim = `Import en cours : ${nf(faites)} / ${nf(parties.length)} parties…`; renderAdmin();
+      faites += await rpc("admin_importer_simulations", {p:parties.slice(k, k + 1000)});
+    }
+    erreur(`${nf(faites)} parties simulées importées.`);
+  } catch(err) {
+    erreur(/function|does not exist|schema cache/i.test(err.message) ? "Exécutez d’abord le script supabase-simulations.sql dans Supabase." : `Import interrompu après ${nf(faites)} parties : ${err.message}`);
+  }
+  PROG.importSim = null; chargerAdminStats();
+});
 
 chargerConfig();
 appliquerReglageAnimations();
