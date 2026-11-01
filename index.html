@@ -1666,6 +1666,59 @@ body.compact:not(.en-partie) .tuile-hall .pastille-recompense{font-size:10px;pad
 body.compact .colonne-travail{height:300px;flex-basis:150px}
 body.compact .compteurs-bandeau b{font-size:28px}
 @media (prefers-reduced-motion: reduce){ .lot-carte{animation:none} }
+
+/* =====================================================================
+   ACCUEIL : bloc Saison ; PAGE SAISON : couleur du panthéon de la saison
+   ===================================================================== */
+.hall-grille.avec-saison{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,.95fr);grid-template-areas:"jouer saison quete" "tuiles tuiles tuiles" "apprendre apprendre apprendre"}
+.hall-saison{grid-area:saison;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;min-height:230px;border-radius:5px;
+  background:linear-gradient(160deg, color-mix(in srgb, var(--teinte) 70%, #0b1430), color-mix(in srgb, var(--teinte) 30%, #060b1a));
+  border:1px solid color-mix(in srgb, var(--teinte) 55%, #c9a35a 45%);box-shadow:inset 0 0 0 4px rgba(0,0,0,.18), inset 0 0 0 5px color-mix(in srgb, #c9a35a 40%, transparent), 0 16px 30px -18px rgba(0,0,0,.75)}
+body:not(.compact) .hall-saison{margin-top:44px}
+/* Liseré grec (méandre) en tête du bloc */
+.hall-saison::before{content:"";position:absolute;left:0;right:0;top:0;height:14px;z-index:1;opacity:.9;
+  background:repeating-linear-gradient(90deg, transparent 0 4px, #e8cf8f 4px 6px, transparent 6px 10px, #e8cf8f 10px 12px, transparent 12px 14px),
+    linear-gradient(180deg, #e8cf8f 0 2px, transparent 2px 12px, #e8cf8f 12px 14px);
+  -webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.fond-hall-saison{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.7) brightness(.75)}
+.teinte-hall{position:absolute;inset:0;background:var(--teinte);mix-blend-mode:color;opacity:.5;pointer-events:none}
+.hall-saison::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg, color-mix(in srgb, var(--teinte) 30%, transparent) 0%, transparent 35%, rgba(6,10,24,.82) 72%, rgba(6,10,24,.95) 100%)}
+.filigrane-hall{position:absolute;right:14px;top:6px;font-family:Cinzel,serif;font-size:150px;line-height:1;color:color-mix(in srgb, #fff 12%, transparent)}
+.contenu-hall-saison{position:relative;z-index:2;display:flex;flex-direction:column;gap:6px;padding:16px 16px 14px;color:#f1e8d4}
+.contenu-hall-saison .sur-titre{color:#d9c99f}
+.contenu-hall-saison h2{margin:0;font-family:Cinzel,serif;font-size:21px;line-height:1.2;background:var(--or-feuille, none);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 1px 1px rgba(0,0,0,.8))}
+.etat-hall-saison{margin:0;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;font-size:14px}
+.etat-hall-saison b{font-family:Cinzel,serif;font-size:30px;line-height:1;color:#f3d791}
+.etat-hall-saison small{width:100%;color:#cfc4ac;font-size:12px}
+.progres-hall-saison{display:flex;flex-direction:column;gap:4px;font-size:13px}
+.progres-hall-saison .barre{height:6px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,.18)}
+.progres-hall-saison .barre > span{display:block;height:100%;background:linear-gradient(90deg,#c99647,#f3d791)}
+.contenu-hall-saison .pastille-recompense{align-self:flex-start}
+.btn-saison{margin-top:4px;align-self:stretch;font-family:Cinzel,serif;font-weight:700;font-size:15px;padding:10px 14px;border-radius:5px;cursor:pointer;color:#2b1a06;border:1px solid #5e3f14;
+  background:linear-gradient(180deg,#f2d38c 0%,#d6a456 45%,#9a6b2c 100%);box-shadow:inset 0 1px 0 rgba(255,245,215,.7), 0 8px 18px -10px rgba(0,0,0,.8)}
+.btn-saison:hover{filter:brightness(1.06)}
+.btn-saison:focus-visible{outline:2px solid #f3d791;outline-offset:3px}
+body.compact .hall-grille.avec-saison{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-areas:"jouer saison" "quete quete" "tuiles tuiles" "apprendre apprendre"}
+body.compact .hall-saison{min-height:0}
+body.compact .contenu-hall-saison{padding:12px 10px 10px;gap:4px}
+body.compact .contenu-hall-saison h2{font-size:15px}
+body.compact .btn-saison{font-size:13px;padding:7px 10px}
+body.compact:not(.en-partie) .hall-grille.avec-saison .hall-quete{margin-top:0}
+@media (max-width:760px){ .hall-grille.avec-saison{grid-template-columns:1fr;grid-template-areas:"jouer" "saison" "quete" "tuiles" "apprendre"} body:not(.compact) .hall-saison{margin-top:0} }
+/* Page Saison : colonnes à la couleur du panthéon */
+.page-saison.v2 .colonne-travail{background:linear-gradient(180deg, color-mix(in srgb, var(--teinte) 62%, #0a1330), color-mix(in srgb, var(--teinte) 22%, #060b1a));
+  border-color:color-mix(in srgb, var(--teinte) 65%, #b9d0ff 15%)}
+.page-saison.v2 .colonne-travail::before{background:linear-gradient(180deg, rgba(6,12,30,.72) 0%, color-mix(in srgb, var(--teinte) 10%, transparent) 26%, color-mix(in srgb, var(--teinte) 10%, transparent) 46%, rgba(6,12,30,.88) 78%, rgba(5,10,24,.95) 100%)}
+.page-saison.v2 .colonne-travail::after{content:"";position:absolute;inset:0;pointer-events:none;background:var(--teinte);mix-blend-mode:color;opacity:.6}
+.page-saison.v2 .colonne-travail .fond-travail{z-index:0}
+.page-saison.v2 .colonne-travail::before,.page-saison.v2 .colonne-travail::after{z-index:1}
+.page-saison.v2 .colonne-travail > :not(.fond-travail){z-index:2}
+.page-saison.v2 .filigrane{color:color-mix(in srgb, #fff 14%, transparent)}
+.page-saison.v2 .colonne-travail.ouvert{border-color:#f0cf7f;box-shadow:inset 0 0 0 3px rgba(0,0,0,.18), 0 0 18px -6px #f0cf7f, 0 14px 26px -16px rgba(0,0,0,.7)}
+.page-saison.v2 .colonne-travail.ferme::after{opacity:.7}
+.page-saison.v2 .corps-travail .quetes-travail{background:rgba(5,10,26,.62)}
+.page-saison.v2 .bandeau-saison{background:radial-gradient(120% 160% at 0% 0%, color-mix(in srgb, var(--teinte) 45%, var(--zone)), var(--zone) 62%)}
 </style>
 </head>
 <body>
@@ -6848,7 +6901,7 @@ function htmlHall(){
       </div>
     </header>
     ${compteIncomplet ? htmlCompte() : ""}
-    <div class="hall-grille">
+    <div class="hall-grille ${PROG.saison ? "avec-saison" : ""}">
       <section class="hall-jouer" aria-labelledby="titre-jouer">
         <h2 id="titre-jouer">Jouer</h2>
         <button type="button" class="btn-geant" data-act="jouer-ia">${ico("jouer", "ico-geant")}<span><b>Contre l’ordinateur</b><small>Une partie avec l’un de vos decks</small></span></button>
@@ -6858,12 +6911,13 @@ function htmlHall(){
           ${mode2v2Visible() ? `<button type="button" class="btn second" data-act="jouer-2v2">${ico("duo")} 2 contre 2 avec un allié <span class="pastille-test">Test</span></button>` : ""}
         </div>
       </section>
+      ${htmlHallSaison()}
       <section class="hall-quete" aria-label="Quêtes du jour">${htmlQuetesJour()}</section>
       <nav class="hall-tuiles" aria-label="Ma collection">
         ${tuile("prog-collection", "collection", "Collection", `${possedees} / ${total} cartes`)}
         ${tuile("prog-decks", "decks", "Decks", `${PROG.decks.length} / 9 decks`)}
         ${tuile("prog-boutique", "boutique", "Boutique", `Paquets à ${prixPaquet} or`)}
-        ${PROG.saison ? tuile("prog-saison", "saison", "Saison", PROG.saison.a_venir ? `<span class="pastille-ouverture">Fermée</span>Ouverture le ${new Date(PROG.saison.debut + "T00:00:00").toLocaleDateString("fr-FR", {day:"numeric", month:"long"})}`
+        ${PROG.saison && false ? tuile("prog-saison", "saison", "Saison", PROG.saison.a_venir ? `<span class="pastille-ouverture">Fermée</span>Ouverture le ${new Date(PROG.saison.debut + "T00:00:00").toLocaleDateString("fr-FR", {day:"numeric", month:"long"})}`
           : (recompensesSaisonEnAttente() ? `<span class="pastille-recompense">${recompensesSaisonEnAttente()} récompense${recompensesSaisonEnAttente()>1 ? "s" : ""} à réclamer</span>` : "") + `${PROG.saison.finis} / ${PROG.saison.travaux.length} travaux, encore ${joursRestants(PROG.saison.fin)} j`) : ""}
         ${PROG.actif && PROG.pret ? tuile("prog-amis", "amis", "Amis", (demandesAmis() ? `<span class="pastille-recompense">${demandesAmis()} demande${demandesAmis()>1 ? "s" : ""}</span>` : "") + (SOC.amis && (SOC.amis.amis || []).length ? `${(SOC.amis.amis || []).filter(a => a.en_ligne).length} en ligne sur ${SOC.amis.amis.length}` : "Défiez vos amis")) : ""}
         ${tuile("prog-classement", "classement", "Classement", p.elo_parties ? `Cote ${nf(p.elo)}` : "Parties en ligne")}
@@ -7865,7 +7919,7 @@ function saisonDouzeTravaux(){
     ["Les Pommes d’or des Hespérides", "Le jardin des dieux, gardé par un dragon.", [["vic_devotion", 1, 1], ["pouvoirs", 3], ["degats", 120]]],
     ["Cerbère", "Le chien à trois têtes, gardien des Enfers : le dernier et le plus terrible.", [["victoires", 3], ["vic_pv", 1, 25], ["creatures", 15]]]
   ];
-  return {nom:"Les Douze Travaux d’Héraclès", debut:prochainLundi(), duree_jours:42, active:false,
+  return {nom:"Les Douze Travaux d’Héraclès", pantheon:"gre", debut:prochainLundi(), duree_jours:42, active:false,
     travaux:T.map(([nom, description, qs], k) => ({nom, description, ouverture_jour:ouvertureTravail(k),
       quetes:qs.map(([type, but, param], n) => { const q = {id:`t${k+1}q${n+1}`, type, but, recompense:n===1 ? {encre:10} : {or:20}}; if(param!==undefined) q.param = String(param); q.texte = texteQueteSaison(q); return q; })})),
     paliers:[{travaux:4, recompense:{paquets:["classique"]}}, {travaux:8, recompense:{paquets:["classique"], or:50}},
@@ -7900,7 +7954,8 @@ function admSaisons(){
     ${s ? `<div class="editeur-saison">
       <div class="champs">${champTexte("Nom de la saison", `saisons.${sid}.nom`, s.nom || "")}
         <label class="champ"><span>Date de début (un lundi de préférence)</span><input type="date" data-chemin="saisons.${sid}.debut" value="${esc(s.debut || "")}"></label>
-        ${champNombre("Durée (jours)", `saisons.${sid}.duree_jours`, s.duree_jours || 42)}</div>
+        ${champNombre("Durée (jours)", `saisons.${sid}.duree_jours`, s.duree_jours || 42)}
+        ${champSelect("Panthéon de la saison (couleur des travaux)", `saisons.${sid}.pantheon`, s.pantheon || "gre", Object.entries(FACTIONS).map(([k, f]) => [k, f.nom]))}</div>
       <p class="resume-booster">Du ${dateSaison(s, 0)} au ${fin} : ${(s.travaux || []).length} travaux, ${(s.travaux || []).reduce((n, t) => n + (t.quetes || []).length, 0)} quêtes.</p>
       <label class="case"><input type="checkbox" data-act="saison-active" data-id="${sid}" ${s.active ? "checked" : ""}> Saison active (visible des joueurs pendant ses dates)</label>
       <div class="adm-actions"><button type="button" class="btn" data-act="saison-envoyer" data-id="${sid}">Envoyer la saison au serveur</button>
@@ -8582,7 +8637,7 @@ function pageSaison(){
   if(!s) return `${entete("Saison")}<div class="page-saison"><p class="aide">Aucune saison n’est prévue pour le moment. Revenez bientôt !</p></div>`;
   const total = s.travaux.length, jrOuv = joursRestants(s.debut + "T00:00:00"), jrFin = joursRestants(s.fin);
   return `${entete("Saison")}
-    <div class="page-saison v2">
+    <div class="page-saison v2" style="--teinte:${couleurSaison(s)}">
       <section class="bandeau-saison">
         <div class="titre-bandeau"><span class="sur-titre">${s.a_venir ? "Prochaine saison" : "Saison en cours"}</span><h2>${esc(s.nom)}</h2>
           <p class="regle-saison">Les travaux s’ouvrent à intervalles réguliers, deux par semaine. Chacun propose une série de quêtes : terminez-les pour accomplir le travail, et franchissez les paliers pour gagner les récompenses.</p></div>
@@ -8596,6 +8651,28 @@ function pageSaison(){
         <section class="travaux-colonnes" aria-label="Les travaux">${s.travaux.map((t, k) => htmlColonneTravail(s, t, k)).join("")}</section>
       </div>
     </div>`;
+}
+
+/* ----- Accueil : le bloc Saison, presque aussi important que « Jouer » ----- */
+const pantheonSaison = s => { const c = s && CONFIG.saisons && CONFIG.saisons[s.id]; return (c && c.pantheon) || "gre"; };
+const couleurSaison = s => (FACTIONS[pantheonSaison(s)] || {}).couleur || "#2d5fbf";
+function htmlHallSaison(){
+  const s = PROG.saison; if(!s) return "";
+  const img = (s.travaux || []).map((t, k) => imageTravail(s.id, k)).find(Boolean) || "";
+  const total = (s.travaux || []).length || 12, attente = recompensesSaisonEnAttente();
+  const jrOuv = s.a_venir ? joursRestants(s.debut + "T00:00:00") : 0, jrFin = joursRestants(s.fin);
+  const sym = ({egy:"☥", hin:"✿", nor:"⚔", gre:"Ω"})[pantheonSaison(s)] || "Ω";
+  return `<section class="hall-saison" style="--teinte:${couleurSaison(s)}" aria-labelledby="titre-hall-saison">
+    ${img ? `<img class="fond-hall-saison" src="${img}" alt=""><span class="teinte-hall" aria-hidden="true"></span>` : `<span class="filigrane-hall" aria-hidden="true">${esc(sym)}</span>`}
+    <div class="contenu-hall-saison">
+      <span class="sur-titre">${s.a_venir ? "Prochaine saison" : "Saison en cours"}</span>
+      <h2 id="titre-hall-saison">${esc(s.nom)}</h2>
+      ${s.a_venir ? `<p class="etat-hall-saison"><b>${jrOuv}</b> jour${jrOuv>1 ? "s" : ""} avant l’ouverture<small>${dateLongue(s.debut + "T00:00:00")}</small></p>`
+        : `<div class="progres-hall-saison"><span class="barre"><span style="width:${Math.round(100*s.finis/total)}%"></span></span><span>${s.finis} / ${total} travaux · encore ${jrFin} j</span></div>
+           ${attente ? `<span class="pastille-recompense">${attente} récompense${attente>1 ? "s" : ""} à réclamer</span>` : ""}`}
+      <button type="button" class="btn-saison" data-act="prog-saison">${s.a_venir ? "Découvrir la saison" : attente ? "Réclamer mes récompenses" : "Continuer les travaux"}</button>
+    </div>
+  </section>`;
 }
 
 chargerConfig();
