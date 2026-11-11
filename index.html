@@ -8512,7 +8512,7 @@ function actionSociale(act, id, el){
     case "ami-defier": defierAmi(id, el && el.dataset.nom || "votre ami"); return false;
     case "boite-recuperer": rpc("recuperer_cadeau", {p_id:Number(id)}).then(async r => {
         if(r && r.erreur) return erreur(r.erreur);
-        await Promise.all([chargerBoite(), rafraichir(), chargerPaquetsOfferts()]); PROG.collection = null; renderProg();
+        await Promise.all([chargerBoite(), rafraichir(), chargerPaquetsOfferts()]); renderProg();   // rafraichir() recharge la collection et les illustrations
         erreur(`Cadeau récupéré : ${texteRecompenseSaison(r)} !`);
       }, e => erreur(e.message)); return false;
     case "boite-supprimer": rpc("supprimer_message", {p_id:Number(id)}).then(async r => { if(r && r.erreur) return erreur(r.erreur); await chargerBoite(); renderProg(); }, e => erreur(e.message)); return false;
