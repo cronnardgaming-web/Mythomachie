@@ -84,6 +84,13 @@ ou changé leur faction, renvoyez le catalogue depuis l’administration (onglet
 `supabase-admin-joueurs.sql` permet à l’administrateur de corriger l’or et l’encre d’un joueur depuis l’onglet
 « Statistiques » de l’administration (bouton « Modifier » dans la liste des joueurs).
 
+## Cadeaux automatiques
+
+`supabase-cadeaux-auto.sql` (après `supabase-social.sql`) : onglet « Cadeaux automatiques » de l’administration.
+Dès qu’un joueur atteint un nombre de parties (contre l’ordinateur ou en ligne), il reçoit automatiquement un
+message avec cadeau dans sa boîte aux lettres, une seule fois par palier. {pseudo} et {parties} sont remplacés
+dans le titre et le texte. Un bouton sert les joueurs qui avaient déjà atteint un palier avant sa création.
+
 ## Saison à venir
 
 `supabase-saison-a-venir.sql` (après `supabase-saisons.sql`) : une saison active dont la date de début n’est pas

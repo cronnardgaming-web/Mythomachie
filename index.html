@@ -983,6 +983,32 @@ body.compact .nom-heros-deck{font-size:17px}
 .cadreur-zoom input{width:110px}
 .accueil-admin .cadreur-zoom input{width:200px}
 
+/* Bruitages */
+.liste-sons{display:flex;flex-direction:column;gap:6px}
+.ligne-son{display:grid;grid-template-columns:minmax(200px,1.1fr) minmax(0,1.4fr) auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--table)}
+.ligne-son.avec{border-left:4px solid #2f9e63}
+.titre-son{display:flex;flex-direction:column}
+.titre-son .aide{font-size:12px}
+.fichiers-son{display:flex;flex-wrap:wrap;gap:5px}
+.puce-son{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:2px 4px;border:1px solid var(--line);border-radius:99px;background:var(--zone)}
+.puce-son .pm{width:22px;height:22px;border-radius:50%;border:1px solid var(--line);background:var(--table);color:var(--ink);cursor:pointer;padding:0;font-size:10px}
+.commandes-son{display:flex;align-items:center;gap:8px}
+.commandes-son .btn{margin:0;padding:6px 12px}
+.volume-son{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--ink-2)}
+.volume-son input{width:90px}
+.reglage-bruitages{display:flex;align-items:center;gap:10px}
+.bouton-son{min-width:80px;padding:6px 12px;border-radius:6px;border:1px solid var(--line);background:var(--table);color:var(--ink);cursor:pointer;font:inherit}
+.bouton-son[aria-pressed="true"]{border-color:#2f9e63}
+@media (max-width:900px){ .ligne-son{grid-template-columns:1fr} }
+
+/* Administration : cadeaux automatiques */
+.liste-paliers-auto{display:flex;flex-direction:column;gap:10px;margin:10px 0}
+.palier-auto{border:1px solid var(--line);border-left:4px solid var(--or, var(--bronze));border-radius:8px;padding:8px 12px}
+.palier-auto.inactif{border-left-color:var(--line);opacity:.75}
+.palier-auto legend{font-weight:700;padding:0 6px}
+.ligne-palier-auto{display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:10px;align-items:end}
+.adm-cadeaux-auto input[type=text],.adm-cadeaux-auto input[type=number],.adm-cadeaux-auto textarea,.adm-cadeaux-auto select{font:inherit;font-size:14px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%;box-sizing:border-box}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -1765,7 +1791,7 @@ if(!window.claude) document.title = NOM_JEU;
 const DEFAUT = {
   version:3,
   // Valeurs d’origine = config.json du site (GitHub), sans les images
-  musiques:{menu:"", duel:[]}, variantes:{}, boosters:{}, saisons:{},
+  musiques:{menu:"", duel:[]}, variantes:{}, boosters:{}, saisons:{}, bruitages:{},
   credits:{musiques:[{titre:"Battle Cinematic Heroic Orchestra", artiste:"Echoes of Lumen"}, {titre:"Battle Music", artiste:"PaulYudin"}, {titre:"Battle", artiste:"NastelBom"}, {titre:"Epic Battle", artiste:"YevhenAstafiev"}, {titre:"Cinematic Powerful Battle Music", artiste:"Tunetank"}, {titre:"Epic Cinematic Battle Music", artiste:"Tunetank"}]},
   regles:{devotionSeuils:[16, 30], devotionNbTresors:2, devotionTresor:"piece", devotionCreature:"dague", armesHeros:true, armesImmediat:true, armesPermanentes:true, armesVie:true, pvDepart:40, seuilPouvoir:10, mainDepart:5, mainPremier:3, piocheParTour:5, tailleMarche:5, plateauMax:7, tailleDeck:30, copiesMax:2, copiesLegendaire:1, carteBase:"pierre", deckDepart:{piece:7, rubis:1, dague:1, epee:1}},
   mots:{provocation:"Provocation", rapidite:"Rapidité", resistance:"Résistance", ethere:"Ethéré"},
@@ -1967,6 +1993,7 @@ function fusionner(obj){
           variantes:(obj.variantes && typeof obj.variantes==="object") ? copie(obj.variantes) : {},
           boosters:(obj.boosters && typeof obj.boosters==="object") ? copie(obj.boosters) : {},
           saisons:(obj.saisons && typeof obj.saisons==="object") ? copie(obj.saisons) : {},
+          bruitages:(obj.bruitages && typeof obj.bruitages==="object") ? copie(obj.bruitages) : {},
           credits:{musiques:(obj.credits && Array.isArray(obj.credits.musiques)) ? copie(obj.credits.musiques) : copie(d.credits.musiques)},
           regles:{...reglesObj, deckDepart:{...((obj.regles && obj.regles.deckDepart) || d.regles.deckDepart)}},
           mots:{...d.mots, ...(obj.mots||{})}, termes:renommerTermes({...d.termes, ...(obj.termes||{})})};
@@ -2328,6 +2355,7 @@ function jouer(id, opts={}){
   const c = j.main[k], d = def(c);
   if(est2v2() && j.esprit && (d.type==="creature" || d.type==="arme")) return erreur("Un esprit ne peut ni poser de créature ni équiper d’arme.");
   if(d.type==="creature" && j.plateau.length>=REGLES.plateauMax) return erreur(`Votre plateau est plein (${REGLES.plateauMax} créatures).`);
+  fxEvt({t:"carte", j:i, uid:c.uid, type:d.type});
   if(d.type==="arme" && REGLES.armesHeros && !j.plateau.find(x => x.uid===opts.cible)){
     // Sans créature à équiper : l’équipement donne sa valeur en puissance au héros
     j.main.splice(k,1); j.joues.push(c);
@@ -2596,6 +2624,7 @@ const ui = {ecran:"jeu", attaquant:null, armeEnAttente:null, choixPierre:null, c
 let minuteToast = null;
 function erreur(msg){
   if(EN.capture){ EN.refusCapture = msg; return false; }
+  if(typeof jouerSon==="function" && /^\+|Récompense obtenue|Cadeau récupéré|Trophée obtenu|Vous êtes maintenant amis/.test(String(msg))) jouerSon("recompense", {fixe:true});
   const t = document.getElementById("toast");
   t.textContent = msg; t.classList.add("visible");
   clearTimeout(minuteToast);
@@ -3103,15 +3132,15 @@ function renderAdmin(){
     cle = actif.dataset.chemin ? `[data-chemin="${actif.dataset.chemin}"]` : actif.dataset.adm ? `[data-adm="${actif.dataset.adm}"]` : null;
     try { pos = actif.selectionStart; } catch(e) { pos = null; }
   }
-  const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => PROG.fiche ? admFicheJoueur() : admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons, messages:admMessages, notes:admNotes};
+  const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => PROG.fiche ? admFicheJoueur() : admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons, messages:admMessages, notes:admNotes, bruitages:admBruitages, "cadeaux-auto":admCadeauxAuto};
   // Mémoriser la position des listes et de la page avant de réafficher
   const defil = {}; app.querySelectorAll(".adm-items, .adm-menu, .grille-choix").forEach((el, k) => { defil[el.className + k] = el.scrollTop; });
   const yPage = window.scrollY;
   const nbAlertes = PROG.surv && PROG.surv.alertes ? PROG.surv.alertes.filter(a => !a.traite).length : 0;
   const groupes = [
-    ["Contenu du jeu", [["cartes","Cartes"],["boosters","Boosters"],["saisons","Saisons"],["heros","Héros"],["factions","Factions"],["regles","Règles"],["musiques","Musiques"]]],
+    ["Contenu du jeu", [["cartes","Cartes"],["boosters","Boosters"],["saisons","Saisons"],["heros","Héros"],["factions","Factions"],["regles","Règles"],["musiques","Musiques"],["bruitages","Bruitages"]]],
     ["Publication", [["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"]] : [])]],
-    ...(PROG.actif ? [["Communication", [["messages","Boîte aux lettres"],["notes","Notes de mise à jour"]]]] : []),
+    ...(PROG.actif ? [["Communication", [["messages","Boîte aux lettres"],["cadeaux-auto","Cadeaux automatiques"],["notes","Notes de mise à jour"]]]] : []),
     ...(PROG.actif ? [["Joueurs", [["stats","Vue d’ensemble"],["stats-heros","Statistiques des héros"],["stats-cartes","Statistiques des cartes"],["stats-joueurs","Liste des joueurs"],["surveillance","Surveillance", nbAlertes]]]] : [])
   ];
   const titres = Object.fromEntries(groupes.flatMap(([, l]) => l.map(([k, t]) => [k, t])));
@@ -3417,6 +3446,8 @@ function actionAdmin(act, id, el){
   if(act.startsWith("mus-")){ actionMusiques(act, id); return; }
   if(act.startsWith("variante-") || act.startsWith("booster-") || act==="carte-promo"){ actionVariantes(act, id); return; }
   if(act.startsWith("saison-")){ actionSaisons(act, id); return; }
+  if(act.startsWith("son-")){ actionBruitages(act, id); return; }
+  if(act.startsWith("pauto-")){ actionCadeauxAuto(act, id); return; }
   if(act.startsWith("msg-") || act.startsWith("note-")){ actionCommunication(act, id); return; }
   if(act==="devotion-creer"){ const [b, f] = String(id).split("|"); creerVersionDevotion(b, f); return; }
   if(act==="son"){ basculerSon(); return renderAdmin(); }
@@ -4176,6 +4207,7 @@ document.addEventListener("click", e => {
   if(act==="nouvelle"){ if(enLigne() || EN.role) quitterEnLigne(); S = null; ui.couvert = false; ui.aiEnCours = false; return render(); }
   if(act.startsWith("en-")) return actionEnLigne(act, id);
   if(act==="son"){ basculerSon(); return render(); }
+  if(act==="bruitages-basculer"){ const p = prefsBruitages(); p.actif = !p.actif; sauverPrefsBruitages(p); if(p.actif){ SONS.dernier.clic = 0; jouerSon("clic"); } return render(); }
   if(act==="reglages-ouvrir" || act==="reglages-fermer"){ PROG.reglagesOuverts = act==="reglages-ouvrir"; return render(); }
   if(act==="tuto") return lancerTuto();
   if(act==="regles"){ if(tutoActif()) S = null; ui.ecran = "regles"; window.scrollTo(0, 0); return render(); }
@@ -4932,6 +4964,7 @@ function renderProg(){
 }
 
 function actionProg(act, id){
+  try { sonsActionProg(act, id); } catch(e) {}
   if(/^(ami-|boite-|prog-amis$|prog-boite$|prog-nouveautes$)/.test(act)){
     const el = document.querySelector(`[data-act="${act}"][data-id="${id}"]`);
     const r = actionSociale(act, id, el);
@@ -6451,9 +6484,10 @@ function jouerEffets(){
   PIOCHE_CACHEES.forEach(u => { const el = document.querySelector(`.zone-main .main .carte[data-uid="${u}"]`); if(el) el.style.visibility = "hidden"; });
   const evts = S.evt || [];
   const dernier = evts.length ? evts[evts.length-1].n : 0;
-  if(FX_VU.id!==S.idPartie){ FX_VU = {id:S.idPartie, n:dernier}; PIOCHE_CACHEES.clear(); ATTAQUANTS_CACHES.clear(); return; }
+  if(FX_VU.id!==S.idPartie){ FX_VU = {id:S.idPartie, n:dernier}; PIOCHE_CACHEES.clear(); ATTAQUANTS_CACHES.clear(); if((S.tour || 1)<=2 && typeof jouerSon==="function") jouerSon("debut_partie", {fixe:true}); return; }
   const nouveaux = evts.filter(e => e.n > FX_VU.n);
   FX_VU.n = Math.max(FX_VU.n, dernier);
+  try { sonsEvenements(nouveaux); } catch(e) {}
   const niveau = niveauAnim();
   if(!niveau || !nouveaux.length) return;
   // Si des cartes partent à la défausse dans le même temps, la pioche attend qu’elles soient arrivées
@@ -6964,6 +6998,7 @@ function htmlReglages(){
   return `<div class="boite boite-reglages" role="dialog" aria-label="Réglages">
     <h2>Réglages</h2>
     ${aDesMusiques() ? `<section><h3>Musique</h3>${htmlSon(true)}</section>` : ""}
+    ${aDesBruitages() ? `<section><h3>Bruitages</h3>${htmlReglageBruitages()}</section>` : ""}
     <section><h3>Animations</h3>${htmlReglageAnimations(false)}<p class="aide">« Réduites » garde les éclats et les chiffres, sans objets qui volent.</p></section>
     ${PROG.actif ? `<section><h3>Compte</h3>${htmlCompte()}</section>` : ""}
     <div class="actions"><button type="button" class="btn" data-act="reglages-fermer">Fermer</button></div>
@@ -8348,7 +8383,11 @@ function htmlFileClassee(){
 PROG.social = {amis:null, boite:null, notes:null, defis:[], recherche:null, defiIgnores:new Set()};
 const SOC = PROG.social;
 async function chargerAmis(){ try { SOC.amis = await rpc("mes_amis"); } catch(e) { SOC.amis = null; } }
-async function chargerBoite(){ try { SOC.boite = await rpc("ma_boite"); } catch(e) { SOC.boite = null; } }
+async function chargerBoite(){
+  const avant = SOC.boite ? SOC.boite.non_lus : null;
+  try { SOC.boite = await rpc("ma_boite"); } catch(e) { SOC.boite = null; }
+  if(avant!=null && SOC.boite && SOC.boite.non_lus > avant) jouerSon("notification");
+}
 async function chargerNotes(){
   try { const c = sbc(); const r = c ? await c.from("notes_maj").select("id,version,titre,texte,cree").eq("publie", true).order("cree", {ascending:false}).limit(30) : null; SOC.notes = r && !r.error ? r.data : null; }
   catch(e) { SOC.notes = null; }
@@ -8371,7 +8410,7 @@ function majBanniereDefi(){
   let b = document.getElementById("banniere-defi");
   const d = (SOC.defis || []).find(x => !SOC.defiIgnores.has(x.id));
   if(!d || (S && ui.ecran==="jeu")){ if(b) b.remove(); return; }
-  if(!b){ b = document.createElement("div"); b.id = "banniere-defi"; b.setAttribute("role", "alert"); document.body.appendChild(b); }
+  if(!b){ b = document.createElement("div"); b.id = "banniere-defi"; b.setAttribute("role", "alert"); document.body.appendChild(b); jouerSon("notification"); }
   b.innerHTML = `<span class="ico-defi" aria-hidden="true">⚔</span><span><b>${esc(d.de)}</b> vous défie${d.elo ? ` (cote ${nf(d.elo)})` : ""} !</span>
     <button type="button" class="btn" data-act="defi-accepter" data-id="${d.id}">Accepter</button><button type="button" class="btn second" data-act="defi-refuser" data-id="${d.id}">Refuser</button>`;
 }
@@ -8771,6 +8810,282 @@ document.addEventListener("input", e => {
   const img = document.querySelector(`.cadreur[data-cadrage="${cible}"] img`); if(img) img.style.cssText = styleCadrage(obj);
 });
 document.addEventListener("change", e => { if(e.target.dataset && e.target.dataset.cadrageZoom) sauver(); });
+
+/* ============================================================
+   BRUITAGES : moteur (Web Audio), branchements, administration, réglages
+   ============================================================ */
+const EVENEMENTS_SONS = [
+  // [clé, groupe, libellé, conseil]
+  ["carte", "Partie", "Jouer une carte", "Froissement de carte posée sur une table, 0,2 à 0,4 s"],
+  ["pioche", "Partie", "Piocher", "Glissement de carte, léger, 0,2 s"],
+  ["achat", "Partie", "Acheter au marché", "Pièces qui tintent, 0,3 à 0,5 s"],
+  ["or", "Partie", "Gagner de l’or", "Petit tintement, 0,2 s (très fréquent : très doux)"],
+  ["puissance", "Partie", "Gagner de la puissance", "Souffle ou métal qu’on dégaine, 0,2 s (fréquent : doux)"],
+  ["melange", "Partie", "Mélanger la défausse", "Battement de cartes, 0,5 s"],
+  ["fin_tour", "Partie", "Fin du tour", "Coup de gong discret, 0,6 à 0,8 s"],
+  ["a_vous", "Partie", "À vous de jouer (en ligne)", "Petit carillon, 0,4 s"],
+  ["debut_partie", "Partie", "Début de partie", "Cor ou tambour, 1 s"],
+  ["attaque", "Combat", "Attaque d’une créature", "Coup sourd, métal contre bouclier, 0,3 s"],
+  ["degats_heros", "Combat", "Dégâts sur un héros", "Impact lourd et grave, 0,4 s"],
+  ["creature_detruite", "Combat", "Créature détruite", "Craquement, poussière de pierre, 0,5 à 0,7 s"],
+  ["soin", "Combat", "Soin", "Note claire et scintillante, 0,5 s"],
+  ["equipement", "Combat", "Équiper une créature", "Lame qu’on fixe, cliquetis, 0,4 s"],
+  ["resistance", "Combat", "Résistance (coup absorbé)", "Bouclier divin, son cristallin, 0,4 s"],
+  ["eclair", "Combat", "Dégâts à une créature au hasard", "Éclair, claquement, 0,4 s"],
+  ["onde", "Combat", "Dégâts à toutes les créatures", "Onde de choc, grondement, 0,6 s"],
+  ["bannir", "Combat", "Bannir une carte", "Souffle qui s’efface, 0,5 s"],
+  ["sacrifice", "Combat", "Sacrifice", "Flamme sombre, 0,6 s"],
+  ["combo", "Combos et pouvoirs", "Combo (son commun)", "Utilisé pour tout panthéon sans son propre, 0,6 s"],
+  ["combo_egy", "Combos et pouvoirs", "Combo égyptien", "Sistre, 0,6 s"],
+  ["combo_hin", "Combos et pouvoirs", "Combo hindou", "Sitar ou clochettes, 0,6 s"],
+  ["combo_nor", "Combos et pouvoirs", "Combo nordique", "Cor de guerre, 0,6 s"],
+  ["combo_gre", "Combos et pouvoirs", "Combo grec", "Lyre, 0,6 s"],
+  ["pouvoir", "Combos et pouvoirs", "Pouvoir de la divinité", "Chœur ou tonnerre, 1 à 1,5 s"],
+  ["chute", "Combos et pouvoirs", "Chute d’un héros (2 contre 2)", "Accord grave, 1 s"],
+  ["resurrection", "Combos et pouvoirs", "Résurrection (2 contre 2)", "Chœur ascendant, 1 s"],
+  ["victoire", "Grands moments", "Victoire", "Fanfare de cuivres et chœur, 2 à 3 s"],
+  ["defaite", "Grands moments", "Défaite", "Accord grave, cordes descendantes, 2 à 3 s"],
+  ["paquet_ouvrir", "Grands moments", "Ouvrir un paquet", "Papier qu’on déchire, 0,5 s"],
+  ["carte_revelee", "Grands moments", "Carte révélée (commune)", "Retournement de carte, 0,3 s"],
+  ["carte_revelee_rare", "Grands moments", "Carte rare révélée", "Retournement et éclat léger, 0,5 s"],
+  ["carte_revelee_epique", "Grands moments", "Carte épique révélée", "Éclat brillant, 0,8 s"],
+  ["carte_revelee_legendaire", "Grands moments", "Carte légendaire révélée", "Chœur majestueux, 1,5 s"],
+  ["recompense", "Menus", "Récompense obtenue", "Courte fanfare, 1 à 1,5 s (quêtes, trophées, saison, cadeaux)"],
+  ["notification", "Menus", "Notification", "Discrète (défi, message reçu), 0,4 s"],
+  ["clic", "Menus", "Clic dans les menus", "Clic sourd de bronze, moins de 0,1 s (très fréquent : très doux)"]
+];
+const SON_FALLBACK = {carte_revelee_rare:"carte_revelee", carte_revelee_epique:"carte_revelee", carte_revelee_legendaire:"carte_revelee_epique", combo_egy:"combo", combo_hin:"combo", combo_nor:"combo", combo_gre:"combo"};
+const SONS = {ctx:null, cache:new Map(), actifs:0, dernier:{}, maxSimultanes:8};
+function prefsBruitages(){
+  try { return Object.assign({actif:true, volume:0.7}, JSON.parse(localStorage.getItem("bruitages-prefs")) || {}); }
+  catch(e) { return {actif:true, volume:0.7}; }
+}
+function sauverPrefsBruitages(p){ try { localStorage.setItem("bruitages-prefs", JSON.stringify(p)); } catch(e) {} }
+const confSon = cle => { const b = CONFIG.bruitages || {}; let c = b[cle]; if((!c || !(c.fichiers || []).length) && SON_FALLBACK[cle]) c = b[SON_FALLBACK[cle]] || (SON_FALLBACK[SON_FALLBACK[cle]] && b[SON_FALLBACK[SON_FALLBACK[cle]]]); return c && (c.fichiers || []).length ? c : null; };
+const aDesBruitages = () => Object.values(CONFIG.bruitages || {}).some(c => c && (c.fichiers || []).length);
+function contexteAudio(){
+  if(SONS.ctx) return SONS.ctx;
+  const C = window.AudioContext || window.webkitAudioContext;
+  if(!C) return null;
+  try { SONS.ctx = new C(); } catch(e) { return null; }
+  return SONS.ctx;
+}
+// Le navigateur n’autorise le son qu’après un geste du joueur
+["pointerdown", "keydown"].forEach(t => document.addEventListener(t, () => { const c = contexteAudio(); if(c && c.state==="suspended") c.resume().catch(() => {}); }, {capture:true, passive:true}));
+function tamponSon(src){
+  if(!SONS.cache.has(src)){
+    const c = contexteAudio();
+    // Un fichier illisible est ignoré sans erreur (les deux formes de decodeAudioData sont gérées)
+    SONS.cache.set(src, c ? fetch(src).then(r => r.arrayBuffer()).then(a => new Promise(ok => { const r = c.decodeAudioData(a, ok, () => ok(null)); if(r && r.catch) r.catch(() => ok(null)); })).catch(() => null) : Promise.resolve(null));
+  }
+  return SONS.cache.get(src);
+}
+async function jouerSon(cle, opts = {}){
+  const p = prefsBruitages(); if(!p.actif || p.volume<=0) return;
+  const conf = confSon(cle); if(!conf) return;
+  const maintenant = performance.now(), ecart = cle==="or" || cle==="puissance" || cle==="clic" ? 90 : 45;
+  if(SONS.dernier[cle] && maintenant - SONS.dernier[cle] < ecart) return;
+  if(SONS.actifs >= SONS.maxSimultanes) return;
+  SONS.dernier[cle] = maintenant;
+  const src = conf.fichiers[Math.floor(Math.random() * conf.fichiers.length)];
+  const gain = Math.max(0, Math.min(2, p.volume * (conf.volume ?? 1) * (opts.gain ?? 1)));
+  const c = contexteAudio();
+  if(!c){ try { const a = new Audio(src); a.volume = Math.min(1, gain); a.play().catch(() => {}); } catch(e) {} return; }
+  const tampon = await tamponSon(src); if(!tampon) return;
+  const s = c.createBufferSource(), g = c.createGain();
+  s.buffer = tampon;
+  s.playbackRate.value = opts.fixe ? 1 : 1 + (Math.random() - 0.5) * 0.08;   // légère variation à chaque lecture
+  g.gain.value = gain;
+  s.connect(g).connect(c.destination);
+  SONS.actifs++; s.onended = () => { SONS.actifs = Math.max(0, SONS.actifs - 1); };
+  s.start();
+}
+function prechargerBruitages(){ Object.values(CONFIG.bruitages || {}).forEach(c => (c && c.fichiers || []).forEach(f => tamponSon(f))); }
+document.addEventListener("pointerdown", function premier(){ document.removeEventListener("pointerdown", premier, true); setTimeout(prechargerBruitages, 300); }, true);
+
+// ----- Branchement sur les événements de la partie
+function sonsEvenements(evts){
+  if(!evts || !evts.length || !S) return;
+  const moi = typeof vue==="function" ? vue() : 0;
+  for(const ev of evts){
+    switch(ev.t){
+      case "carte": jouerSon("carte"); break;
+      case "pioche": jouerSon("pioche", {gain:0.8}); break;
+      case "achat": jouerSon("achat"); break;
+      case "or": jouerSon("or", {gain:0.7}); break;
+      case "puissance": jouerSon("puissance", {gain:0.7}); break;
+      case "melange": jouerSon("melange"); break;
+      case "defausse": jouerSon("fin_tour"); break;
+      case "attaque": jouerSon(ev.cible==="face" ? "degats_heros" : "attaque"); break;
+      case "frappe": jouerSon(ev.cible==="face" ? "degats_heros" : "attaque"); break;
+      case "mort": jouerSon("creature_detruite"); break;
+      case "soin": jouerSon("soin"); break;
+      case "arme": jouerSon("equipement"); break;
+      case "bouclier": jouerSon("resistance"); break;
+      case "eclair": jouerSon("eclair"); break;
+      case "onde": jouerSon("onde"); break;
+      case "bannir": jouerSon("bannir"); break;
+      case "sacrifice": jouerSon("sacrifice"); break;
+      case "combo": jouerSon("combo_" + (ev.faction || "")); break;
+      case "pouvoir": jouerSon("pouvoir", {fixe:true}); break;
+      case "chute": jouerSon("chute", {fixe:true}); break;
+      case "resurrection": jouerSon("resurrection", {fixe:true}); break;
+      case "fin": jouerSon(ev.perdant===moi ? "defaite" : "victoire", {fixe:true}); break;
+    }
+  }
+  // En ligne : le tour revient au joueur
+  if(S.mode==="enligne" && evts.some(e => e.t==="defausse") && S.courant===moi && S.vainqueur===null) setTimeout(() => jouerSon("a_vous"), 500);
+}
+// ----- Menus : clics, paquets, récompenses, notifications
+document.addEventListener("pointerdown", e => {
+  if(document.body.classList.contains("en-partie") && !e.target.closest("#couche")) return;
+  const b = e.target.closest && e.target.closest("button, .tuile-hall, [role=button]");
+  if(b && !b.disabled && !b.closest(".cadreur")) jouerSon("clic", {gain:0.6});
+}, true);
+const idCartePaquet = x => typeof x==="string" ? x : x && x.id;
+function sonsActionProg(act, id){
+  const P = PROG.paquet;
+  if(act==="paquet-acheter" || act==="paquet-offert") setTimeout(() => jouerSon("paquet_ouvrir", {fixe:true}), 150);
+  if(act==="paquet-reveler" && P){ const d = CARTES[idCartePaquet(P.cartes[Number(id)])] || {}; jouerSon(d.rarete==="legendaire" ? "carte_revelee_legendaire" : d.rarete==="epique" ? "carte_revelee_epique" : d.rarete==="rare" ? "carte_revelee_rare" : "carte_revelee", {fixe:d.rarete==="legendaire"}); }
+  if(act==="paquet-tout" && P){
+    const r = P.cartes.filter((_, i) => !P.reveles.has(i)).map(x => (CARTES[idCartePaquet(x)] || {}).rarete);
+    jouerSon(r.includes("legendaire") ? "carte_revelee_legendaire" : r.includes("epique") ? "carte_revelee_epique" : r.includes("rare") ? "carte_revelee_rare" : "carte_revelee");
+  }
+}
+
+/* ----- Administration : onglet Bruitages ----- */
+const tailleTexte = o => o<1024 ? `${o} o` : o<1048576 ? `${Math.round(o/1024)} Ko` : `${(o/1048576).toFixed(1).replace(".", ",")} Mo`;
+const tailleDataUrl = d => Math.round((String(d).length - String(d).indexOf(",") - 1) * 0.75);
+function admBruitages(){
+  const B = CONFIG.bruitages || {};
+  const total = Object.values(B).reduce((s, c) => s + ((c && c.fichiers) || []).reduce((t, f) => t + (String(f).startsWith("data:") ? tailleDataUrl(f) : 0), 0), 0);
+  const nb = EVENEMENTS_SONS.filter(([k]) => B[k] && (B[k].fichiers || []).length).length;
+  const groupes = [...new Set(EVENEMENTS_SONS.map(e => e[1]))];
+  return `<div class="adm-page adm-bruitages">
+    <h2>Bruitages</h2>
+    <p class="aide">Déposez un ou plusieurs fichiers par événement (MP3 ou OGG, mono, 150 Ko maximum chacun). Avec plusieurs fichiers, le jeu en choisit un au hasard, et fait légèrement varier la hauteur à chaque lecture. Les combos sans son propre utilisent le son « Combo » s’il existe ; les cartes rares, épiques et légendaires reprennent le son de rareté inférieure.
+      ${nb} événement${nb>1 ? "s" : ""} sur ${EVENEMENTS_SONS.length} ont un son · ${tailleTexte(total)} au total dans config.json. Après vos changements, exportez config.json.</p>
+    ${groupes.map(g => `<h3>${esc(g)}</h3><div class="liste-sons">${EVENEMENTS_SONS.filter(e => e[1]===g).map(([k, , libelle, conseil]) => {
+      const c = B[k] || {}, f = c.fichiers || [];
+      return `<div class="ligne-son ${f.length ? "avec" : ""}">
+        <div class="titre-son"><b>${esc(libelle)}</b><span class="aide">${esc(conseil)}</span></div>
+        <div class="fichiers-son">${f.map((x, n) => `<span class="puce-son"><button type="button" class="pm" data-act="son-ecouter" data-id="${k}|${n}" aria-label="Écouter le fichier ${n+1}">▶</button>${String(x).startsWith("data:") ? tailleTexte(tailleDataUrl(x)) : esc(String(x).split("/").pop())}<button type="button" class="pm" data-act="son-retirer" data-id="${k}|${n}" aria-label="Retirer le fichier ${n+1}">✕</button></span>`).join("") || `<span class="aide">aucun son</span>`}</div>
+        <div class="commandes-son">
+          <input type="file" accept="audio/*" multiple hidden data-son-fichier="${k}">
+          <button type="button" class="btn second" data-act="son-ajouter" data-id="${k}">Ajouter</button>
+          ${f.length ? `<label class="volume-son" title="Volume de cet événement"><span>Vol.</span><input type="range" min="0.1" max="1.5" step="0.05" value="${c.volume ?? 1}" data-son-volume="${k}"></label>
+            <button type="button" class="btn-discret" data-act="son-tester" data-id="${k}">Tester</button>` : ""}
+        </div></div>`; }).join("")}</div>`).join("")}
+  </div>`;
+}
+function actionBruitages(act, id){
+  if(!CONFIG.bruitages) CONFIG.bruitages = {};
+  const [k, n] = String(id).split("|");
+  switch(act){
+    case "son-ajouter": { const i = document.querySelector(`[data-son-fichier="${k}"]`); if(i) i.click(); return; }
+    case "son-ecouter": { const src = ((CONFIG.bruitages[k] || {}).fichiers || [])[Number(n)]; if(src) tamponSon(src).then(t => { const c = contexteAudio(); if(t && c){ const s = c.createBufferSource(), g = c.createGain(); s.buffer = t; g.gain.value = prefsBruitages().volume * ((CONFIG.bruitages[k] || {}).volume ?? 1); s.connect(g).connect(c.destination); s.start(); } else { const a = new Audio(src); a.play().catch(() => {}); } }); return; }
+    case "son-tester": SONS.dernier[k] = 0; jouerSon(k); return;
+    case "son-retirer": { const c = CONFIG.bruitages[k]; if(c){ c.fichiers.splice(Number(n), 1); if(!c.fichiers.length) delete CONFIG.bruitages[k]; } sauver(); break; }
+    default: return;
+  }
+  renderAdmin();
+}
+document.addEventListener("change", async e => {
+  const k = e.target.dataset && e.target.dataset.sonFichier;
+  if(k && e.target.files && e.target.files.length){
+    if(!CONFIG.bruitages) CONFIG.bruitages = {};
+    const c = CONFIG.bruitages[k] = CONFIG.bruitages[k] || {fichiers:[], volume:1};
+    let ajoutes = 0;
+    for(const f of e.target.files){
+      if(!/^audio\//.test(f.type) && !/\.(mp3|ogg|wav|m4a)$/i.test(f.name)){ erreur(`« ${f.name} » n’est pas un fichier son.`); continue; }
+      if(f.size > 150 * 1024){ erreur(`« ${f.name} » pèse ${tailleTexte(f.size)} : 150 Ko maximum. Raccourcissez-le, passez-le en mono ou en MP3 à 96 kb/s.`); continue; }
+      const url = await new Promise(ok => { const lr = new FileReader(); lr.onload = () => ok(lr.result); lr.readAsDataURL(f); });
+      c.fichiers.push(url); ajoutes++;
+    }
+    e.target.value = "";
+    if(ajoutes){ sauver(); renderAdmin(); erreur(`${ajoutes} son${ajoutes>1 ? "s" : ""} ajouté${ajoutes>1 ? "s" : ""}.`); }
+  }
+  const kv = e.target.dataset && e.target.dataset.sonVolume;
+  if(kv && CONFIG.bruitages && CONFIG.bruitages[kv]){ CONFIG.bruitages[kv].volume = Number(e.target.value); sauver(); SONS.dernier[kv] = 0; jouerSon(kv); }
+});
+// ----- Réglages du joueur
+function htmlReglageBruitages(){
+  const p = prefsBruitages();
+  return `<div class="reglage-bruitages"><button type="button" class="bouton-son" data-act="bruitages-basculer" aria-pressed="${p.actif}" aria-label="${p.actif ? "Couper les bruitages" : "Activer les bruitages"}">${p.actif ? "Activés" : "Coupés"}</button>
+    <input type="range" min="0" max="1" step="0.05" value="${p.volume}" data-bruitages-volume aria-label="Volume des bruitages" ${p.actif ? "" : "disabled"}></div>`;
+}
+document.addEventListener("input", e => { if(e.target.hasAttribute && e.target.hasAttribute("data-bruitages-volume")){ const p = prefsBruitages(); p.volume = Number(e.target.value); sauverPrefsBruitages(p); } });
+document.addEventListener("change", e => { if(e.target.hasAttribute && e.target.hasAttribute("data-bruitages-volume")){ SONS.dernier.clic = 0; jouerSon("clic"); } });
+
+/* ----- Administration : cadeaux automatiques selon le nombre de parties jouées ----- */
+async function chargerPaliersAuto(){
+  try { adm.paliersAuto = await rpc("admin_paliers_parties"); adm.paliersAutoErreur = null; }
+  catch(e) { adm.paliersAuto = []; adm.paliersAutoErreur = /function|does not exist|schema cache/i.test(e.message) ? "Exécutez d’abord le script supabase-cadeaux-auto.sql dans Supabase." : e.message; }
+  if(adm.onglet==="cadeaux-auto") renderAdmin();
+}
+function admCadeauxAuto(){
+  if(!adm.paliersAuto){ if(PROG.pret) chargerPaliersAuto(); return `<div class="adm-page"><h2>Cadeaux automatiques</h2><p class="attente">Chargement…</p></div>`; }
+  const P = adm.paliersAuto, cartes = trierCartes(Object.keys(CARTES).filter(k => estCollectionnable(CARTES[k])));
+  const sel = (n, champ, val, options) => `<select data-palier="${n}.${champ}"><option value="">Aucun${champ==="carte" || champ==="variante" ? "e" : ""}</option>${options.map(([v, l]) => `<option value="${v}" ${val===v ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>`;
+  return `<div class="adm-page adm-cadeaux-auto">
+    <h2>Cadeaux automatiques</h2>
+    <p class="aide">Dès qu’un joueur atteint un nombre de parties (contre l’ordinateur ou en ligne), il reçoit automatiquement le message et son cadeau dans sa boîte aux lettres. Chaque palier n’est envoyé qu’une fois par joueur. Dans le titre et le texte, <b>{pseudo}</b> et <b>{parties}</b> sont remplacés automatiquement.</p>
+    ${adm.paliersAutoErreur ? `<p style="color:var(--danger)">${esc(adm.paliersAutoErreur)}</p>` : ""}
+    <div class="liste-paliers-auto">${P.map((p, n) => { const c = p.cadeau || {}; return `<fieldset class="palier-auto ${p.actif===false ? "inactif" : ""}">
+      <legend>${p.seuil || "?"} parties${p.id ? ` · ${nf(p.envois || 0)} envoyé${(p.envois || 0)>1 ? "s" : ""} sur ${nf(p.eligibles || 0)} joueur${(p.eligibles || 0)>1 ? "s" : ""} éligible${(p.eligibles || 0)>1 ? "s" : ""}` : " · nouveau"}</legend>
+      <div class="ligne-palier-auto">
+        <label class="champ"><span>Nombre de parties</span><input type="number" min="1" step="1" data-palier="${n}.seuil" value="${p.seuil || ""}"></label>
+        <label class="champ large"><span>Titre du message</span><input type="text" maxlength="120" data-palier="${n}.titre" value="${esc(p.titre || "")}"></label>
+        <label class="case"><input type="checkbox" data-palier="${n}.actif" ${p.actif===false ? "" : "checked"}> Actif</label>
+      </div>
+      <label class="champ"><span>Texte (une ligne commençant par « - » devient une puce, **texte** en gras)</span><textarea rows="3" data-palier="${n}.texte">${esc(p.texte || "")}</textarea></label>
+      <div class="cadeau-message">
+        <label class="champ"><span>Or</span><input type="number" min="0" data-palier="${n}.or" value="${c.or || 0}"></label>
+        <label class="champ"><span>Encre</span><input type="number" min="0" data-palier="${n}.encre" value="${c.encre || 0}"></label>
+        <label class="champ"><span>Carte</span>${sel(n, "carte", (c.cartes || [])[0] || "", cartes.map(k => [k, CARTES[k].nom]))}</label>
+        <label class="champ"><span>Paquet</span>${sel(n, "paquet", (c.paquets || [])[0] || "", [["classique", "Paquet classique"], ...Object.entries(FACTIONS).map(([k, f]) => [k, `Paquet ${f.m}`])])}</label>
+        <label class="champ"><span>Illustration</span>${sel(n, "variante", (c.variantes || [])[0] || "", Object.entries(CONFIG.variantes || {}).map(([k, v]) => [k, `${(CARTES[v.carte] || {}).nom || v.carte} : ${v.nom || k}`]))}</label>
+      </div>
+      <div class="adm-actions"><button type="button" class="btn-discret" data-act="pauto-suppr" data-id="${n}">Supprimer ce palier</button></div>
+    </fieldset>`; }).join("") || `<p class="aide">Aucun palier pour le moment.</p>`}</div>
+    <div class="adm-actions">
+      <button type="button" class="btn second" data-act="pauto-ajouter">Ajouter un palier</button>
+      <button type="button" class="btn" data-act="pauto-enregistrer">Enregistrer sur le serveur</button>
+      <button type="button" class="btn second" data-act="pauto-appliquer">Envoyer maintenant aux joueurs ayant déjà atteint ces paliers</button>
+    </div>
+    <p class="aide">Pensez à enregistrer avant d’envoyer. L’envoi immédiat sert surtout à servir les joueurs qui avaient déjà joué avant la création d’un palier : ensuite, tout est automatique.</p>
+  </div>`;
+}
+document.addEventListener("input", e => {
+  const ch = e.target.dataset && e.target.dataset.palier; if(!ch || !adm.paliersAuto) return;
+  const [n, champ] = ch.split("."), p = adm.paliersAuto[Number(n)]; if(!p) return;
+  const c = p.cadeau = p.cadeau || {};
+  const v = e.target.type==="checkbox" ? e.target.checked : e.target.value;
+  if(champ==="seuil") p.seuil = Number(v) || 0;
+  else if(champ==="titre" || champ==="texte") p[champ] = v;
+  else if(champ==="actif") p.actif = v;
+  else if(champ==="or" || champ==="encre"){ if(Number(v)>0) c[champ] = Number(v); else delete c[champ]; }
+  else { const cle = {carte:"cartes", paquet:"paquets", variante:"variantes"}[champ]; if(v) c[cle] = [v]; else delete c[cle]; }
+});
+document.addEventListener("change", e => { const ch = e.target.dataset && e.target.dataset.palier; if(ch && (e.target.tagName==="SELECT" || e.target.type==="checkbox")) e.target.dispatchEvent(new Event("input", {bubbles:true})); });
+function actionCadeauxAuto(act, id){
+  const P = adm.paliersAuto || (adm.paliersAuto = []);
+  const erreurSql = e => erreur(/function|does not exist|schema cache/i.test(e.message) ? "Exécutez d’abord le script supabase-cadeaux-auto.sql dans Supabase." : e.message);
+  switch(act){
+    case "pauto-ajouter": { const dernier = P.reduce((m, p) => Math.max(m, p.seuil || 0), 0); P.push({seuil:dernier ? dernier*2 : 20, titre:"Merci {pseudo} !", texte:"Vous avez déjà joué {parties} parties sur Mythomachie. Voici un petit cadeau pour vous remercier de votre participation à la bêta.", cadeau:{or:100}, actif:true}); break; }
+    case "pauto-suppr": if(confirm("Supprimer ce palier ? (Il sera retiré du serveur à l’enregistrement.)")) P.splice(Number(id), 1); break;
+    case "pauto-enregistrer":
+      if(P.some(p => !(p.seuil>0) || !(p.titre || "").trim())) return erreur("Chaque palier doit avoir un nombre de parties et un titre.");
+      rpc("admin_maj_paliers_parties", {p:P.map(({envois, eligibles, ...p}) => p)}).then(n => { erreur(`${n} palier${n>1 ? "s" : ""} enregistré${n>1 ? "s" : ""}.`); adm.paliersAuto = null; chargerPaliersAuto(); }, erreurSql);
+      return;
+    case "pauto-appliquer":
+      if(!confirm("Envoyer maintenant les messages des paliers actifs à tous les joueurs qui les ont déjà atteints ? (Aucun joueur ne reçoit deux fois le même palier.)")) return;
+      rpc("admin_appliquer_paliers_parties").then(n => { erreur(n ? `${nf(n)} message${n>1 ? "s" : ""} envoyé${n>1 ? "s" : ""}.` : "Aucun nouveau message à envoyer : tous les joueurs éligibles sont déjà servis."); adm.paliersAuto = null; chargerPaliersAuto(); }, erreurSql);
+      return;
+    default: return;
+  }
+  renderAdmin();
+}
 
 chargerConfig();
 appliquerReglageAnimations();
