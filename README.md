@@ -91,6 +91,14 @@ statistiques vérifiées) et rapportent de l’or comme une partie classique. Tr
 et des statistiques dédiées (page du mode et profil). Ces parties comptent aussi dans les statistiques générales
 et les trophées, mais pas dans les quêtes du jour classiques, la saison ou le classement.
 
+## 2 contre 2 en ligne (étape 1 : salons)
+
+`supabase-2v2-ligne.sql` (après `supabase-2v2-suite.sql` et `supabase-correctif-2v2.sql`) : salons privés (code),
+recherche de partie (regroupement jusqu’à 4 joueurs), choix des places, lancement par l’hôte (les places libres
+deviennent des bots après 15 secondes), un ticket par joueur humain, Elo propre au 2 contre 2 (cotes figées au
+lancement, aucune cote contre des bots seuls) et classement du 2 contre 2. La section « Jouer en ligne » du menu
+du 2 contre 2 reste réservée à l’administrateur jusqu’à l’étape 2 (la partie en temps réel).
+
 ## Correctif du 2 contre 2
 
 `supabase-correctif-2v2.sql` (à exécuter avec `supabase-2v2.sql`) : la table des tickets de partie n’acceptait que

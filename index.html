@@ -1051,6 +1051,29 @@ body.compact .nom-heros-deck{font-size:17px}
 .pastille-bonus-2v2.obtenu{color:#e8ffe9;background:#2f9e63}
 .bonus-fin{color:#f3d791}
 
+/* 2 contre 2 en ligne : salons */
+.actions-en-ligne-2v2{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.actions-en-ligne-2v2 .btn{margin:0}
+.page-salon-2v2{display:flex;flex-direction:column;gap:14px}
+.tete-salon{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.tete-salon .btn{margin:0}
+.code-salon{font-family:ui-monospace,Consolas,monospace;letter-spacing:.2em;color:var(--or, var(--bronze));user-select:all}
+.equipes-salon{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.equipe-salon{display:flex;flex-direction:column;gap:8px}
+.equipe-salon h3{margin:0;font-family:Cinzel,serif}
+.equipe-salon.eq-a{border-top:3px solid #2f6fb5}
+.equipe-salon.eq-b{border-top:3px solid #b8402f}
+.place-salon{display:grid;grid-template-columns:34px 1fr;column-gap:10px;align-items:center;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--table)}
+.place-salon .num-place{grid-row:span 3;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:var(--zone);border:1px solid var(--line)}
+.place-salon small{color:var(--ink-2)}
+.place-salon .btn-discret{justify-self:start;margin-top:4px}
+.place-salon.moi{border-color:var(--or, var(--bronze));background:color-mix(in srgb, var(--or, var(--bronze)) 12%, var(--table))}
+.place-salon.libre{border-style:dashed;opacity:.85}
+.lancer-salon{display:flex;flex-direction:column;align-items:center;gap:6px}
+.lancer-salon .btn-geant{min-width:320px}
+.centre{text-align:center}
+@media (max-width:700px){ .equipes-salon{grid-template-columns:1fr} }
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -2991,7 +3014,7 @@ function render(){
   if(ui.ecran!=="jeu" || !tutoActif()){ const p = document.getElementById("tuto-panneau"); if(p) p.remove(); }
   if(ui.ecran==="credits"){ INSTANT = null; app.innerHTML = pageCredits(); document.getElementById("couche").innerHTML = ""; document.getElementById("couche").classList.remove("accueil"); return; }
   if(ui.ecran==="regles"){ INSTANT = null; app.innerHTML = pageRegles(); document.getElementById("couche").innerHTML = ""; document.getElementById("couche").classList.remove("accueil"); return; }
-  if(["collection","decks","editeur","boutique","profil","saison","classement","amis","boite","nouveautes","mode2v2"].includes(ui.ecran)){ INSTANT = null; renderProg(); return; }
+  if(["collection","decks","editeur","boutique","profil","saison","classement","amis","boite","nouveautes","mode2v2","salon2v2"].includes(ui.ecran)){ INSTANT = null; renderProg(); return; }
   if(!S){ INSTANT = null; app.innerHTML = ""; renderCouche(); if(PROG.pret) signaler(); return; }
   if(est2v2()) return render2v2();
   const me = vue(), moi = S.joueurs[me], lui = S.joueurs[1-me];
@@ -5098,7 +5121,7 @@ function renderProg(){
   const actif = document.activeElement;
   const cle = actif && actif.dataset && actif.dataset.prog ? actif.dataset.prog : null;
   let pos = null; try { pos = actif.selectionStart; } catch(e) {}
-  const pages = {collection:pageCollection, decks:pageDecks, editeur:pageEditeur, boutique:pageBoutique, profil:pageProfil, saison:pageSaison, classement:pageClassement, amis:pageAmis, boite:pageBoite, nouveautes:pageNouveautes, mode2v2:pageMode2v2};
+  const pages = {collection:pageCollection, decks:pageDecks, editeur:pageEditeur, boutique:pageBoutique, profil:pageProfil, saison:pageSaison, classement:pageClassement, amis:pageAmis, boite:pageBoite, nouveautes:pageNouveautes, mode2v2:pageMode2v2, salon2v2:pageSalon2v2};
   const defil = {}; app.querySelectorAll(".grille-atelier, .liste-atelier, .atelier-deck").forEach(el => { defil[el.className.split(" ")[0]] = el.scrollTop; });
   const yPage = window.scrollY;
   app.innerHTML = PROG.pret || ui.ecran==="mode2v2" ? pages[ui.ecran]() : `${entete(NOM_JEU)}<p class="attente">Chargement…</p>`;
@@ -5112,6 +5135,7 @@ function renderProg(){
 
 function actionProg(act, id){
   try { sonsActionProg(act, id); } catch(e) {}
+  if(act.startsWith("salon2v2-")){ const r = actionSalon2v2(act, id); if(r===true) render(); return r!==null; }
   if(/^(prep2v2|lancer-2v2|quete2v2|tuto2v2)$/.test(act)){ const r = actionMode2v2(act, id); if(r===true) render(); return r!==null; }
   if(/^(ami-|boite-|prog-amis$|prog-boite$|prog-nouveautes$)/.test(act)){
     const el = document.querySelector(`[data-act="${act}"][data-id="${id}"]`);
@@ -5538,7 +5562,7 @@ const NOMS_ECRANS = {"accueil":"Accueil", "partie-ia":"Partie contre l’ordinat
   "boutique":"Boutique", "profil":"Profil", "admin":"Administration", "tutoriel":"Tutoriel", "regles":"Règles du jeu", "credits":"Crédits"};
 function ecranActuel(){
   if(ui.ecran==="admin") return "admin";
-  if(["collection","decks","editeur","boutique","profil","saison","classement","amis","boite","nouveautes","mode2v2"].includes(ui.ecran)) return ui.ecran;
+  if(["collection","decks","editeur","boutique","profil","saison","classement","amis","boite","nouveautes","mode2v2","salon2v2"].includes(ui.ecran)) return ui.ecran;
   if(S && S.tuto) return "tutoriel";
   if(ui.ecran==="regles") return "regles";
   if(ui.ecran==="credits") return "credits";
@@ -9660,6 +9684,7 @@ function pageMode2v2(){
         </section>
 ` : ""}
       </div>
+      ${htmlEnLigne2v2()}
       ${htmlTuto2v2()}
     </div>`;
 }
@@ -9716,6 +9741,82 @@ const htmlBonusJour2v2 = () => {
   return b.disponible ? `<p class="bonus-2v2 dispo">🏆 <b>Victoire du jour :</b> votre première victoire aujourd’hui rapporte <b>+${b.montant} or</b> en bonus.</p>`
                       : `<p class="bonus-2v2 obtenu">✓ Victoire du jour obtenue. Revenez demain pour un nouveau bonus.</p>`;
 };
+
+/* ============================================================
+   2 CONTRE 2 EN LIGNE (étape 1) : salons et recherche de partie
+   ============================================================ */
+const SAL = {code:null, etat:null, minuteur:null, recherche:false, saisie:""};
+const enLigne2v2Visible = () => !!(PROG.actif && PROG.admin);   // réservé à l’administrateur tant que la partie en ligne n’est pas terminée
+async function entrerSalon(r){
+  if(!r || r.erreur) return erreur((r && r.erreur) || "Impossible de rejoindre ce salon.");
+  SAL.code = r.code; SAL.etat = null; ui.ecran = "salon2v2";
+  clearInterval(SAL.minuteur);
+  const lire = async () => {
+    if(ui.ecran!=="salon2v2" || !SAL.code){ clearInterval(SAL.minuteur); return; }
+    try { SAL.etat = await rpc("etat_salon_2v2", {p_code:SAL.code}); } catch(e) { SAL.etat = {erreur:e.message}; }
+    if(SAL.etat && SAL.etat.statut==="en_cours" && typeof demarrerPartie2v2Ligne==="function"){ clearInterval(SAL.minuteur); return demarrerPartie2v2Ligne(SAL.etat); }
+    if(SAL.etat && ["annule", "termine"].includes(SAL.etat.statut)){ clearInterval(SAL.minuteur); SAL.code = null; ui.ecran = "mode2v2"; erreur("Ce salon a été fermé."); }
+    if(ui.ecran==="salon2v2") renderProg();
+  };
+  await lire(); SAL.minuteur = setInterval(lire, 2000);
+}
+function quitterSalon(){
+  if(SAL.code) rpc("quitter_salon_2v2", {p_code:SAL.code}).catch(() => {});
+  clearInterval(SAL.minuteur); SAL.code = null; SAL.etat = null; ui.ecran = "mode2v2";
+}
+function htmlEnLigne2v2(){
+  if(!enLigne2v2Visible()) return "";
+  return `<section class="bloc-2v2 en-ligne-2v2"><h2>Jouer en ligne <span class="pastille-test">Test</span></h2>
+    <p class="aide">Jouez avec d’autres joueurs : l’ordinateur prend les places libres.</p>
+    <div class="actions-en-ligne-2v2">
+      <button type="button" class="btn" data-act="salon2v2-chercher">Rechercher une partie</button>
+      <button type="button" class="btn second" data-act="salon2v2-creer">Créer un salon privé</button>
+    </div>
+    <div class="ligne-recherche-ami"><input type="text" maxlength="5" placeholder="Code du salon" aria-label="Code du salon" data-sal="saisie" value="${esc(SAL.saisie)}"><button type="button" class="btn second" data-act="salon2v2-rejoindre">Rejoindre</button></div>
+  </section>`;
+}
+function pageSalon2v2(){
+  const E = SAL.etat;
+  if(!E) return `${entete("Salon 2 contre 2")}<p class="attente">Connexion au salon…</p>`;
+  if(E.erreur) return `${entete("Salon 2 contre 2")}<p class="avertissement">${esc(E.erreur)}</p><button type="button" class="btn" data-act="salon2v2-quitter">Retour</button>`;
+  const place = (k) => { const s = (E.sieges || [])[k];
+    return `<div class="place-salon ${s ? (s.moi ? "moi" : "humain") : "libre"}">
+      <span class="num-place">${k + 1}</span>
+      ${s ? `<b>${esc(s.pseudo)}${s.moi ? " (vous)" : ""}</b><small>cote ${nf(s.elo2v2 ?? 1200)}${s.joueur===E.hote_id ? " · hôte" : ""}</small>`
+          : `<b>Place libre</b><small>tenue par l’ordinateur si personne ne la prend</small>${E.moi!=null && E.statut==="attente" ? `<button type="button" class="btn-discret" data-act="salon2v2-place" data-id="${k}">Prendre cette place</button>` : ""}`}
+    </div>`; };
+  const nb = (E.sieges || []).filter(Boolean).length, reste = Math.max(0, 15 - (E.attente_s || 0));
+  if(E.statut==="en_cours" && typeof demarrerPartie2v2Ligne!=="function") return `${entete("Salon 2 contre 2")}<section class="bloc-2v2"><h2>Partie lancée</h2>
+    <p>Les tickets de chaque joueur sont créés. La partie en temps réel arrive à l’étape suivante du développement.</p><button type="button" class="btn" data-act="salon2v2-quitter">Retour</button></section>`;
+  return `${entete("Salon 2 contre 2")}
+    <div class="page-salon-2v2">
+      <section class="bloc-2v2 tete-salon"><div><span class="sur-titre">${E.public ? "Recherche de partie" : "Salon privé"}</span>
+        <h2>Code : <span class="code-salon">${esc(E.code)}</span></h2>
+        <p class="aide">${E.public ? "Les joueurs qui lancent une recherche rejoignent ce salon." : "Donnez ce code à vos amis pour qu’ils vous rejoignent."} ${nb} joueur${nb>1 ? "s" : ""} sur 4 · en attente depuis ${E.attente_s || 0} s.</p></div>
+        <button type="button" class="btn second" data-act="salon2v2-quitter">Quitter le salon</button></section>
+      <div class="equipes-salon">
+        <section class="bloc-2v2 equipe-salon eq-a"><h3>Équipe A</h3>${place(0)}${place(2)}</section>
+        <section class="bloc-2v2 equipe-salon eq-b"><h3>Équipe B</h3>${place(1)}${place(3)}</section>
+      </div>
+      <p class="aide centre">Les équipes jouent en alternance : place 1, puis 2, puis 3, puis 4. Changez de place en cliquant sur « Prendre cette place ».</p>
+      ${E.hote ? `<div class="lancer-salon"><button type="button" class="btn-geant" data-act="salon2v2-lancer" ${E.peut_lancer ? "" : "disabled"}><span><b>Lancer la partie</b><small>${nb<4 ? `${4 - nb} place${4 - nb>1 ? "s" : ""} tenue${4 - nb>1 ? "s" : ""} par l’ordinateur` : "Quatre joueurs : c’est complet !"}</small></span></button>
+        ${E.peut_lancer ? "" : `<p class="aide centre">Lancement possible dans ${reste} s, ou dès que le salon est complet.</p>`}</div>`
+        : `<p class="attente centre">En attente du lancement par l’hôte…</p>`}
+    </div>`;
+}
+function actionSalon2v2(act, id){
+  switch(act){
+    case "salon2v2-creer": rpc("creer_salon_2v2", {p_public:false}).then(c => entrerSalon({code:c}), e => erreur(e.message)); return false;
+    case "salon2v2-chercher": rpc("chercher_salon_2v2").then(entrerSalon, e => erreur(e.message)); return false;
+    case "salon2v2-rejoindre": { const c = (SAL.saisie || "").trim(); if(c.length<5){ erreur("Le code d’un salon compte 5 caractères."); return false; }
+      rpc("rejoindre_salon_2v2", {p_code:c}).then(entrerSalon, e => erreur(e.message)); return false; }
+    case "salon2v2-place": rpc("changer_siege_2v2", {p_code:SAL.code, p_siege:Number(id)}).then(r => { if(r && r.erreur) erreur(r.erreur); }, e => erreur(e.message)); return false;
+    case "salon2v2-quitter": quitterSalon(); return true;
+    case "salon2v2-lancer": rpc("lancer_salon_2v2", {p_code:SAL.code}).then(r => { if(r && r.erreur) erreur(r.erreur); }, e => erreur(e.message)); return false;
+  }
+  return null;
+}
+document.addEventListener("input", e => { if(e.target.dataset && e.target.dataset.sal) SAL[e.target.dataset.sal] = e.target.value.toUpperCase(); });
 
 chargerConfig();
 appliquerReglageAnimations();
