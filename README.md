@@ -84,6 +84,12 @@ ou changé leur faction, renvoyez le catalogue depuis l’administration (onglet
 `supabase-admin-joueurs.sql` permet à l’administrateur de corriger l’or et l’encre d’un joueur depuis l’onglet
 « Statistiques » de l’administration (bouton « Modifier » dans la liste des joueurs).
 
+## Recyclage des exemplaires en trop
+
+`supabase-recyclage-surplus.sql` (après `supabase-variantes.sql`) : le bouton « Tout recycler » de la collection
+transforme en encre, en une seule fois, tous les exemplaires au-delà du maximum utile d’un deck (mêmes règles que le
+recyclage carte par carte). Sans ce script, le bouton fonctionne quand même, exemplaire par exemplaire.
+
 ## Cadeaux automatiques
 
 `supabase-cadeaux-auto.sql` (après `supabase-social.sql`) : onglet « Cadeaux automatiques » de l’administration.

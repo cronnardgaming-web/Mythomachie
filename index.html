@@ -1834,6 +1834,33 @@ body.compact .emplacement-booster .booster{width:96px}
 .ob-actions{position:absolute;left:0;right:0;bottom:6vh;display:flex;justify-content:center;gap:12px;opacity:0}
 .ob-actions .btn{margin:0}
 .ob-titre{position:absolute;left:0;right:0;top:5vh;margin:0;text-align:center;font-family:Cinzel,serif;font-size:22px;color:#f3d791;text-shadow:0 2px 6px rgba(0,0,0,.8)}
+
+/* =====================================================================
+   ADMINISTRATION RÉORGANISÉE : menu à icônes, tableau de bord ; COLLECTION : recyclage groupé
+   ===================================================================== */
+.adm-menu-groupe h2{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);margin:14px 10px 4px;font-family:inherit;font-weight:700}
+.adm-menu-groupe:first-child h2{margin-top:4px}
+.adm-lien{display:flex !important;align-items:center;gap:9px}
+.ico-adm{width:22px;text-align:center;font-size:15px;flex:none;filter:saturate(.8)}
+.txt-adm{flex:1;text-align:left}
+.adm-lien[aria-current="page"]{font-weight:700}
+.adm-accueil .bloc-adm{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:12px 0;background:var(--table)}
+.adm-accueil .bloc-adm h3{margin:0 0 8px}
+.liste-afaire{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.liste-afaire li{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;padding:8px 10px;border-radius:8px;border-left:4px solid #d39b2a;background:var(--zone)}
+.liste-afaire .btn{margin:0}
+.tout-va-bien{margin:0;color:#4fd18b;font-weight:700}
+.adm-accueil .tuile-texte{grid-column:span 2}
+.adm-accueil .tuile-texte b{font-size:16px;line-height:1.3}
+.raccourcis-adm{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.raccourci-adm{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--zone);color:var(--ink);cursor:pointer;font:inherit}
+.raccourci-adm:hover{border-color:var(--or, var(--bronze))}
+.raccourci-adm:focus-visible{outline:2px solid var(--or, var(--bronze));outline-offset:2px}
+.ico-raccourci{font-size:22px}
+.raccourci-adm span:last-child{font-size:13px;color:var(--ink-2)}
+.bandeau-surplus{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:8px 0 12px;padding:10px 14px;border-radius:8px;
+  border:1px solid color-mix(in srgb, #a98cff 50%, var(--line));background:color-mix(in srgb, #a98cff 10%, var(--table))}
+.bandeau-surplus .btn{margin:0}
 </style>
 </head>
 <body>
@@ -2088,6 +2115,7 @@ function sauvegarderAvantChangement(ancienne){
 }
 function lireSecours(){ try { return JSON.parse(localStorage.getItem(CLE_SECOURS)); } catch(e) { return null; } }
 function sauver(){
+  if(typeof marquerModifie==="function" && ui && ui.ecran==="admin") marquerModifie();
   try { localStorage.setItem(CLE_STOCKAGE, JSON.stringify(CONFIG)); return true; }
   catch(e) {
     // Seule une mémoire réellement pleine est signalée ; un stockage indisponible (navigation privée stricte) n’empêche pas de jouer
@@ -3134,7 +3162,7 @@ function apresAction(){
 /* ============================================================
    PANNEAU D’ADMINISTRATION
    ============================================================ */
-const adm = {onglet:"cartes", sel:null, recherche:"", filtre:"toutes", tri:"faction", suppr:null, reset:false, ouverts:new Set()};
+const adm = {onglet:"accueil", sel:null, recherche:"", filtre:"toutes", tri:"faction", suppr:null, reset:false, ouverts:new Set()};
 const ORDRE_RARETE = [["commune","Communes"],["rare","Rares"],["epique","Épiques"],["legendaire","Légendaires"],["base","Départ et base"],["jeton","Jetons"]];
 const ORDRE_TYPE = {creature:0, sort:1, arme:2};
 const groupeRarete = d => d.jeton ? "jeton" : (d.depart || d.base) ? "base" : (d.rarete || "commune");
@@ -3202,17 +3230,21 @@ function renderAdmin(){
     cle = actif.dataset.chemin ? `[data-chemin="${actif.dataset.chemin}"]` : actif.dataset.adm ? `[data-adm="${actif.dataset.adm}"]` : null;
     try { pos = actif.selectionStart; } catch(e) { pos = null; }
   }
-  const pages = {cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => PROG.fiche ? admFicheJoueur() : admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons, messages:admMessages, notes:admNotes, bruitages:admBruitages, "cadeaux-auto":admCadeauxAuto};
+  const pages = {accueil:admAccueil, cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => PROG.fiche ? admFicheJoueur() : admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons, messages:admMessages, notes:admNotes, bruitages:admBruitages, "cadeaux-auto":admCadeauxAuto};
   // Mémoriser la position des listes et de la page avant de réafficher
   const defil = {}; app.querySelectorAll(".adm-items, .adm-menu, .grille-choix").forEach((el, k) => { defil[el.className + k] = el.scrollTop; });
   const yPage = window.scrollY;
   const nbAlertes = PROG.surv && PROG.surv.alertes ? PROG.surv.alertes.filter(a => !a.traite).length : 0;
   const groupes = [
-    ["Contenu du jeu", [["cartes","Cartes"],["boosters","Boosters"],["saisons","Saisons"],["heros","Héros"],["factions","Factions"],["regles","Règles"],["musiques","Musiques"],["bruitages","Bruitages"]]],
-    ["Publication", [["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"]] : [])]],
-    ...(PROG.actif ? [["Communication", [["messages","Boîte aux lettres"],["cadeaux-auto","Cadeaux automatiques"],["notes","Notes de mise à jour"]]]] : []),
-    ...(PROG.actif ? [["Joueurs", [["stats","Vue d’ensemble"],["stats-heros","Statistiques des héros"],["stats-cartes","Statistiques des cartes"],["stats-joueurs","Liste des joueurs"],["surveillance","Surveillance", nbAlertes]]]] : [])
+    ["Accueil", [["accueil","Tableau de bord"]]],
+    ["Le jeu", [["cartes","Cartes"],["heros","Héros et divinités"],["factions","Panthéons"],["regles","Règles"]]],
+    ["Récompenses", [["boosters","Boosters"],["saisons","Saisons"], ...(PROG.actif ? [["cadeaux-auto","Cadeaux automatiques"]] : [])]],
+    ...(PROG.actif ? [["Joueurs", [["stats-joueurs","Liste des joueurs"],["messages","Boîte aux lettres"],["surveillance","Surveillance", nbAlertes]]],
+                      ["Statistiques", [["stats","Vue d’ensemble"],["stats-heros","Héros"],["stats-cartes","Cartes"]]]] : []),
+    ["Ambiance", [["musiques","Musiques"],["bruitages","Bruitages"]]],
+    ["Publication", [...(PROG.actif ? [["notes","Notes de mise à jour"]] : []), ["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"]] : [])]]
   ];
+  if(!groupes.some(([, l]) => l.some(([k]) => k===adm.onglet))) adm.onglet = "accueil";
   const titres = Object.fromEntries(groupes.flatMap(([, l]) => l.map(([k, t]) => [k, t])));
   // Cartes de la configuration que le serveur ne connaît pas encore
   if(PROG.actif && PROG.pret && !window.claude && PROG.catalogueServeur===undefined){
@@ -3236,7 +3268,7 @@ function renderAdmin(){
   <div class="adm-corps">
     <nav class="adm-menu" aria-label="Sections de l’administration">
       ${groupes.map(([g, liens]) => `<div class="adm-menu-groupe"><h2>${g}</h2>${liens.map(([k, l, n]) =>
-        `<button type="button" class="adm-lien" data-act="onglet" data-id="${k}" ${adm.onglet===k ? 'aria-current="page"' : ""}>${l}${n ? `<span class="badge-menu" aria-label="${n} alertes à traiter">${n}</span>` : ""}</button>`).join("")}</div>`).join("")}
+        `<button type="button" class="adm-lien" data-act="onglet" data-id="${k}" ${adm.onglet===k ? 'aria-current="page"' : ""}><span class="ico-adm" aria-hidden="true">${ICONES_ADMIN[k] || "•"}</span><span class="txt-adm">${l}</span>${n ? `<span class="badge-menu" aria-label="${n} alertes à traiter">${n}</span>` : ""}</button>`).join("")}</div>`).join("")}
     </nav>
     <section class="adm-contenu" aria-label="${esc(titres[adm.onglet] || "")}">${pages[adm.onglet]()}</section>
   </div></div>`;
@@ -3736,6 +3768,7 @@ async function versDataURL(url){
   }
 }
 async function telechargerConfig(){
+  if(typeof marquerExporte==="function") marquerExporte();
   erreur("Préparation du fichier config.json…");
   const cfg = copie(CONFIG);
   cfg.exporte = Date.now();
@@ -4910,6 +4943,7 @@ function pageCollection(){
   const possedees = Object.keys(PROG.collection).filter(id => estCollectionnable(CARTES[id])).length;
   return `${entete("Collection")}
     <p class="aide">${possedees} cartes différentes sur ${total}. Cliquez sur une carte pour la voir en grand, la fabriquer ou recycler ses exemplaires en trop.</p>
+    ${htmlBoutonSurplus()}
     ${htmlFiltres(true)}
     ${htmlCartesDepart()}
     <div class="grille">${ids.map(id => {
@@ -5119,6 +5153,7 @@ function actionProg(act, id){
       }, "Deck enregistré.");
       return true;
     }
+    case "col-recycler-tout": recyclerToutSurplus(); return true;
     case "paquet-acheter": {
       const avant = {...PROG.collection}, f = id && FACTIONS[id] ? id : null;
       const bid = id && String(id).startsWith("b:") ? String(id).slice(2) : null, bs = bid && CONFIG.boosters ? CONFIG.boosters[bid] : null;
@@ -9357,6 +9392,84 @@ function ouvrirBoosterAnime({id, source, appel, titre, faction, apres}){
       else { PROG.paquet = null; await couche.animate([{opacity:1}, {opacity:0}], {duration:ms(250), fill:"forwards"}).finished; fermer(); }
     });
   }).catch(e => fermer(e && e.message || "L’ouverture du paquet a échoué."));
+}
+
+/* ----- Collection : recycler tous les exemplaires en trop ----- */
+function surplusCollection(){
+  const prix = (PROG.eco && PROG.eco.encre_recyclage) || {commune:5, rare:20, epique:100, legendaire:400};
+  let ex = 0, encre = 0, cartes = 0;
+  for(const [id, nb] of Object.entries(PROG.collection || {})){
+    const d = CARTES[id]; if(!d || !estCollectionnable(d) || d.promo) continue;
+    const trop = nb - maxCopies(id); if(trop<=0) continue;
+    ex += trop; cartes++; encre += trop * (prix[d.rarete || "commune"] || 0);
+  }
+  return {ex, encre, cartes};
+}
+function htmlBoutonSurplus(){
+  const s = surplusCollection();
+  if(!s.ex) return "";
+  return `<div class="bandeau-surplus"><span>Vous avez <b>${nf(s.ex)} exemplaire${s.ex>1 ? "s" : ""} en trop</b> (au-delà du maximum utile d’un deck), sur ${nf(s.cartes)} carte${s.cartes>1 ? "s" : ""}.</span>
+    <button type="button" class="btn" data-act="col-recycler-tout" ${PROG.occupe ? "disabled" : ""}>Tout recycler (+${nf(s.encre)} encre)</button></div>`;
+}
+async function recyclerToutSurplus(){
+  const s = surplusCollection(); if(!s.ex) return;
+  if(!confirm(`Recycler ${s.ex} exemplaire${s.ex>1 ? "s" : ""} en trop pour ${s.encre} encre ? Vous gardez toujours le maximum utile de chaque carte pour vos decks.`)) return;
+  action(async () => {
+    try { return await rpc("recycler_surplus"); }
+    catch(e) {
+      if(!/function|does not exist|schema cache/i.test(e.message)) throw e;
+      // Serveur sans la fonction groupée : recyclage exemplaire par exemplaire
+      let ex = 0, encre = 0;
+      for(const [id, nb] of Object.entries(PROG.collection || {})){
+        const d = CARTES[id]; if(!d || !estCollectionnable(d) || d.promo) continue;
+        for(let k = nb - maxCopies(id); k>0; k--){ encre += await rpc("recycler", {c:id}); ex++; }
+      }
+      return {exemplaires:ex, encre};
+    }
+  }, r => `${nf(r.exemplaires || 0)} exemplaire${(r.exemplaires || 0)>1 ? "s" : ""} recyclé${(r.exemplaires || 0)>1 ? "s" : ""} : +${nf(r.encre || 0)} encre !`);
+}
+
+/* ----- Administration : tableau de bord ----- */
+const ICONES_ADMIN = {accueil:"🏠", cartes:"🃏", heros:"👑", factions:"🏛", regles:"📜", boosters:"🎁", saisons:"🗓", "cadeaux-auto":"🎀",
+  "stats-joueurs":"👥", messages:"✉", surveillance:"🛡", stats:"📊", "stats-heros":"⚔", "stats-cartes":"📈", musiques:"🎵", bruitages:"🔊",
+  notes:"📰", donnees:"💾", serveur:"🖥"};
+const marquerModifie = () => { try { localStorage.setItem("config-modifiee", String(Date.now())); } catch(e) {} };
+const marquerExporte = () => { try { localStorage.setItem("config-exportee", String(Date.now())); } catch(e) {} };
+const nonExporte = () => { try { return Number(localStorage.getItem("config-modifiee") || 0) > Number(localStorage.getItem("config-exportee") || 0); } catch(e) { return false; } };
+function admAccueil(){
+  const R = PROG.adminStats && PROG.adminStats.resume;
+  if(PROG.actif && PROG.pret && !PROG.adminStats) chargerAdminStats().then(() => { if(adm.onglet==="accueil") renderAdmin(); }).catch(() => {});
+  const absentes = PROG.catalogueServeur ? Object.keys(CARTES).filter(k => !PROG.catalogueServeur.has(k)).length : 0;
+  const alertes = PROG.surv && PROG.surv.alertes ? PROG.surv.alertes.filter(a => !a.traite).length : null;
+  const sa = Object.entries(CONFIG.saisons || {}).filter(([, s]) => s.active).sort((a, b) => String(a[1].debut).localeCompare(String(b[1].debut)))
+    .map(([k, s]) => { const d = new Date(s.debut + "T00:00:00"), f = new Date(d.getTime() + (s.duree_jours || 42)*864e5), n = new Date();
+      return {nom:s.nom, etat: n<d ? `ouvre le ${d.toLocaleDateString("fr-FR", {day:"numeric", month:"long"})}` : n<f ? `en cours jusqu’au ${f.toLocaleDateString("fr-FR", {day:"numeric", month:"long"})}` : "terminée"}; })
+    .find(x => x.etat!=="terminée");
+  const afaire = [
+    nonExporte() && !window.claude ? [`Des changements n’ont pas encore été exportés dans config.json : les joueurs ne les voient pas.`, "config-telecharger", "Exporter config.json"] : null,
+    absentes ? [`${absentes} carte${absentes>1 ? "s" : ""} manque${absentes>1 ? "nt" : ""} au catalogue du serveur (absentes des paquets et des statistiques).`, "srv-catalogue", "Envoyer le catalogue"] : null,
+    alertes ? [`${alertes} alerte${alertes>1 ? "s" : ""} de surveillance à examiner.`, "onglet:surveillance", "Voir les alertes"] : null
+  ].filter(Boolean);
+  const chiffre = (v, l) => `<div class="tuile"><b>${v}</b><span>${l}</span></div>`;
+  const raccourci = (act, ico, t, d) => `<button type="button" class="raccourci-adm" data-act="${act.startsWith("onglet:") ? "onglet" : act}" ${act.startsWith("onglet:") ? `data-id="${act.slice(7)}"` : ""}><span class="ico-raccourci" aria-hidden="true">${ico}</span><b>${t}</b><span>${d}</span></button>`;
+  return `<div class="adm-page adm-accueil">
+    <h2>Tableau de bord</h2>
+    <section class="bloc-adm"><h3>À faire</h3>
+      ${afaire.length ? `<ul class="liste-afaire">${afaire.map(([t, act, l]) => `<li><span>${esc(t)}</span><button type="button" class="btn ${act==="config-telecharger" ? "" : "second"}" data-act="${act.startsWith("onglet:") ? "onglet" : act}" ${act.startsWith("onglet:") ? `data-id="${act.slice(7)}"` : ""}>${l}</button></li>`).join("")}</ul>`
+        : `<p class="tout-va-bien">✓ Rien d’urgent : tout est à jour.</p>`}
+    </section>
+    ${PROG.actif ? `<section class="bloc-adm"><h3>En bref</h3><div class="tuiles">
+      ${chiffre(R ? nf(R.en_ligne || 0) : "…", "joueurs en ligne")}${chiffre(R ? nf(R.comptes ?? R.joueurs ?? 0) : "…", "comptes")}${chiffre(R ? nf(R.parties_24h || 0) : "…", "parties sur 24 h")}${chiffre(R ? nf(R.actifs_7j || 0) : "…", "actifs sur 7 jours")}
+      <div class="tuile tuile-texte"><b>${sa ? esc(sa.nom) : "Aucune saison"}</b><span>${sa ? `saison ${sa.etat}` : "programmée pour le moment"}</span></div></div></section>` : ""}
+    <section class="bloc-adm"><h3>Raccourcis</h3><div class="raccourcis-adm">
+      ${raccourci("onglet:cartes", "🃏", "Les cartes", "Créer ou modifier une carte")}
+      ${PROG.actif ? raccourci("onglet:messages", "✉", "Écrire aux joueurs", "Message ou cadeau") : ""}
+      ${raccourci("onglet:saisons", "🗓", "La saison", "Travaux, quêtes, récompenses")}
+      ${raccourci("onglet:boosters", "🎁", "Les boosters", "Apparence et boosters spéciaux")}
+      ${PROG.actif ? raccourci("onglet:notes", "📰", "Une nouveauté", "Note de mise à jour") : ""}
+      ${PROG.actif ? raccourci("onglet:stats-joueurs", "👥", "Un joueur", "Fiche, or, cartes, cadeaux") : ""}
+    </div></section>
+  </div>`;
 }
 
 chargerConfig();
