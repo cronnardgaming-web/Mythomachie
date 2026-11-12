@@ -1636,7 +1636,7 @@ body.compact:not(.en-partie) .tuile-hall .pastille-recompense{font-size:10px;pad
 .lot-carte{position:relative;width:96px;transform:rotate(var(--r,0deg));transition:transform .25s;animation:flotter 6s ease-in-out infinite}
 .lot-carte + .lot-carte{margin-left:-36px}
 .lot-saison:nth-child(odd) .lot-carte{animation-delay:-3s}
-.lot-carte .carte{width:96px;font-size:6.4px;box-shadow:0 10px 18px -8px rgba(0,0,0,.75)}
+.lot-carte .carte{--w:96px;width:var(--w);box-shadow:0 10px 18px -8px rgba(0,0,0,.75)}
 .lot-carte:hover{transform:rotate(0deg) scale(1.08);z-index:2}
 .lot-illustration .carte{box-shadow:0 0 16px 2px color-mix(in srgb, var(--or, var(--bronze)) 55%, transparent), 0 10px 18px -8px rgba(0,0,0,.75)}
 .ruban{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);white-space:nowrap;font-size:9px;font-weight:700;letter-spacing:.03em;padding:2px 7px;border-radius:99px;color:#2b1a06;background:linear-gradient(180deg,#ffe28a,#e0b13d)}
@@ -1768,6 +1768,72 @@ body:not(.en-partie) .titre-quetes .aide{font-family:"Alegreya Sans",system-ui,s
 body:not(.en-partie) .contenu-hall-saison h2{font-size:clamp(17px,1.6vw,21px)}
 body.compact:not(.en-partie) .hall-modes .btn{font-size:12px;padding:6px 6px}
 body.compact:not(.en-partie) .btn-geant b{font-size:16px}
+
+/* =====================================================================
+   BOOSTERS : sachet dessiné et animation d’ouverture
+   ===================================================================== */
+.booster{position:relative;width:120px;aspect-ratio:1/1.55;display:flex;flex-direction:column;filter:drop-shadow(0 10px 14px rgba(0,0,0,.55));container-type:inline-size}
+.booster-dent{flex:0 0 7%;position:relative;background:linear-gradient(180deg, color-mix(in srgb, var(--bc) 30%, #e9e4da), color-mix(in srgb, var(--bc) 55%, #6d6a64));
+  -webkit-mask:linear-gradient(#000,#000) content-box, repeating-linear-gradient(90deg,#000 0 3px,transparent 3px 4px);
+  background-image:repeating-linear-gradient(90deg, rgba(255,255,255,.35) 0 1px, transparent 1px 4px), linear-gradient(180deg, color-mix(in srgb, var(--bc) 30%, #e9e4da), color-mix(in srgb, var(--bc) 55%, #6d6a64))}
+.booster-dent.haut{clip-path:polygon(0 30%,4% 0,8% 30%,12% 0,16% 30%,20% 0,24% 30%,28% 0,32% 30%,36% 0,40% 30%,44% 0,48% 30%,52% 0,56% 30%,60% 0,64% 30%,68% 0,72% 30%,76% 0,80% 30%,84% 0,88% 30%,92% 0,96% 30%,100% 0,100% 100%,0 100%);border-radius:0}
+.booster-dent.bas{clip-path:polygon(0 0,100% 0,100% 70%,96% 100%,92% 70%,88% 100%,84% 70%,80% 100%,76% 70%,72% 100%,68% 70%,64% 100%,60% 70%,56% 100%,52% 70%,48% 100%,44% 70%,40% 100%,36% 70%,32% 100%,28% 70%,24% 100%,20% 70%,16% 100%,12% 70%,8% 100%,4% 70%,0 100%)}
+.booster-corps{position:relative;flex:1;overflow:hidden;background:linear-gradient(160deg, color-mix(in srgb, var(--bc) 55%, #fff) 0%, var(--bc) 45%, color-mix(in srgb, var(--bc) 60%, #000) 100%)}
+.booster.classique .booster-corps{background:linear-gradient(160deg,#f1eee8 0%,#c9c4bb 45%,#8e897f 100%)}
+.booster-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.78;mix-blend-mode:luminosity;filter:contrast(1.08)}
+.booster.classique .booster-art{mix-blend-mode:normal;opacity:.85;filter:grayscale(.15) contrast(1.05)}
+.booster-voile{position:absolute;inset:0;background:linear-gradient(180deg, color-mix(in srgb, var(--bc) 25%, transparent) 0%, transparent 30%, transparent 62%, color-mix(in srgb, var(--bc) 55%, #000 30%) 100%)}
+.booster.classique .booster-voile{background:linear-gradient(180deg, rgba(255,255,255,.35) 0%, transparent 30%, transparent 62%, rgba(40,36,30,.55) 100%)}
+.booster-reflet{position:absolute;inset:0;background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,.32) 42%, transparent 52%, transparent 70%, rgba(255,255,255,.15) 78%, transparent 84%);mix-blend-mode:screen;pointer-events:none}
+.booster-sym{position:absolute;inset:0;display:grid;place-items:center;font-family:Cinzel,serif;font-size:42cqw;color:rgba(255,255,255,.5);text-shadow:0 2px 6px rgba(0,0,0,.4)}
+.booster-tete{position:absolute;left:0;right:0;top:4%;display:flex;flex-direction:column;align-items:center;gap:1px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.75)}
+.booster-tete span{font-size:6.5cqw;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.9}
+.booster-tete b{font-family:"Cinzel Decorative",Cinzel,serif;font-size:11.5cqw;line-height:1;letter-spacing:.02em;background:var(--or-feuille, linear-gradient(#fff,#f3d791));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 1px 1px rgba(0,0,0,.7))}
+.booster-bandeau{position:absolute;left:0;right:0;bottom:6%;padding:3% 4%;text-align:center;font-family:Cinzel,serif;font-weight:700;font-size:7.5cqw;letter-spacing:.04em;color:#fff;
+  background:linear-gradient(180deg, rgba(10,10,14,.82), rgba(10,10,14,.92));border-top:1px solid color-mix(in srgb, var(--bc) 50%, #f0cf7f);border-bottom:1px solid color-mix(in srgb, var(--bc) 50%, #f0cf7f)}
+.booster.classique .booster-bandeau{border-color:#c9a35a}
+.emplacement-booster{display:flex;justify-content:center;padding:4px 0 2px}
+.emplacement-booster .booster{width:150px}
+body.compact .emplacement-booster .booster{width:96px}
+.offre .emplacement-booster .booster{transition:transform .2s}
+.offre:hover .emplacement-booster .booster{transform:translateY(-4px) rotate(-1.5deg)}
+@media (prefers-reduced-motion: reduce){ .offre:hover .emplacement-booster .booster{transform:none} }
+/* Administration : apparence des paquets */
+.apparences-paquets{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;margin:8px 0}
+.apparence-paquet{display:flex;gap:12px;align-items:flex-start;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--table)}
+.apercu-booster .booster{width:110px}
+.reglages-apparence{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+.reglages-apparence select{font:inherit;font-size:13px;color:var(--ink);background:var(--zone);border:1px solid var(--line);border-radius:6px;padding:5px 6px;max-width:100%}
+.separation-adm{border:none;border-top:1px solid var(--line);margin:16px 0}
+/* Ouverture */
+#ouverture-booster{position:fixed;inset:0;z-index:90;overflow:hidden}
+.ob-fond{position:absolute;inset:0;opacity:0;background:radial-gradient(60% 55% at 50% 45%, rgba(40,32,18,.55), rgba(4,6,12,.94));backdrop-filter:blur(3px)}
+.ob-scene{position:absolute;inset:0}
+.ob-booster{position:absolute;transform-origin:50% 50%}
+.ob-booster .booster{width:100% !important;height:100%;aspect-ratio:auto}
+.ob-haut,.ob-bas{position:absolute;inset:0}
+.ob-haut{clip-path:polygon(0 0,100% 0,100% 13%,94% 15%,88% 12%,82% 15.5%,76% 12.5%,70% 15%,64% 12%,58% 15.5%,52% 12.5%,46% 15%,40% 12%,34% 15.5%,28% 12.5%,22% 15%,16% 12%,10% 15.5%,4% 12.5%,0 14%);z-index:2;transform-origin:85% 15%}
+.ob-bas{clip-path:polygon(0 14%,4% 12.5%,10% 15.5%,16% 12%,22% 15%,28% 12.5%,34% 15.5%,40% 12%,46% 15%,52% 12.5%,58% 15.5%,64% 12%,70% 15%,76% 12.5%,82% 15.5%,88% 12%,94% 15%,100% 13%,100% 100%,0 100%)}
+.ob-eclat{position:absolute;left:-10%;right:-10%;top:10%;height:8%;opacity:0;z-index:3;pointer-events:none;border-radius:50%;
+  background:radial-gradient(closest-side, rgba(255,246,214,1), rgba(255,214,120,.7) 45%, transparent);filter:blur(4px)}
+.ob-carte{position:absolute;padding:0;border:none;background:none;cursor:pointer;perspective:900px;z-index:1}
+.ob-carte:focus-visible{outline:2px solid #f3d791;outline-offset:4px;border-radius:8px}
+.ob-interieur{position:relative;display:block;width:100%;height:100%;transition:transform .6s cubic-bezier(.3,.7,.3,1);transform-style:preserve-3d}
+.ob-carte.retournee .ob-interieur{transform:rotateY(180deg)}
+.ob-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:8px}
+.ob-dos{display:grid;place-items:center;border:2px solid color-mix(in srgb, var(--bc) 40%, #f0cf7f);
+  background:radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--bc) 70%, #fff 10%), color-mix(in srgb, var(--bc) 55%, #000) 80%);box-shadow:0 10px 22px -10px rgba(0,0,0,.8), inset 0 0 0 4px rgba(0,0,0,.18)}
+.ob-dos span{font-family:Cinzel,serif;font-size:42px;color:rgba(255,240,200,.75);text-shadow:0 2px 6px rgba(0,0,0,.6)}
+.ob-avant{transform:rotateY(180deg);display:flex;flex-direction:column;align-items:center}
+.ob-avant .carte{--w:var(--l, 150px);width:var(--w)}
+.ob-avant .nouvelle{margin-top:6px}
+.ob-carte:not(.retournee):hover .ob-interieur{transform:translateY(-6px)}
+.ob-carte.eclat-epique .ob-avant .carte{box-shadow:0 0 22px 4px rgba(168,110,255,.75)}
+.ob-carte.eclat-legendaire .ob-avant .carte{box-shadow:0 0 32px 8px rgba(255,205,96,.9);animation:eclat-leg 1.6s ease-out 1}
+@keyframes eclat-leg{0%{filter:brightness(2.2)}100%{filter:brightness(1)}}
+.ob-actions{position:absolute;left:0;right:0;bottom:6vh;display:flex;justify-content:center;gap:12px;opacity:0}
+.ob-actions .btn{margin:0}
+.ob-titre{position:absolute;left:0;right:0;top:5vh;margin:0;text-align:center;font-family:Cinzel,serif;font-size:22px;color:#f3d791;text-shadow:0 2px 6px rgba(0,0,0,.8)}
 </style>
 </head>
 <body>
@@ -1791,7 +1857,7 @@ if(!window.claude) document.title = NOM_JEU;
 const DEFAUT = {
   version:3,
   // Valeurs d’origine = config.json du site (GitHub), sans les images
-  musiques:{menu:"", duel:[]}, variantes:{}, boosters:{}, saisons:{}, bruitages:{},
+  musiques:{menu:"", duel:[]}, variantes:{}, boosters:{}, saisons:{}, bruitages:{}, apparencePaquets:{},
   credits:{musiques:[{titre:"Battle Cinematic Heroic Orchestra", artiste:"Echoes of Lumen"}, {titre:"Battle Music", artiste:"PaulYudin"}, {titre:"Battle", artiste:"NastelBom"}, {titre:"Epic Battle", artiste:"YevhenAstafiev"}, {titre:"Cinematic Powerful Battle Music", artiste:"Tunetank"}, {titre:"Epic Cinematic Battle Music", artiste:"Tunetank"}]},
   regles:{devotionSeuils:[16, 30], devotionNbTresors:2, devotionTresor:"piece", devotionCreature:"dague", armesHeros:true, armesImmediat:true, armesPermanentes:true, armesVie:true, pvDepart:40, seuilPouvoir:10, mainDepart:5, mainPremier:3, piocheParTour:5, tailleMarche:5, plateauMax:7, tailleDeck:30, copiesMax:2, copiesLegendaire:1, carteBase:"pierre", deckDepart:{piece:7, rubis:1, dague:1, epee:1}},
   mots:{provocation:"Provocation", rapidite:"Rapidité", resistance:"Résistance", ethere:"Ethéré"},
@@ -1994,6 +2060,7 @@ function fusionner(obj){
           boosters:(obj.boosters && typeof obj.boosters==="object") ? copie(obj.boosters) : {},
           saisons:(obj.saisons && typeof obj.saisons==="object") ? copie(obj.saisons) : {},
           bruitages:(obj.bruitages && typeof obj.bruitages==="object") ? copie(obj.bruitages) : {},
+          apparencePaquets:(obj.apparencePaquets && typeof obj.apparencePaquets==="object") ? copie(obj.apparencePaquets) : {},
           credits:{musiques:(obj.credits && Array.isArray(obj.credits.musiques)) ? copie(obj.credits.musiques) : copie(d.credits.musiques)},
           regles:{...reglesObj, deckDepart:{...((obj.regles && obj.regles.deckDepart) || d.regles.deckDepart)}},
           mots:{...d.mots, ...(obj.mots||{})}, termes:renommerTermes({...d.termes, ...(obj.termes||{})})};
@@ -4923,7 +4990,7 @@ function pageBoutique(){
   const prix = PROG.eco ? PROG.eco.prix_paquet : 100, n = PROG.eco ? PROG.eco.cartes_paquet : 5;
   const pr = PROG.eco ? PROG.eco.probabilites : {};
   const pq = PROG.paquet, manque = !PROG.profil || PROG.profil.pieces_or<prix;
-  const contenu = pq ? `<div class="ouverture">
+  const contenu = pq && !pq.anime ? `<div class="ouverture">
     <h2>${esc(pq.titre || "Votre paquet")}</h2>
     <div class="revelation">${pq.cartes.map((id, i) => pq.reveles.has(i)
       ? `<div class="revele ${pq.anim && pq.anim.has(i) ? "anim" : ""}">${htmlTirage(id, i, pq)}</div>`
@@ -4942,7 +5009,7 @@ function pageBoutique(){
       ${contenu}
       ${PROG.paquet ? "" : htmlPaquetsOfferts()}
       <div class="offres">${offres.map(o => `<div class="offre ${o.f ? "f-" + o.f : ""} ${o.special ? "offre-speciale" : ""}" ${o.couleur ? `style="--fc:${esc(o.couleur)};--fci:#fff"` : ""}>
-        <div class="paquet-visuel ${o.f || o.special ? "paquet-faction" : ""}" aria-hidden="true"><span>${esc(o.sym)}</span></div>
+        <div class="emplacement-booster" data-booster="${o.id}">${htmlBooster(o.id)}</div>
         <div class="offre-texte"><h2>${esc(o.nom)}</h2><p class="aide">${esc(o.desc)}</p>
           <button type="button" class="btn" data-act="paquet-acheter" data-id="${o.id}" ${manque || PROG.occupe ? "disabled" : ""}>Acheter pour ${prix} or</button></div>
       </div>`).join("")}</div>
@@ -5055,6 +5122,12 @@ function actionProg(act, id){
     case "paquet-acheter": {
       const avant = {...PROG.collection}, f = id && FACTIONS[id] ? id : null;
       const bid = id && String(id).startsWith("b:") ? String(id).slice(2) : null, bs = bid && CONFIG.boosters ? CONFIG.boosters[bid] : null;
+      const sourceB = document.querySelector(`.emplacement-booster[data-booster="${CSS.escape(String(id || ""))}"] .booster`);
+      if(niveauAnim()>0 && sourceB && !PROG.occupe){
+        ouvrirBoosterAnime({id, source:sourceB, faction:f, titre: bs ? (bs.nom || "Booster spécial") : f ? `Paquet ${FACTIONS[f].m}` : "Paquet classique",
+          appel:() => rpc("ouvrir_paquet", bid ? {p_booster:bid} : f ? {p_faction:f} : {})});
+        return true;
+      }
       action(async () => {
         const cartes = await rpc("ouvrir_paquet", bid ? {p_booster:bid} : f ? {p_faction:f} : {});
         PROG.paquet = {cartes, faction:f, titre: bs ? (bs.nom || "Booster spécial") : f ? `Paquet ${FACTIONS[f].m}` : "Paquet classique",
@@ -5077,6 +5150,12 @@ function actionProg(act, id){
     }
     case "paquet-offert": {
       const avant = {...PROG.collection}, f = id && FACTIONS[id] ? id : null;
+      const sourceO = document.querySelector(`[data-act="paquet-offert"][data-id="${CSS.escape(String(id || ""))}"]`);
+      if(niveauAnim()>0 && sourceO && !PROG.occupe){
+        ouvrirBoosterAnime({id:f || "", source:sourceO, faction:f, titre:`${NOM_PAQUET(id)} (offert)`,
+          appel:() => rpc("ouvrir_paquet", {p_faction:f, p_offert:true}), apres:() => chargerPaquetsOfferts().then(() => render())});
+        return true;
+      }
       action(async () => {
         const cartes = await rpc("ouvrir_paquet", {p_faction:f, p_offert:true});
         PROG.paquet = {cartes, faction:f, titre:`${NOM_PAQUET(id)} (offert)`, reveles:new Set(), anim:new Set(), nouvelles:new Set(cartes.filter(c => !avant[c]))};
@@ -7080,6 +7159,27 @@ function htmlAdminVariantes(id){
     </fieldset>`;
 }
 // ----- Écran « Boosters » de l’administration
+function htmlApparencePaquets(){
+  const lignes = [["", "Paquet classique"], ...Object.entries(FACTIONS).map(([k, f]) => [k, `Paquet ${f.m}`]), ...boostersSpeciaux().map(([bid, b]) => ["b:" + bid, b.nom || "Booster spécial"])];
+  const cartes = Object.keys(CARTES).filter(k => estCollectionnable(CARTES[k]) && CARTES[k].image)
+    .sort((a, b) => (["legendaire","epique","rare","commune"].indexOf(CARTES[a].rarete || "commune") - ["legendaire","epique","rare","commune"].indexOf(CARTES[b].rarete || "commune")) || CARTES[a].nom.localeCompare(CARTES[b].nom, "fr"));
+  return `<h3>Apparence des paquets</h3>
+    <p class="aide">Choisissez la carte dont l’illustration orne chaque sachet (une créature légendaire, par exemple), puis cadrez-la en la faisant glisser. Elle apparaît en légère transparence sur la couleur du panthéon ; le paquet classique reste dans un ton neutre.</p>
+    <div class="apparences-paquets">${lignes.map(([id, nom]) => { const cle = cleApparence(id), a = (CONFIG.apparencePaquets || {})[cle] || {}, ap = apparencePaquet(id);
+      return `<div class="apparence-paquet">
+        <div class="apercu-booster">${htmlBooster(id)}</div>
+        <div class="reglages-apparence"><b>${esc(nom)}</b>
+          <label class="champ"><span>Illustration</span><select data-apparence-carte="${esc(cle)}"><option value="">Aucune (symbole)</option>${cartes.map(k => `<option value="${k}" ${a.carte===k ? "selected" : ""}>${esc(CARTES[k].nom)} (${esc(NOMS_RARETE[CARTES[k].rarete || "commune"] || "")}, ${esc((FACTIONS[CARTES[k].faction] || {}).nom || "neutre")})</option>`).join("")}</select></label>
+          ${ap.image ? htmlCadreur(`paquet:${cle}`, ap.image, a.cadrage, 120, 150, `l’illustration du ${nom}`) : ""}
+        </div></div>`; }).join("")}</div>
+    <p class="aide">Après vos changements, exportez config.json.</p>`;
+}
+document.addEventListener("change", e => {
+  const cle = e.target.dataset && e.target.dataset.apparenceCarte; if(cle===undefined) return;
+  if(!CONFIG.apparencePaquets) CONFIG.apparencePaquets = {};
+  if(e.target.value) CONFIG.apparencePaquets[cle] = {carte:e.target.value, cadrage:{posX:50, posY:30, zoom:1}}; else delete CONFIG.apparencePaquets[cle];
+  sauver(); renderAdmin();
+});
 function admBoosters(){
   if(!CONFIG.boosters) CONFIG.boosters = {};
   const B = CONFIG.boosters, ids = Object.keys(B);
@@ -7091,7 +7191,7 @@ function admBoosters(){
   const parRarete = b ? RARETES.map(([r, l]) => {
     const n = (b.cartes || []).filter(k => CARTES[k] && (CARTES[k].rarete || "commune")===r).length + (b.variantes || []).filter(v => CONFIG.variantes[v] && CARTES[CONFIG.variantes[v].carte] && (CARTES[CONFIG.variantes[v].carte].rarete || "commune")===r).length;
     return n ? `${n} ${l.toLowerCase()}${n>1 ? "s" : ""}` : null; }).filter(Boolean).join(", ") : "";
-  return `<div class="adm-page adm-boosters">
+  return `<div class="adm-page adm-boosters">${htmlApparencePaquets()}<hr class="separation-adm">
     <h2>Boosters</h2>
     <p class="aide">Le <b>booster principal</b> contient toutes les cartes, sauf les cartes promotionnelles et les illustrations alternatives. Chaque <b>booster de panthéon</b> contient les cartes de sa faction, avec les mêmes exceptions. Ces deux types se remplissent tout seuls.</p>
     <p class="aide">Les <b>boosters spéciaux</b> contiennent exactement ce que vous choisissez ici : cartes (promotionnelles comprises) et illustrations alternatives. Même prix et mêmes chances de rareté que les autres paquets. Après vos changements : onglet Serveur, « Envoyer le catalogue », puis exportez config.json.</p>
@@ -8772,6 +8872,7 @@ function imageAccueilSaison(sid){
 // Cible d’un cadrage : "travail:sid|k" ou "accueil:sid"
 function objetCadrage(cible){
   const [type, reste] = cible.split(":");
+  if(type==="paquet"){ const cle = cible.slice(7), a = (CONFIG.apparencePaquets || {})[cle]; if(a && !a.cadrage) a.cadrage = {posX:50, posY:30, zoom:1}; return a && a.cadrage; }
   if(type==="travail"){ const [sid, k] = reste.split("|"); const t = confTravail(sid, k); if(t && !t.cadrage) t.cadrage = {...cadrageVide}; return t && t.cadrage; }
   const s = CONFIG.saisons && CONFIG.saisons[reste]; if(s && !s.accueilCadrage) s.accueilCadrage = {...cadrageVide}; return s && s.accueilCadrage;
 }
@@ -8997,7 +9098,8 @@ document.addEventListener("pointerdown", e => {
 const idCartePaquet = x => typeof x==="string" ? x : x && x.id;
 function sonsActionProg(act, id){
   const P = PROG.paquet;
-  if(act==="paquet-acheter" || act==="paquet-offert") setTimeout(() => jouerSon("paquet_ouvrir", {fixe:true}), 150);
+  // Avec l’animation, le son d’ouverture est joué à l’instant où le sachet se déchire
+  if((act==="paquet-acheter" || act==="paquet-offert") && niveauAnim()===0) setTimeout(() => jouerSon("paquet_ouvrir", {fixe:true}), 150);
   if(act==="paquet-reveler" && P){ const d = CARTES[idCartePaquet(P.cartes[Number(id)])] || {}; jouerSon(d.rarete==="legendaire" ? "carte_revelee_legendaire" : d.rarete==="epique" ? "carte_revelee_epique" : d.rarete==="rare" ? "carte_revelee_rare" : "carte_revelee", {fixe:d.rarete==="legendaire"}); }
   if(act==="paquet-tout" && P){
     const r = P.cartes.filter((_, i) => !P.reveles.has(i)).map(x => (CARTES[idCartePaquet(x)] || {}).rarete);
@@ -9137,6 +9239,124 @@ function actionCadeauxAuto(act, id){
     default: return;
   }
   renderAdmin();
+}
+
+/* ============================================================
+   BOOSTERS : sachets dessinés, apparence réglable, animation d’ouverture
+   ============================================================ */
+const cleApparence = id => !id ? "classique" : String(id);
+function apparencePaquet(id){
+  const a = (CONFIG.apparencePaquets || {})[cleApparence(id)] || {};
+  const carte = a.carte && CARTES[a.carte] ? a.carte : null;
+  return {carte, image:carte ? CARTES[carte].image || "" : "", cadrage:a.cadrage || null};
+}
+function couleurPaquet(id){
+  if(id && FACTIONS[id]) return FACTIONS[id].couleur || "#8a5a1f";
+  if(id && String(id).startsWith("b:")){ const b = (CONFIG.boosters || {})[String(id).slice(2)]; return (b && b.couleur) || "#8a5a1f"; }
+  return "#8f8a80";   // paquet classique : ton neutre, argent et pierre
+}
+function nomCourtPaquet(id){
+  if(id && FACTIONS[id]) return `Booster ${FACTIONS[id].m.replace(/^(égyptien|hindou|nordique|grec)$/i, x => x)}`;
+  if(id && String(id).startsWith("b:")){ const b = (CONFIG.boosters || {})[String(id).slice(2)]; return (b && b.nom) || "Booster spécial"; }
+  return "Booster classique";
+}
+const symbolePaquet = id => id && FACTIONS[id] ? FACTIONS[id].sym : id && String(id).startsWith("b:") ? (((CONFIG.boosters || {})[String(id).slice(2)] || {}).symbole || "✦") : (NOM_JEU || "M").charAt(0);
+function htmlBooster(id, classe = ""){
+  const a = apparencePaquet(id), n = PROG.eco ? PROG.eco.cartes_paquet : 5;
+  return `<div class="booster ${id ? "" : "classique"} ${classe}" style="--bc:${couleurPaquet(id)}" aria-hidden="true">
+    <span class="booster-dent haut"></span>
+    <div class="booster-corps">
+      ${a.image ? `<img class="booster-art" src="${a.image}" alt="" draggable="false" style="${styleCadrage(a.cadrage || {posX:50, posY:30, zoom:1})}">` : `<span class="booster-sym">${esc(symbolePaquet(id))}</span>`}
+      <span class="booster-voile"></span><span class="booster-reflet"></span>
+      <div class="booster-tete"><span>${n} cartes</span><b>${esc(NOM_JEU || "Mythomachie")}</b></div>
+      <div class="booster-bandeau">${esc(nomCourtPaquet(id))}</div>
+    </div>
+    <span class="booster-dent bas"></span>
+  </div>`;
+}
+
+/* ----- Animation d’ouverture ----- */
+const RANG_TIRAGE = t => { const m = /^v(\+?):/.exec(t); if(m) return m[1] ? 2.5 : 3.5; return ({commune:0, rare:1, epique:2, legendaire:3})[(CARTES[t] || {}).rarete || "commune"] ?? 0; };
+function ouvrirBoosterAnime({id, source, appel, titre, faction, apres}){
+  const niv = niveauAnim(), vite = niv<2 ? 0.55 : 1, ms = x => Math.round(x * vite);
+  const avant = {...PROG.collection};
+  const rect = source ? source.getBoundingClientRect() : null;
+  PROG.occupe = true;
+  const couche = document.createElement("div");
+  couche.id = "ouverture-booster"; couche.setAttribute("role", "dialog"); couche.setAttribute("aria-label", "Ouverture du paquet");
+  couche.innerHTML = `<div class="ob-fond"></div><div class="ob-scene"></div><div class="ob-actions"></div><p class="ob-titre">${esc(titre)}</p>`;
+  document.body.appendChild(couche);
+  const scene = couche.querySelector(".ob-scene"), actions = couche.querySelector(".ob-actions");
+  couche.querySelector(".ob-fond").animate([{opacity:0}, {opacity:1}], {duration:ms(350), fill:"forwards"});
+  // 1. Le booster grandit jusqu’au centre (pendant ce temps, le serveur tire les cartes)
+  const L = Math.min(260, innerWidth * 0.42), H = L * 1.55;
+  const boite = document.createElement("div"); boite.className = "ob-booster";
+  boite.style.cssText = `width:${L}px;height:${H}px;left:${(innerWidth - L)/2}px;top:${(innerHeight - H)/2 - innerHeight*0.04}px`;
+  const corps = htmlBooster(id, "grand");
+  boite.innerHTML = `<div class="ob-haut">${corps}</div><div class="ob-bas">${corps}</div>`;
+  scene.appendChild(boite);
+  const depart = rect ? {x:rect.left + rect.width/2 - (innerWidth/2), y:rect.top + rect.height/2 - (parseFloat(boite.style.top) + H/2), s:Math.max(0.2, rect.width / L)} : {x:0, y:40, s:0.6};
+  const grandir = boite.animate([{transform:`translate(${depart.x}px,${depart.y}px) scale(${depart.s})`}, {transform:"translate(0,0) scale(1.06)", offset:0.8}, {transform:"translate(0,0) scale(1)"}],
+                                {duration:ms(750), easing:"cubic-bezier(.2,.8,.2,1)", fill:"forwards"});
+  const fermer = (msg) => { couche.remove(); PROG.occupe = false; if(msg) erreur(msg); render(); };
+  Promise.all([appel(), grandir.finished]).then(async ([cartes]) => {
+    const ordre = cartes.map((t, i) => ({t, i})).sort((a, b) => RANG_TIRAGE(a.t) - RANG_TIRAGE(b.t) || a.i - b.i).map(x => x.t);
+    PROG.paquet = {cartes:ordre, faction, titre, reveles:new Set(), anim:new Set(), anime:true, nouvelles:new Set(ordre.filter(c => !avant[c]))};
+    rafraichir().then(() => { if(apres) apres(); render(); }).catch(() => {});
+    // 2. Le haut du sachet se déchire
+    await new Promise(r => setTimeout(r, ms(150)));
+    jouerSon("paquet_ouvrir", {fixe:true});
+    const haut = boite.querySelector(".ob-haut");
+    const eclat = document.createElement("span"); eclat.className = "ob-eclat"; boite.appendChild(eclat);
+    eclat.animate([{opacity:0, transform:"scaleX(.2)"}, {opacity:1, transform:"scaleX(1)", offset:0.3}, {opacity:0, transform:"scaleX(1.3)"}], {duration:ms(600), fill:"forwards"});
+    boite.animate([{transform:"translate(0,0)"}, {transform:"translate(-3px,1px)"}, {transform:"translate(3px,-1px)"}, {transform:"translate(0,0)"}], {duration:ms(220), iterations:2});
+    await haut.animate([{transform:"translate(0,0) rotate(0)", opacity:1}, {transform:`translate(${L*0.55}px,${-H*0.35}px) rotate(24deg)`, opacity:0}],
+                       {duration:ms(650), easing:"cubic-bezier(.3,.6,.4,1)", fill:"forwards"}).finished;
+    // 3. Les cartes sortent une à une, les plus rares en dernier
+    const n = ordre.length, ecart = 14, larg = Math.min(150, (innerWidth - 40 - ecart*(n-1)) / n), haut2 = larg * 1.4;
+    const yLigne = innerHeight * 0.5 - haut2/2, xDebut = (innerWidth - (n*larg + (n-1)*ecart)) / 2;
+    const bouche = {x:parseFloat(boite.style.left) + L/2 - larg/2, y:parseFloat(boite.style.top) + H*0.12};
+    const elems = ordre.map((t, i) => {
+      const e = document.createElement("button");
+      e.type = "button"; e.className = "ob-carte"; e.dataset.i = i; e.setAttribute("aria-label", `Retourner la carte ${i + 1}`);
+      e.style.cssText = `width:${larg}px;height:${haut2}px;left:${bouche.x}px;top:${bouche.y}px;--bc:${couleurPaquet(id)};--l:${larg}px`;
+      e.innerHTML = `<span class="ob-interieur"><span class="ob-face ob-dos"><span>${esc(symbolePaquet(id))}</span></span><span class="ob-face ob-avant">${htmlTirage(t, i, PROG.paquet)}</span></span>`;
+      return e;
+    });
+    for(let i = 0; i<n; i++){
+      const e = elems[i]; scene.insertBefore(e, boite);
+      const dx = xDebut + i*(larg + ecart) - bouche.x, dy = yLigne - bouche.y;
+      e.animate([{transform:"translate(0,0) scale(.55)", opacity:0}, {transform:`translate(${dx*0.15}px,${-H*0.35}px) scale(.8)`, opacity:1, offset:0.45}, {transform:`translate(${dx}px,${dy}px) scale(1)`, opacity:1}],
+                {duration:ms(620), easing:"cubic-bezier(.25,.8,.3,1)", fill:"forwards"});
+      jouerSon("pioche", {immediat:true});
+      await new Promise(r => setTimeout(r, ms(300)));
+    }
+    boite.animate([{opacity:1, transform:"translate(0,0)"}, {opacity:0, transform:`translate(0,${H*0.4}px)`}], {duration:ms(500), fill:"forwards"});
+    await new Promise(r => setTimeout(r, ms(450)));
+    // 4. Le joueur retourne les cartes
+    const retourner = i => {
+      if(PROG.paquet.reveles.has(i)) return;
+      PROG.paquet.reveles.add(i);
+      const e = elems[i], t = ordre[i];
+      e.classList.add("retournee"); e.setAttribute("aria-label", `Carte ${i + 1} révélée`);
+      try { sonsActionProg("paquet-reveler", String(i)); } catch(err) {}
+      const r = RANG_TIRAGE(t);
+      if(r>=2) e.classList.add(r>=3 ? "eclat-legendaire" : "eclat-epique");
+      majActions();
+    };
+    const majActions = () => {
+      const reste = PROG.paquet.reveles.size < n;
+      actions.innerHTML = `${reste ? `<button type="button" class="btn" data-ob="tout">Tout révéler</button>` : ""}<button type="button" class="btn ${reste ? "second" : ""}" data-ob="fin">${reste ? "Passer" : "Continuer"}</button>`;
+    };
+    majActions();
+    actions.animate([{opacity:0}, {opacity:1}], {duration:ms(300), fill:"forwards"});
+    couche.addEventListener("click", async ev => {
+      const c = ev.target.closest(".ob-carte"); if(c){ retourner(Number(c.dataset.i)); return; }
+      const b = ev.target.closest("[data-ob]"); if(!b) return;
+      if(b.dataset.ob==="tout"){ for(let i = 0; i<n; i++) if(!PROG.paquet.reveles.has(i)){ retourner(i); await new Promise(r => setTimeout(r, ms(260))); } }
+      else { PROG.paquet = null; await couche.animate([{opacity:1}, {opacity:0}], {duration:ms(250), fill:"forwards"}).finished; fermer(); }
+    });
+  }).catch(e => fermer(e && e.message || "L’ouverture du paquet a échoué."));
 }
 
 chargerConfig();
