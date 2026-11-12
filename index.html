@@ -1034,6 +1034,23 @@ body.compact .nom-heros-deck{font-size:17px}
 .quetes-2v2 .pied-q{display:flex;justify-content:flex-end}
 .quetes-2v2 .btn-rang{width:auto;padding:4px 12px}
 
+/* 2 contre 2 : tutoriel, victoire du jour */
+.bandeau-2v2{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.bandeau-2v2 .btn{margin:0}
+.voile-tuto-2v2{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:16px;background:rgba(4,6,12,.7);backdrop-filter:blur(2px)}
+.boite-tuto-2v2{max-width:560px}
+.boite-tuto-2v2 ul{margin:6px 0;padding-left:20px}
+.schema-2v2{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:6px 0 10px}
+.schema-2v2 span{text-align:center;padding:10px 4px;border-radius:8px;font-size:13px;font-weight:700}
+.schema-2v2 .eq-a{background:color-mix(in srgb, #2f6fb5 30%, var(--table));border:1px solid #2f6fb5}
+.schema-2v2 .eq-b{background:color-mix(in srgb, #b8402f 30%, var(--table));border:1px solid #b8402f}
+.bonus-2v2{margin:12px 0 0;padding:8px 10px;border-radius:8px;font-size:14px}
+.bonus-2v2.dispo{border:1px solid var(--or, var(--bronze));background:color-mix(in srgb, var(--or, var(--bronze)) 14%, var(--table))}
+.bonus-2v2.obtenu{border:1px solid #2f9e63;color:#4fd18b}
+.pastille-bonus-2v2{display:inline-block;margin-left:6px;font-size:10.5px;font-weight:700;padding:1px 8px;border-radius:99px;color:#2b1a06;background:linear-gradient(180deg,#ffe28a,#e0b13d);font-family:"Alegreya Sans",system-ui,sans-serif;letter-spacing:0;text-transform:none;font-variant:normal}
+.pastille-bonus-2v2.obtenu{color:#e8ffe9;background:#2f9e63}
+.bonus-fin{color:#f3d791}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -5095,7 +5112,7 @@ function renderProg(){
 
 function actionProg(act, id){
   try { sonsActionProg(act, id); } catch(e) {}
-  if(/^(prep2v2|lancer-2v2|quete2v2)$/.test(act)){ const r = actionMode2v2(act, id); if(r===true) render(); return r!==null; }
+  if(/^(prep2v2|lancer-2v2|quete2v2|tuto2v2)$/.test(act)){ const r = actionMode2v2(act, id); if(r===true) render(); return r!==null; }
   if(/^(ami-|boite-|prog-amis$|prog-boite$|prog-nouveautes$)/.test(act)){
     const el = document.querySelector(`[data-act="${act}"][data-id="${id}"]`);
     const r = actionSociale(act, id, el);
@@ -5119,7 +5136,10 @@ function actionProg(act, id){
       return true;
     }
     case "jouer-ia": case "jouer-duo": PROG.choixDeck = {mode: act==="jouer-ia" ? "ia" : "duo"}; break;
-    case "jouer-2v2": ui.ecran = "mode2v2"; PROG.quetes2v2 = undefined; break;
+    case "jouer-2v2": ui.ecran = "mode2v2"; PROG.quetes2v2 = undefined; if(PROG.actif && PROG.pret) chargerBonus2v2().then(() => { if(ui.ecran==="mode2v2") renderProg(); });
+      // Première visite : le tutoriel s’ouvre de lui-même
+      try { if(!localStorage.getItem("tuto-2v2-vu")) PROG.tuto2v2 = 0; } catch(e) {}
+      break;
     case "choix-retour": PROG.choixDeck = null; break;
     case "bienvenue-suite": PROG.accueilEtape = Math.min(3, (PROG.accueilEtape || 1) + 1); PROG.accueilAnimer = true; break;
     case "bienvenue-fermer": PROG.accueilEtape = null; break;
@@ -5588,7 +5608,7 @@ async function chargerQuete(){
 }
 async function chargerMesStats(annoncer){
   chargerQuete().then(() => { if(!S && PROG.pret && ui.ecran==="jeu") renderCouche(); });
-  Promise.all([chargerTrophees(), chargerPaquetsOfferts(), chargerSaison(), chargerSocial(), chargerStats2v2()]).then(() => {
+  Promise.all([chargerTrophees(), chargerPaquetsOfferts(), chargerSaison(), chargerSocial(), chargerStats2v2(), chargerBonus2v2()]).then(() => {
     if(!S && PROG.pret){ if(ui.ecran==="jeu") renderCouche(); else if(["profil", "boutique", "saison"].includes(ui.ecran)) renderProg(); }
   });
   try { PROG.mesStats = await rpc("mes_stats"); } catch(e) { return; }
@@ -5610,7 +5630,9 @@ const TROPHEES = [
   {id:"champion_egy", nom:"Champion d’Égypte", desc:"Victoires avec une divinité égyptienne", sym:"☥", paliers:[5, 25, 75, 200], val:s => ((s.par_heros || {}).egy || {}).victoires || 0},
   {id:"champion_hin", nom:"Champion d’Inde", desc:"Victoires avec une divinité hindoue", sym:"✿", paliers:[5, 25, 75, 200], val:s => ((s.par_heros || {}).hin || {}).victoires || 0},
   {id:"champion_nor", nom:"Champion du Nord", desc:"Victoires avec une divinité nordique", sym:"⚔", paliers:[5, 25, 75, 200], val:s => ((s.par_heros || {}).nor || {}).victoires || 0},
-  {id:"champion_gre", nom:"Champion de l’Olympe", desc:"Victoires avec une divinité grecque", sym:"Ω", paliers:[5, 25, 75, 200], val:s => ((s.par_heros || {}).gre || {}).victoires || 0}
+  {id:"champion_gre", nom:"Champion de l’Olympe", desc:"Victoires avec une divinité grecque", sym:"Ω", paliers:[5, 25, 75, 200], val:s => ((s.par_heros || {}).gre || {}).victoires || 0},
+  {id:"freres_armes", nom:"Frères d’armes", desc:"Victoires en 2 contre 2", sym:"⚭", paliers:[3, 15, 50, 150], val:() => (PROG.stats2v2 || {}).victoires || 0},
+  {id:"indestructibles", nom:"Indestructibles", desc:"Victoires en 2 contre 2 sans qu’aucun héros de votre équipe ne tombe", sym:"⛨", paliers:[1, 5, 20, 60], val:() => (PROG.stats2v2 || {}).sans_chute || 0}
 ];
 const NOMS_PALIERS = ["Bronze", "Argent", "Or", "Platine"];
 const palierAtteint = (t, s) => PROG.trophees ? rangsAtteints(t) : t.paliers.filter(p => (t.val(s) || 0) >= p).length;
@@ -7119,7 +7141,7 @@ function htmlHall(){
         <div class="hall-modes">
           <button type="button" class="btn second" data-act="en-ligne">${ico("enligne")} En ligne</button>
           <button type="button" class="btn second" data-act="jouer-duo">${ico("duo")} Deux joueurs sur cet écran</button>
-          ${mode2v2Visible() ? `<button type="button" class="btn second" data-act="jouer-2v2">${ico("duo")} 2 contre 2 avec un allié</button>` : ""}
+          ${mode2v2Visible() ? `<button type="button" class="btn second" data-act="jouer-2v2">${ico("duo")} 2 contre 2 avec un allié${PROG.actif && PROG.bonus2v2 ? (PROG.bonus2v2.disponible ? `<span class="pastille-bonus-2v2" title="Votre première victoire du jour en 2 contre 2 rapporte un bonus">Victoire du jour +${PROG.bonus2v2.montant} or</span>` : `<span class="pastille-bonus-2v2 obtenu" title="Victoire du jour déjà obtenue">✓ Victoire du jour</span>`) : ""}</button>` : ""}
         </div>
       </section>
       ${htmlHallSaison()}
@@ -7512,23 +7534,28 @@ function choisirCibleIA(i){
 async function jouerTourIA2v2(){
   const etape = async () => { if(!S.simulation && typeof document!=="undefined" && document.getElementById("app")){ render(); await pause(520); } };
   const i = S.courant, j = S.joueurs[i];
+  const expert = S.niveau2v2==="expert" && j.eq!==S.joueurs[0].eq;   // le niveau choisi s’applique aux adversaires
   if(!j.esprit && pouvoirPret(j)){ activerPouvoir(); bannirAuto(); await etape(); }
   let p = true, garde = 60;
+  const ordreMain = () => expert ? [...j.main].sort((a, b) => ({creature:0, sort:1, arme:2})[def(a).type] - ({creature:0, sort:1, arme:2})[def(b).type]) : [...j.main];
   while(p && S.vainqueur===null && garde-->0){
     p = false;
-    for(const c of [...j.main]){
+    for(const c of ordreMain()){
       const d = def(c);
       if(d.type==="creature" && !j.esprit && j.plateau.length<REGLES.plateauMax){ jouer(c.uid); p = true; await etape(); break; }
       if(d.type==="sort"){ jouer(c.uid, {}); p = true; await etape(); break; }
       if(d.type==="arme" && !j.esprit && !j.plateau.length && REGLES.armesHeros){ jouer(c.uid, {}); p = true; await etape(); break; }
-      if(d.type==="arme" && !j.esprit && j.plateau.length){ jouer(c.uid, {cible:[...j.plateau].sort((a, b) => atkTotal(b) - atkTotal(a))[0].uid}); p = true; await etape(); break; }
+      if(d.type==="arme" && !j.esprit && j.plateau.length){
+        const pretes = expert ? j.plateau.filter(x => x.peutAttaquer && !x.aAttaque) : [];
+        jouer(c.uid, {cible:[...(pretes.length ? pretes : j.plateau)].sort((a, b) => atkTotal(b) - atkTotal(a))[0].uid}); p = true; await etape(); break;
+      }
     }
     bannirAuto();
   }
   let garde2 = 40;
   while(S.vainqueur===null && garde2-->0){
-    const o = S.marche.map((c, k) => ({k, d:def(c)})).filter(x => x.d.prix<=j.or)
-      .sort((a, b) => (b.d.prix + (b.d.faction===j.heros ? 1.5 : 0)) - (a.d.prix + (a.d.faction===j.heros ? 1.5 : 0)));
+    const note = d => expert ? scoreAchat(d, j) : d.prix + (d.faction===j.heros ? 1.5 : 0);
+    const o = S.marche.map((c, k) => ({k, d:def(c)})).filter(x => x.d.prix<=j.or).sort((a, b) => note(b.d) - note(a.d));
     const base = CARTES[REGLES.carteBase];
     if(o.length) acheter(o[0].k); else if(base && (base.prix || 0)>0 && j.or>=base.prix) acheter("base"); else break;
     await etape();
@@ -7542,7 +7569,13 @@ async function jouerTourIA2v2(){
       if(t.face){ attaquer2v2(c.uid, "face", k); await etape(); continue; }
       const cand = S.joueurs.flatMap(x => x.plateau).filter(v => t.creatures.has(v.uid));
       const tues = cand.filter(v => !v.bouclier && vieRestante(v)<=atkTotal(c)).sort((a, b) => atkTotal(b) - atkTotal(a));
-      const ch = tues[0] || cand.sort((a, b) => vieRestante(a) - vieRestante(b))[0];
+      let ch = tues[0] || cand.sort((a, b) => vieRestante(a) - vieRestante(b))[0];
+      if(expert){
+        // Expert : tue sans mourir si possible, sinon sacrifie seulement pour une cible plus précieuse, et n’attaque jamais pour rien
+        const note = v => { const tue = !v.bouclier && atkTotal(c)>=vieRestante(v), survit = v.bouclier || atkTotal(v) < vieRestante(c);
+          return tue && survit ? 10 + valeurCrea(v) : tue ? valeurCrea(v) - valeurCrea(c) : v.bouclier && survit ? 2 : -1; };
+        ch = cand.map(v => [v, note(v)]).filter(x => x[1]>0).sort((a, b) => b[1] - a[1]).map(x => x[0])[0] || null;
+      }
       if(ch){ attaquer2v2(c.uid, ch.uid, k); await etape(); }
     }
     let g = 40;
@@ -7575,7 +7608,8 @@ function lancer2v2(deck, prep){
   nouvellePartie2v2([deck || null, deckDuPantheon(choixPantheon(fAdv)), deckDuPantheon(fAllie), deckDuPantheon(choixPantheon(fAdv))],
     {humains:[0], noms:[pseudo || "Joueur A1", "Adversaire 1", "Votre allié", "Adversaire 2"], depart:[0, 3, 2, 1][place - 1],
      variantes:[typeof PROG!=="undefined" && PROG.pret ? prefVariantes() : null, null, null, null]});
-  S.deck0 = deck || null; S.prep2v2 = {...P}; S.place2v2 = place;
+  S.deck0 = deck || null; S.prep2v2 = {...P}; S.place2v2 = place; S.niveau2v2 = P.niveau==="expert" ? "expert" : "normal";
+  if(S.niveau2v2==="expert"){ S.joueurs[1].nom = "Adversaire 1 (Expert)"; S.joueurs[3].nom = "Adversaire 2 (Expert)"; }
   log(`Vous jouez en ${place}${place===1 ? "ʳᵉ" : "ᵉ"} position.`);
   const id = S.idPartie;
   if(typeof PROG!=="undefined"){
@@ -9548,7 +9582,7 @@ async function verifierRecompense2v2(){
       details:{allie:S.joueurs[allieDe(0)].heros, resurrections:(S.c2v2 || {}).resurrections || 0, chutes:(S.c2v2 || {}).chutes || 0}}});
   } catch(e) { res = {erreur:/function|does not exist|schema cache/i.test(e.message) ? "le 2 contre 2 n’est pas encore enregistré sur ce serveur" : e.message}; }
   PROG.gain2v2 = {id, ...res};
-  await Promise.all([rafraichir().catch(() => {}), chargerQuetes2v2(), chargerStats2v2()]);
+  await Promise.all([rafraichir().catch(() => {}), chargerQuetes2v2(), chargerStats2v2(), chargerBonus2v2()]);
   chargerMesStats(true);
   if(S && S.idPartie===id) renderCouche();
 }
@@ -9557,7 +9591,7 @@ function htmlGain2v2(){
   if(!PROG.actif) return "";
   if(!g || g.id!==S.idPartie) return `<p class="aide">Enregistrement de la partie…</p>`;
   if(g.erreur) return `<p class="avertissement">Partie non comptée : ${esc(String(g.erreur).replace(/\.+$/, ""))}.</p>`;
-  return `<p class="gain">${g.gain ? `+${g.gain} or` : "Plafond d’or du jour atteint."}</p><p class="aide">La partie compte pour vos quêtes et statistiques de 2 contre 2.</p>`;
+  return `<p class="gain">${g.gain ? `+${g.gain} or` : "Plafond d’or du jour atteint."}</p>${g.bonus ? `<p class="gain bonus-fin">🏆 Victoire du jour : +${g.bonus} or</p>` : ""}<p class="aide">La partie compte pour vos quêtes et statistiques de 2 contre 2.</p>`;
 }
 function htmlStats2v2(s){
   if(!s) return `<p class="aide">Aucune statistique pour le moment.</p>`;
@@ -9581,7 +9615,8 @@ function pageMode2v2(){
   return `${entete("2 contre 2")}
     <div class="page-2v2">
       <section class="bandeau-2v2"><div><span class="sur-titre">Mode coopératif</span><h2>2 contre 2</h2>
-        <p>Faites équipe avec un allié contrôlé par l’ordinateur face à deux adversaires. Partagez la Provocation, déclenchez des combos à deux, relevez votre allié tombé… et gagnez ensemble.</p></div></section>
+        <p>Faites équipe avec un allié contrôlé par l’ordinateur face à deux adversaires. Partagez la Provocation, déclenchez des combos à deux, relevez votre allié tombé… et gagnez ensemble.</p></div>
+        <button type="button" class="btn second" data-act="tuto2v2" data-id="0">▶ Découvrir le 2 contre 2</button></section>
       <div class="grille-2v2">
         <section class="bloc-2v2 prep-2v2"><h2>Préparer la partie</h2>
           <h3>Votre place dans le tour</h3>
@@ -9589,8 +9624,11 @@ function pageMode2v2(){
           <p class="aide">Les équipes jouent en alternance : 1ʳᵉ et 3ᵉ places contre 2ᵉ et 4ᵉ. Plus on joue tôt, moins on pioche au premier tour.</p>
           <h3>Le panthéon de votre allié</h3>${pan("allie", P.allie)}
           <h3>Le panthéon de vos adversaires</h3>${pan("adv", P.adv)}
+          <h3>Le niveau de vos adversaires</h3>
+          <div class="choix-pastilles" role="radiogroup">${[["normal", "Normal", "pour découvrir"], ["expert", "Expert", "achats et attaques calculés"]].map(([k, l, d]) => `<button type="button" class="pastille-choix ${(P.niveau || "normal")===k ? "choisie" : ""}" role="radio" aria-checked="${(P.niveau || "normal")===k}" data-act="prep2v2" data-id="niveau|${k}">${l}<small>${d}</small></button>`).join("")}</div>
           ${PROG.actif ? (v.length ? `<h3>Votre deck</h3><select data-prep="deck" aria-label="Votre deck">${v.map(d => `<option value="${d.id}" ${d.id===P.deck ? "selected" : ""}>${esc(d.nom)}</option>`).join("")}</select>`
             : `<p class="avertissement">Il vous faut un deck complet de ${REGLES.tailleDeck} cartes pour jouer.</p>`) : ""}
+          ${htmlBonusJour2v2()}
           <button type="button" class="btn-geant btn-lancer-2v2" data-act="lancer-2v2" ${PROG.actif && !v.length ? "disabled" : ""}><span><b>Lancer la partie</b><small>Vous et votre allié contre deux adversaires</small></span></button>
         </section>
         <section class="bloc-2v2"><h2>Règles du 2 contre 2</h2><ul class="regles-2v2">
@@ -9609,15 +9647,16 @@ function pageMode2v2(){
             <span class="pied-q">${q.faite ? `<span class="recu-palier">✓ ${q.or} or</span>` : q.progres>=q.but ? `<button type="button" class="btn btn-rang" data-act="quete2v2" data-id="${esc(q.id)}">+${q.or} or</button>` : `<span class="aide">${q.progres} / ${q.but} · ${q.or} or</span>`}</span></li>`).join("")}</ul>
             <p class="aide">Trois nouvelles quêtes chaque jour, propres au 2 contre 2.</p>`}
         </section>
-        <section class="bloc-2v2"><h2>Vos statistiques en 2 contre 2</h2>${htmlStats2v2(PROG.stats2v2)}
-          <p class="aide">Ces parties comptent aussi dans vos statistiques générales et vos trophées.</p></section>` : ""}
+` : ""}
       </div>
+      ${htmlTuto2v2()}
     </div>`;
 }
 function actionMode2v2(act, id){
   switch(act){
     case "jouer-2v2": ui.ecran = "mode2v2"; PROG.quetes2v2 = undefined; return true;
     case "prep2v2": { const [k, v] = String(id).split("|"); PROG.prep2v2[k] = v; sauverPrep2v2(); return true; }
+    case "tuto2v2": PROG.tuto2v2 = id==="fin" ? null : Number(id); if(id==="fin"){ try { localStorage.setItem("tuto-2v2-vu", "1"); } catch(e) {} } return true;
     case "lancer-2v2": {
       let cartes = null;
       if(PROG.actif){
@@ -9632,6 +9671,40 @@ function actionMode2v2(act, id){
   return null;
 }
 document.addEventListener("change", e => { if(e.target.dataset && e.target.dataset.prep){ PROG.prep2v2[e.target.dataset.prep] = e.target.value; sauverPrep2v2(); } });
+
+/* ----- 2 contre 2 : tutoriel du menu, victoire bonus du jour ----- */
+async function chargerBonus2v2(){ try { PROG.bonus2v2 = await rpc("etat_bonus_2v2"); } catch(e) { PROG.bonus2v2 = null; } }
+const ETAPES_TUTO_2V2 = [
+  ["Deux équipes, quatre héros", `<div class="schema-2v2"><span class="eq-a">1 · Vous</span><span class="eq-b">2 · Adversaire</span><span class="eq-a">3 · Votre allié</span><span class="eq-b">4 · Adversaire</span></div>
+    <p>Vous faites équipe avec un allié contrôlé par l’ordinateur. Les équipes jouent <b>en alternance</b> : un héros de votre équipe, puis un adversaire, et ainsi de suite.</p>
+    <p>Choisissez votre place dans le menu : jouer tôt donne l’initiative, mais une première pioche plus petite.</p>`],
+  ["Votre allié", `<p>Votre allié joue seul, mais <b>vous combattez ensemble</b> :</p><ul>
+    <li>une créature à <b>Provocation</b> protège toute l’équipe ;</li>
+    <li>une carte jouée par votre allié <b>compte pour vos combos</b> du même tour, et inversement ;</li>
+    <li>vos <b>soins</b> peuvent aller à votre allié : choisissez le bénéficiaire sous votre médaillon.</li></ul>`],
+  ["Le pouvoir divin, à deux", `<p>En 2 contre 2, la <b>jauge du pouvoir est commune</b> à l’équipe : chaque créature ennemie détruite, par vous ou par votre allié, la fait monter.</p>
+    <p>Quand elle est pleine, le premier héros de l’équipe qui joue peut activer son pouvoir. Coordonnez-vous : détruire les créatures adverses profite à toute l’équipe.</p>`],
+  ["Tomber n’est pas perdre", `<p>Un héros à 0 PV <b>devient un esprit</b> : il ne joue plus de créatures, mais revient à la vie au bout de quelques tours, avec une partie de ses PV.</p>
+    <p>À sa chute, son allié récupère des PV grâce à la <b>vengeance</b>. Protégez votre allié tombé jusqu’à son retour !</p>`],
+  ["Remporter la victoire", `<p>Votre équipe gagne quand <b>les deux héros adverses sont tombés en même temps</b>.</p>
+    <p><b>Conseil :</b> concentrez vos attaques sur un seul adversaire. Une fois tombé, son allié est seul quelques tours : c’est le moment de le faire tomber à son tour.</p>
+    <p>Chaque jour, <b>votre première victoire en 2 contre 2</b> rapporte un bonus d’or, et trois quêtes propres au mode vous attendent.</p>`]
+];
+function htmlTuto2v2(){
+  const n = PROG.tuto2v2; if(n==null) return "";
+  const [titre, corps] = ETAPES_TUTO_2V2[n], fin = n===ETAPES_TUTO_2V2.length - 1;
+  return `<div class="voile-tuto-2v2" role="dialog" aria-label="Tutoriel du 2 contre 2 : ${esc(titre)}"><div class="boite boite-tuto-2v2">
+    <span class="points-guide" aria-hidden="true">${ETAPES_TUTO_2V2.map((_, k) => `<i class="${k===n ? "actif" : ""}"></i>`).join("")}</span>
+    <h2>${titre}</h2>${corps}
+    <div class="actions">${n>0 ? `<button type="button" class="btn second" data-act="tuto2v2" data-id="${n-1}">Précédent</button>` : ""}
+      ${fin ? `<button type="button" class="btn" data-act="tuto2v2" data-id="fin">C’est parti !</button>` : `<button type="button" class="btn" data-act="tuto2v2" data-id="${n+1}">Suivant</button>`}
+      <button type="button" class="btn-discret" data-act="tuto2v2" data-id="fin">Fermer</button></div></div></div>`;
+}
+const htmlBonusJour2v2 = () => {
+  const b = PROG.bonus2v2; if(!PROG.actif || !b) return "";
+  return b.disponible ? `<p class="bonus-2v2 dispo">🏆 <b>Victoire du jour :</b> votre première victoire aujourd’hui rapporte <b>+${b.montant} or</b> en bonus.</p>`
+                      : `<p class="bonus-2v2 obtenu">✓ Victoire du jour obtenue. Revenez demain pour un nouveau bonus.</p>`;
+};
 
 chargerConfig();
 appliquerReglageAnimations();

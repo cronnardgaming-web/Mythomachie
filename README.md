@@ -91,6 +91,12 @@ statistiques vérifiées) et rapportent de l’or comme une partie classique. Tr
 et des statistiques dédiées (page du mode et profil). Ces parties comptent aussi dans les statistiques générales
 et les trophées, mais pas dans les quêtes du jour classiques, la saison ou le classement.
 
+## 2 contre 2 (suite)
+
+`supabase-2v2-suite.sql` (après `supabase-2v2.sql`) : victoire bonus du jour (la première victoire en 2 contre 2
+de la journée rapporte un bonus, 30 or par défaut, réglable avec la clé « bonus_victoire_2v2 ») et deux trophées
+propres au mode : « Frères d’armes » (victoires) et « Indestructibles » (victoires sans chute).
+
 ## Règles de blocage des parties
 
 `supabase-reglages-blocage.sql` : durée minimale d’une partie 75 secondes, 60 parties par heure au maximum.
