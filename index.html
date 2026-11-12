@@ -2181,6 +2181,8 @@ function nouvellePartie(mode, decks, variantesJeu, opts = {}){
   if(mode==="ia") S.niveauIA = niveauIA();
   if(S.niveauIA==="expert") S.joueurs[1].nom = "Ordinateur (Expert)";
   log(`${S.joueurs[S.courant].nom} commence.`);
+  // Bruitages : préchargés au début de la partie, puis le son d’ouverture (sans retarder la distribution)
+  if(typeof prechargerBruitages==="function" && typeof window!=="undefined"){ prechargerBruitages(); SONS.file = []; SONS.vu = null; jouerSon("debut_partie", {fixe:true}); }
 }
 
 // Héros : le dieu primordial du panthéon le plus représenté dans le deck (égalité : au hasard)
@@ -2261,6 +2263,7 @@ function fxEvt(o){
   S.evtN = (S.evtN || 0) + 1;
   S.evt.push({n:S.evtN, ...o});
   if(S.evt.length > 60) S.evt.splice(0, S.evt.length - 60);
+  if(typeof sonsDirects==="function") sonsDirects(S.evt[S.evt.length-1]);
 }
 function appliquer(i, e, src){
   if(!e) return;
@@ -2550,7 +2553,7 @@ async function tourIA(){
   finally { if(S===partie || !S) { ui.aiEnCours = false; if(S) render(); } }
 }
 async function tourIAInterne(partie){
-  const pauseIA = async ms => { await pause(ms); if(S!==partie) throw "partie-quittee"; };
+  const pauseIA = async ms => { await pause(ms); if(typeof sonsTermines==="function") await sonsTermines(2500); if(S!==partie) throw "partie-quittee"; };
   ui.aiEnCours = true; render();
   await pauseIA(700);
   const i = S.courant, j = S.joueurs[i];
@@ -4207,7 +4210,7 @@ document.addEventListener("click", e => {
   if(act==="nouvelle"){ if(enLigne() || EN.role) quitterEnLigne(); S = null; ui.couvert = false; ui.aiEnCours = false; return render(); }
   if(act.startsWith("en-")) return actionEnLigne(act, id);
   if(act==="son"){ basculerSon(); return render(); }
-  if(act==="bruitages-basculer"){ const p = prefsBruitages(); p.actif = !p.actif; sauverPrefsBruitages(p); if(p.actif){ SONS.dernier.clic = 0; jouerSon("clic"); } return render(); }
+  if(act==="bruitages-basculer"){ const p = prefsBruitages(); p.actif = !p.actif; sauverPrefsBruitages(p); if(p.actif) lireSon("carte", {}); return render(); }
   if(act==="reglages-ouvrir" || act==="reglages-fermer"){ PROG.reglagesOuverts = act==="reglages-ouvrir"; return render(); }
   if(act==="tuto") return lancerTuto();
   if(act==="regles"){ if(tutoActif()) S = null; ui.ecran = "regles"; window.scrollTo(0, 0); return render(); }
@@ -6484,10 +6487,10 @@ function jouerEffets(){
   PIOCHE_CACHEES.forEach(u => { const el = document.querySelector(`.zone-main .main .carte[data-uid="${u}"]`); if(el) el.style.visibility = "hidden"; });
   const evts = S.evt || [];
   const dernier = evts.length ? evts[evts.length-1].n : 0;
-  if(FX_VU.id!==S.idPartie){ FX_VU = {id:S.idPartie, n:dernier}; PIOCHE_CACHEES.clear(); ATTAQUANTS_CACHES.clear(); if((S.tour || 1)<=2 && typeof jouerSon==="function") jouerSon("debut_partie", {fixe:true}); return; }
+  if(FX_VU.id!==S.idPartie){ FX_VU = {id:S.idPartie, n:dernier}; PIOCHE_CACHEES.clear(); ATTAQUANTS_CACHES.clear(); return; }
   const nouveaux = evts.filter(e => e.n > FX_VU.n);
   FX_VU.n = Math.max(FX_VU.n, dernier);
-  try { sonsEvenements(nouveaux); } catch(e) {}
+  try { sonsEvenements(nouveaux.filter(e => !(SONS.vu && SONS.vu.id===S.idPartie && e.n <= SONS.vu.n))); } catch(e) {}
   const niveau = niveauAnim();
   if(!niveau || !nouveaux.length) return;
   // Si des cartes partent à la défausse dans le même temps, la pioche attend qu’elles soient arrivées
@@ -8855,92 +8858,141 @@ const EVENEMENTS_SONS = [
   ["clic", "Menus", "Clic dans les menus", "Clic sourd de bronze, moins de 0,1 s (très fréquent : très doux)"]
 ];
 const SON_FALLBACK = {carte_revelee_rare:"carte_revelee", carte_revelee_epique:"carte_revelee", carte_revelee_legendaire:"carte_revelee_epique", combo_egy:"combo", combo_hin:"combo", combo_nor:"combo", combo_gre:"combo"};
-const SONS = {ctx:null, cache:new Map(), actifs:0, dernier:{}, maxSimultanes:8};
+const SONS = {ctx:null, cache:new Map(), file:[], enCours:false, dernier:{}, sortie:null, attente:[]};
+// Volume : nouveau réglage par défaut, bien plus discret (les anciens réglages sont abandonnés)
 function prefsBruitages(){
-  try { return Object.assign({actif:true, volume:0.7}, JSON.parse(localStorage.getItem("bruitages-prefs")) || {}); }
-  catch(e) { return {actif:true, volume:0.7}; }
+  try { return Object.assign({actif:true, volume:0.3}, JSON.parse(localStorage.getItem("bruitages-prefs-2")) || {}); }
+  catch(e) { return {actif:true, volume:0.3}; }
 }
-function sauverPrefsBruitages(p){ try { localStorage.setItem("bruitages-prefs", JSON.stringify(p)); } catch(e) {} }
+function sauverPrefsBruitages(p){ try { localStorage.setItem("bruitages-prefs-2", JSON.stringify(p)); } catch(e) {} }
+// Poids de chaque son : les sons fréquents sont plus doux ; la priorité décide qui passe quand il y en a trop
+const POIDS_SONS = {
+  clic:[0.35, 0], or:[0.45, 1], puissance:[0.45, 1], pioche:[0.5, 1], melange:[0.6, 1], carte:[0.65, 2], achat:[0.7, 2], equipement:[0.75, 3],
+  fin_tour:[0.6, 2], a_vous:[0.7, 3], soin:[0.7, 3], attaque:[0.8, 4], degats_heros:[0.85, 5], creature_detruite:[0.8, 5], resistance:[0.75, 4],
+  eclair:[0.8, 4], onde:[0.85, 5], bannir:[0.7, 3], sacrifice:[0.75, 4], combo:[0.75, 4], pouvoir:[0.9, 6], chute:[0.9, 6], resurrection:[0.9, 6],
+  victoire:[1, 9], defaite:[1, 9], debut_partie:[0.8, 7], paquet_ouvrir:[0.8, 5], carte_revelee:[0.7, 4], carte_revelee_rare:[0.75, 5],
+  carte_revelee_epique:[0.85, 6], carte_revelee_legendaire:[1, 8], recompense:[0.85, 6], notification:[0.6, 5]
+};
+const poidsSon = cle => POIDS_SONS[cle] || POIDS_SONS[cle.replace(/_(egy|hin|nor|gre)$/, "")] || [0.7, 3];
+// Durée maximale avant de passer au son suivant (un son long ne bloque pas la partie)
+const DUREE_MAX = {or:0.35, puissance:0.35, pioche:0.35, clic:0.15, carte:0.5, achat:0.6, victoire:3.5, defaite:3.5, carte_revelee_legendaire:2};
 const confSon = cle => { const b = CONFIG.bruitages || {}; let c = b[cle]; if((!c || !(c.fichiers || []).length) && SON_FALLBACK[cle]) c = b[SON_FALLBACK[cle]] || (SON_FALLBACK[SON_FALLBACK[cle]] && b[SON_FALLBACK[SON_FALLBACK[cle]]]); return c && (c.fichiers || []).length ? c : null; };
 const aDesBruitages = () => Object.values(CONFIG.bruitages || {}).some(c => c && (c.fichiers || []).length);
 function contexteAudio(){
   if(SONS.ctx) return SONS.ctx;
   const C = window.AudioContext || window.webkitAudioContext;
   if(!C) return null;
-  try { SONS.ctx = new C(); } catch(e) { return null; }
+  try {
+    SONS.ctx = new C();
+    // Sortie commune : volume général réduit, et un compresseur qui écrase les pics
+    const comp = SONS.ctx.createDynamicsCompressor();
+    comp.threshold.value = -24; comp.knee.value = 12; comp.ratio.value = 6; comp.attack.value = 0.003; comp.release.value = 0.2;
+    const maitre = SONS.ctx.createGain(); maitre.gain.value = 0.7;
+    comp.connect(maitre).connect(SONS.ctx.destination);
+    SONS.sortie = comp;
+  } catch(e) { return null; }
   return SONS.ctx;
 }
-// Le navigateur n’autorise le son qu’après un geste du joueur
 ["pointerdown", "keydown"].forEach(t => document.addEventListener(t, () => { const c = contexteAudio(); if(c && c.state==="suspended") c.resume().catch(() => {}); }, {capture:true, passive:true}));
 function tamponSon(src){
   if(!SONS.cache.has(src)){
     const c = contexteAudio();
-    // Un fichier illisible est ignoré sans erreur (les deux formes de decodeAudioData sont gérées)
     SONS.cache.set(src, c ? fetch(src).then(r => r.arrayBuffer()).then(a => new Promise(ok => { const r = c.decodeAudioData(a, ok, () => ok(null)); if(r && r.catch) r.catch(() => ok(null)); })).catch(() => null) : Promise.resolve(null));
   }
   return SONS.cache.get(src);
 }
-async function jouerSon(cle, opts = {}){
-  const p = prefsBruitages(); if(!p.actif || p.volume<=0) return;
-  const conf = confSon(cle); if(!conf) return;
-  const maintenant = performance.now(), ecart = cle==="or" || cle==="puissance" || cle==="clic" ? 90 : 45;
-  if(SONS.dernier[cle] && maintenant - SONS.dernier[cle] < ecart) return;
-  if(SONS.actifs >= SONS.maxSimultanes) return;
-  SONS.dernier[cle] = maintenant;
+// Lecture d’un son ; renvoie sa durée effective (en secondes)
+async function lireSon(cle, opts = {}){
+  const p = prefsBruitages(); if(!p.actif || p.volume<=0) return 0;
+  const conf = confSon(cle); if(!conf) return 0;
   const src = conf.fichiers[Math.floor(Math.random() * conf.fichiers.length)];
-  const gain = Math.max(0, Math.min(2, p.volume * (conf.volume ?? 1) * (opts.gain ?? 1)));
+  const gain = Math.max(0, Math.min(1.5, p.volume * (conf.volume ?? 1) * poidsSon(cle)[0] * (opts.gain ?? 1)));
   const c = contexteAudio();
-  if(!c){ try { const a = new Audio(src); a.volume = Math.min(1, gain); a.play().catch(() => {}); } catch(e) {} return; }
-  const tampon = await tamponSon(src); if(!tampon) return;
-  const s = c.createBufferSource(), g = c.createGain();
-  s.buffer = tampon;
-  s.playbackRate.value = opts.fixe ? 1 : 1 + (Math.random() - 0.5) * 0.08;   // légère variation à chaque lecture
-  g.gain.value = gain;
-  s.connect(g).connect(c.destination);
-  SONS.actifs++; s.onended = () => { SONS.actifs = Math.max(0, SONS.actifs - 1); };
-  s.start();
+  if(!c){ try { const a = new Audio(src); a.volume = Math.min(1, gain); a.play().catch(() => {}); } catch(e) {} return 0.4; }
+  const tampon = await tamponSon(src); if(!tampon) return 0;
+  const s = c.createBufferSource(), g = c.createGain(), vitesse = opts.fixe ? 1 : 1 + (Math.random() - 0.5) * 0.06;
+  s.buffer = tampon; s.playbackRate.value = vitesse; g.gain.value = gain;
+  s.connect(g).connect(SONS.sortie || c.destination); s.start();
+  return Math.min(tampon.duration / vitesse, DUREE_MAX[cle] ?? 1.1);
+}
+// File d’attente : un son à la fois, chacun attend la fin du précédent
+async function deroulerFile(){
+  if(SONS.enCours) return;
+  SONS.enCours = true;
+  while(SONS.file.length){
+    const {cle, opts} = SONS.file.shift();
+    let d = 0; try { d = await lireSon(cle, opts); } catch(e) {}
+    if(d>0) await new Promise(r => setTimeout(r, d * 1000 + 60));
+  }
+  SONS.enCours = false;
+  SONS.attente.splice(0).forEach(r => r());
+}
+// Promesse résolue quand tous les sons en attente sont terminés (au plus « max » millisecondes)
+function sonsTermines(max = 2500){
+  if(!SONS.enCours && !SONS.file.length) return Promise.resolve();
+  return Promise.race([new Promise(r => SONS.attente.push(r)), new Promise(r => setTimeout(r, max))]);
+}
+function jouerSon(cle, opts = {}){
+  if(!confSon(cle)) return;
+  const p = prefsBruitages(); if(!p.actif || p.volume<=0) return;
+  if(opts.immediat){ const t = performance.now(); if(SONS.dernier[cle] && t - SONS.dernier[cle] < 90) return; SONS.dernier[cle] = t; lireSon(cle, opts); return; }
+  // Trop de sons en attente : on garde les plus importants
+  if(SONS.file.length >= 3){
+    const prio = poidsSon(cle)[1], plusFaible = SONS.file.reduce((m, x, i) => poidsSon(x.cle)[1] < poidsSon(SONS.file[m].cle)[1] ? i : m, 0);
+    if(poidsSon(SONS.file[plusFaible].cle)[1] >= prio) return;
+    SONS.file.splice(plusFaible, 1);
+  }
+  SONS.file.push({cle, opts});
+  deroulerFile();
 }
 function prechargerBruitages(){ Object.values(CONFIG.bruitages || {}).forEach(c => (c && c.fichiers || []).forEach(f => tamponSon(f))); }
 document.addEventListener("pointerdown", function premier(){ document.removeEventListener("pointerdown", premier, true); setTimeout(prechargerBruitages, 300); }, true);
 
-// ----- Branchement sur les événements de la partie
+// ----- Sons déclenchés par le moteur, à l’instant de l’action : les événements d’une même action sont regroupés
+function sonsDirects(ev){
+  if(!S || typeof window==="undefined" || !aDesBruitages()) return;
+  // Noté tout de suite : la boucle d’affichage ne le rejouera pas
+  SONS.vu = {id:S.idPartie, n:Math.max(SONS.vu && SONS.vu.id===S.idPartie ? SONS.vu.n : 0, ev.n)};
+  if(!SONS.lot){
+    SONS.lot = [];
+    queueMicrotask(() => {
+      const lot = SONS.lot; SONS.lot = null;
+      if(!S || !lot.length) return;
+      sonsEvenements(lot);
+    });
+  }
+  SONS.lot.push(ev);
+}
+// ----- Branchement sur les événements de la partie : au plus 3 sons par action, sans doublon
+function cleSonEvenement(ev, moi){
+  switch(ev.t){
+    case "carte": return "carte"; case "pioche": return "pioche"; case "achat": return "achat"; case "or": return "or"; case "puissance": return "puissance";
+    case "melange": return "melange"; case "defausse": return "fin_tour"; case "attaque": case "frappe": return ev.cible==="face" ? "degats_heros" : "attaque";
+    case "mort": return "creature_detruite"; case "soin": return "soin"; case "arme": return "equipement"; case "bouclier": return "resistance";
+    case "eclair": return "eclair"; case "onde": return "onde"; case "bannir": return "bannir"; case "sacrifice": return "sacrifice";
+    case "combo": return "combo_" + (ev.faction || ""); case "pouvoir": return "pouvoir"; case "chute": return "chute"; case "resurrection": return "resurrection";
+    case "fin": return ev.perdant===moi ? "defaite" : "victoire";
+  }
+  return null;
+}
 function sonsEvenements(evts){
   if(!evts || !evts.length || !S) return;
   const moi = typeof vue==="function" ? vue() : 0;
-  for(const ev of evts){
-    switch(ev.t){
-      case "carte": jouerSon("carte"); break;
-      case "pioche": jouerSon("pioche", {gain:0.8}); break;
-      case "achat": jouerSon("achat"); break;
-      case "or": jouerSon("or", {gain:0.7}); break;
-      case "puissance": jouerSon("puissance", {gain:0.7}); break;
-      case "melange": jouerSon("melange"); break;
-      case "defausse": jouerSon("fin_tour"); break;
-      case "attaque": jouerSon(ev.cible==="face" ? "degats_heros" : "attaque"); break;
-      case "frappe": jouerSon(ev.cible==="face" ? "degats_heros" : "attaque"); break;
-      case "mort": jouerSon("creature_detruite"); break;
-      case "soin": jouerSon("soin"); break;
-      case "arme": jouerSon("equipement"); break;
-      case "bouclier": jouerSon("resistance"); break;
-      case "eclair": jouerSon("eclair"); break;
-      case "onde": jouerSon("onde"); break;
-      case "bannir": jouerSon("bannir"); break;
-      case "sacrifice": jouerSon("sacrifice"); break;
-      case "combo": jouerSon("combo_" + (ev.faction || "")); break;
-      case "pouvoir": jouerSon("pouvoir", {fixe:true}); break;
-      case "chute": jouerSon("chute", {fixe:true}); break;
-      case "resurrection": jouerSon("resurrection", {fixe:true}); break;
-      case "fin": jouerSon(ev.perdant===moi ? "defaite" : "victoire", {fixe:true}); break;
-    }
-  }
-  // En ligne : le tour revient au joueur
-  if(S.mode==="enligne" && evts.some(e => e.t==="defausse") && S.courant===moi && S.vainqueur===null) setTimeout(() => jouerSon("a_vous"), 500);
+  const cles = [...new Set(evts.map(e => cleSonEvenement(e, moi)).filter(k => k && confSon(k)))];
+  if(!cles.length) return;
+  // Action du joueur lui-même : les petits sons encore en attente de l’action précédente sont abandonnés
+  if(evts.some(e => e.j===moi) && S.courant===moi) SONS.file = SONS.file.filter(x => poidsSon(x.cle)[1] >= 5);
+  // Les 3 sons les plus importants, dans l’ordre des actions
+  const gardes = new Set([...cles].sort((a, b) => poidsSon(b)[1] - poidsSon(a)[1]).slice(0, 3));
+  cles.filter(k => gardes.has(k)).forEach(k => jouerSon(k, {fixe:["victoire","defaite","pouvoir","chute","resurrection"].includes(k)}));
+  if(S.mode==="enligne" && evts.some(e => e.t==="defausse") && S.courant===moi && S.vainqueur===null) jouerSon("a_vous");
 }
+
 // ----- Menus : clics, paquets, récompenses, notifications
 document.addEventListener("pointerdown", e => {
   if(document.body.classList.contains("en-partie") && !e.target.closest("#couche")) return;
   const b = e.target.closest && e.target.closest("button, .tuile-hall, [role=button]");
-  if(b && !b.disabled && !b.closest(".cadreur")) jouerSon("clic", {gain:0.6});
+  if(b && !b.disabled && !b.closest(".cadreur")) jouerSon("clic", {immediat:true});
 }, true);
 const idCartePaquet = x => typeof x==="string" ? x : x && x.id;
 function sonsActionProg(act, id){
@@ -8984,7 +9036,7 @@ function actionBruitages(act, id){
   switch(act){
     case "son-ajouter": { const i = document.querySelector(`[data-son-fichier="${k}"]`); if(i) i.click(); return; }
     case "son-ecouter": { const src = ((CONFIG.bruitages[k] || {}).fichiers || [])[Number(n)]; if(src) tamponSon(src).then(t => { const c = contexteAudio(); if(t && c){ const s = c.createBufferSource(), g = c.createGain(); s.buffer = t; g.gain.value = prefsBruitages().volume * ((CONFIG.bruitages[k] || {}).volume ?? 1); s.connect(g).connect(c.destination); s.start(); } else { const a = new Audio(src); a.play().catch(() => {}); } }); return; }
-    case "son-tester": SONS.dernier[k] = 0; jouerSon(k); return;
+    case "son-tester": lireSon(k, {}); return;
     case "son-retirer": { const c = CONFIG.bruitages[k]; if(c){ c.fichiers.splice(Number(n), 1); if(!c.fichiers.length) delete CONFIG.bruitages[k]; } sauver(); break; }
     default: return;
   }
@@ -9006,7 +9058,7 @@ document.addEventListener("change", async e => {
     if(ajoutes){ sauver(); renderAdmin(); erreur(`${ajoutes} son${ajoutes>1 ? "s" : ""} ajouté${ajoutes>1 ? "s" : ""}.`); }
   }
   const kv = e.target.dataset && e.target.dataset.sonVolume;
-  if(kv && CONFIG.bruitages && CONFIG.bruitages[kv]){ CONFIG.bruitages[kv].volume = Number(e.target.value); sauver(); SONS.dernier[kv] = 0; jouerSon(kv); }
+  if(kv && CONFIG.bruitages && CONFIG.bruitages[kv]){ CONFIG.bruitages[kv].volume = Number(e.target.value); sauver(); lireSon(kv, {}); }
 });
 // ----- Réglages du joueur
 function htmlReglageBruitages(){
@@ -9015,7 +9067,7 @@ function htmlReglageBruitages(){
     <input type="range" min="0" max="1" step="0.05" value="${p.volume}" data-bruitages-volume aria-label="Volume des bruitages" ${p.actif ? "" : "disabled"}></div>`;
 }
 document.addEventListener("input", e => { if(e.target.hasAttribute && e.target.hasAttribute("data-bruitages-volume")){ const p = prefsBruitages(); p.volume = Number(e.target.value); sauverPrefsBruitages(p); } });
-document.addEventListener("change", e => { if(e.target.hasAttribute && e.target.hasAttribute("data-bruitages-volume")){ SONS.dernier.clic = 0; jouerSon("clic"); } });
+document.addEventListener("change", e => { if(e.target.hasAttribute && e.target.hasAttribute("data-bruitages-volume")) lireSon("carte", {}); });
 
 /* ----- Administration : cadeaux automatiques selon le nombre de parties jouées ----- */
 async function chargerPaliersAuto(){
