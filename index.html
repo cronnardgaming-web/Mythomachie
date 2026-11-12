@@ -7614,7 +7614,15 @@ function lancer2v2(deck, prep){
   const id = S.idPartie;
   if(typeof PROG!=="undefined"){
     PROG.choixDeck = null;
-    if(PROG.actif && PROG.pret) rpc("commencer_2v2").then(t => { if(S && S.idPartie===id) S.ticket2v2 = t; }).catch(() => {});
+    if(PROG.actif && PROG.pret) rpc("commencer_2v2").then(t => {
+      if(!S || S.idPartie!==id) return;
+      if(t) S.ticket2v2 = t; else S.ticket2v2Erreur = "trop de parties commencées en une heure";
+    }).catch(e => {
+      if(!S || S.idPartie!==id) return;
+      // Le joueur saura pourquoi sa partie ne sera pas comptée, au lieu d’un silence
+      S.ticket2v2Erreur = /check constraint|tickets_partie_mode/i.test(e.message) ? "le serveur n’accepte pas encore les parties de 2 contre 2 (script supabase-correctif-2v2.sql à exécuter)"
+        : /function|does not exist|schema cache/i.test(e.message) ? "le 2 contre 2 n’est pas encore installé sur le serveur" : e.message;
+    });
   }
   Object.assign(ui, {ecran:"jeu", attaquant:null, armeEnAttente:null, choixPierre:null, aiEnCours:false, couvert:false});
   apresAction();
@@ -9570,6 +9578,9 @@ async function chargerQuetes2v2(){ try { PROG.quetes2v2 = await rpc("mes_quetes_
 async function chargerStats2v2(){ try { PROG.stats2v2 = await rpc("mes_stats_2v2"); } catch(e) { PROG.stats2v2 = null; } }
 // Enregistrement d’une partie terminée (ticket demandé au lancement)
 async function verifierRecompense2v2(){
+  if(PROG.pret && S && est2v2() && S.vainqueur!==null && !S.ticket2v2 && S.ticket2v2Erreur && !(PROG.gain2v2 && PROG.gain2v2.id===S.idPartie)){
+    PROG.gain2v2 = {id:S.idPartie, erreur:S.ticket2v2Erreur}; renderCouche(); return;
+  }
   if(!PROG.pret || !S || !est2v2() || S.vainqueur===null || !S.ticket2v2 || PROG.recompensees.has(S.idPartie)) return;
   PROG.recompensees.add(S.idPartie);
   const id = S.idPartie, j = S.joueurs[0], st = S.stats[0] || {};

@@ -91,6 +91,11 @@ statistiques vérifiées) et rapportent de l’or comme une partie classique. Tr
 et des statistiques dédiées (page du mode et profil). Ces parties comptent aussi dans les statistiques générales
 et les trophées, mais pas dans les quêtes du jour classiques, la saison ou le classement.
 
+## Correctif du 2 contre 2
+
+`supabase-correctif-2v2.sql` (à exécuter avec `supabase-2v2.sql`) : la table des tickets de partie n’acceptait que
+les modes « ia », « duo » et « enligne » ; sans ce correctif, les parties de 2 contre 2 ne sont pas comptées.
+
 ## 2 contre 2 (suite)
 
 `supabase-2v2-suite.sql` (après `supabase-2v2.sql`) : victoire bonus du jour (la première victoire en 2 contre 2
