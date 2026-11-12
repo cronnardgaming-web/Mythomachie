@@ -1009,6 +1009,31 @@ body.compact .nom-heros-deck{font-size:17px}
 .ligne-palier-auto{display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:10px;align-items:end}
 .adm-cadeaux-auto input[type=text],.adm-cadeaux-auto input[type=number],.adm-cadeaux-auto textarea,.adm-cadeaux-auto select{font:inherit;font-size:14px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%;box-sizing:border-box}
 
+/* 2 contre 2 */
+.page-2v2{display:flex;flex-direction:column;gap:14px}
+.bandeau-2v2{padding:16px 20px;border-radius:5px;border:1px solid var(--filet, var(--line));background:radial-gradient(120% 160% at 0% 0%, color-mix(in srgb, #6b3fa0 30%, var(--zone)), var(--zone) 62%)}
+.bandeau-2v2 h2{margin:2px 0 6px;font-family:Cinzel,serif;font-size:28px;background:var(--or-feuille, none);-webkit-background-clip:text;background-clip:text;color:transparent}
+.bandeau-2v2 p{margin:0;max-width:760px}
+.grille-2v2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px;align-items:start}
+.bloc-2v2{padding:14px 16px;border-radius:5px;border:1px solid var(--filet, var(--line));background:var(--zone)}
+.bloc-2v2 h2{margin:0 0 8px;font-family:Cinzel,serif;font-size:19px}
+.bloc-2v2 h3{margin:12px 0 6px;font-size:14px}
+.choix-pastilles{display:flex;flex-wrap:wrap;gap:6px}
+.pastille-choix{display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:var(--table);color:var(--ink);cursor:pointer;font:inherit;font-size:14px}
+.pastille-choix small{font-size:11px;color:var(--ink-2)}
+.pastille-choix.choisie{border-color:var(--or, var(--bronze));background:color-mix(in srgb, var(--or, var(--bronze)) 18%, var(--table));font-weight:700}
+.pastille-choix:focus-visible{outline:2px solid var(--or, var(--bronze));outline-offset:2px}
+.prep-2v2 select{font:inherit;font-size:14px;color:var(--ink);background:var(--table);border:1px solid var(--line);border-radius:6px;padding:7px 8px;width:100%}
+.btn-lancer-2v2{margin-top:14px;width:100%}
+.regles-2v2{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.45}
+.quetes-2v2{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.quetes-2v2 li{display:flex;flex-direction:column;gap:4px}
+.quetes-2v2 .barre{display:block;height:6px;border-radius:3px;overflow:hidden;background:color-mix(in srgb, var(--table) 70%, #000 18%)}
+.quetes-2v2 .barre > span{display:block;height:100%;background:linear-gradient(90deg,#2f9e63,#55d68f)}
+.quetes-2v2 li.faite .texte-q{text-decoration:line-through;opacity:.7}
+.quetes-2v2 .pied-q{display:flex;justify-content:flex-end}
+.quetes-2v2 .btn-rang{width:auto;padding:4px 12px}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -2949,7 +2974,7 @@ function render(){
   if(ui.ecran!=="jeu" || !tutoActif()){ const p = document.getElementById("tuto-panneau"); if(p) p.remove(); }
   if(ui.ecran==="credits"){ INSTANT = null; app.innerHTML = pageCredits(); document.getElementById("couche").innerHTML = ""; document.getElementById("couche").classList.remove("accueil"); return; }
   if(ui.ecran==="regles"){ INSTANT = null; app.innerHTML = pageRegles(); document.getElementById("couche").innerHTML = ""; document.getElementById("couche").classList.remove("accueil"); return; }
-  if(["collection","decks","editeur","boutique","profil","saison","classement","amis","boite","nouveautes"].includes(ui.ecran)){ INSTANT = null; renderProg(); return; }
+  if(["collection","decks","editeur","boutique","profil","saison","classement","amis","boite","nouveautes","mode2v2"].includes(ui.ecran)){ INSTANT = null; renderProg(); return; }
   if(!S){ INSTANT = null; app.innerHTML = ""; renderCouche(); if(PROG.pret) signaler(); return; }
   if(est2v2()) return render2v2();
   const me = vue(), moi = S.joueurs[me], lui = S.joueurs[1-me];
@@ -3097,7 +3122,7 @@ function renderCouche(){
         <button type="button" class="btn" data-act="mode-ia">Jouer contre l’ordinateur</button>
         ${htmlChoixNiveau()}
         <button type="button" class="btn second" data-act="mode-duo">Deux joueurs sur cet écran</button>
-        <button type="button" class="btn second" data-act="mode-2v2">2 contre 2</button>
+        <button type="button" class="btn second" data-act="jouer-2v2">2 contre 2</button>
         <button type="button" class="btn second" data-act="tuto">Tutoriel</button>
         <button type="button" class="btn second" data-act="regles">Règles du jeu</button>
         <button type="button" class="btn second" data-act="credits">Crédits</button>
@@ -4324,7 +4349,7 @@ document.addEventListener("click", e => {
   if(ui.ecran==="admin" || act==="admin"){ return actionAdmin(act, id, el); }
   if(actionProg(act, id)) return;
   if(act==="rejouer" && enLigne()){ if(EN.role==="hote") revancheHote(); return; }
-  if(act==="rejouer" && S && est2v2()) return lancer2v2(S.deck0);
+  if(act==="rejouer" && S && est2v2()) return lancer2v2(S.deck0, S.prep2v2);
   if(act==="mode-2v2") return lancer2v2(null);
   if(act==="rejouer"){
     const mode = S.mode;
@@ -4771,6 +4796,7 @@ async function action(fn, succes){
 
 // ----- Fin de partie : or et quête
 async function verifierRecompense(){
+  if(S && est2v2()) return verifierRecompense2v2();
   if(!PROG.pret || !S || S.vainqueur===null || !S.idPartie || S.tuto || est2v2()) return;
   if(PROG.recompensees.has(S.idPartie)) return;
   const cle = S.idPartie;
@@ -4892,7 +4918,7 @@ function htmlChoixDeck(){
 function lancerAvecDecks(){
   const c = PROG.choixDeck, d1 = PROG.decks.find(d => d.id===c.d1), d2 = PROG.decks.find(d => d.id===c.d2);
   if(!d1) return;
-  if(c.mode==="2v2") return lancer2v2(d1.cartes);
+  if(c.mode==="2v2") return lancer2v2(d1.cartes, PROG.prep2v2);
   nouvellePartie(c.mode, [d1.cartes, c.mode==="duo" && d2 ? d2.cartes : deckConstruit()], [prefVariantes(), c.mode==="duo" ? prefVariantes() : null]);
   PROG.choixDeck = null; PROG.bienvenue = false;
   Object.assign(ui, {ecran:"jeu", attaquant:null, armeEnAttente:null, choixPierre:null, aiEnCours:false, couvert:c.mode==="duo"});
@@ -5055,10 +5081,10 @@ function renderProg(){
   const actif = document.activeElement;
   const cle = actif && actif.dataset && actif.dataset.prog ? actif.dataset.prog : null;
   let pos = null; try { pos = actif.selectionStart; } catch(e) {}
-  const pages = {collection:pageCollection, decks:pageDecks, editeur:pageEditeur, boutique:pageBoutique, profil:pageProfil, saison:pageSaison, classement:pageClassement, amis:pageAmis, boite:pageBoite, nouveautes:pageNouveautes};
+  const pages = {collection:pageCollection, decks:pageDecks, editeur:pageEditeur, boutique:pageBoutique, profil:pageProfil, saison:pageSaison, classement:pageClassement, amis:pageAmis, boite:pageBoite, nouveautes:pageNouveautes, mode2v2:pageMode2v2};
   const defil = {}; app.querySelectorAll(".grille-atelier, .liste-atelier, .atelier-deck").forEach(el => { defil[el.className.split(" ")[0]] = el.scrollTop; });
   const yPage = window.scrollY;
-  app.innerHTML = PROG.pret ? pages[ui.ecran]() : `${entete(NOM_JEU)}<p class="attente">Chargement…</p>`;
+  app.innerHTML = PROG.pret || ui.ecran==="mode2v2" ? pages[ui.ecran]() : `${entete(NOM_JEU)}<p class="attente">Chargement…</p>`;
   app.querySelectorAll(".grille-atelier, .liste-atelier, .atelier-deck").forEach(el => { const v = defil[el.className.split(" ")[0]]; if(v) el.scrollTop = v; });
   if(ui.ecran!=="boutique" && Math.abs(window.scrollY - yPage)>1) window.scrollTo(0, yPage);
   signaler();
@@ -5069,6 +5095,7 @@ function renderProg(){
 
 function actionProg(act, id){
   try { sonsActionProg(act, id); } catch(e) {}
+  if(/^(prep2v2|lancer-2v2|quete2v2)$/.test(act)){ const r = actionMode2v2(act, id); if(r===true) render(); return r!==null; }
   if(/^(ami-|boite-|prog-amis$|prog-boite$|prog-nouveautes$)/.test(act)){
     const el = document.querySelector(`[data-act="${act}"][data-id="${id}"]`);
     const r = actionSociale(act, id, el);
@@ -5092,7 +5119,7 @@ function actionProg(act, id){
       return true;
     }
     case "jouer-ia": case "jouer-duo": PROG.choixDeck = {mode: act==="jouer-ia" ? "ia" : "duo"}; break;
-    case "jouer-2v2": if(!mode2v2Visible()) return true; PROG.choixDeck = {mode:"2v2"}; break;
+    case "jouer-2v2": ui.ecran = "mode2v2"; PROG.quetes2v2 = undefined; break;
     case "choix-retour": PROG.choixDeck = null; break;
     case "bienvenue-suite": PROG.accueilEtape = Math.min(3, (PROG.accueilEtape || 1) + 1); PROG.accueilAnimer = true; break;
     case "bienvenue-fermer": PROG.accueilEtape = null; break;
@@ -5491,7 +5518,7 @@ const NOMS_ECRANS = {"accueil":"Accueil", "partie-ia":"Partie contre l’ordinat
   "boutique":"Boutique", "profil":"Profil", "admin":"Administration", "tutoriel":"Tutoriel", "regles":"Règles du jeu", "credits":"Crédits"};
 function ecranActuel(){
   if(ui.ecran==="admin") return "admin";
-  if(["collection","decks","editeur","boutique","profil","saison","classement","amis","boite","nouveautes"].includes(ui.ecran)) return ui.ecran;
+  if(["collection","decks","editeur","boutique","profil","saison","classement","amis","boite","nouveautes","mode2v2"].includes(ui.ecran)) return ui.ecran;
   if(S && S.tuto) return "tutoriel";
   if(ui.ecran==="regles") return "regles";
   if(ui.ecran==="credits") return "credits";
@@ -5526,7 +5553,7 @@ function assurerTicket(){
     .then(t => { if(!(S && S.idPartie===id)) return; if(!t){ S.ticketErreur = "le serveur a refusé d’ouvrir la partie (trop de parties en une heure ?)"; return; } S.ticket = t; if(enLigne() && EN.role==="hote") publier(); })
     .catch(e => { if(S && S.idPartie===id) S.ticketErreur = e.message; });
 }
-const messageServeur = m => /trop courte/i.test(m) ? "partie trop courte (moins de 2 minutes) : elle n’est pas comptée"
+const messageServeur = m => /trop courte/i.test(m) ? "partie trop courte (moins de 75 secondes) : elle n’est pas comptée"
   : /Trop de parties/i.test(m) ? "trop de parties commencées en une heure"
   : /ticket|Ticket/.test(m) ? "partie non enregistrée par le serveur" : m;
 // Une partie = deux camps, enregistrés ensemble et une seule fois :
@@ -5561,7 +5588,7 @@ async function chargerQuete(){
 }
 async function chargerMesStats(annoncer){
   chargerQuete().then(() => { if(!S && PROG.pret && ui.ecran==="jeu") renderCouche(); });
-  Promise.all([chargerTrophees(), chargerPaquetsOfferts(), chargerSaison(), chargerSocial()]).then(() => {
+  Promise.all([chargerTrophees(), chargerPaquetsOfferts(), chargerSaison(), chargerSocial(), chargerStats2v2()]).then(() => {
     if(!S && PROG.pret){ if(ui.ecran==="jeu") renderCouche(); else if(["profil", "boutique", "saison"].includes(ui.ecran)) renderProg(); }
   });
   try { PROG.mesStats = await rpc("mes_stats"); } catch(e) { return; }
@@ -5636,6 +5663,10 @@ function pageProfil(){
         <h3>Par héros</h3>
         <div class="tableau-defile"><table class="tableau"><thead><tr><th>Héros</th><th>Parties</th><th>Victoires</th><th>Taux</th></tr></thead><tbody>${heros}</tbody></table></div>
         <p class="aide">Les parties à deux sur le même écran ne sont pas comptées.</p>
+      </section>
+      <section class="bloc-profil">
+        <h2>2 contre 2</h2>
+        ${htmlStats2v2(PROG.stats2v2)}
       </section>
       <section class="bloc-profil">
         <h2>Trophées</h2>
@@ -7088,7 +7119,7 @@ function htmlHall(){
         <div class="hall-modes">
           <button type="button" class="btn second" data-act="en-ligne">${ico("enligne")} En ligne</button>
           <button type="button" class="btn second" data-act="jouer-duo">${ico("duo")} Deux joueurs sur cet écran</button>
-          ${mode2v2Visible() ? `<button type="button" class="btn second" data-act="jouer-2v2">${ico("duo")} 2 contre 2 avec un allié <span class="pastille-test">Test</span></button>` : ""}
+          ${mode2v2Visible() ? `<button type="button" class="btn second" data-act="jouer-2v2">${ico("duo")} 2 contre 2 avec un allié</button>` : ""}
         </div>
       </section>
       ${htmlHallSaison()}
@@ -7345,8 +7376,10 @@ function nouvellePartie2v2(decks, opts = {}){
   S.stats = [0, 1, 2, 3].map(() => ({creatures:0, sorts:0, achats:0, degats:0, soins:0, pouvoirs:0, jouees:{}, achetees:{}}));
   S.debut = Date.now();
   for(let k=0; k<R2.marche && S.marcheDeck.length; k++) S.marche.push(S.marcheDeck.pop());
-  S.joueurs.forEach((j, k) => piocher(j, R2.pioche[k] ?? REGLES.mainDepart, true));
-  log(`${S.joueurs[0].nom} commence.`);
+  const dep = Number(opts.depart) || 0;
+  S.courant = dep; S.c2v2 = {chutes:0, resurrections:0};
+  S.joueurs.forEach((j, k) => piocher(j, R2.pioche[(k - dep + 4) % 4] ?? REGLES.mainDepart, true));
+  log(`${S.joueurs[dep].nom} commence.`);
 }
 // Bénéficiaire d’un soin ou d’un renfort : celui choisi par le joueur (S.choixBenef), sinon celui qui en a le plus besoin
 function beneficiaire2v2(i, genre){
@@ -7425,6 +7458,7 @@ function verifierVictoire2v2(){
     for(const c of j.plateau){ if(!def(c).jeton) j.defausse.push({uid:c.uid, id:c.id}); if(c.arme) j.defausse.push({uid:c.arme.uid, id:c.arme.id}); }
     j.plateau = [];
     log(`${heroDe(j).nom} tombe et devient un esprit.`);
+    if(j.eq===S.joueurs[0].eq && S.c2v2) S.c2v2.chutes++;
     fxEvt({t:"chute", j:k});
     const a = S.joueurs[allieDe(k)];
     if(!a.esprit && R2.vengeance){ a.pv += R2.vengeance; log(`Vengeance : ${heroDe(a).nom} récupère ${R2.vengeance} PV.`); fxEvt({t:"soin", j:allieDe(k), v:R2.vengeance}); }
@@ -7439,6 +7473,7 @@ function debutTour2v2(){
   if(j.esprit && j.tEsprit>=R2.resuTours){
     j.esprit = false; j.pv = R2.resuPV;
     log(`${heroDe(j).nom} revient à la vie avec ${R2.resuPV} PV !`);
+    if(j.eq===S.joueurs[0].eq && S.c2v2) S.c2v2.resurrections++;
     fxEvt({t:"resurrection", j:S.courant});
   }
   j.plateau.forEach(c => { c.peutAttaquer = true; c.aAttaque = false; });
@@ -7531,13 +7566,22 @@ async function jouerTourIA2v2(){
    MODE 2 CONTRE 2 : écran de jeu (toi et un allié ordinateur contre deux ordinateurs)
    ============================================================ */
 // Mode en test : visible uniquement par l’administrateur (et sur le prototype Claude)
-const mode2v2Visible = () => !!window.claude || !!(typeof PROG!=="undefined" && PROG.admin);
-function lancer2v2(deck){
+const mode2v2Visible = () => true;
+function lancer2v2(deck, prep){
   const pseudo = typeof PROG!=="undefined" && PROG.profil && PROG.profil.pseudo;
-  nouvellePartie2v2([deck || null, null, null, null], {humains:[0], noms:[pseudo || "Joueur A1", "Adversaire 1", "Votre allié", "Adversaire 2"],
-    variantes:[typeof PROG!=="undefined" && PROG.pret ? prefVariantes() : null, null, null, null]});
-  S.deck0 = deck || null;
-  if(typeof PROG!=="undefined"){ PROG.choixDeck = null; }
+  const P = prep || (typeof PROG!=="undefined" && PROG.prep2v2) || {};
+  const place = P.place && P.place!=="hasard" ? Number(P.place) : 1 + Math.floor(Math.random() * 4);
+  const fAllie = choixPantheon(P.allie || "hasard"), fAdv = P.adv || "hasard";
+  nouvellePartie2v2([deck || null, deckDuPantheon(choixPantheon(fAdv)), deckDuPantheon(fAllie), deckDuPantheon(choixPantheon(fAdv))],
+    {humains:[0], noms:[pseudo || "Joueur A1", "Adversaire 1", "Votre allié", "Adversaire 2"], depart:[0, 3, 2, 1][place - 1],
+     variantes:[typeof PROG!=="undefined" && PROG.pret ? prefVariantes() : null, null, null, null]});
+  S.deck0 = deck || null; S.prep2v2 = {...P}; S.place2v2 = place;
+  log(`Vous jouez en ${place}${place===1 ? "ʳᵉ" : "ᵉ"} position.`);
+  const id = S.idPartie;
+  if(typeof PROG!=="undefined"){
+    PROG.choixDeck = null;
+    if(PROG.actif && PROG.pret) rpc("commencer_2v2").then(t => { if(S && S.idPartie===id) S.ticket2v2 = t; }).catch(() => {});
+  }
   Object.assign(ui, {ecran:"jeu", attaquant:null, armeEnAttente:null, choixPierre:null, aiEnCours:false, couvert:false});
   apresAction();
 }
@@ -7643,6 +7687,7 @@ function render2v2(){
   animerChangements();
   jouerEffets();
   if(PROG.pret) signaler();
+  if(S.vainqueur!==null) verifierRecompense();   // enregistrement de la partie de 2 contre 2
 }
 // Clics propres au 2 contre 2 (les autres actions passent par le jeu habituel)
 function clic2v2(act, id){
@@ -7660,11 +7705,11 @@ function clic2v2(act, id){
   return false;
 }
 function htmlFin2v2(){
-  const gagne = S.equipeGagnante===0;
+  const gagne = S.equipeGagnante===S.joueurs[0].eq;
   return `<div class="boite" role="dialog" aria-label="Fin de partie">
     <h2>${gagne ? "Victoire de votre équipe !" : "Défaite"}</h2>
     <p>${gagne ? "Les deux héros adverses sont tombés." : "Votre héros et celui de votre allié sont tombés."} Partie terminée au tour ${Math.ceil(S.tour/4)}.</p>
-    <p class="aide">Mode en test : cette partie ne compte pas encore pour les quêtes, les trophées et les récompenses.</p>
+    ${htmlGain2v2()}
     <div class="actions"><button type="button" class="btn" data-act="rejouer">Rejouer</button><button type="button" class="btn second" data-act="nouvelle">Changer de mode</button></div>
   </div>`;
 }
@@ -8044,7 +8089,7 @@ function causeAlerte(a){
     return c;
   }
   switch(a.motif){
-    case "partie_trop_courte": return `La partie a été envoyée ${d.duree_s ?? "?"} secondes après son ouverture, alors qu’une partie doit durer au moins ${d.minimum_s ?? 120} secondes.`;
+    case "partie_trop_courte": return `La partie a été envoyée ${d.duree_s ?? "?"} secondes après son ouverture, alors qu’une partie doit durer au moins ${d.minimum_s ?? 75} secondes.`;
     case "mode_falsifie": return `Mode envoyé « ${d.mode_envoye} », alors que la partie a été ouverte en mode « ${d.mode_du_ticket} ».`;
     case "partie_sans_ticket": return "Aucun ticket valide n’a été fourni : cette partie n’a jamais été ouverte par le serveur.";
     case "ticket_invente": return "Le ticket envoyé n’existe pas ou appartient à un autre joueur.";
@@ -9471,6 +9516,122 @@ function admAccueil(){
     </div></section>
   </div>`;
 }
+
+/* ============================================================
+   2 CONTRE 2 : menu (préparation, règles, quêtes, statistiques), enregistrement des parties
+   ============================================================ */
+PROG.prep2v2 = (() => { try { return Object.assign({place:"hasard", allie:"hasard", adv:"hasard", deck:null}, JSON.parse(localStorage.getItem("prep-2v2")) || {}); } catch(e) { return {place:"hasard", allie:"hasard", adv:"hasard", deck:null}; } })();
+const sauverPrep2v2 = () => { try { localStorage.setItem("prep-2v2", JSON.stringify(PROG.prep2v2)); } catch(e) {} };
+function deckDuPantheon(f){
+  if(!f || !FACTIONS[f]) return null;   // au hasard : deck mélangé de toutes les factions
+  const copies = [];
+  for(const [id, d] of Object.entries(CARTES)){
+    if(d.depart || d.base || d.jeton || d.promo || d.faction!==f || !estCollectionnable(d)) continue;
+    for(let n = 0; n<(d.rarete==="legendaire" ? REGLES.copiesLegendaire : REGLES.copiesMax); n++) copies.push(id);
+  }
+  return melange(copies).slice(0, REGLES.tailleDeck);
+}
+const choixPantheon = v => v==="hasard" ? Object.keys(FACTIONS)[Math.floor(Math.random() * Object.keys(FACTIONS).length)] : v;
+async function chargerQuetes2v2(){ try { PROG.quetes2v2 = await rpc("mes_quetes_2v2"); } catch(e) { PROG.quetes2v2 = {indisponible:true}; } }
+async function chargerStats2v2(){ try { PROG.stats2v2 = await rpc("mes_stats_2v2"); } catch(e) { PROG.stats2v2 = null; } }
+// Enregistrement d’une partie terminée (ticket demandé au lancement)
+async function verifierRecompense2v2(){
+  if(!PROG.pret || !S || !est2v2() || S.vainqueur===null || !S.ticket2v2 || PROG.recompensees.has(S.idPartie)) return;
+  PROG.recompensees.add(S.idPartie);
+  const id = S.idPartie, j = S.joueurs[0], st = S.stats[0] || {};
+  const base = o => { const r = {}; for(const [k, n] of Object.entries(o || {})){ const b = (CARTES[k] && CARTES[k].versionDe) || k; r[b] = (r[b] || 0) + n; } return r; };
+  let res;
+  try {
+    res = await rpc("enregistrer_2v2", {d:{ticket:S.ticket2v2, victoire:S.equipeGagnante===j.eq, tours:Math.max(1, Math.ceil(S.tour/4)),
+      camp:{heros:j.heros, degats:st.degats || 0, soins:st.soins || 0, creatures:st.creatures || 0, sorts:st.sorts || 0, achats:st.achats || 0, pouvoirs:st.pouvoirs || 0,
+            jouees:base(st.jouees), achetees:base(st.achetees), palier:j.palier || 0, pv_fin:j.pv},
+      details:{allie:S.joueurs[allieDe(0)].heros, resurrections:(S.c2v2 || {}).resurrections || 0, chutes:(S.c2v2 || {}).chutes || 0}}});
+  } catch(e) { res = {erreur:/function|does not exist|schema cache/i.test(e.message) ? "le 2 contre 2 n’est pas encore enregistré sur ce serveur" : e.message}; }
+  PROG.gain2v2 = {id, ...res};
+  await Promise.all([rafraichir().catch(() => {}), chargerQuetes2v2(), chargerStats2v2()]);
+  chargerMesStats(true);
+  if(S && S.idPartie===id) renderCouche();
+}
+function htmlGain2v2(){
+  const g = PROG.gain2v2;
+  if(!PROG.actif) return "";
+  if(!g || g.id!==S.idPartie) return `<p class="aide">Enregistrement de la partie…</p>`;
+  if(g.erreur) return `<p class="avertissement">Partie non comptée : ${esc(String(g.erreur).replace(/\.+$/, ""))}.</p>`;
+  return `<p class="gain">${g.gain ? `+${g.gain} or` : "Plafond d’or du jour atteint."}</p><p class="aide">La partie compte pour vos quêtes et statistiques de 2 contre 2.</p>`;
+}
+function htmlStats2v2(s){
+  if(!s) return `<p class="aide">Aucune statistique pour le moment.</p>`;
+  const tuile = (v, l) => `<div class="tuile"><b>${v}</b><span>${l}</span></div>`;
+  const pct2 = (a, b) => b ? `${Math.round(100*a/b)} %` : "–";
+  return `<div class="tuiles">${tuile(nf(s.parties), "parties")}${tuile(`${nf(s.victoires)} <small>(${pct2(s.victoires, s.parties)})</small>`, "victoires")}
+      ${tuile(nf(s.sans_chute), "victoires sans chute")}${tuile(nf(s.resurrections), "résurrections")}${tuile(nf(s.chutes), "héros tombés")}
+      ${tuile(nf(s.degats), "dégâts infligés")}${tuile(nf(s.soins), "PV soignés")}${tuile(nf(s.creatures), "créatures jouées")}${tuile(nf(s.pouvoirs), "pouvoirs utilisés")}</div>
+    <div class="tableau-defile"><table class="tableau"><thead><tr><th>Votre panthéon</th><th>Parties</th><th>Victoires</th><th>Taux</th></tr></thead><tbody>
+      ${Object.entries(FACTIONS).map(([k, f]) => { const v = (s.par_heros || {})[k] || {parties:0, victoires:0}; return `<tr><td>${esc(f.nom)}</td><td>${nf(v.parties)}</td><td>${nf(v.victoires)}</td><td>${pct2(v.victoires, v.parties)}</td></tr>`; }).join("")}
+    </tbody></table></div>`;
+}
+function pageMode2v2(){
+  const P = PROG.prep2v2, R2 = {...REGLES_2V2_DEFAUT, ...((CONFIG && CONFIG.regles2v2) || {})}, v = PROG.actif ? decksValides() : [];
+  const places = [["hasard", "Au hasard"], ["1", `1ʳᵉ place`], ["2", "2ᵉ place"], ["3", "3ᵉ place"], ["4", "4ᵉ place"]];
+  const piocheDe = p => R2.pioche[p-1] ?? REGLES.mainDepart;
+  const pan = (cle, val) => `<div class="choix-pastilles" role="radiogroup">${[["hasard", "Au hasard"], ...Object.entries(FACTIONS).map(([k, f]) => [k, f.nom])].map(([k, l]) =>
+    `<button type="button" class="pastille-choix ${val===k ? "choisie" : ""}" role="radio" aria-checked="${val===k}" data-act="prep2v2" data-id="${cle}|${k}">${esc(l)}</button>`).join("")}</div>`;
+  const Q = PROG.quetes2v2;
+  if(PROG.actif && PROG.pret && Q===undefined){ PROG.quetes2v2 = null; Promise.all([chargerQuetes2v2(), chargerStats2v2()]).then(() => { if(ui.ecran==="mode2v2") renderProg(); }); }
+  return `${entete("2 contre 2")}
+    <div class="page-2v2">
+      <section class="bandeau-2v2"><div><span class="sur-titre">Mode coopératif</span><h2>2 contre 2</h2>
+        <p>Faites équipe avec un allié contrôlé par l’ordinateur face à deux adversaires. Partagez la Provocation, déclenchez des combos à deux, relevez votre allié tombé… et gagnez ensemble.</p></div></section>
+      <div class="grille-2v2">
+        <section class="bloc-2v2 prep-2v2"><h2>Préparer la partie</h2>
+          <h3>Votre place dans le tour</h3>
+          <div class="choix-pastilles" role="radiogroup">${places.map(([k, l]) => `<button type="button" class="pastille-choix ${String(P.place)===k ? "choisie" : ""}" role="radio" aria-checked="${String(P.place)===k}" data-act="prep2v2" data-id="place|${k}">${l}${k!=="hasard" ? `<small>pioche ${piocheDe(Number(k))}</small>` : ""}</button>`).join("")}</div>
+          <p class="aide">Les équipes jouent en alternance : 1ʳᵉ et 3ᵉ places contre 2ᵉ et 4ᵉ. Plus on joue tôt, moins on pioche au premier tour.</p>
+          <h3>Le panthéon de votre allié</h3>${pan("allie", P.allie)}
+          <h3>Le panthéon de vos adversaires</h3>${pan("adv", P.adv)}
+          ${PROG.actif ? (v.length ? `<h3>Votre deck</h3><select data-prep="deck" aria-label="Votre deck">${v.map(d => `<option value="${d.id}" ${d.id===P.deck ? "selected" : ""}>${esc(d.nom)}</option>`).join("")}</select>`
+            : `<p class="avertissement">Il vous faut un deck complet de ${REGLES.tailleDeck} cartes pour jouer.</p>`) : ""}
+          <button type="button" class="btn-geant btn-lancer-2v2" data-act="lancer-2v2" ${PROG.actif && !v.length ? "disabled" : ""}><span><b>Lancer la partie</b><small>Vous et votre allié contre deux adversaires</small></span></button>
+        </section>
+        <section class="bloc-2v2"><h2>Règles du 2 contre 2</h2><ul class="regles-2v2">
+          <li><b>Deux équipes de deux héros,</b> qui jouent en alternance. Chaque héros a <b>${R2.pv} PV</b>.</li>
+          <li><b>Premières pioches :</b> ${R2.pioche.map((n, i) => `${n} cartes pour le ${i + 1}${i ? "ᵉ" : "ᵉʳ"}`).join(", ")} joueur, pour équilibrer l’avantage de jouer tôt.</li>
+          <li><b>Un marché de ${R2.marche} cartes,</b> partagé par les quatre joueurs.</li>
+          <li><b>La Provocation protège toute l’équipe :</b> tant qu’une créature à Provocation est en jeu, les adversaires doivent la viser.</li>
+          <li><b>Les combos se font à deux :</b> une carte de votre allié jouée le même tour compte pour vos combos. Vous pouvez aussi soigner votre allié.</li>
+          <li><b>Héros tombé :</b> il devient un esprit et revient à la vie au bout de ${R2.resuTours} tours avec ${R2.resuPV} PV, si son allié tient bon. À sa chute, son allié récupère <b>${R2.vengeance} PV</b> (vengeance).</li>
+          <li><b>Le pouvoir divin</b> se recharge sur une jauge commune à l’équipe (${R2.seuilJauge} créatures ennemies détruites).</li>
+          <li><b>La victoire</b> revient à l’équipe qui fait tomber les deux héros adverses en même temps.</li></ul>
+        </section>
+        ${PROG.actif ? `<section class="bloc-2v2"><h2>Quêtes du 2 contre 2</h2>
+          ${!Q ? `<p class="attente">Chargement…</p>` : Q.indisponible ? `<p class="aide">Les quêtes du 2 contre 2 ne sont pas encore disponibles sur ce serveur.</p>` : `<ul class="quetes-2v2">${(Q.quetes || []).map(q => `<li class="${q.faite ? "faite" : ""}">
+            <span class="texte-q">${esc(q.texte)}</span><span class="barre"><span style="width:${Math.min(100, 100*q.progres/q.but)}%"></span></span>
+            <span class="pied-q">${q.faite ? `<span class="recu-palier">✓ ${q.or} or</span>` : q.progres>=q.but ? `<button type="button" class="btn btn-rang" data-act="quete2v2" data-id="${esc(q.id)}">+${q.or} or</button>` : `<span class="aide">${q.progres} / ${q.but} · ${q.or} or</span>`}</span></li>`).join("")}</ul>
+            <p class="aide">Trois nouvelles quêtes chaque jour, propres au 2 contre 2.</p>`}
+        </section>
+        <section class="bloc-2v2"><h2>Vos statistiques en 2 contre 2</h2>${htmlStats2v2(PROG.stats2v2)}
+          <p class="aide">Ces parties comptent aussi dans vos statistiques générales et vos trophées.</p></section>` : ""}
+      </div>
+    </div>`;
+}
+function actionMode2v2(act, id){
+  switch(act){
+    case "jouer-2v2": ui.ecran = "mode2v2"; PROG.quetes2v2 = undefined; return true;
+    case "prep2v2": { const [k, v] = String(id).split("|"); PROG.prep2v2[k] = v; sauverPrep2v2(); return true; }
+    case "lancer-2v2": {
+      let cartes = null;
+      if(PROG.actif){
+        const v = decksValides(), d = v.find(x => x.id===PROG.prep2v2.deck) || v[0];
+        if(!d){ erreur(`Il vous faut un deck complet de ${REGLES.tailleDeck} cartes pour jouer.`); return false; }
+        cartes = d.cartes; PROG.prep2v2.deck = d.id; sauverPrep2v2();
+      }
+      lancer2v2(cartes, {...PROG.prep2v2}); return false;
+    }
+    case "quete2v2": action(async () => { const r = await rpc("reclamer_quete_2v2", {p_id:id}); if(r && r.erreur) throw new Error(r.erreur); await Promise.all([chargerQuetes2v2(), rafraichir()]); return r; }, r => `+${r.or} or !`); return false;
+  }
+  return null;
+}
+document.addEventListener("change", e => { if(e.target.dataset && e.target.dataset.prep){ PROG.prep2v2[e.target.dataset.prep] = e.target.value; sauverPrep2v2(); } });
 
 chargerConfig();
 appliquerReglageAnimations();

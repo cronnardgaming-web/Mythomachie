@@ -84,6 +84,17 @@ ou changé leur faction, renvoyez le catalogue depuis l’administration (onglet
 `supabase-admin-joueurs.sql` permet à l’administrateur de corriger l’or et l’encre d’un joueur depuis l’onglet
 « Statistiques » de l’administration (bouton « Modifier » dans la liste des joueurs).
 
+## 2 contre 2
+
+`supabase-2v2.sql` (après les autres scripts) : les parties en 2 contre 2 sont enregistrées (ticket, durée minimale,
+statistiques vérifiées) et rapportent de l’or comme une partie classique. Trois quêtes du jour propres au mode,
+et des statistiques dédiées (page du mode et profil). Ces parties comptent aussi dans les statistiques générales
+et les trophées, mais pas dans les quêtes du jour classiques, la saison ou le classement.
+
+## Règles de blocage des parties
+
+`supabase-reglages-blocage.sql` : durée minimale d’une partie 75 secondes, 60 parties par heure au maximum.
+
 ## Recyclage des exemplaires en trop
 
 `supabase-recyclage-surplus.sql` (après `supabase-variantes.sql`) : le bouton « Tout recycler » de la collection
