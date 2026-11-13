@@ -96,8 +96,10 @@ et les trophées, mais pas dans les quêtes du jour classiques, la saison ou le 
 `supabase-2v2-ligne.sql` (après `supabase-2v2-suite.sql` et `supabase-correctif-2v2.sql`) : salons privés (code),
 recherche de partie (regroupement jusqu’à 4 joueurs), choix des places, lancement par l’hôte (les places libres
 deviennent des bots après 15 secondes), un ticket par joueur humain, Elo propre au 2 contre 2 (cotes figées au
-lancement, aucune cote contre des bots seuls) et classement du 2 contre 2. La section « Jouer en ligne » du menu
-du 2 contre 2 reste réservée à l’administrateur jusqu’à l’étape 2 (la partie en temps réel).
+lancement, aucune cote contre des bots seuls) et classement du 2 contre 2. Étape 2 (partie en temps réel, dans
+index.html) : l’hôte fait tourner la partie et les bots, chaque joueur voit la partie depuis sa place et envoie ses
+actions en ordres numérotés (refusés hors de son tour), un joueur silencieux 20 secondes est remplacé par l’ordinateur,
+et chaque joueur humain enregistre sa partie avec son propre ticket (or, quêtes, statistiques, bonus, cote).
 
 ## Correctif du 2 contre 2
 

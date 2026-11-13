@@ -2797,10 +2797,10 @@ function erreur(msg){
 function interactif(){
   return S && S.vainqueur===null && !ui.couvert && !ui.aiEnCours && (S.mode==="duo" || S.courant===vue()) && !(enLigne() && EN.enAttente);
 }
-const vue = () => S.format==="2v2" ? 0 : S.mode==="ia" ? 0 : S.mode==="enligne" ? (EN.role==="hote" ? 0 : 1) : S.courant;
+const vue = () => S.format==="2v2" ? siege2() : S.mode==="ia" ? 0 : S.mode==="enligne" ? (EN.role==="hote" ? 0 : 1) : S.courant;
 const enLigne = () => !!S && S.mode==="enligne";
 function nomAffiche(j){
-  if(est2v2()) return j===S.joueurs[0] ? "Vous" : j.nom;
+  if(est2v2()) return j===S.joueurs[siege2()] ? "Vous" : j.nom;
   const estMoi = j===S.joueurs[vue()];
   if(enLigne()) return estMoi ? "Vous" : (j.pseudo || "Adversaire");
   if(S.mode==="ia" && estMoi && PROG.profil && PROG.profil.pseudo) return PROG.profil.pseudo;
@@ -3015,6 +3015,7 @@ function render(){
   if(ui.ecran==="credits"){ INSTANT = null; app.innerHTML = pageCredits(); document.getElementById("couche").innerHTML = ""; document.getElementById("couche").classList.remove("accueil"); return; }
   if(ui.ecran==="regles"){ INSTANT = null; app.innerHTML = pageRegles(); document.getElementById("couche").innerHTML = ""; document.getElementById("couche").classList.remove("accueil"); return; }
   if(["collection","decks","editeur","boutique","profil","saison","classement","amis","boite","nouveautes","mode2v2","salon2v2"].includes(ui.ecran)){ INSTANT = null; renderProg(); return; }
+  if(!S && typeof L2!=="undefined" && L2.attente){ INSTANT = null; app.innerHTML = `<div class="attente-partie-2v2"><p class="attente">${esc(L2.attente)}</p><p class="aide">Préparation de la partie de 2 contre 2 en ligne.</p></div>`; document.getElementById("couche").innerHTML = ""; return; }
   if(!S){ INSTANT = null; app.innerHTML = ""; renderCouche(); if(PROG.pret) signaler(); return; }
   if(est2v2()) return render2v2();
   const me = vue(), moi = S.joueurs[me], lui = S.joueurs[1-me];
@@ -3220,7 +3221,11 @@ function renderCouche(){
 function apresAction(){
   if(enLigne() && EN.role==="hote") publier();
   render();
-  if(S && est2v2()){ if(S.vainqueur===null && !S.joueurs[S.courant].humain && !ui.aiEnCours) tourIA2v2Anime(); return; }
+  if(S && est2v2()){
+    if(S.enLigne2v2 && L2.hote){ publier2v2(); if(S.vainqueur!==null && !L2.fini){ L2.fini = true; rpc("terminer_salon_2v2", {p_code:L2.code}).catch(() => {}); } }
+    if(S.vainqueur===null && !S.joueurs[S.courant].humain && !ui.aiEnCours && hote2v2()) tourIA2v2Anime();
+    return;
+  }
   if(S && S.vainqueur===null && S.mode==="ia" && S.courant===1 && !ui.aiEnCours) (tutoActif() ? tutoTourAdverse() : tourIA());
 }
 
@@ -4264,7 +4269,7 @@ const MOTEUR_DISTANT = {
   finTour:() => envoyer({type:"fin"}),
   activerPouvoir:() => envoyer({type:"pouvoir"})
 };
-const M = () => enLigne() && EN.role==="invite" ? MOTEUR_DISTANT : MOTEUR_LOCAL;
+const M = () => enLigne() && EN.role==="invite" ? MOTEUR_DISTANT : (typeof enPartie2v2Ligne==="function" && enPartie2v2Ligne() && !L2.hote) ? MOTEUR_2V2_DISTANT : MOTEUR_LOCAL;
 
 function htmlEnLigne(){
   const retour = `<button type="button" class="btn second" data-act="en-retour">Retour</button>`;
@@ -4372,7 +4377,7 @@ document.addEventListener("click", e => {
     Object.assign(ui, {attaquant:null, armeEnAttente:null, choixPierre:null, aiEnCours:false, couvert: act==="mode-duo"});
     return apresAction();
   }
-  if(act==="nouvelle"){ if(enLigne() || EN.role) quitterEnLigne(); S = null; ui.couvert = false; ui.aiEnCours = false; return render(); }
+  if(act==="nouvelle"){ if(typeof quitterPartie2v2Ligne==="function" && S && S.enLigne2v2) quitterPartie2v2Ligne(); else if(enLigne() || EN.role) quitterEnLigne(); S = null; ui.couvert = false; ui.aiEnCours = false; return render(); }
   if(act.startsWith("en-")) return actionEnLigne(act, id);
   if(act==="son"){ basculerSon(); return render(); }
   if(act==="bruitages-basculer"){ const p = prefsBruitages(); p.actif = !p.actif; sauverPrefsBruitages(p); if(p.actif) lireSon("carte", {}); return render(); }
@@ -4389,6 +4394,7 @@ document.addEventListener("click", e => {
   if(ui.ecran==="admin" || act==="admin"){ return actionAdmin(act, id, el); }
   if(actionProg(act, id)) return;
   if(act==="rejouer" && enLigne()){ if(EN.role==="hote") revancheHote(); return; }
+  if(act==="rejouer" && S && est2v2() && S.enLigne2v2){ quitterPartie2v2Ligne(); S = null; ui.ecran = "mode2v2"; return render(); }
   if(act==="rejouer" && S && est2v2()) return lancer2v2(S.deck0, S.prep2v2);
   if(act==="mode-2v2") return lancer2v2(null);
   if(act==="rejouer"){
@@ -4402,7 +4408,7 @@ document.addEventListener("click", e => {
   if(act==="voir-defausse"){ ui.voirDefausse = Number(id); return renderCouche(); }
   if(act==="fermer-defausse"){ ui.voirDefausse = null; return renderCouche(); }
   // 2 contre 2 : bénéficiaire choisi des soins et renforts
-  if(est2v2()) S.choixBenef = ui.benef==="moi" ? 0 : ui.benef==="allie" ? 2 : null;
+  if(est2v2()) S.choixBenef = ui.benef==="moi" ? siege2() : ui.benef==="allie" ? allieDe(siege2()) : null;
   if(act==="ban"){ M().bannir(id); return apresAction(); }
   if(act==="ban-stop"){ if(enLigne() && EN.role==="invite") S.bannirEnAttente = 0; M().bannirStop(); return apresAction(); }
   if(act==="annuler"){ ui.attaquant = null; ui.armeEnAttente = null; ui.choixPierre = null; return render(); }
@@ -7397,6 +7403,7 @@ function htmlTirage(t, i, pq){
    ============================================================ */
 const REGLES_2V2_DEFAUT = {pv:30, marche:7, pioche:[2,4,5,5], seuilJauge:14, resuTours:2, resuPV:15, vengeance:8, reserveMax:5};
 const est2v2 = () => !!(S && S.format==="2v2");
+const siege2 = () => (S && S.siegeLocal!=null ? S.siegeLocal : 0);   // place du joueur sur cet écran
 const allieDe = i => (i + 2) % 4;
 const ennemisDe = i => [(i + 1) % 4, (i + 3) % 4];
 const ennemisVivants = i => ennemisDe(i).map(k => S.joueurs[k]).filter(j => !j.esprit);
@@ -7423,7 +7430,7 @@ function nouvellePartie2v2(decks, opts = {}){
   S.debut = Date.now();
   for(let k=0; k<R2.marche && S.marcheDeck.length; k++) S.marche.push(S.marcheDeck.pop());
   const dep = Number(opts.depart) || 0;
-  S.courant = dep; S.c2v2 = {chutes:0, resurrections:0};
+  S.courant = dep; S.c2v2 = {chutes:[0, 0], resurrections:[0, 0]};
   S.joueurs.forEach((j, k) => piocher(j, R2.pioche[(k - dep + 4) % 4] ?? REGLES.mainDepart, true));
   log(`${S.joueurs[dep].nom} commence.`);
 }
@@ -7504,7 +7511,7 @@ function verifierVictoire2v2(){
     for(const c of j.plateau){ if(!def(c).jeton) j.defausse.push({uid:c.uid, id:c.id}); if(c.arme) j.defausse.push({uid:c.arme.uid, id:c.arme.id}); }
     j.plateau = [];
     log(`${heroDe(j).nom} tombe et devient un esprit.`);
-    if(j.eq===S.joueurs[0].eq && S.c2v2) S.c2v2.chutes++;
+    if(S.c2v2) S.c2v2.chutes[j.eq]++;
     fxEvt({t:"chute", j:k});
     const a = S.joueurs[allieDe(k)];
     if(!a.esprit && R2.vengeance){ a.pv += R2.vengeance; log(`Vengeance : ${heroDe(a).nom} récupère ${R2.vengeance} PV.`); fxEvt({t:"soin", j:allieDe(k), v:R2.vengeance}); }
@@ -7519,7 +7526,7 @@ function debutTour2v2(){
   if(j.esprit && j.tEsprit>=R2.resuTours){
     j.esprit = false; j.pv = R2.resuPV;
     log(`${heroDe(j).nom} revient à la vie avec ${R2.resuPV} PV !`);
-    if(j.eq===S.joueurs[0].eq && S.c2v2) S.c2v2.resurrections++;
+    if(S.c2v2) S.c2v2.resurrections[j.eq]++;
     fxEvt({t:"resurrection", j:S.courant});
   }
   j.plateau.forEach(c => { c.peutAttaquer = true; c.aAttaque = false; });
@@ -7558,7 +7565,7 @@ function choisirCibleIA(i){
 async function jouerTourIA2v2(){
   const etape = async () => { if(!S.simulation && typeof document!=="undefined" && document.getElementById("app")){ render(); await pause(520); } };
   const i = S.courant, j = S.joueurs[i];
-  const expert = S.niveau2v2==="expert" && j.eq!==S.joueurs[0].eq;   // le niveau choisi s’applique aux adversaires
+  const expert = S.niveau2v2==="expert" && j.eq!==S.joueurs[siege2()].eq;   // le niveau choisi s’applique aux adversaires
   if(!j.esprit && pouvoirPret(j)){ activerPouvoir(); bannirAuto(); await etape(); }
   let p = true, garde = 60;
   const ordreMain = () => expert ? [...j.main].sort((a, b) => ({creature:0, sort:1, arme:2})[def(a).type] - ({creature:0, sort:1, arme:2})[def(b).type]) : [...j.main];
@@ -7660,6 +7667,7 @@ async function tourIA2v2Anime(){
   while(S && S.idPartie===id && est2v2() && S.vainqueur===null && !S.joueurs[S.courant].humain){
     await jouerTourIA2v2();
     if(!S || S.idPartie!==id) return;
+    if(S.enLigne2v2) publier2v2();
     render();
     await pause(700);
   }
@@ -7667,13 +7675,13 @@ async function tourIA2v2Anime(){
   if(S && S.idPartie===id) render();
 }
 function htmlMedaillon2v2(k, inter, visee){
-  const j = S.joueurs[k], h = heroDe(j), moi = k===0, ennemi = j.eq!==S.joueurs[0].eq, R2 = S.r2;
+  const j = S.joueurs[k], h = heroDe(j), moi = k===siege2(), ennemi = j.eq!==S.joueurs[siege2()].eq, R2 = S.r2;
   const sym = FACTIONS[j.heros] ? FACTIONS[j.heros].sym : "✦";
-  const ciblable = ennemi && visee && cibles2v2(0, k).face;
+  const ciblable = ennemi && visee && cibles2v2(siege2(), k).face;
   const activable = moi && inter && pouvoirPret(j);
   const balise = ennemi || activable ? "button" : "div";
   const attrs = ennemi ? `type="button" data-act="face2" data-id="${k}" aria-label="Viser ${esc(h.nom)}"` : activable ? `type="button" data-act="pouvoir" aria-label="Activer ${esc(h.pouvoir ? h.pouvoir.nom : "le pouvoir")}"` : "";
-  const role = moi ? "Vous" : j.eq===S.joueurs[0].eq ? "Votre allié" : j.nom;
+  const role = moi ? "Vous" : j.eq===S.joueurs[siege2()].eq ? (j.humain && S.enLigne2v2 ? `${j.nom} (allié)` : "Votre allié") : j.nom;
   const etat = j.esprit
     ? `Esprit : revient dans ${Math.max(1, R2.resuTours - j.tEsprit)} tour${Math.max(1, R2.resuTours - j.tEsprit)>1 ? "s" : ""}`
     : j.reserve ? `+${j.reserve} puissance en réserve` : "";
@@ -7686,7 +7694,7 @@ function htmlMedaillon2v2(k, inter, visee){
   </div>`;
 }
 function htmlBloc2v2(k, inter, visee, ciblesEnn){
-  const j = S.joueurs[k], moi = k===0, ennemi = j.eq!==S.joueurs[0].eq;
+  const j = S.joueurs[k], moi = k===siege2(), ennemi = j.eq!==S.joueurs[siege2()].eq;
   const vide = j.esprit ? "Esprit : plus de créatures" : ennemi ? "Aucune créature" : moi ? "Vos créatures" : "Créatures de votre allié";
   const crea = j.plateau.map(c => moi ? htmlCrea(c, "own", inter ? (ui.armeEnAttente ? "cible" : `${c.peutAttaquer && !c.aAttaque ? "peut" : ""} ${ui.attaquant===c.uid ? "choisie" : ""}`) : "")
                                       : htmlCrea(c, ennemi ? "enemy" : "allie", ennemi && visee && ciblesEnn.has(c.uid) ? "cible" : "")).join("");
@@ -7697,35 +7705,37 @@ function htmlBloc2v2(k, inter, visee, ciblesEnn){
 }
 function render2v2(){
   const app = document.getElementById("app");
-  const moi = S.joueurs[0], allie = S.joueurs[2], inter = interactif();
+  const sg = siege2(), ia = allieDe(sg), [e1, e2] = ennemisDe(sg), monEq = S.joueurs[sg].eq;
+  const moi = S.joueurs[sg], allie = S.joueurs[ia], inter = interactif() && !(S.enLigne2v2 && L2.hotePerdu);
   const visee = inter && !moi.esprit && (ui.attaquant || moi.combat>0);
-  const ciblesEnn = new Set([1, 3].flatMap(k => [...cibles2v2(0, k).creatures]));
+  const ciblesEnn = new Set([e1, e2].flatMap(k => [...cibles2v2(sg, k).creatures]));
   const n = moi.main.length, milieu = (n-1)/2, pas = Math.min(5, 26/Math.max(n, 1));
   const base = CARTES[REGLES.carteBase] ? {uid:"base", id:REGLES.carteBase} : null;
-  const monTour = S.vainqueur===null && S.courant===0;
+  const monTour = S.vainqueur===null && S.courant===sg;
   const courant = S.joueurs[S.courant];
-  const qui = S.courant===2 ? "Votre allié joue" : "L’adversaire joue";
+  const qui = S.courant===ia ? "Votre allié joue" : "L’adversaire joue";
   memoriserPositions();
   app.innerHTML = `
   <header class="barre-jeu">
-    <span class="logo-mini">${NOM_JEU}</span><span class="mode">2 contre 2</span>
+    <span class="logo-mini">${NOM_JEU}</span><span class="mode">2 contre 2${S.enLigne2v2 ? " en ligne" : ""}</span>
     <span class="tour-info">Tour ${Math.ceil(S.tour/4)}</span>
-    <span class="pastille-tour ${S.vainqueur!==null ? "" : monTour ? "a-moi" : "adverse"}">${S.vainqueur!==null ? "Partie terminée" : monTour ? (moi.esprit ? "À vous (esprit)" : "À vous de jouer") : S.courant===2 ? "Tour de votre allié" : `Tour de ${esc(courant.nom)}`}</span>
+    <span class="pastille-tour ${S.vainqueur!==null ? "" : monTour ? "a-moi" : "adverse"}">${S.vainqueur!==null ? "Partie terminée" : monTour ? (moi.esprit ? "À vous (esprit)" : "À vous de jouer") : S.courant===ia ? "Tour de votre allié" : `Tour de ${esc(courant.nom)}`}</span>
     ${htmlSon(false)}
     <button type="button" class="btn-discret" data-act="nouvelle">Quitter la partie</button>
   </header>
   <div class="table-jeu">
     <div class="plateau plateau-2v2 ${S.vainqueur!==null ? "" : monTour ? "tour-moi" : "tour-adverse"}">
-      <div class="rang2 rang-ennemis">${htmlBloc2v2(1, inter, visee, ciblesEnn)}${htmlBloc2v2(3, inter, visee, ciblesEnn)}</div>
+      <div class="rang2 rang-ennemis">${htmlBloc2v2(e1, inter, visee, ciblesEnn)}${htmlBloc2v2(e2, inter, visee, ciblesEnn)}</div>
       <div class="axe axe-2v2">
-        <span class="jauge-eq" title="Créatures adverses détruites par votre équipe">Pouvoir de votre équipe : ${S.jauge[0]} / ${S.r2.seuilJauge}</span>
+        <span class="jauge-eq" title="Créatures adverses détruites par votre équipe">Pouvoir de votre équipe : ${S.jauge[monEq]} / ${S.r2.seuilJauge}</span>
         <span class="axe-ligne"></span>
         <button type="button" class="fin ${inter ? "attend" : ""}" data-act="fin" ${inter ? "" : "disabled"}>${inter || S.vainqueur!==null ? "Fin du tour" : "Patientez"}</button>
         <span class="axe-ligne"></span>
-        <span class="jauge-eq" title="Créatures de votre équipe détruites par les adversaires">Pouvoir adverse : ${S.jauge[1]} / ${S.r2.seuilJauge}</span>
+        <span class="jauge-eq" title="Créatures de votre équipe détruites par les adversaires">Pouvoir adverse : ${S.jauge[1 - monEq]} / ${S.r2.seuilJauge}</span>
         ${S.vainqueur===null && !monTour ? `<span class="adversaire-joue" role="status">${qui}<span class="points" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></span>` : ""}
       </div>
-      <div class="rang2 rang-allies">${htmlBloc2v2(2, inter, visee, ciblesEnn)}${htmlBloc2v2(0, inter, visee, ciblesEnn)}</div>
+      <div class="rang2 rang-allies">${htmlBloc2v2(ia, inter, visee, ciblesEnn)}${htmlBloc2v2(sg, inter, visee, ciblesEnn)}</div>
+      ${S.enLigne2v2 && L2.hotePerdu ? `<p class="avertissement centre">L’hôte de la partie ne répond plus. <button type="button" class="btn second" data-act="nouvelle">Quitter</button></p>` : ""}
       <div class="barre-moi">
         <div class="main-allie" aria-label="Main de votre allié"><span class="aide">Main de votre allié</span><div class="cartes-allie">${allie.main.map(c => htmlCarte(c)).join("") || `<span class="aide">vide</span>`}</div></div>
         <div class="ressources-jeu">
@@ -7757,21 +7767,21 @@ function render2v2(){
 }
 // Clics propres au 2 contre 2 (les autres actions passent par le jeu habituel)
 function clic2v2(act, id){
-  const j = S.joueurs[0];
+  const j = S.joueurs[siege2()];
   if(act==="enemy" || act==="face2"){
     if(j.esprit) return erreur("Un esprit ne peut pas attaquer : soutenez votre allié avec vos cartes."), true;
     const p = act==="face2" ? S.joueurs[Number(id)] : proprietaire(id);
     if(!p) return true;
     const k = S.joueurs.indexOf(p), cible = act==="face2" ? "face" : id;
-    if(ui.attaquant){ attaquer2v2(ui.attaquant, cible, k); ui.attaquant = null; }
-    else if(j.combat>0) utiliserCombat2v2(cible, k);
+    if(ui.attaquant){ A2().attaquer2v2(ui.attaquant, cible, k); ui.attaquant = null; }
+    else if(j.combat>0) A2().utiliserCombat2v2(cible, k);
     else erreur("Sélectionnez une de vos créatures prêtes, ou gagnez de la puissance pour que votre héros attaque.");
     return true;
   }
   return false;
 }
 function htmlFin2v2(){
-  const gagne = S.equipeGagnante===S.joueurs[0].eq;
+  const gagne = S.equipeGagnante===S.joueurs[siege2()].eq;
   return `<div class="boite" role="dialog" aria-label="Fin de partie">
     <h2>${gagne ? "Victoire de votre équipe !" : "Défaite"}</h2>
     <p>${gagne ? "Les deux héros adverses sont tombés." : "Votre héros et celui de votre allié sont tombés."} Partie terminée au tour ${Math.ceil(S.tour/4)}.</p>
@@ -9607,14 +9617,14 @@ async function verifierRecompense2v2(){
   }
   if(!PROG.pret || !S || !est2v2() || S.vainqueur===null || !S.ticket2v2 || PROG.recompensees.has(S.idPartie)) return;
   PROG.recompensees.add(S.idPartie);
-  const id = S.idPartie, j = S.joueurs[0], st = S.stats[0] || {};
+  const sg = siege2(), id = S.idPartie, j = S.joueurs[sg], st = S.stats[sg] || {};
   const base = o => { const r = {}; for(const [k, n] of Object.entries(o || {})){ const b = (CARTES[k] && CARTES[k].versionDe) || k; r[b] = (r[b] || 0) + n; } return r; };
   let res;
   try {
     res = await rpc("enregistrer_2v2", {d:{ticket:S.ticket2v2, victoire:S.equipeGagnante===j.eq, tours:Math.max(1, Math.ceil(S.tour/4)),
       camp:{heros:j.heros, degats:st.degats || 0, soins:st.soins || 0, creatures:st.creatures || 0, sorts:st.sorts || 0, achats:st.achats || 0, pouvoirs:st.pouvoirs || 0,
             jouees:base(st.jouees), achetees:base(st.achetees), palier:j.palier || 0, pv_fin:j.pv},
-      details:{allie:S.joueurs[allieDe(0)].heros, resurrections:(S.c2v2 || {}).resurrections || 0, chutes:(S.c2v2 || {}).chutes || 0}}});
+      details:{allie:S.joueurs[allieDe(sg)].heros, resurrections:((S.c2v2 || {}).resurrections || [])[j.eq] || 0, chutes:((S.c2v2 || {}).chutes || [])[j.eq] || 0}}});
   } catch(e) { res = {erreur:/function|does not exist|schema cache/i.test(e.message) ? "le 2 contre 2 n’est pas encore enregistré sur ce serveur" : e.message}; }
   PROG.gain2v2 = {id, ...res};
   await Promise.all([rafraichir().catch(() => {}), chargerQuetes2v2(), chargerStats2v2(), chargerBonus2v2()]);
@@ -9626,7 +9636,7 @@ function htmlGain2v2(){
   if(!PROG.actif) return "";
   if(!g || g.id!==S.idPartie) return `<p class="aide">Enregistrement de la partie…</p>`;
   if(g.erreur) return `<p class="avertissement">Partie non comptée : ${esc(String(g.erreur).replace(/\.+$/, ""))}.</p>`;
-  return `<p class="gain">${g.gain ? `+${g.gain} or` : "Plafond d’or du jour atteint."}</p>${g.bonus ? `<p class="gain bonus-fin">🏆 Victoire du jour : +${g.bonus} or</p>` : ""}<p class="aide">La partie compte pour vos quêtes et statistiques de 2 contre 2.</p>`;
+  return `<p class="gain">${g.gain ? `+${g.gain} or` : "Plafond d’or du jour atteint."}</p>${g.bonus ? `<p class="gain bonus-fin">🏆 Victoire du jour : +${g.bonus} or</p>` : ""}${g.elo!=null ? `<p class="gain">Cote du 2 contre 2 : ${g.elo>0 ? "+" : ""}${g.elo}</p>` : ""}<p class="aide">La partie compte pour vos quêtes et statistiques de 2 contre 2.</p>`;
 }
 function htmlStats2v2(s){
   if(!s) return `<p class="aide">Aucune statistique pour le moment.</p>`;
@@ -9746,7 +9756,7 @@ const htmlBonusJour2v2 = () => {
    2 CONTRE 2 EN LIGNE (étape 1) : salons et recherche de partie
    ============================================================ */
 const SAL = {code:null, etat:null, minuteur:null, recherche:false, saisie:""};
-const enLigne2v2Visible = () => !!(PROG.actif && PROG.admin);   // réservé à l’administrateur tant que la partie en ligne n’est pas terminée
+const enLigne2v2Visible = () => !!PROG.actif;
 async function entrerSalon(r){
   if(!r || r.erreur) return erreur((r && r.erreur) || "Impossible de rejoindre ce salon.");
   SAL.code = r.code; SAL.etat = null; ui.ecran = "salon2v2";
@@ -9766,7 +9776,7 @@ function quitterSalon(){
 }
 function htmlEnLigne2v2(){
   if(!enLigne2v2Visible()) return "";
-  return `<section class="bloc-2v2 en-ligne-2v2"><h2>Jouer en ligne <span class="pastille-test">Test</span></h2>
+  return `<section class="bloc-2v2 en-ligne-2v2"><h2>Jouer en ligne <span class="pastille-test">Bêta</span></h2>
     <p class="aide">Jouez avec d’autres joueurs : l’ordinateur prend les places libres.</p>
     <div class="actions-en-ligne-2v2">
       <button type="button" class="btn" data-act="salon2v2-chercher">Rechercher une partie</button>
@@ -9817,6 +9827,146 @@ function actionSalon2v2(act, id){
   return null;
 }
 document.addEventListener("input", e => { if(e.target.dataset && e.target.dataset.sal) SAL[e.target.dataset.sal] = e.target.value.toUpperCase(); });
+
+/* ============================================================
+   2 CONTRE 2 EN LIGNE (étape 2) : partie en temps réel à 4
+   L’hôte fait tourner le moteur (et les bots) ; chaque joueur envoie ses actions en ordres numérotés.
+   ============================================================ */
+const L2 = {canal:null, code:null, hote:false, siege:0, ticket:null, seq:0, version:0, vus:{}, decks:{}, sieges:null, minuteurs:[], dernierEtat:0, fini:false};
+const enPartie2v2Ligne = () => !!(S && S.enLigne2v2);
+const hote2v2 = () => !enPartie2v2Ligne() || L2.hote;
+function fermerCanal2v2(){
+  L2.minuteurs.forEach(m => clearInterval(m)); L2.minuteurs = [];
+  const sb = window.__supa && window.__supa.client();
+  if(L2.canal && sb){ try { sb.removeChannel(L2.canal); } catch(e) {} }
+  L2.canal = null;
+}
+const emettre2v2 = (ev, payload) => { if(L2.canal) Promise.resolve(L2.canal.send({type:"broadcast", event:ev, payload})).catch(() => {}); };
+function ouvrirCanal2v2(code, gestion){
+  fermerCanal2v2();
+  const sb = window.__supa && window.__supa.client(); if(!sb) return Promise.resolve(false);
+  L2.canal = sb.channel(`salon2v2-${code}`, {config:{broadcast:{self:false}}});
+  for(const [ev, f] of Object.entries(gestion)) L2.canal.on("broadcast", {event:ev}, msg => f((msg && msg.payload) || {}));
+  return new Promise(ok => { const d = setTimeout(() => ok(false), 10000); L2.canal.subscribe(st => { if(st==="SUBSCRIBED"){ clearTimeout(d); ok(true); } }); });
+}
+// ----- Hôte : diffusion de l’état complet après chaque action
+function publier2v2(){
+  if(!enPartie2v2Ligne() || !L2.hote) return;
+  L2.version++;
+  const e = JSON.parse(JSON.stringify(S)); delete e.ticket2v2; delete e.siegeLocal;
+  e.journal = e.journal.slice(-14);
+  emettre2v2("etat", {v:L2.version, etat:e});
+}
+function executerOrdre2v2(o, siege){
+  const c = o.cmd || {};
+  if(S.vainqueur!==null || S.courant!==siege) return;
+  S.choixBenef = c.benef ?? null;
+  EN.capture = true; EN.refusCapture = null;
+  try {
+    switch(c.type){
+      case "jouer": jouer(c.id, c.opts || {}); break;
+      case "attaquer": attaquer2v2(c.att, c.cible, c.k); break;
+      case "combat": utiliserCombat2v2(c.cible, c.k); break;
+      case "acheter": acheter(c.k); break;
+      case "sacrifier": sacrifier(c.id); break;
+      case "bannir": bannir(c.id); break;
+      case "bannirStop": S.bannirEnAttente = 0; break;
+      case "fin": finTour(); break;
+      case "pouvoir": activerPouvoir(); break;
+    }
+  } finally { EN.capture = false; }
+}
+function gestionHote2v2(){
+  return {
+    bonjour: () => publier2v2(),
+    deck: p => { if(Number.isInteger(p.siege) && Array.isArray(p.cartes)) L2.decks[p.siege] = {cartes:p.cartes.slice(0, 60), id:p.id}; },
+    vivant: p => { if(Number.isInteger(p.siege)) L2.vus[p.siege] = Date.now(); },
+    ordre: p => {
+      if(!enPartie2v2Ligne() || !Number.isInteger(p.siege)) return;
+      const s = L2.sieges && L2.sieges[p.siege];
+      if(!s || s.joueur!==p.id || !S.joueurs[p.siege].humain) return;   // seul le joueur assis à cette place peut la jouer
+      L2.vus[p.siege] = Date.now();
+      if(p.seq <= (S.seqs2v2[p.siege] || 0)) return;
+      S.seqs2v2[p.siege] = p.seq;
+      executerOrdre2v2(p, p.siege);
+      apresAction();
+    }
+  };
+}
+// Un joueur silencieux depuis 20 s est remplacé par l’ordinateur
+function surveillerPresence2v2(){
+  if(!enPartie2v2Ligne() || !L2.hote || S.vainqueur!==null) return;
+  let change = false;
+  S.joueurs.forEach((j, k) => {
+    if(k===L2.siege || !j.humain || !L2.sieges[k]) return;
+    if(Date.now() - (L2.vus[k] || L2.debut) > 20000){
+      j.humain = false; change = true;
+      log(`${j.nom} s’est déconnecté : l’ordinateur prend le relais.`);
+    }
+  });
+  if(change) apresAction();
+}
+// ----- Démarrage, appelé par le salon quand l’hôte lance la partie
+async function demarrerPartie2v2Ligne(E){
+  if(L2.code===E.code && (L2.canal || S && S.enLigne2v2)) return;
+  Object.assign(L2, {code:E.code, hote:!!E.hote, siege:E.moi, ticket:E.ticket, seq:0, version:0, vus:{}, decks:{}, sieges:(E.sieges || []), fini:false, debut:Date.now(), dernierEtat:Date.now()});
+  SAL.code = null; clearInterval(SAL.minuteur);
+  const monDeck = (() => { const v = decksValides(), d = v.find(x => x.id===PROG.prep2v2.deck) || v[0]; return d ? d.cartes : null; })();
+  ui.ecran = "jeu"; S = null; L2.attente = "Connexion à la partie…"; render();
+  if(L2.hote){
+    const ok = await ouvrirCanal2v2(E.code, gestionHote2v2());
+    if(!ok){ L2.attente = null; return erreur("Connexion à la partie impossible."); }
+    emettre2v2("demande-deck", {});
+    await pause(4000);   // laisse aux joueurs le temps d’envoyer leur deck
+    const humains = L2.sieges.map((s, k) => s ? k : null).filter(k => k!==null);
+    const decks = await Promise.all([0, 1, 2, 3].map(async k => {
+      if(k===L2.siege) return monDeck;
+      const d = L2.decks[k]; if(!d || !L2.sieges[k]) return null;
+      try { return await rpc("deck_invite_valide", {p_invite:L2.sieges[k].joueur, p_cartes:d.cartes}) ? d.cartes : null; } catch(e) { return d.cartes; }
+    }));
+    nouvellePartie2v2(decks, {humains, noms:L2.sieges.map((s, k) => s ? s.pseudo : `Ordinateur ${k + 1}`), depart:0, mode:"enligne2v2"});
+    Object.assign(S, {enLigne2v2:true, siegeLocal:L2.siege, ticket2v2:L2.ticket, seqs2v2:{}});
+    L2.attente = null;
+    L2.minuteurs.push(setInterval(surveillerPresence2v2, 3000), setInterval(publier2v2, 6000));
+    Object.assign(ui, {ecran:"jeu", attaquant:null, armeEnAttente:null, aiEnCours:false, couvert:false});
+    apresAction();
+  } else {
+    const ok = await ouvrirCanal2v2(E.code, {
+      etat: p => {
+        if(!p.etat || p.v <= L2.version) return;
+        L2.version = p.v; L2.dernierEtat = Date.now(); L2.attente = null;
+        S = p.etat; S.siegeLocal = L2.siege; S.ticket2v2 = L2.ticket;
+        if(S.courant!==L2.siege){ ui.attaquant = null; ui.armeEnAttente = null; }
+        render();
+      },
+      "demande-deck": () => emettre2v2("deck", {siege:L2.siege, id:EN.monId || (PROG.user && PROG.user.id), cartes:monDeck || []}),
+      "hote-parti": () => { L2.hotePerdu = true; render(); }
+    });
+    if(!ok){ L2.attente = null; return erreur("Connexion à la partie impossible."); }
+    emettre2v2("deck", {siege:L2.siege, id:EN.monId || (PROG.user && PROG.user.id), cartes:monDeck || []});
+    emettre2v2("bonjour", {});
+    L2.minuteurs.push(setInterval(() => {
+      emettre2v2("vivant", {siege:L2.siege});
+      if(S && S.vainqueur===null && Date.now() - L2.dernierEtat > 30000 && !L2.hotePerdu){ L2.hotePerdu = true; render(); }
+    }, 3000));
+  }
+}
+function envoyer2v2(cmd){
+  L2.seq++;
+  emettre2v2("ordre", {siege:L2.siege, id:EN.monId || (PROG.user && PROG.user.id), seq:L2.seq, cmd:{...cmd, benef:S.choixBenef ?? null}});
+  return true;
+}
+const MOTEUR_2V2_DISTANT = {
+  jouer:(id, opts={}) => envoyer2v2({type:"jouer", id, opts}), acheter:k => envoyer2v2({type:"acheter", k}),
+  sacrifier:id => envoyer2v2({type:"sacrifier", id}), bannir:id => envoyer2v2({type:"bannir", id}), bannirStop:() => envoyer2v2({type:"bannirStop"}),
+  finTour:() => envoyer2v2({type:"fin"}), activerPouvoir:() => envoyer2v2({type:"pouvoir"}),
+  attaquer2v2:(att, cible, k) => envoyer2v2({type:"attaquer", att, cible, k}), utiliserCombat2v2:(cible, k) => envoyer2v2({type:"combat", cible, k})
+};
+const A2 = () => enPartie2v2Ligne() && !L2.hote ? MOTEUR_2V2_DISTANT : {attaquer2v2, utiliserCombat2v2};
+function quitterPartie2v2Ligne(){
+  if(L2.hote && L2.code && S && S.vainqueur===null) emettre2v2("hote-parti", {});
+  fermerCanal2v2(); L2.code = null;
+}
 
 chargerConfig();
 appliquerReglageAnimations();
