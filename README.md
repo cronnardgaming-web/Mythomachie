@@ -133,6 +133,12 @@ propres au mode : « Frères d’armes » (victoires) et « Indestructibles » (
 transforme en encre, en une seule fois, tous les exemplaires au-delà du maximum utile d’un deck (mêmes règles que le
 recyclage carte par carte). Sans ce script, le bouton fonctionne quand même, exemplaire par exemplaire.
 
+## Correctif des cadeaux automatiques
+
+`supabase-correctif-cadeaux-auto.sql` (après `supabase-cadeaux-auto.sql`) : les parties de 2 contre 2 comptent
+désormais pour les paliers. Après l’exécution, cliquez sur « Envoyer maintenant aux joueurs ayant déjà atteint ces
+paliers » pour servir ceux qui les avaient atteints grâce au 2 contre 2.
+
 ## Cadeaux automatiques
 
 `supabase-cadeaux-auto.sql` (après `supabase-social.sql`) : onglet « Cadeaux automatiques » de l’administration.

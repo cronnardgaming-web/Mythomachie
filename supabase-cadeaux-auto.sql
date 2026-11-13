@@ -1,7 +1,7 @@
 -- =====================================================================
 -- CADEAUX AUTOMATIQUES : un message avec cadeau dès qu’un joueur atteint un nombre de parties
 -- À exécuter une fois dans Supabase (SQL Editor, puis Run), après supabase-social.sql.
--- Les parties comptées sont celles contre l’ordinateur et en ligne. Chaque palier n’est envoyé
+-- Les parties comptées sont celles contre l’ordinateur, en ligne et en 2 contre 2. Chaque palier n’est envoyé
 -- qu’une fois par joueur. Dans le texte, {pseudo} et {parties} sont remplacés automatiquement.
 -- =====================================================================
 create table if not exists public.paliers_parties (
@@ -27,7 +27,7 @@ create or replace function public.envoyer_paliers_parties(u uuid) returns int
 language plpgsql security definer set search_path = public as $$
 declare n int; p paliers_parties; pseudo text; envoyes int := 0;
 begin
-  select count(*) into n from parties_jouees where joueur = u and mode in ('ia', 'enligne');
+  select count(*) into n from parties_jouees where joueur = u and mode in ('ia', 'enligne', '2v2');
   select coalesce(pr.pseudo, 'aventurier') into pseudo from profils pr where pr.id = u;
   for p in select * from paliers_parties pp where pp.actif and pp.seuil <= n
              and not exists (select 1 from envois_paliers e where e.joueur = u and e.palier = pp.id) order by pp.seuil loop
@@ -48,7 +48,7 @@ revoke execute on function public.envoyer_paliers_parties(uuid) from public, ano
 create or replace function public.declencher_paliers_parties() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
-  if new.joueur is not null and new.mode in ('ia', 'enligne') then perform envoyer_paliers_parties(new.joueur); end if;
+  if new.joueur is not null and new.mode in ('ia', 'enligne', '2v2') then perform envoyer_paliers_parties(new.joueur); end if;
   return new;
 end $$;
 drop trigger if exists parties_paliers on public.parties_jouees;
@@ -61,7 +61,7 @@ begin
   if not est_admin() then raise exception 'Réservé à l’administrateur.'; end if;
   return (select coalesce(jsonb_agg(jsonb_build_object('id', p.id, 'seuil', p.seuil, 'titre', p.titre, 'texte', p.texte, 'cadeau', p.cadeau, 'actif', p.actif,
             'envois', (select count(*) from envois_paliers e where e.palier = p.id),
-            'eligibles', (select count(*) from (select joueur from parties_jouees where joueur is not null and mode in ('ia', 'enligne')
+            'eligibles', (select count(*) from (select joueur from parties_jouees where joueur is not null and mode in ('ia', 'enligne', '2v2')
                                                 group by joueur having count(*) >= p.seuil) x)) order by p.seuil), '[]'::jsonb)
           from paliers_parties p);
 end $$;
@@ -95,7 +95,7 @@ language plpgsql security definer set search_path = public as $$
 declare u uuid; total int := 0;
 begin
   if not est_admin() then raise exception 'Réservé à l’administrateur.'; end if;
-  for u in select distinct joueur from parties_jouees where joueur is not null and mode in ('ia', 'enligne') loop
+  for u in select distinct joueur from parties_jouees where joueur is not null and mode in ('ia', 'enligne', '2v2') loop
     total := total + envoyer_paliers_parties(u);
   end loop;
   return total;
