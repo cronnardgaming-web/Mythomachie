@@ -101,6 +101,10 @@ index.html) : l’hôte fait tourner la partie et les bots, chaque joueur voit l
 actions en ordres numérotés (refusés hors de son tour), un joueur silencieux 20 secondes est remplacé par l’ordinateur,
 et chaque joueur humain enregistre sa partie avec son propre ticket (or, quêtes, statistiques, bonus, cote).
 
+## Joueurs en ligne
+
+`supabase-joueurs-en-ligne.sql` : nombre de joueurs actifs ces 2 dernières minutes, affiché sur l’accueil.
+
 ## 2 contre 2 en ligne (étape 3)
 
 `supabase-2v2-ligne-suite.sql` (après `supabase-2v2-ligne.sql`) : invitation d’un ami dans un salon (bannière chez

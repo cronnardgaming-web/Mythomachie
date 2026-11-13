@@ -1084,6 +1084,18 @@ body.compact .nom-heros-deck{font-size:17px}
 .banniere-invit{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:60;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-radius:10px;border:1px solid var(--or, var(--bronze));background:var(--zone);box-shadow:0 12px 30px -10px rgba(0,0,0,.7)}
 .banniere-invit .btn{margin:0}
 
+/* Aperçu au survol, statistiques lisibles en 2 contre 2, joueurs en ligne */
+.apercu-survol{position:fixed;z-index:95;pointer-events:none;filter:drop-shadow(0 18px 30px rgba(0,0,0,.7));animation:apparition-survol .12s ease-out}
+.apercu-survol:not(.apercu-crea) > *{position:absolute;left:0;top:0}
+.apercu-crea{display:flex;flex-direction:column;align-items:center;gap:6px}
+.apercu-crea .carte{--w:inherit;width:var(--w);cursor:default}
+.etat-apercu{margin:0;padding:4px 10px;border-radius:99px;font-size:13px;background:rgba(10,10,14,.9);color:#f1e8d4;border:1px solid var(--line)}
+@keyframes apparition-survol{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion: reduce){ .apercu-survol{animation:none} }
+.plateau-2v2 .crea .atk,.plateau-2v2 .crea .pv{width:max(34cqw, 24px);height:max(34cqw, 24px);font-size:max(19cqw, 14px);font-weight:800}
+.pastille-en-ligne{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:12.5px;padding:2px 10px;border-radius:99px;border:1px solid var(--line);background:color-mix(in srgb, var(--zone) 80%, transparent);color:var(--ink-2)}
+.pastille-en-ligne i{width:8px;height:8px;border-radius:50%;background:#4fd18b;box-shadow:0 0 6px #4fd18b}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -4365,6 +4377,7 @@ document.addEventListener("mouseover", e => {
   if(el===bulleCible) return;
   if(!el){ cacherBulle(); return; }
   bulleCible = el;
+  if(typeof SURVOL!=="undefined" && SURVOL.el) return;
   const b = document.getElementById("bulle");
   const texte = el.dataset.aide==="carte" ? el.dataset.texte : TEXTES_AIDE[el.dataset.aide];
   if(!texte){ cacherBulle(); return; }
@@ -5649,7 +5662,7 @@ async function chargerQuete(){
 }
 async function chargerMesStats(annoncer){
   chargerQuete().then(() => { if(!S && PROG.pret && ui.ecran==="jeu") renderCouche(); });
-  Promise.all([chargerTrophees(), chargerPaquetsOfferts(), chargerSaison(), chargerSocial(), chargerStats2v2(), chargerBonus2v2()]).then(() => {
+  Promise.all([chargerTrophees(), chargerPaquetsOfferts(), chargerSaison(), chargerSocial(), chargerStats2v2(), chargerBonus2v2(), chargerEnLigne()]).then(() => {
     if(!S && PROG.pret){ if(ui.ecran==="jeu") renderCouche(); else if(["profil", "boutique", "saison"].includes(ui.ecran)) renderProg(); }
   });
   try { PROG.mesStats = await rpc("mes_stats"); } catch(e) { return; }
@@ -6612,6 +6625,7 @@ function icoVolante(cle, taille){
 }
 // Origine d’un effet : la carte jouée (avant affichage), sinon le médaillon ou la main adverse
 function origine(ev){
+  if(est2v2() && ev.j!==undefined && ev.j!==vue()){ const r = rectDe(`.medaillon[data-joueur="${ev.j}"]`); if(r) return centre(r); }
   if(ev.src && POS_AVANT[ev.src]) return centre(POS_AVANT[ev.src].r);
   if(ev.src==="heros"){ const r = rectDe(`.medaillon[data-joueur="${ev.j}"]`); if(r) return centre(r); }
   const r = ev.j===vue() ? rectDe(".zone-main .main") : (POS_AVANT["main-adverse"] && POS_AVANT["main-adverse"].r) || rectDe(".main-adverse");
@@ -7164,7 +7178,7 @@ function htmlHall(){
   const compteIncomplet = typeof compteEtat==="function" && compteEtat()!=="complet";
   return `<div class="hall" role="main" aria-label="${NOM_JEU}">
     <header class="hall-tete">
-      <div class="hall-logo"><h1 class="logo">${NOM_JEU}</h1><span class="sous-logo">Le choc des panthéons</span></div>
+      <div class="hall-logo"><h1 class="logo">${NOM_JEU}</h1><span class="sous-logo">Le choc des panthéons</span>${PROG.actif && PROG.enLigneNb ? `<span class="pastille-en-ligne"><i aria-hidden="true"></i>${nf(PROG.enLigneNb)} joueur${PROG.enLigneNb>1 ? "s" : ""} en ligne</span>` : ""}</div>
       <div class="hall-droite">
         ${bourse()}
         <button type="button" class="hall-profil" data-act="prog-profil" title="Mon profil"><span class="avatar" aria-hidden="true">${esc((pseudo || "?").charAt(0).toUpperCase())}</span><span class="nom-profil">${pseudo ? esc(pseudo) : "Choisir un pseudo"}${p.titre ? `<small class="titre-joueur">${esc(p.titre)}</small>` : ""}</span></button>
@@ -7574,7 +7588,7 @@ function choisirCibleIA(i){
   return enn.sort((a, b) => strat==="equilibre" ? S.joueurs[b].pv - S.joueurs[a].pv : S.joueurs[a].pv - S.joueurs[b].pv)[0];
 }
 async function jouerTourIA2v2(){
-  const etape = async () => { if(!S.simulation && typeof document!=="undefined" && document.getElementById("app")){ render(); await pause(520); } };
+  const etape = async () => { if(!S.simulation && typeof document!=="undefined" && document.getElementById("app")){ render(); await pause(520); if(typeof sonsTermines==="function") await sonsTermines(1800); } };
   const i = S.courant, j = S.joueurs[i];
   const expert = S.niveau2v2==="expert" && j.eq!==S.joueurs[siege2()].eq;   // le niveau choisi s’applique aux adversaires
   if(!j.esprit && pouvoirPret(j)){ activerPouvoir(); bannirAuto(); await etape(); }
@@ -9190,7 +9204,9 @@ async function deroulerFile(){
   if(SONS.enCours) return;
   SONS.enCours = true;
   while(SONS.file.length){
-    const {cle, opts} = SONS.file.shift();
+    const {cle, opts, t} = SONS.file.shift();
+    // Un son en retard de plus d’une seconde ne correspond plus à ce qu’on voit : il est abandonné (sauf les grands moments)
+    if(t && performance.now() - t > 1000 && poidsSon(cle)[1] < 7) continue;
     let d = 0; try { d = await lireSon(cle, opts); } catch(e) {}
     if(d>0) await new Promise(r => setTimeout(r, d * 1000 + 60));
   }
@@ -9212,7 +9228,7 @@ function jouerSon(cle, opts = {}){
     if(poidsSon(SONS.file[plusFaible].cle)[1] >= prio) return;
     SONS.file.splice(plusFaible, 1);
   }
-  SONS.file.push({cle, opts});
+  SONS.file.push({cle, opts, t:performance.now()});
   deroulerFile();
 }
 function prechargerBruitages(){ Object.values(CONFIG.bruitages || {}).forEach(c => (c && c.fichiers || []).forEach(f => tamponSon(f))); }
@@ -10061,6 +10077,59 @@ async function reprendreHote2v2(){
   ui.aiEnCours = false;
   apresAction();
 }
+
+/* ----- Aperçu agrandi d’une carte au survol de la souris (tous les modes, souris uniquement) ----- */
+const SURVOL = {el:null, cible:null, minuteur:null};
+const sourisPrecise = () => window.matchMedia && matchMedia("(hover: hover) and (pointer: fine)").matches;
+function cacherSurvol(){ clearTimeout(SURVOL.minuteur); SURVOL.cible = null; if(SURVOL.el){ SURVOL.el.remove(); SURVOL.el = null; } }
+function montrerSurvol(cible){
+  cacherSurvol();
+  if(!cible.isConnected) return;
+  const r = cible.getBoundingClientRect(); if(r.width<8) return;
+  // Agrandissement : environ ×2,5, sans dépasser 85 % de la hauteur de l’écran
+  const f = Math.min(Math.max(2, 320 / r.width), innerHeight * 0.85 / r.height, 4);
+  const L = r.width * f, H = r.height * f;
+  const el = document.createElement("div"); el.className = "apercu-survol"; el.setAttribute("aria-hidden", "true");
+  // Créature en jeu : la carte complète (texte et effets), avec son attaque et ses PV actuels
+  if(cible.classList.contains("crea") && S){
+    const c = S.joueurs.flatMap(j => j.plateau || []).find(x => x.uid===cible.dataset.id);
+    if(c){
+      const Lc = Math.min(300, innerHeight * 0.6);
+      el.classList.add("apercu-crea");
+      el.innerHTML = `<div style="--w:${Lc}px">${htmlCarte(c, {uid:"apercu-" + c.uid})}</div><p class="etat-apercu">Actuellement : <b>${atkTotal(c)}</b> attaque · <b>${vieRestante(c)}</b> / ${c.vieMax} PV${c.bouclier ? " · Résistance" : ""}</p>`;
+      el.querySelectorAll("[data-act]").forEach(x => x.removeAttribute("data-act"));
+      document.body.appendChild(el);
+      const re = el.getBoundingClientRect();
+      let x = r.right + 14; if(x + re.width > innerWidth - 8) x = r.left - re.width - 14; if(x < 8) x = Math.max(8, (innerWidth - re.width) / 2);
+      el.style.left = x + "px"; el.style.top = Math.min(Math.max(8, r.top + r.height/2 - re.height/2), innerHeight - re.height - 8) + "px";
+      SURVOL.el = el; SURVOL.cible = cible; if(typeof cacherBulle==="function") cacherBulle();
+      return;
+    }
+  }
+  const clone = cible.cloneNode(true); clone.removeAttribute("data-act"); clone.querySelectorAll("[data-act]").forEach(x => x.removeAttribute("data-act"));
+  clone.classList.remove("cible", "peut", "choisie", "attaque", "survol"); clone.style.cssText = `width:${r.width}px;height:${r.height}px;margin:0;transform:scale(${f});transform-origin:0 0;--w:${r.width}px`;
+  el.appendChild(clone);
+  let x = r.right + 14; if(x + L > innerWidth - 8) x = r.left - L - 14; if(x < 8) x = Math.max(8, (innerWidth - L) / 2);
+  const y = Math.min(Math.max(8, r.top + r.height/2 - H/2), innerHeight - H - 8);
+  el.style.cssText = `left:${x}px;top:${y}px;width:${L}px;height:${H}px`;
+  document.body.appendChild(el); SURVOL.el = el; SURVOL.cible = cible;
+  if(typeof cacherBulle==="function") cacherBulle();   // l’aperçu montre déjà toute la carte : pas de bulle par-dessus
+}
+document.addEventListener("mouseover", e => {
+  if(!sourisPrecise() || ui.ecran!=="jeu" || !S) return;
+  const c = e.target.closest && e.target.closest("#app .carte, #app .crea");
+  if(!c){ if(SURVOL.cible) cacherSurvol(); return; }
+  if(c===SURVOL.cible) return;
+  cacherSurvol();
+  SURVOL.minuteur = setTimeout(() => { if(c.matches(":hover")) montrerSurvol(c); }, 350);
+});
+document.addEventListener("mouseout", e => { if(SURVOL.cible && !(e.relatedTarget && SURVOL.cible.contains(e.relatedTarget))) cacherSurvol(); });
+["pointerdown", "wheel", "keydown"].forEach(t => document.addEventListener(t, cacherSurvol, {capture:true, passive:true}));
+// Un nouvel affichage remplace les cartes : l’aperçu disparaît s’il ne correspond plus à rien
+setInterval(() => { if(SURVOL.cible && !SURVOL.cible.isConnected) cacherSurvol(); }, 400);
+// ----- Joueurs en ligne (accueil)
+async function chargerEnLigne(){ try { PROG.enLigneNb = await rpc("joueurs_en_ligne"); } catch(e) { PROG.enLigneNb = null; } }
+setInterval(() => { if(PROG.actif && PROG.pret && !document.hidden && !S){ chargerEnLigne().then(() => { if(!S && ui.ecran==="jeu") render(); }); } }, 60000);
 
 chargerConfig();
 appliquerReglageAnimations();
