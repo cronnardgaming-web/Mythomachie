@@ -1074,6 +1074,16 @@ body.compact .nom-heros-deck{font-size:17px}
 .centre{text-align:center}
 @media (max-width:700px){ .equipes-salon{grid-template-columns:1fr} }
 
+/* 2 contre 2 en ligne : classement, invitations */
+.onglets-classement{display:flex;gap:8px;margin-bottom:12px}
+.ligne-moi td{background:color-mix(in srgb, var(--or, var(--bronze)) 14%, transparent);font-weight:700}
+.liste-invit{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.liste-invit li{display:flex;align-items:center;gap:8px}
+.liste-invit .en-ligne{color:#4fd18b}
+.liste-invit .hors-ligne{color:var(--ink-2)}
+.banniere-invit{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:60;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-radius:10px;border:1px solid var(--or, var(--bronze));background:var(--zone);box-shadow:0 12px 30px -10px rgba(0,0,0,.7)}
+.banniere-invit .btn{margin:0}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -5141,6 +5151,7 @@ function renderProg(){
 
 function actionProg(act, id){
   try { sonsActionProg(act, id); } catch(e) {}
+  if(act==="classement-onglet"){ PROG.ongletClassement = id; if(id==="2v2") PROG.classement2v2 = null; render(); return true; }
   if(act.startsWith("salon2v2-")){ const r = actionSalon2v2(act, id); if(r===true) render(); return r!==null; }
   if(/^(prep2v2|lancer-2v2|quete2v2|tuto2v2)$/.test(act)){ const r = actionMode2v2(act, id); if(r===true) render(); return r!==null; }
   if(/^(ami-|boite-|prog-amis$|prog-boite$|prog-nouveautes$)/.test(act)){
@@ -7735,7 +7746,7 @@ function render2v2(){
         ${S.vainqueur===null && !monTour ? `<span class="adversaire-joue" role="status">${qui}<span class="points" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></span>` : ""}
       </div>
       <div class="rang2 rang-allies">${htmlBloc2v2(ia, inter, visee, ciblesEnn)}${htmlBloc2v2(sg, inter, visee, ciblesEnn)}</div>
-      ${S.enLigne2v2 && L2.hotePerdu ? `<p class="avertissement centre">L’hôte de la partie ne répond plus. <button type="button" class="btn second" data-act="nouvelle">Quitter</button></p>` : ""}
+      ${S.enLigne2v2 && L2.hotePerdu ? `<p class="avertissement centre">L’hôte de la partie ne répond plus : un autre joueur va la reprendre dans quelques secondes. <button type="button" class="btn second" data-act="nouvelle">Quitter</button></p>` : ""}
       <div class="barre-moi">
         <div class="main-allie" aria-label="Main de votre allié"><span class="aide">Main de votre allié</span><div class="cartes-allie">${allie.main.map(c => htmlCarte(c)).join("") || `<span class="aide">vide</span>`}</div></div>
         <div class="ressources-jeu">
@@ -8582,13 +8593,15 @@ async function chargerClassement(){
   if(ui.ecran==="classement") renderProg();
 }
 function pageClassement(){
+  const ongl = `<div class="onglets-classement" role="tablist">${[["1v1", "1 contre 1"], ["2v2", "2 contre 2"]].map(([k, l]) => `<button type="button" role="tab" class="pastille-choix ${(PROG.ongletClassement || "1v1")===k ? "choisie" : ""}" aria-selected="${(PROG.ongletClassement || "1v1")===k}" data-act="classement-onglet" data-id="${k}">${l}</button>`).join("")}</div>`;
+  if(PROG.ongletClassement==="2v2") return `${entete("Classement")}<div class="page-classement">${ongl}${htmlClassement2v2()}</div>`;
   const C = PROG.classement;
   if(!C) { chargerClassement(); return `${entete("Classement")}<p class="attente">Chargement…</p>`; }
   if(C.erreur) return `${entete("Classement")}<p class="aide">Le classement n’est pas encore disponible.</p>`;
   const m = C.moi || {};
   const calibrage = (m.parties || 0) < 10;
   return `${entete("Classement")}
-    <div class="page-classement">
+    <div class="page-classement">${ongl}
       <section class="ma-cote">
         <div class="cote-grande"><b>${nf(m.elo ?? 1200)}</b><span>votre cote</span></div>
         <div class="infos-cote">
@@ -9809,6 +9822,7 @@ function pageSalon2v2(){
         <section class="bloc-2v2 equipe-salon eq-b"><h3>Équipe B</h3>${place(1)}${place(3)}</section>
       </div>
       <p class="aide centre">Les équipes jouent en alternance : place 1, puis 2, puis 3, puis 4. Changez de place en cliquant sur « Prendre cette place ».</p>
+      ${htmlInviterAmis2v2(E)}
       ${E.hote ? `<div class="lancer-salon"><button type="button" class="btn-geant" data-act="salon2v2-lancer" ${E.peut_lancer ? "" : "disabled"}><span><b>Lancer la partie</b><small>${nb<4 ? `${4 - nb} place${4 - nb>1 ? "s" : ""} tenue${4 - nb>1 ? "s" : ""} par l’ordinateur` : "Quatre joueurs : c’est complet !"}</small></span></button>
         ${E.peut_lancer ? "" : `<p class="aide centre">Lancement possible dans ${reste} s, ou dès que le salon est complet.</p>`}</div>`
         : `<p class="attente centre">En attente du lancement par l’hôte…</p>`}
@@ -9822,6 +9836,7 @@ function actionSalon2v2(act, id){
       rpc("rejoindre_salon_2v2", {p_code:c}).then(entrerSalon, e => erreur(e.message)); return false; }
     case "salon2v2-place": rpc("changer_siege_2v2", {p_code:SAL.code, p_siege:Number(id)}).then(r => { if(r && r.erreur) erreur(r.erreur); }, e => erreur(e.message)); return false;
     case "salon2v2-quitter": quitterSalon(); return true;
+    case "salon2v2-inviter": rpc("inviter_salon_2v2", {p_ami:id, p_code:SAL.code}).then(r => { if(r && r.erreur) return erreur(r.erreur); (SAL.invites = SAL.invites || new Set()).add(id); erreur("Invitation envoyée."); renderProg(); }, e => erreur(e.message)); return false;
     case "salon2v2-lancer": rpc("lancer_salon_2v2", {p_code:SAL.code}).then(r => { if(r && r.erreur) erreur(r.erreur); }, e => erreur(e.message)); return false;
   }
   return null;
@@ -9909,7 +9924,8 @@ function surveillerPresence2v2(){
 // ----- Démarrage, appelé par le salon quand l’hôte lance la partie
 async function demarrerPartie2v2Ligne(E){
   if(L2.code===E.code && (L2.canal || S && S.enLigne2v2)) return;
-  Object.assign(L2, {code:E.code, hote:!!E.hote, siege:E.moi, ticket:E.ticket, seq:0, version:0, vus:{}, decks:{}, sieges:(E.sieges || []), fini:false, debut:Date.now(), dernierEtat:Date.now()});
+  Object.assign(L2, {code:E.code, hote:!!E.hote, siege:E.moi, ticket:E.ticket, seq:0, version:0, vus:{}, decks:{}, sieges:(E.sieges || []), fini:false, debut:Date.now(), dernierEtat:Date.now(), hotePerdu:false,
+    siegeHote:Math.max(0, (E.sieges || []).findIndex(s => s && s.joueur===E.hote_id))});
   SAL.code = null; clearInterval(SAL.minuteur);
   const monDeck = (() => { const v = decksValides(), d = v.find(x => x.id===PROG.prep2v2.deck) || v[0]; return d ? d.cartes : null; })();
   ui.ecran = "jeu"; S = null; L2.attente = "Connexion à la partie…"; render();
@@ -9934,20 +9950,25 @@ async function demarrerPartie2v2Ligne(E){
     const ok = await ouvrirCanal2v2(E.code, {
       etat: p => {
         if(!p.etat || p.v <= L2.version) return;
-        L2.version = p.v; L2.dernierEtat = Date.now(); L2.attente = null;
+        L2.version = p.v; L2.dernierEtat = Date.now(); L2.attente = null; L2.hotePerdu = false;
         S = p.etat; S.siegeLocal = L2.siege; S.ticket2v2 = L2.ticket;
         if(S.courant!==L2.siege){ ui.attaquant = null; ui.armeEnAttente = null; }
         render();
       },
       "demande-deck": () => emettre2v2("deck", {siege:L2.siege, id:EN.monId || (PROG.user && PROG.user.id), cartes:monDeck || []}),
-      "hote-parti": () => { L2.hotePerdu = true; render(); }
+      "hote-parti": () => { L2.dernierEtat = Date.now() - 30000; L2.hotePerdu = true; render(); }
     });
     if(!ok){ L2.attente = null; return erreur("Connexion à la partie impossible."); }
     emettre2v2("deck", {siege:L2.siege, id:EN.monId || (PROG.user && PROG.user.id), cartes:monDeck || []});
     emettre2v2("bonjour", {});
     L2.minuteurs.push(setInterval(() => {
       emettre2v2("vivant", {siege:L2.siege});
-      if(S && S.vainqueur===null && Date.now() - L2.dernierEtat > 30000 && !L2.hotePerdu){ L2.hotePerdu = true; render(); }
+      if(L2.hote || !S || S.vainqueur!==null) return;
+      const silence = Date.now() - L2.dernierEtat;
+      if(silence > 30000 && !L2.hotePerdu){ L2.hotePerdu = true; render(); }
+      // Le joueur humain suivant reprend la partie ; les autres attendent son tour, puis celui du suivant
+      const r = rangSuccesseur2v2();
+      if(r>=0 && silence > 30000 + r*15000) reprendreHote2v2();
     }, 3000));
   }
 }
@@ -9966,6 +9987,79 @@ const A2 = () => enPartie2v2Ligne() && !L2.hote ? MOTEUR_2V2_DISTANT : {attaquer
 function quitterPartie2v2Ligne(){
   if(L2.hote && L2.code && S && S.vainqueur===null) emettre2v2("hote-parti", {});
   fermerCanal2v2(); L2.code = null;
+}
+
+/* ============================================================
+   2 CONTRE 2 EN LIGNE (étape 3) : classement, invitations, reprise du rôle d’hôte
+   ============================================================ */
+async function chargerClassement2v2(){ try { PROG.classement2v2 = await rpc("classement_2v2", {p_limite:100}); } catch(e) { PROG.classement2v2 = {erreur:e.message}; } if(ui.ecran==="classement") renderProg(); }
+function htmlClassement2v2(){
+  const C = PROG.classement2v2;
+  if(!C){ chargerClassement2v2(); return `<p class="attente">Chargement…</p>`; }
+  if(C.erreur) return `<p class="aide">Le classement du 2 contre 2 n’est pas encore disponible.</p>`;
+  const m = C.moi || {};
+  return `<section class="ma-cote">
+      <div class="cote-grande"><b>${nf(m.elo ?? 1200)}</b><span>votre cote en 2 contre 2</span></div>
+      <div class="infos-cote">
+        <p>${m.rang ? `<b>${m.rang}<sup>${m.rang===1 ? "er" : "e"}</sup></b> sur ${nf(C.total)} joueurs classés` : "Pas encore classé : jouez une partie de 2 contre 2 en ligne face à des joueurs."}</p>
+        <p class="aide">${nf(m.parties || 0)} partie${(m.parties || 0)>1 ? "s" : ""} classée${(m.parties || 0)>1 ? "s" : ""} · meilleure cote : ${nf(m.max ?? 1200)}</p>
+        <p class="aide">Seules les parties en ligne face à au moins un joueur adverse comptent : contre deux ordinateurs, la cote ne change pas. Chaque équipe vaut la moyenne de ses deux cotes.</p>
+      </div>
+      <button type="button" class="btn" data-act="jouer-2v2">Jouer en 2 contre 2</button>
+    </section>
+    <section><h2>Les 100 meilleurs en 2 contre 2</h2>
+      ${(C.joueurs || []).length ? `<div class="tableau-defile"><table class="tableau"><thead><tr><th>Rang</th><th>Joueur</th><th>Cote</th><th>Parties</th></tr></thead><tbody>
+        ${C.joueurs.map(j => `<tr class="${j.moi ? "ligne-moi" : ""}"><td>${j.rang}</td><td>${esc(j.pseudo)}${j.titre ? ` <small class="aide">${esc(j.titre)}</small>` : ""}</td><td><b>${nf(j.elo)}</b></td><td>${nf(j.parties)}</td></tr>`).join("")}</tbody></table></div>`
+        : `<p class="aide">Personne n’est encore classé : soyez le premier !</p>`}
+    </section>`;
+}
+// ----- Invitations dans un salon
+async function chargerInvitations2v2(){ try { SOC.invit2v2 = (await rpc("mes_invitations_2v2")) || []; } catch(e) { SOC.invit2v2 = []; } majBanniereInvit2v2(); }
+SOC.invitIgnorees = new Set();
+function majBanniereInvit2v2(){
+  let b = document.getElementById("banniere-invit2v2");
+  const d = (SOC.invit2v2 || []).find(x => !SOC.invitIgnorees.has(x.id));
+  if(!d || (S && ui.ecran==="jeu") || ui.ecran==="salon2v2"){ if(b) b.remove(); return; }
+  if(!b){ b = document.createElement("div"); b.id = "banniere-invit2v2"; b.className = "banniere-invit"; b.setAttribute("role", "alert"); document.body.appendChild(b); jouerSon("notification"); }
+  b.innerHTML = `<span class="ico-defi" aria-hidden="true">⚭</span><span><b>${esc(d.de)}</b> vous invite dans son salon de 2 contre 2 !</span>
+    <button type="button" class="btn" data-invit="oui" data-id="${d.id}">Rejoindre</button><button type="button" class="btn second" data-invit="non" data-id="${d.id}">Refuser</button>`;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("#banniere-invit2v2 [data-invit]"); if(!b) return;
+  e.stopPropagation();
+  const id = Number(b.dataset.id), oui = b.dataset.invit==="oui";
+  SOC.invitIgnorees.add(id); majBanniereInvit2v2();
+  rpc("repondre_invitation_2v2", {p_id:id, p_accepte:oui}).then(r => { if(oui) entrerSalon(r); }, err => erreur(err.message));
+}, true);
+setInterval(() => { if(PROG.actif && PROG.pret && !document.hidden && !(S && ui.ecran==="jeu")) chargerInvitations2v2(); }, 8000);
+function htmlInviterAmis2v2(E){
+  if(E.statut!=="attente" || E.moi==null) return "";
+  const amis = (SOC.amis && SOC.amis.amis) || [], dans = new Set((E.sieges || []).filter(Boolean).map(s => s.joueur));
+  if(!SOC.amis) chargerAmis().then(() => { if(ui.ecran==="salon2v2") renderProg(); });
+  return `<section class="bloc-2v2 inviter-2v2"><h3>Inviter un ami</h3>
+    ${amis.length ? `<ul class="liste-invit">${amis.map(a => `<li><span class="${a.en_ligne ? "en-ligne" : "hors-ligne"}" aria-hidden="true">●</span> <b>${esc(a.pseudo)}</b>
+      ${dans.has(a.id) ? `<span class="aide">dans le salon</span>` : SAL.invites && SAL.invites.has(a.id) ? `<span class="aide">invité</span>` : `<button type="button" class="btn-discret" data-act="salon2v2-inviter" data-id="${a.id}">Inviter</button>`}</li>`).join("")}</ul>`
+      : `<p class="aide">Ajoutez des amis depuis la page Amis pour les inviter ici. Vous pouvez aussi leur donner le code du salon.</p>`}
+  </section>`;
+}
+// ----- Reprise du rôle d’hôte : le joueur humain suivant reprend la partie là où elle en était
+function rangSuccesseur2v2(){
+  const cand = [0, 1, 2, 3].filter(k => k!==L2.siegeHote && L2.sieges[k] && S && S.joueurs[k] && S.joueurs[k].humain);
+  return cand.indexOf(L2.siege);
+}
+async function reprendreHote2v2(){
+  if(L2.hote || !S || S.vainqueur!==null) return;
+  const ancien = L2.siegeHote;
+  L2.hote = true; L2.hotePerdu = false; L2.siegeHote = L2.siege; L2.version += 1000;
+  if(S.joueurs[ancien] && S.joueurs[ancien].humain){ S.joueurs[ancien].humain = false; log(`${S.joueurs[ancien].nom} (hôte) a quitté la partie : ${S.joueurs[L2.siege].nom} la reprend, l’ordinateur joue sa place.`); }
+  S.seqs2v2 = S.seqs2v2 || {}; S.siegeLocal = L2.siege; S.ticket2v2 = L2.ticket;
+  L2.minuteurs.forEach(m => clearInterval(m)); L2.minuteurs = [];
+  await ouvrirCanal2v2(L2.code, gestionHote2v2());
+  L2.debut = Date.now(); L2.vus = {};
+  L2.minuteurs.push(setInterval(surveillerPresence2v2, 3000), setInterval(publier2v2, 6000));
+  rpc("reprendre_salon_2v2", {p_code:L2.code}).catch(() => {});
+  ui.aiEnCours = false;
+  apresAction();
 }
 
 chargerConfig();

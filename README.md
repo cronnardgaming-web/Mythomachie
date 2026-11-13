@@ -101,6 +101,13 @@ index.html) : l’hôte fait tourner la partie et les bots, chaque joueur voit l
 actions en ordres numérotés (refusés hors de son tour), un joueur silencieux 20 secondes est remplacé par l’ordinateur,
 et chaque joueur humain enregistre sa partie avec son propre ticket (or, quêtes, statistiques, bonus, cote).
 
+## 2 contre 2 en ligne (étape 3)
+
+`supabase-2v2-ligne-suite.sql` (après `supabase-2v2-ligne.sql`) : invitation d’un ami dans un salon (bannière chez
+l’ami invité, entre amis seulement) et reprise du rôle d’hôte quand l’hôte quitte la partie (le joueur humain suivant
+reprend la partie, l’ordinateur joue la place de l’ancien hôte). Le classement du 2 contre 2 est un onglet de la page
+Classement. Rappel : la cote du 2 contre 2 ne change que face à au moins un joueur humain adverse.
+
 ## Correctif du 2 contre 2
 
 `supabase-correctif-2v2.sql` (à exécuter avec `supabase-2v2.sql`) : la table des tickets de partie n’acceptait que
