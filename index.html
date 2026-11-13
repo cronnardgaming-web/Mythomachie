@@ -1092,9 +1092,11 @@ body.compact .nom-heros-deck{font-size:17px}
 .etat-apercu{margin:0;padding:4px 10px;border-radius:99px;font-size:13px;background:rgba(10,10,14,.9);color:#f1e8d4;border:1px solid var(--line)}
 @keyframes apparition-survol{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion: reduce){ .apercu-survol{animation:none} }
-.plateau-2v2 .crea .atk,.plateau-2v2 .crea .pv{width:max(34cqw, 24px);height:max(34cqw, 24px);font-size:max(19cqw, 14px);font-weight:800}
+.plateau-2v2 .crea .atk,.plateau-2v2 .crea .pv{width:max(28cqw, 18px);height:max(28cqw, 18px);font-size:max(15cqw, 11px);font-weight:800}
 .pastille-en-ligne{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:12.5px;padding:2px 10px;border-radius:99px;border:1px solid var(--line);background:color-mix(in srgb, var(--zone) 80%, transparent);color:var(--ink-2)}
 .pastille-en-ligne i{width:8px;height:8px;border-radius:50%;background:#4fd18b;box-shadow:0 0 6px #4fd18b}
+
+.joues-2v2{display:flex;flex-wrap:wrap;gap:6px;align-items:center;max-width:420px}
 
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
@@ -7710,11 +7712,14 @@ function htmlMedaillon2v2(k, inter, visee){
   const etat = j.esprit
     ? `Esprit : revient dans ${Math.max(1, R2.resuTours - j.tEsprit)} tour${Math.max(1, R2.resuTours - j.tEsprit)>1 ? "s" : ""}`
     : j.reserve ? `+${j.reserve} puissance en réserve` : "";
+  const pv = h.pouvoir || {nom:"Pouvoir", effet:{}}, jg = Math.min(S.jauge[j.eq], R2.seuilJauge), pret = pouvoirPret(j);
+  const aidePouvoir = `${decrire(pv.effet || {})} Se charge quand ${R2.seuilJauge} créatures ennemies sont détruites : la jauge est commune à l’équipe.`;
   return `<div class="medaillon-bloc ${moi ? "moi" : ennemi ? "adv" : "allie"} ${j.esprit ? "esprit" : ""} ${S.courant===k && S.vainqueur===null ? "actif" : ""}">
-    <${balise} ${attrs} class="medaillon f-${j.heros || "neutre"} ${ciblable ? "cible" : ""} ${activable ? "pret" : ""}" data-joueur="${k}" style="--p:${Math.min(1, S.jauge[j.eq]/R2.seuilJauge).toFixed(3)}">
+    <${balise} ${attrs} class="medaillon f-${j.heros || "neutre"} ${ciblable ? "cible" : ""} ${activable ? "pret" : ""}" data-joueur="${k}" style="--p:${Math.min(1, S.jauge[j.eq]/R2.seuilJauge).toFixed(3)}" data-aide="carte" data-titre="${esc(pv.nom)}" data-texte="${esc(aidePouvoir)}">
       <span class="anneau" aria-hidden="true"></span><span class="visage ${h.image ? "portrait-heros" : ""}" aria-hidden="true">${h.image ? `<img src="${h.image}" alt="">` : sym}</span><span class="pv-ecu" title="Points de vie">${j.esprit ? "✝" : j.pv}</span>
     </${balise}>
     <div class="plaque"><b>${esc(h.nom)}</b>${j.palier ? `<span class="devotion-palier">${"✦".repeat(j.palier)} Dévotion</span>` : ""}<span class="qui">${esc(role)}</span>${etat ? `<span class="charge ${j.esprit ? "" : "ok"}">${etat}</span>` : ""}
+      <span class="charge ${pret ? "ok" : ""}" data-aide="carte" data-titre="${esc(pv.nom)}" data-texte="${esc(aidePouvoir)}">${pret ? `${esc(pv.nom)} est prêt` : `${esc(pv.nom)} : ${jg} / ${R2.seuilJauge}`}</span>
       ${activable ? `<button type="button" class="btn btn-pouvoir" data-act="pouvoir">Activer</button>` : ""}</div>
   </div>`;
 }
@@ -7767,6 +7772,7 @@ function render2v2(){
           <span class="ressource or"><span class="jeton">${moi.or}</span>or</span>
           <span class="ressource puissance ${inter && moi.combat>0 ? "dispo" : ""}" data-aide="puissance" data-titre="Puissance"><span class="jeton">${moi.combat}</span>puissance</span>
         </div>
+        ${moi.joues.length ? `<div class="joues joues-2v2" aria-label="Cartes jouées ce tour">${moi.joues.map(c => htmlJoue(c, inter)).join("")}</div>` : ""}
         <label class="choix-benef">Soins et renforts
           <select data-benef aria-label="Bénéficiaire des soins et renforts">${[["auto","Automatique (au plus blessé)"],["moi","Pour moi"],["allie","Pour mon allié"]].map(([v, l]) => `<option value="${v}" ${(ui.benef || "auto")===v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
       </div>
