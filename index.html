@@ -430,7 +430,7 @@ body.sans-animations *,body.sans-animations *::before,body.sans-animations *::af
 .btn-geant b{display:block;font-family:Cinzel,serif;font-size:clamp(19px,2.3vw,24px)}
 .btn-geant small{display:block;font-size:14px;opacity:.85;margin-top:2px}
 .ico-geant{width:44px;height:44px;flex:none}
-.hall-modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));grid-auto-flow:column;gap:10px}
+.hall-modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:10px}
 .pastille-test{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:#6b3fa0;border-radius:99px;padding:1px 7px;margin-left:4px}
 .hall-modes .btn{display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:11px 12px}
 .hall-quete{grid-area:quete;display:flex}
@@ -492,6 +492,16 @@ body.compact .lien-hall{padding:2px 4px;font-size:13px}
 .adm-lien[aria-current="page"]{background:color-mix(in srgb, var(--bronze) 24%, transparent);box-shadow:inset 3px 0 0 var(--bronze);font-weight:700}
 .badge-menu{background:#b8402f;color:#fff;border-radius:99px;font-size:12px;font-weight:700;padding:0 7px;line-height:20px}
 .adm-contenu{min-width:0}
+.version-anglaise{margin:8px 0 12px;padding:8px 12px;border:1px dashed var(--line);border-radius:8px}.version-anglaise summary{cursor:pointer;font-weight:600}
+.adm-traductions .trad-resume{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin:10px 0 14px}
+.adm-traductions .trad-outils{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.adm-traductions .trad-outils input{min-width:200px;flex:1;max-width:320px}
+.trad-groupe{margin:18px 0}.trad-groupe h3{margin:0 0 8px}
+.trad-ligne{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) 190px;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+.trad-fr{display:flex;flex-direction:column;min-width:0}.trad-fr span{font-size:12px;opacity:.65}
+.trad-ligne input{width:100%;box-sizing:border-box}
+.trad-etat{font-size:12.5px}.trad-etat.ok{color:#2f7a4a}.trad-etat.manque{color:#a8431f}.trad-etat.prop{color:#8a6a12}
+@media (max-width:760px){.trad-ligne{grid-template-columns:1fr}}
 .adm-contenu > .adm-page:first-child,.adm-contenu > .adm-cartes:first-child{margin-top:0}
 details.effet .champs{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
 .adm-contenu .champ input,.adm-contenu .champ select{min-width:0;width:100%;box-sizing:border-box}
@@ -1984,9 +1994,791 @@ body.compact .emplacement-booster .booster{width:96px}
 <div id="pivoter" role="dialog" aria-label="Tournez votre téléphone"><span class="icone-pivot" aria-hidden="true">📱</span><p>Pour jouer confortablement, tournez votre téléphone en mode paysage.</p><button type="button" class="btn second" data-act="portrait-ok">Continuer en portrait</button></div>
 
 <script>
+/* ============================================================
+   LANGUES : français (langue d’origine) et anglais
+   Les textes affichés sont traduits à la volée par un dictionnaire (TRAD) :
+   - correspondances exactes (« Fin du tour » → « End turn ») ;
+   - modèles pour les phrases avec des valeurs (« Tour de Zeus. » → « Zeus's turn. »).
+   L’administration reste en français. Ajouter une langue = ajouter son dictionnaire.
+   ============================================================ */
+const LANGUES = {fr:"Français", en:"English"};
+let LANGUE = (() => {
+  try { const l = localStorage.getItem("langue"); if(l && LANGUES[l]) return l; } catch(e) {}
+  const n = (navigator.languages && navigator.languages[0]) || navigator.language || "fr";
+  return /^fr\b/i.test(n) ? "fr" : "en";   // navigateur francophone : français ; sinon : anglais
+})();
+const LOC = () => ({fr:"fr-FR", en:"en-US"})[LANGUE] || "fr-FR";
+const TRAD = {en:{exact:new Map(), motifs:[], noms:new Map()}};
+const CACHE_TRAD = new Map();
+function ajouterTraductions(langue, exact, motifs){
+  const d = TRAD[langue] = TRAD[langue] || {exact:new Map(), motifs:[], noms:new Map()};
+  for(const [fr, tr] of Object.entries(exact || {})) d.exact.set(fr, tr);
+  for(const m of motifs || []) d.motifs.push(m);
+  CACHE_TRAD.clear();
+}
+// Gabarits : « # » remplace un nombre (dans l’ordre ; « #2 » désigne le 2ᵉ nombre du texte français)
+function ajouterGabarits(langue, paires){
+  const NB = "(\\d[\\d\u00a0\u202f ,.]*?)";
+  const motifs = Object.entries(paires).map(([fr, tr]) => {
+    const re = new RegExp("^" + fr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/#/g, NB) + "$");
+    return [re, (...v) => { let i = 0; return tr.replace(/#(\d?)/g, (_, k) => v[k ? Number(k) - 1 : i++]); }];
+  });
+  ajouterTraductions(langue, {}, motifs);
+}
+// Noms propres et termes de jeu (cartes, divinités, panthéons) : utilisés seuls ou à l’intérieur des modèles
+function ajouterNoms(langue, noms){ const d = TRAD[langue] = TRAD[langue] || {exact:new Map(), motifs:[], noms:new Map()}; for(const [fr, tr] of Object.entries(noms)) d.noms.set(fr, tr); CACHE_TRAD.clear(); }
+function traduireNom(t){ const d = TRAD[LANGUE]; return (d && ((d.cfg && d.cfg.get(t)) || d.noms.get(t) || d.exact.get(t))) || t; }
+function traduire(texte){
+  if(LANGUE==="fr" || texte==null) return texte;
+  const s = String(texte), c = s.trim();
+  if(!c || !/[A-Za-zÀ-ÿ]/.test(c)) return s;
+  const k = LANGUE + "\u0001" + s;
+  if(CACHE_TRAD.has(k)) return CACHE_TRAD.get(k);
+  const d = TRAD[LANGUE]; let r = null;
+  if(d){
+    const cn = c.replace(/[\u00a0\u202f]/g, " ");
+    r = (d.cfg && (d.cfg.get(c) || d.cfg.get(cn))) || d.exact.get(c) || d.noms.get(c) || d.exact.get(cn) || d.noms.get(cn) || null;
+    if(r==null) for(const [re, rep] of d.motifs){
+      const m = c.match(re) || cn.match(re);
+      if(m){ const v = typeof rep==="function" ? rep(...m.slice(1)) : rep.replace(/\$(\d)/g, (_, i) => traduireNom(m[i] || "")); if(v!=null){ r = v; break; } }
+    }
+  }
+  if(r!=null){
+    // Ponctuation anglaise : pas d’espace avant « : ! ? » ni à l’intérieur des guillemets
+    const i = s.indexOf(c); let av = s.slice(0, i), ap = s.slice(i + c.length);
+    if(/^[:;!?”]/.test(r)) av = "";
+    if(/“$/.test(r)) ap = "";
+    r = av + r + ap;
+  } else r = s;
+  if(CACHE_TRAD.size > 20000) CACHE_TRAD.clear();
+  CACHE_TRAD.set(k, r);
+  return r;
+}
+const T = traduire;
+// ----- Traduction de ce qui s’affiche
+const ATTRS_TRAD = ["title", "aria-label", "placeholder", "alt", "data-titre", "data-texte"];
+const horsTraduction = el => !!(el && el.closest && el.closest(".adm-coque, script, style, textarea, [data-sans-trad], [contenteditable]"));
+function traduireNoeud(racine){
+  if(LANGUE==="fr" || !racine) return;
+  if(racine.nodeType===3){ if(!horsTraduction(racine.parentElement)){ const v = traduire(racine.nodeValue); if(v!==racine.nodeValue) racine.nodeValue = v; } return; }
+  if(racine.nodeType!==1 || horsTraduction(racine)) return;
+  const w = document.createTreeWalker(racine, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, {acceptNode:n => n.nodeType===1 && horsTraduction(n) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT});
+  const els = [racine];
+  for(let n = w.currentNode; n; n = w.nextNode()){
+    if(n.nodeType===3){ const v = traduire(n.nodeValue); if(v!==n.nodeValue) n.nodeValue = v; }
+    else if(n!==racine) els.push(n);
+  }
+  for(const el of els) for(const a of ATTRS_TRAD){ const v = el.getAttribute && el.getAttribute(a); if(v){ const t = traduire(v); if(t!==v) el.setAttribute(a, t); } }
+}
+const OBS_TRAD = new MutationObserver(recs => {
+  if(LANGUE==="fr") return;
+  for(const r of recs){
+    if(r.type==="childList") r.addedNodes.forEach(traduireNoeud);
+    else if(r.type==="characterData") traduireNoeud(r.target);
+    else if(r.type==="attributes" && !horsTraduction(r.target)){
+      const v = r.target.getAttribute(r.attributeName);
+      if(v){ const t = traduire(v); if(t!==v) r.target.setAttribute(r.attributeName, t); }
+    }
+  }
+});
+function appliquerLangue(){
+  document.documentElement.lang = LANGUE;
+  OBS_TRAD.disconnect();
+  if(LANGUE!=="fr"){
+    traduireNoeud(document.body);
+    OBS_TRAD.observe(document.body, {childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:ATTRS_TRAD});
+  }
+}
+function changerLangue(l){
+  if(!LANGUES[l] || l===LANGUE) return;
+  try { localStorage.setItem("langue", l); } catch(e) {}
+  location.reload();   // tout l’affichage repart dans la nouvelle langue
+}
+// Fenêtres du navigateur
+{ const c0 = window.confirm.bind(window), a0 = window.alert.bind(window), p0 = window.prompt.bind(window);
+  window.confirm = m => c0(traduire(m)); window.alert = m => a0(traduire(m)); window.prompt = (m, v) => p0(traduire(m), v); }
+function htmlReglageLangue(){
+  return `<div class="choix-pastilles" role="radiogroup" aria-label="Langue / Language" data-sans-trad>${Object.entries(LANGUES).map(([k, l]) =>
+    `<button type="button" class="pastille-choix ${LANGUE===k ? "choisie" : ""}" role="radio" aria-checked="${LANGUE===k}" data-act="langue" data-id="${k}" lang="${k}">${l}</button>`).join("")}</div>`;
+}
+/* ----- Dictionnaire anglais (1/2) : noms, interface générale, messages, journal ----- */
+ajouterNoms("en", {
+  "Mythomachie":"Mythomachy", "Le choc des panthéons":"Clash of Pantheons",
+  "Égyptiens":"Egyptians", "Hindous":"Hindus", "Nordiques":"Norse", "Grecs":"Greeks",
+  "égyptien":"Egyptian", "hindou":"Hindu", "nordique":"Norse", "grec":"Greek",
+  "égyptienne":"Egyptian", "hindoue":"Hindu", "grecque":"Greek", "égyptiens":"Egyptian", "hindous":"Hindu", "nordiques":"Norse", "grecs":"Greek",
+  "égyptiennes":"Egyptian", "hindoues":"Hindu", "grecques":"Greek",
+  "Osiris":"Osiris", "Râ":"Ra", "Atoum":"Atum", "Shiva":"Shiva", "Vishnu":"Vishnu", "Brahma":"Brahma", "Thor":"Thor", "Odin":"Odin", "Ymir":"Ymir",
+  "Poséidon":"Poseidon", "Zeus":"Zeus", "Chaos":"Chaos",
+  "Renaissance":"Rebirth", "Lumière de Râ":"Light of Ra", "Souffle de vie":"Breath of Life", "Danse cosmique":"Cosmic Dance", "Préservation":"Preservation",
+  "Abondance":"Abundance", "Fureur du tonnerre":"Thunder Fury", "Lance Gungnir":"Spear Gungnir", "Colère du géant":"Giant's Wrath",
+  "Raz-de-marée":"Tidal Wave", "Foudre de l’Olympe":"Lightning of Olympus", "Abîme originel":"Primordial Abyss",
+  "Provocation":"Taunt", "Rapidité":"Haste", "Résistance":"Shield", "Ethéré":"Ethereal", "Conjuration":"Conjuration", "Echo":"Echo", "Allié":"Ally", "Sacrifice":"Sacrifice",
+  "Joueur 1":"Player 1", "Joueur 2":"Player 2", "Ordinateur":"Computer", "Ordinateur (Expert)":"Computer (Expert)", "Votre allié":"Your ally",
+  "Adversaire 1":"Opponent 1", "Adversaire 2":"Opponent 2", "Adversaire 1 (Expert)":"Opponent 1 (Expert)", "Adversaire 2 (Expert)":"Opponent 2 (Expert)",
+  "Joueur A1":"Player A1", "Joueur A2":"Player A2", "Joueur B1":"Player B1", "Joueur B2":"Player B2", "Équipe A":"Team A", "Équipe B":"Team B",
+  "Vous":"You", "Ordinateur 1":"Computer 1", "Ordinateur 2":"Computer 2", "Ordinateur 3":"Computer 3", "Ordinateur 4":"Computer 4",
+  "commune":"common", "rare":"rare", "épique":"epic", "légendaire":"legendary"
+});
+const EN_ORD = n => { n = Number(n); const r = n%100; return n + (r>=11 && r<=13 ? "th" : ({1:"st", 2:"nd", 3:"rd"})[n%10] || "th"); };
+const EN_PL = (n, m, p) => `${n} ${Number(n)===1 ? m : (p || m + "s")}`;
+ajouterTraductions("en", {
+  // ----- Accueil
+  "Amis":"Friends", "Apprendre":"Learn", "Boutique":"Shop", "Boîte aux lettres":"Mailbox", "Changer":"Change", "Classement":"Leaderboard", "Collection":"Collection",
+  "Continuer en portrait":"Continue in portrait", "Contre l’ordinateur":"Against the computer", "Crédits":"Credits", "Decks":"Decks",
+  "Deux joueurs sur cet écran":"Two players on this screen", "En ligne":"Online", "Jouer":"Play", "Ma collection":"My collection", "Mon profil":"My profile",
+  "Nouveau":"New", "Nouveautés":"What’s new", "Pour jouer confortablement, tournez votre téléphone en mode paysage.":"For a comfortable game, turn your phone to landscape.",
+  "Profil":"Profile", "Quêtes du jour":"Daily quests", "Remplacer cette quête (une fois par jour)":"Replace this quest (once a day)", "Règles du jeu":"Game rules",
+  "Réglages":"Settings", "Tournez votre téléphone":"Turn your phone", "Tutoriel":"Tutorial", "Une partie avec l’un de vos decks":"A game with one of your decks",
+  "encre":"ink", "or":"gold", "parties contre l’ordinateur ou en ligne":"games against the computer or online", "2 contre 2 avec un allié":"2 vs 2 with an ally",
+  "Défiez vos amis":"Challenge your friends", "Statistiques et trophées":"Statistics and trophies", "Parties en ligne":"Online games",
+  "Votre première victoire du jour en 2 contre 2 rapporte un bonus":"Your first 2 vs 2 win of the day earns a bonus", "✓ Victoire du jour":"✓ Daily win",
+  "Victoire du jour déjà obtenue":"Daily win already earned", "Fermée":"Closed", "Prochaine saison":"Next season", "Saison en cours":"Current season",
+  "Découvrir la saison":"Discover the season", "Continuer les travaux":"Continue the labours", "Réclamer mes récompenses":"Claim my rewards",
+  // ----- Amis, boîte aux lettres, nouveautés
+  "Accepter":"Accept", "Adversaires récents":"Recent opponents", "Ajouter":"Add", "Ajouter un ami":"Add a friend", "Annuler":"Cancel", "Demandes envoyées":"Requests sent",
+  "Demandes reçues":"Requests received", "Défier":"Challenge", "Hors ligne":"Offline", "Mes amis":"My friends", "Rechercher un pseudo":"Search for a username",
+  "Refuser":"Decline", "Retirer":"Remove", "en attente":"pending", "Cadeau":"Gift", "Récupérer":"Collect", "Récupéré":"Collected", "Aucun message.":"No messages.",
+  "Rejoindre":"Join", "Inviter":"Invite", "Inviter un ami":"Invite a friend", "dans le salon":"in the lobby", "invité":"invited",
+  // ----- Boutique
+  "Booster classique":"Classic booster", "Booster grec":"Greek booster", "Booster hindou":"Hindu booster", "Booster nordique":"Norse booster", "Booster égyptien":"Egyptian booster",
+  "Cartes de toutes les factions.":"Cards from every faction.", "Gagnés avec vos trophées. Ils s’ouvrent gratuitement, avec les mêmes chances qu’un paquet acheté.":"Earned with your trophies. They open for free, with the same odds as a bought pack.",
+  "Ouvrir":"Open", "Paquet classique":"Classic pack", "Paquet grec":"Greek pack", "Paquet hindou":"Hindu pack", "Paquet nordique":"Norse pack", "Paquet égyptien":"Egyptian pack",
+  "Paquets offerts":"Free packs", "Uniquement des cartes grecques.":"Greek cards only.", "Uniquement des cartes hindoues.":"Hindu cards only.",
+  "Uniquement des cartes nordiques.":"Norse cards only.", "Uniquement des cartes égyptiennes.":"Egyptian cards only.",
+  "Tout révéler":"Reveal all", "Passer":"Skip", "Continuer":"Continue", "Nouvelle !":"New!", "Illustration exclusive":"Exclusive artwork",
+  // ----- Choix du deck, decks, éditeur
+  "Aucun deck prêt":"No deck ready", "Choisir un deck":"Choose a deck", "Mes decks":"My decks", "Retour":"Back", "Brouillon":"Draft", "Dupliquer":"Duplicate",
+  "Modifier":"Edit", "Nouveau deck":"New deck", "Supprimer":"Delete", "Affichage":"Display", "Compléter automatiquement":"Auto-complete",
+  "Courbe des coûts (cliquez pour filtrer)":"Cost curve (click to filter)", "Coût":"Cost", "Filtres":"Filters", "Masquer les cartes épuisées":"Hide cards you have used up",
+  "Mon deck":"My deck", "Nom":"Name", "Nom du deck":"Deck name", "Toutes raretés":"All rarities", "Trier par":"Sort by", "Vider":"Clear", "Votre collection":"Your collection",
+  "Votre deck":"Your deck", "Votre divinité":"Your deity", "Vous pouvez enregistrer un deck incomplet et le terminer plus tard.":"You can save an unfinished deck and complete it later.",
+  "Éditeur de deck":"Deck editor", "Équipements":"Equipment", "⚔ Équipements":"⚔ Equipment", "✧ Sorts":"✧ Spells", "❖ Créatures":"❖ Creatures", "Enregistrer":"Save",
+  // ----- Collection
+  "Arme":"Weapon", "Armes":"Weapons", "Attaque":"Attack", "Bannir":"Banish", "Base":"Base", "Bonus de PV":"HP bonus", "Bonus d’attaque":"Attack bonus", "Carte de base":"Base card",
+  "Carte de départ":"Starter card", "Cartes de départ":"Starter cards", "Cartes à collectionner":"Collectible cards",
+  "Chaque joueur commence ses parties avec ces cartes. Avec la Dévotion, certaines prennent la couleur de votre panthéon : ouvrez-les pour voir leurs versions.":"Every player starts their games with these cards. With Devotion, some take on the colour of your pantheon: open them to see their versions.",
+  "Commune":"Common", "Coût croissant":"Cost, low to high", "Coût décroissant":"Cost, high to low", "Créature":"Creature", "Créatures":"Creatures", "Départ":"Starter",
+  "Faction":"Faction", "Légendaire":"Legendary", "Marché":"Market", "Or":"Gold", "Par nom":"By name", "Par rareté":"By rarity", "Pioche":"Draw", "Points de vie":"Hit points",
+  "Prix en or":"Gold price", "Puissance":"Power", "Rare":"Rare", "Rareté":"Rarity", "Rechercher":"Search", "Rechercher une carte":"Search for a card",
+  "Retour à l’accueil":"Back to home", "Seulement mes cartes":"Only my cards", "Soin":"Healing", "Sort":"Spell", "Sorts":"Spells", "Tous les types":"All types",
+  "Toutes les factions":"All factions", "Toutes les raretés":"All rarities", "Trier les cartes":"Sort cards", "Trier par panthéon":"Sort by pantheon", "Type":"Type",
+  "Vous avez":"You have", "ou":"or", "Épique":"Epic", "Carte précédente":"Previous card", "Carte suivante":"Next card", "Vous en possédez":"You own",
+  "Vous avez déjà le nombre maximum d’exemplaires utiles.":"You already have the maximum number of useful copies.", "×":"×", "Saison":"Season",
+  "Toujours disponible":"Always available", "Recycler":"Recycle", "Fermer":"Close", "Fabriquer":"Craft",
+  "Effet déclenché quand la créature arrive en jeu.":"Effect triggered when the creature enters play.", "Effet déclenché quand la créature meurt.":"Effect triggered when the creature dies.",
+  "Les créatures et le héros adverses doivent viser cette créature avant les autres.":"Enemy creatures and the enemy hero must target this creature first.",
+  "Peut attaquer dès le tour où elle est posée.":"Can attack on the turn it is played.", "Ignore entièrement les premiers dégâts subis, puis disparaît.":"Completely ignores the first damage taken, then disappears.",
+  "Ne peut pas être visée tant qu’elle n’a pas attaqué. Elle ne protège pas son joueur.":"Cannot be targeted until it has attacked. It does not protect its player.",
+  "Retirez la carte de la partie pour obtenir cet effet. Elle ne reviendra plus dans votre deck.":"Remove the card from the game to get this effect. It will not come back to your deck.",
+  "Sert à acheter des cartes au marché pendant le tour.":"Used to buy cards at the market during the turn.", "Les points d’attaque de votre héros pour ce tour.":"Your hero’s attack points for this turn.",
+  "Rend des points de vie à votre héros, sans limite.":"Restores hit points to your hero, with no limit.", "Piochez immédiatement ce nombre de cartes.":"Draw this many cards immediately.",
+  "Retirez définitivement une carte de votre main ou de votre défausse : votre deck s’allège et vous piochez plus souvent vos meilleures cartes.":"Permanently remove a card from your hand or discard pile: your deck gets leaner and you draw your best cards more often.",
+  // ----- Connexion, menu de départ
+  "Achats réfléchis, échanges rentables, attaques calculées.":"Thoughtful purchases, profitable trades, calculated attacks.", "Administration":"Administration",
+  "Idéal pour découvrir le jeu.":"Ideal to discover the game.", "Jouer contre l’ordinateur":"Play against the computer", "Niveau de l’ordinateur":"Computer level",
+  "Un premier essai jouable : quatre factions, un marché commun et des créatures sur le plateau. Choisissez un mode pour commencer.":"A first playable version: four factions, a shared market and creatures on the board. Choose a mode to start.",
+  "Normal":"Normal", "Expert":"Expert", "Se connecter":"Log in", "Créer un compte":"Create an account", "Mot de passe":"Password", "Adresse e-mail":"Email address",
+  "Mot de passe oublié ?":"Forgot your password?", "Continuer sans compte":"Continue without an account",
+  // ----- Partie
+  "Aucune créature adverse":"No enemy creatures", "Camp adverse":"Enemy side", "Cliquez sur vos cartes pour les jouer, achetez au marché, puis finissez le tour.":"Click your cards to play them, buy at the market, then end your turn.",
+  "Deck":"Deck", "Défausse":"Discard pile", "Fin du tour":"End turn", "Journal":"Log", "Nouvelle partie":"New game", "Or et puissance de ce joueur, en temps réel":"This player’s gold and power, in real time",
+  "Vos créatures apparaîtront ici":"Your creatures will appear here", "Votre camp":"Your side", "Votre main":"Your hand", "puissance":"power", "À vous de jouer":"Your turn",
+  "Patientez":"Please wait", "Quitter la partie":"Leave the game", "Aucune créature":"No creatures", "Automatique (au plus blessé)":"Automatic (most wounded)",
+  "Bénéficiaire des soins et renforts":"Who receives healing and boosts", "Créatures adverses détruites par votre équipe":"Enemy creatures destroyed by your team",
+  "Créatures de votre allié":"Your ally’s creatures", "Créatures de votre équipe détruites par les adversaires":"Your team’s creatures destroyed by the opponents",
+  "Main de votre allié":"Your ally’s hand", "Pour moi":"For me", "Pour mon allié":"For my ally", "Soins et renforts":"Healing and boosts", "Vos créatures":"Your creatures",
+  "✦✦ Dévotion":"✦✦ Devotion", "✦ Dévotion":"✦ Devotion", "Dévotion":"Devotion", "Esprit : plus de créatures":"Spirit: no more creatures", "La Fin des Temps":"The End of Days",
+  "☄ La Fin des Temps":"☄ The End of Days", "Soins réduits de moitié · au prochain tour, chaque héros perd":"Healing halved · next turn, each hero loses",
+  "Tour de votre allié":"Your ally’s turn", "À vous (esprit)":"Your turn (spirit)", "Partie terminée":"Game over", "Votre allié joue":"Your ally is playing", "L’adversaire joue":"The opponent is playing",
+  "Changement de joueur":"Change of player", "Commencer mon tour":"Start my turn", "Activer":"Activate", "Sacrifier :":"Sacrifice:", "Vous":"You", "Votre allié":"Your ally",
+  "Défaite":"Defeat", "Victoire !":"Victory!", "Égalité":"Draw", "Changer de mode":"Change mode", "Fin de partie":"End of game", "Rejouer":"Play again",
+  "Proposer une revanche":"Offer a rematch", "Quitter":"Leave", "En attente d’une revanche lancée par votre adversaire…":"Waiting for your opponent to start a rematch…",
+  "Pas de récompense : partie non enregistrée par le serveur.":"No reward: the game was not recorded by the server.", "Pas de récompense : trop de parties commencées en une heure.":"No reward: too many games started in one hour.",
+  "Enregistrement de la partie…":"Recording the game…", "La partie compte pour vos quêtes et statistiques de 2 contre 2.":"The game counts for your 2 vs 2 quests and statistics.",
+  "Plafond d’or du jour atteint.":"Daily gold limit reached.", "Réclamer la victoire":"Claim victory", "Votre adversaire a quitté la partie.":"Your opponent has left the game.",
+  "Abandonner":"Forfeit",
+  // ----- 2 contre 2
+  "Au hasard":"Random", "Bêta":"Beta", "Code du salon":"Lobby code", "Créer un salon privé":"Create a private lobby", "Deux équipes de deux héros,":"Two teams of two heroes,",
+  "Faites équipe avec un allié contrôlé par l’ordinateur face à deux adversaires. Partagez la Provocation, déclenchez des combos à deux, relevez votre allié tombé… et gagnez ensemble.":"Team up with a computer-controlled ally against two opponents. Share Taunt, trigger combos together, bring your fallen ally back… and win together.",
+  "Gagner une partie sans qu’aucun héros de votre équipe ne tombe":"Win a game without any hero of your team falling", "Héros tombé :":"Fallen hero:",
+  "Jouez avec d’autres joueurs : l’ordinateur prend les places libres.":"Play with other players: the computer takes the free seats.", "La Fin des Temps :":"The End of Days:",
+  "La Provocation protège toute l’équipe :":"Taunt protects the whole team:", "La victoire":"Victory", "Lancer la partie":"Start the game", "Le niveau de vos adversaires":"Your opponents’ level",
+  "Le panthéon de vos adversaires":"Your opponents’ pantheon", "Le panthéon de votre allié":"Your ally’s pantheon", "Le pouvoir divin":"The divine power", "Les combos se font à deux :":"Combos are shared:",
+  "Mode coopératif":"Co-op mode", "Premières pioches :":"First draws:", "Préparer la partie":"Prepare the game", "Rechercher une partie":"Find a game", "Victoire du jour :":"Daily win:",
+  "Votre place dans le tour":"Your seat in the turn order", "Vous et votre allié contre deux adversaires":"You and your ally against two opponents", "achats et attaques calculés":"calculated purchases and attacks",
+  "en bonus.":"as a bonus.", "partagé par les quatre joueurs.":"shared by the four players.", "pour découvrir":"to discover", "qui jouent en alternance. Chaque héros a":"taking turns alternately. Each hero has",
+  "revient à l’équipe qui fait tomber les deux héros adverses en même temps.":"goes to the team that brings down both enemy heroes at the same time.",
+  "tant qu’une créature à Provocation est en jeu, les adversaires doivent la viser.":"while a creature with Taunt is in play, the opponents must target it.",
+  "une carte de votre allié jouée le même tour compte pour vos combos. Vous pouvez aussi soigner votre allié.":"a card your ally played the same turn counts for your combos. You can also heal your ally.",
+  "votre première victoire aujourd’hui rapporte":"your first win today earns", "(vengeance).":"(vengeance).", "Règles du 2 contre 2":"2 vs 2 rules", "Quêtes du 2 contre 2":"2 vs 2 quests",
+  "Trois nouvelles quêtes chaque jour, propres au 2 contre 2.":"Three new quests every day, specific to 2 vs 2.", "▶ Découvrir le 2 contre 2":"▶ Discover 2 vs 2", "Jouer en ligne":"Play online",
+  "2 contre 2":"2 vs 2", "2 contre 2 en ligne":"2 vs 2 online", "Jouer en 2 contre 2":"Play 2 vs 2", "Vos statistiques en 2 contre 2":"Your 2 vs 2 statistics",
+  "Les quêtes du 2 contre 2 ne sont pas encore disponibles sur ce serveur.":"2 vs 2 quests are not yet available on this server.",
+  "Ces parties comptent aussi dans vos statistiques générales et vos trophées.":"These games also count in your overall statistics and trophies.",
+  // Salon
+  "Code :":"Code:", "Place libre":"Free seat", "Prendre cette place":"Take this seat", "Quitter le salon":"Leave the lobby", "Salon 2 contre 2":"2 vs 2 lobby", "Salon privé":"Private lobby",
+  "tenue par l’ordinateur si personne ne la prend":"held by the computer if nobody takes it", "En attente du lancement par l’hôte…":"Waiting for the host to start…",
+  "Recherche de partie":"Matchmaking", "Lancement possible dans":"Can start in", "Connexion au salon…":"Connecting to the lobby…", "Quatre joueurs : c’est complet !":"Four players: the lobby is full!",
+  "Ajoutez des amis depuis la page Amis pour les inviter ici. Vous pouvez aussi leur donner le code du salon.":"Add friends from the Friends page to invite them here. You can also give them the lobby code.",
+  "Partie lancée":"Game started", "Connexion à la partie…":"Connecting to the game…", "Préparation de la partie de 2 contre 2 en ligne.":"Preparing the online 2 vs 2 game.",
+  "Les équipes jouent en alternance : place 1, puis 2, puis 3, puis 4. Changez de place en cliquant sur « Prendre cette place ».":"Teams take turns alternately: seat 1, then 2, then 3, then 4. Change seats by clicking “Take this seat”.",
+  // ----- Jeu en ligne (1 contre 1)
+  "Copier le code":"Copy the code", "En attente de votre adversaire…":"Waiting for your opponent…", "Partie créée":"Game created",
+  "Envoyez ce code à votre adversaire. Il ouvre le jeu, choisit « Jouer en ligne » puis « Rejoindre ».":"Send this code to your opponent. They open the game, choose “Play online”, then “Join”.",
+  "Recherche d’un adversaire":"Looking for an opponent", "Recherche d’un adversaire de votre niveau…":"Looking for an opponent at your level…",
+  "Chaque joueur joue sur son propre écran. Celui qui crée la partie fait tourner les règles : gardez sa page ouverte jusqu’à la fin.":"Each player plays on their own screen. Whoever creates the game runs the rules: keep their page open until the end.",
+  "Chercher un adversaire":"Find an opponent", "Code de la partie":"Game code", "Connexion au serveur de jeu impossible pour le moment. Vérifiez votre connexion internet, puis réessayez.":"Cannot reach the game server right now. Check your internet connection, then try again.",
+  "Créer une partie":"Create a game", "Créer une partie avec un code":"Create a game with a code",
+  "Le jeu vous trouve un adversaire de votre niveau. Toutes les parties en ligne, classées ou avec un code, comptent pour le classement.":"The game finds you an opponent at your level. All online games, ranked or with a code, count for the leaderboard.",
+  "Partie classée":"Ranked game", "Rejoindre une partie":"Join a game", "Reprendre":"Resume", "Vos parties en cours":"Your games in progress", "code":"code",
+  // ----- Profil
+  "Choisissez un pseudo":"Choose a username", "Créatures jouées":"Creatures played", "Dégâts infligés à l’adversaire":"Damage dealt to the opponent", "Héros":"Hero",
+  "Les parties à deux sur le même écran ne sont pas comptées.":"Games for two on the same screen are not counted.", "PV soignés":"HP healed", "Par héros":"By hero", "Parties":"Games",
+  "Parties jouées":"Games played", "Platine":"Platinum", "Bronze":"Bronze", "Argent":"Silver", "Points de vie soignés":"Hit points healed", "Pouvoirs de divinité utilisés":"Deity powers used",
+  "Pseudo":"Username", "Statistiques":"Statistics", "Taux":"Rate", "Trophées":"Trophies", "Victoires":"Wins", "Votre adversaire le voit pendant les parties en ligne.":"Your opponent sees it during online games.",
+  "Votre panthéon":"Your pantheon", "cartes achetées":"cards bought", "créatures jouées":"creatures played", "dégâts infligés":"damage dealt", "héros tombés":"heroes fallen",
+  "meilleure série de victoires":"best win streak", "parties":"games", "parties jouées":"games played", "points de vie soignés":"hit points healed", "pouvoirs utilisés":"powers used",
+  "résurrections":"resurrections", "toutes au max.":"all maxed out.", "victoires":"wins", "victoires en ligne":"online wins", "victoires sans chute":"wins without a fall",
+  "Champion de l’Olympe":"Champion of Olympus", "Champion du Nord":"Champion of the North", "Champion d’Inde":"Champion of India", "Champion d’Égypte":"Champion of Egypt",
+  "Collectionneur":"Collector", "Combattant":"Fighter", "Conquérant":"Conqueror", "Fléau":"Scourge", "Frères d’armes":"Brothers in Arms", "Guérisseur":"Healer", "Indestructibles":"Indestructible",
+  "Invaincu":"Undefeated", "Invocateur":"Summoner", "Marchand":"Merchant", "Maître des panthéons":"Master of Pantheons", "Puissance divine":"Divine Power",
+  "Victoires avec chacun des quatre panthéons":"Wins with each of the four pantheons", "Victoires avec une divinité grecque":"Wins with a Greek deity",
+  "Victoires avec une divinité hindoue":"Wins with a Hindu deity", "Victoires avec une divinité nordique":"Wins with a Norse deity", "Victoires avec une divinité égyptienne":"Wins with an Egyptian deity",
+  "Victoires d’affilée":"Wins in a row", "Victoires en 2 contre 2":"Wins in 2 vs 2", "Victoires en 2 contre 2 sans qu’aucun héros de votre équipe ne tombe":"2 vs 2 wins without any hero of your team falling",
+  "Réclamer":"Claim", "✓ Obtenue":"✓ Earned", "Obtenu":"Earned",
+  // ----- Réglages
+  "Animations":"Animations", "Aucune":"None", "Complètes":"Full", "Compte":"Account", "Niveau des animations":"Animation level", "Réduites":"Reduced", "Se déconnecter":"Log out",
+  "Votre progression est sauvegardée en ligne et vous suit sur tous vos appareils.":"Your progress is saved online and follows you on all your devices.",
+  "« Réduites » garde les éclats et les chiffres, sans objets qui volent.":"“Reduced” keeps flashes and numbers, without flying objects.", "Musique":"Music", "Bruitages":"Sound effects",
+  "Activés":"On", "Coupés":"Off", "Volume des bruitages":"Sound effects volume",
+  // ----- Saison
+  "Les travaux":"The labours", "Récompenses à gagner":"Rewards to earn", "À gagner":"To earn", "Travail accompli":"Labour completed", "Fermé":"Closed",
+  "Les travaux s’ouvrent à intervalles réguliers, deux par semaine. Chacun propose une série de quêtes : terminez-les pour accomplir le travail, et franchissez les paliers pour gagner les récompenses.":"The labours open at regular intervals, two a week. Each one offers a series of quests: complete them to accomplish the labour, and reach the milestones to earn the rewards.",
+  "jours restants":"days left", "Aucune saison n’est prévue pour le moment. Revenez bientôt !":"No season is planned at the moment. Come back soon!",
+  "Les Douze Travaux d’Héraclès":"The Twelve Labours of Heracles", "Le Lion de Némée":"The Nemean Lion", "L’Hydre de Lerne":"The Lernaean Hydra", "La Biche de Cérynie":"The Ceryneian Hind",
+  "Le Sanglier d’Érymanthe":"The Erymanthian Boar", "Les Écuries d’Augias":"The Augean Stables", "Les Oiseaux du lac Stymphale":"The Stymphalian Birds", "Le Taureau de Crète":"The Cretan Bull",
+  "Les Juments de Diomède":"The Mares of Diomedes", "La Ceinture d’Hippolyte":"The Girdle of Hippolyta", "Les Troupeaux de Géryon":"The Cattle of Geryon",
+  "Les Pommes d’or des Hespérides":"The Golden Apples of the Hesperides", "Cerbère":"Cerberus",
+  "La plus rapide des créatures : soyez plus vif qu’elle.":"The fastest of creatures: be quicker than it.", "Pour chaque tête tranchée, deux repoussent : enchaînez les coups.":"For every head cut off, two grow back: keep striking.",
+  "Sa peau est impénétrable : seule la persévérance en vient à bout.":"Its hide is impenetrable: only perseverance can overcome it.", "Une bête furieuse, à affronter bien armé.":"A furious beast, to be faced well armed.",
+  "Mode coopératif":"Co-op mode", "Saison":"Season",
+  // ----- Tutoriels : boutons communs
+  "Quitter le tutoriel":"Quit the tutorial", "Suivant":"Next", "Précédent":"Previous", "C’est parti !":"Let’s go!", "Lire les règles":"Read the rules", "Lancer le tutoriel":"Start the tutorial",
+  // ----- Messages (confirmations, erreurs) et journal
+  "Quitter maintenant compte comme un abandon : la partie est perdue et votre cote baisse d’au moins 15 points.\n\nAbandonner la partie ?":"Leaving now counts as a forfeit: the game is lost and your rating drops by at least 15 points.\n\nForfeit the game?",
+  "Retirer toutes les cartes de ce deck ?":"Remove all cards from this deck?", "Actualisation…":"Refreshing…", "Adresse e-mail confirmée.":"Email address confirmed.",
+  "Ce salon a été fermé.":"This lobby has been closed.", "Cette adresse e-mail n’est pas valide.":"This email address is not valid.", "Cette créature ne peut pas attaquer maintenant.":"This creature cannot attack now.",
+  "Cette créature ne peut pas être visée.":"This creature cannot be targeted.", "Choisissez une de vos créatures à équiper.":"Choose one of your creatures to equip.", "Code copié.":"Code copied.",
+  "Connexion réussie : votre progression est chargée.":"Logged in: your progress is loaded.", "Connexion à la partie impossible.":"Cannot connect to the game.", "E-mail de confirmation renvoyé.":"Confirmation email sent again.",
+  "E-mail envoyé : cliquez sur le lien qu’il contient.":"Email sent: click the link it contains.", "Il faut d’abord détruire les créatures qui protègent ce héros.":"You must first destroy the creatures protecting this hero.",
+  "Indiquez d’abord votre adresse e-mail.":"Enter your email address first.", "Indiquez votre mot de passe.":"Enter your password.", "Invitation envoyée.":"Invitation sent.",
+  "Le code d’un salon compte 5 caractères.":"A lobby code has 5 characters.", "Le pseudo doit faire de 3 à 20 caractères : lettres, chiffres, espaces, tirets ou soulignés.":"The username must be 3 to 20 characters: letters, digits, spaces, hyphens or underscores.",
+  "Les deux mots de passe ne sont pas identiques.":"The two passwords do not match.", "Mot de passe enregistré : votre progression est sauvegardée en ligne.":"Password saved: your progress is saved online.",
+  "Partie supprimée.":"Game deleted.", "Posez d’abord une créature à équiper.":"Play a creature to equip first.", "Tapez au moins 2 lettres du pseudo.":"Type at least 2 letters of the username.",
+  "Sélectionnez une de vos créatures prêtes, ou gagnez de la puissance avec vos cartes pour que votre héros attaque.":"Select one of your ready creatures, or gain power with your cards so your hero can attack.",
+  "Sélectionnez une de vos créatures prêtes, ou gagnez de la puissance pour que votre héros attaque.":"Select one of your ready creatures, or gain power so your hero can attack.",
+  "Un esprit ne peut ni poser de créature ni équiper d’arme.":"A spirit can neither play creatures nor equip weapons.", "Un esprit ne peut pas attaquer : soutenez votre allié avec vos cartes.":"A spirit cannot attack: support your ally with your cards.",
+  "Utilisez au moins 8 caractères, avec des lettres et des chiffres.":"Use at least 8 characters, with letters and digits.", "Texte copié.":"Text copied.", "Ligne copiée.":"Line copied.",
+  "Le téléchargement a échoué : réessayez dans un instant.":"The download failed: try again in a moment.", "Connexion à la partie impossible.":"Cannot connect to the game.",
+  "La Fin des Temps commence !":"The End of Days begins!", "Les soins sont réduits de moitié, et chaque héros s’épuise un peu plus à chaque tour.":"Healing is halved, and each hero wears down a little more every turn.",
+  "Les deux équipes s’effondrent ensemble : l’équipe a, qui tenait le mieux, résiste de justesse.":"Both teams collapse together: team A, which held out best, narrowly survives.",
+  "Les deux équipes s’effondrent ensemble : l’équipe b, qui tenait le mieux, résiste de justesse.":"Both teams collapse together: team B, which held out best, narrowly survives."
+}, [
+  // ----- Modèles (phrases avec des valeurs)
+  [/^(\d+) \/ (\d+) cartes$/, "$1 / $2 cards"], [/^(\d+) \/ (\d+) decks$/, "$1 / $2 decks"], [/^(\d+) \/ (\d+) rangs de trophées$/, "$1 / $2 trophy ranks"],
+  [/^(\d+) demandes?$/, (n) => EN_PL(n, "request")], [/^(\d+) en ligne sur (\d+)$/, "$1 online out of $2"], [/^(\d+) joueurs? en ligne$/, n => EN_PL(n, "player") + " online"],
+  [/^(\d+) récompenses? à réclamer$/, n => EN_PL(n, "reward") + " to claim"], [/^Boîte aux lettres \((\d+) messages? non lus?\)$/, n => `Mailbox (${EN_PL(n, "unread message")})`],
+  [/^Nouveautés \((\d+) non lues?\)$/, "What’s new ($1 unread)"], [/^Paquets à (\d+) or$/, "Packs for $1 gold"], [/^Cote ([\d  ,.]+)$/, "Rating $1"], [/^cote ([\d  ,.]+)$/, "rating $1"],
+  [/^cote ([\d  ,.]+) · en ligne$/, "rating $1 · online"], [/^cote ([\d  ,.]+) · hôte$/, "rating $1 · host"], [/^Victoire du jour \+(\d+) or$/, "Daily win +$1 gold"],
+  [/^\+(\d+) or$/, "+$1 gold"], [/^(\d+) or$/, "$1 gold"], [/^(\d+) encre$/, "$1 ink"], [/^✓ (\d+) or$/, "✓ $1 gold"], [/^(\d+) PV$/, "$1 HP"],
+  [/^Jouer (\d+) parties?$/, n => `Play ${EN_PL(n, "game")}`], [/^Gagner (\d+) parties?$/, n => `Win ${EN_PL(n, "game")}`], [/^Acheter (\d+) cartes? au marché$/, n => `Buy ${EN_PL(n, "card")} at the market`],
+  [/^Gagner une partie avec les (.+)$/, "Win a game with the $1"], [/^Gagner (\d+) partie avec les (.+)$/, "Win $1 game with the $2"], [/^Gagner (\d+) partie en (\d+) tours ou moins$/, "Win $1 game in $2 turns or fewer"],
+  [/^Infliger (\d+) dégâts à l’adversaire$/, "Deal $1 damage to the opponent"], [/^Infliger (\d+) dégâts en 2 contre 2$/, "Deal $1 damage in 2 vs 2"], [/^Soigner (\d+) points de vie$/, "Heal $1 hit points"],
+  [/^Soigner (\d+) points de vie en 2 contre 2$/, "Heal $1 hit points in 2 vs 2"], [/^Poser (\d+) créatures?$/, n => `Play ${EN_PL(n, "creature")}`], [/^Poser (\d+) créatures en 2 contre 2$/, "Play $1 creatures in 2 vs 2"],
+  [/^Jouer (\d+) équipements?$/, n => `Play ${EN_PL(n, "piece")} of equipment`], [/^Déclencher (\d+) combos?$/, n => `Trigger ${EN_PL(n, "combo")}`], [/^Jouer (\d+) parties en 2 contre 2$/, "Play $1 games in 2 vs 2"],
+  [/^Gagner (\d+) parties en 2 contre 2$/, "Win $1 games in 2 vs 2"], [/^Utiliser (\d+) fois le pouvoir de votre divinité en 2 contre 2$/, "Use your deity’s power $1 times in 2 vs 2"],
+  [/^Voir un membre de votre équipe revenir à la vie$/, "See a member of your team come back to life"], [/^Utiliser (\d+) fois le pouvoir de votre divinité$/, "Use your deity’s power $1 times"],
+  [/^Pseudo \((\d+) lettres minimum\)$/, "Username ($1 letters minimum)"], [/^Déjà (\d+) parties\.$/, "Already $1 games."], [/^Merci (.+) !$/, "Thank you $1!"],
+  [/^🎁 (.+)$/, (x) => "🎁 " + x.split(", ").map(p => traduire(p)).join(", ")], [/^(\d+) cartes$/, "$1 cards"], [/^(\d+) carte$/, "$1 card"], [/^Acheter pour (\d+) or$/, "Buy for $1 gold"],
+  [/^Chaque paquet contient (\d+) cartes, dont au moins une rare\. Chances par carte : commune ([\d,]+) %, rare ([\d,]+) %, épique ([\d,]+) %, légendaire ([\d,]+) %\.$/, "Each pack contains $1 cards, including at least one rare. Odds per card: common $2%, rare $3%, epic $4%, legendary $5%."],
+  [/^× ?(\d+)$/, "× $1"], [/^Il vous faut un deck complet de (\d+) cartes pour (jouer|jouer en ligne|défier un ami|accepter un défi)\.$/, (n, a) => `You need a complete ${n}-card deck to ${({"jouer":"play", "jouer en ligne":"play online", "défier un ami":"challenge a friend", "accepter un défi":"accept a challenge"})[a]}.`],
+  [/^(\d+) parties classées · meilleure cote : ([\d  ,.]+)$/, "$1 ranked games · best rating: $2"], [/^sur (\d+) joueurs classés$/, "out of $1 ranked players"], [/^votre cote$/, "your rating"],
+  [/^votre cote en 2 contre 2$/, "your 2 vs 2 rating"], [/^Les (\d+) meilleurs en 2 contre 2$/, "Top $1 in 2 vs 2"], [/^Les meilleurs joueurs$/, "Top players"],
+  [/^(\d+) cartes différentes sur (\d+)\. Cliquez sur une carte pour la voir en grand, la fabriquer ou recycler ses exemplaires en trop\.$/, "$1 different cards out of $2. Click a card to see it full size, craft it or recycle its extra copies."],
+  [/^(\d+) exemplaires? en trop$/, n => `${EN_PL(n, "extra copy", "extra copies")}`], [/^\(au-delà du maximum utile d’un deck\), sur (\d+) cartes?\.$/, n => `(beyond the useful maximum for a deck), across ${EN_PL(n, "card")}.`],
+  [/^Tout recycler \(\+([\d  ,.]+) encre\)$/, "Recycle all (+$1 ink)"], [/^(\d+) versions$/, "$1 versions"],
+  [/^(Arme|Créature|Sort) (grec|grecque|hindoue?|nordique|égyptien|égyptienne)$/, (t, f) => `${traduireNom(f)} ${({Arme:"weapon", "Créature":"creature", Sort:"spell"})[t]}`],
+  [/^Bonus déclenché si une autre carte (grecque|hindoue|nordique|égyptienne) a été jouée ce tour\.$/, "Bonus triggered if another $1 card was played this turn."],
+  [/^Combo : (.+)$/, "Combo: $1"], [/^Combo avec les (.+)$/, "Combo with the $1"], [/^(Commune|Rare|Épique|Légendaire), (.+)$/, (r, f) => `${traduire(r)}, ${traduireNom(f)}`],
+  [/^\. Un deck peut en contenir (\d+)\.$/, ". A deck can hold $1."], [/^: son illustration est floutée tant que vous ne l’avez pas\. Un deck peut en contenir (\d+)\.$/, ": its artwork stays blurred until you own it. A deck can hold $1."],
+  [/^Fabriquer \((\d+) encre\)$/, "Craft ($1 ink)"], [/^Votre encre : ([\d  ,.]+)$/, "Your ink: $1"], [/^Il manque (\d+) cartes?\.$/, n => `${EN_PL(n, "card")} missing.`],
+  [/^Vous ne possédez que (\d+) (.+)\.$/, "You only own $1 $2."], [/^Ajouter un exemplaire de (.+)$/, "Add a copy of $1"], [/^Retirer un exemplaire de (.+)$/, "Remove a copy of $1"],
+  [/^(\d+) cartes? à (\d+) or( ou plus)?$/, (n, p, plus) => `${EN_PL(n, "card")} costing ${p} gold${plus ? " or more" : ""}`], [/^(\d+) dans le deck, (\d+) disponibles?$/, "$1 in the deck, $2 available"],
+  [/^\/ (\d+) cartes$/, "/ $1 cards"], [/^(Grecs|Hindous|Nordiques|Égyptiens) (\d+)$/, "$1 $2"],
+  [/^(\d+) \/ (\d+) cartes (grecques|hindoues|nordiques|égyptiennes)\. Encore (\d+) cartes (?:grecques|hindoues|nordiques|égyptiennes) pour gagner en dévotion et faire évoluer ton dieu et (tes cartes Trésor|ta carte Vagabon)\.$/,
+    (a, b, f, n, c) => `${a} / ${b} ${traduireNom(f)} cards. ${n} more ${traduireNom(f)} cards to gain Devotion and evolve your god and ${c==="tes cartes Trésor" ? "your Treasure cards" : "your Vagabond card"}.`],
+  [/^Dieu (des mers|du soleil|des morts|du tonnerre|de la guerre|du ciel|des géants|de la création|de la destruction|de la préservation|primordial) (.+)$/, (d, f) => `${traduireNom(f)} god ${({"des mers":"of the seas", "du soleil":"of the sun", "des morts":"of the dead", "du tonnerre":"of thunder", "de la guerre":"of war", "du ciel":"of the sky", "des géants":"of giants", "de la création":"of creation", "de la destruction":"of destruction", "de la préservation":"of preservation", "primordial":"(primordial)"})[d]}`],
+  [/^Au tour de (.+)$/, "$1’s turn"], [/^Passez l’écran à (.+)\. Sa main restera cachée jusqu’à ce qu’il soit prêt\.$/, "Hand the screen to $1. Their hand stays hidden until they are ready."],
+  [/^Viser (.+), le héros adverse$/, "Target $1, the enemy hero"], [/^Viser (.+)$/, "Target $1"], [/^Activer (.+)$/, "Activate $1"],
+  [/^Attente : (\d+) s\. Écart de cote accepté : ±(\d+) \(il s’élargit avec l’attente\)\. Votre cote : ([\d  ,.]+)\.$/, "Waiting: $1 s. Rating gap accepted: ±$2 (it widens as you wait). Your rating: $3."],
+  [/^Partie (\w{5})$/, "Game $1"], [/^Supprimer la partie (\w{5})$/, "Delete game $1"], [/^laissée il y a (\d+) (h|min|j)$/, (n, u) => `left ${n} ${({h:"h", min:"min", j:"d"})[u]} ago`],
+  [/^(\d+) \/ (\d+) · (\d+) or$/, "$1 / $2 · $3 gold"],
+  [/^(\d+) cartes pour le (\d+)ᵉʳ, (\d+) cartes pour le (\d+)ᵉ, (\d+) cartes pour le (\d+)ᵉ, (\d+) cartes pour le (\d+)ᵉ joueur, pour équilibrer l’avantage de jouer tôt\.$/,
+    (a, i, b, j, c, k, d, l) => `${a} cards for the ${EN_ORD(i)}, ${b} for the ${EN_ORD(j)}, ${c} for the ${EN_ORD(k)} and ${d} for the ${EN_ORD(l)} player, to balance the advantage of playing early.`],
+  [/^(\d+)ʳᵉ place$/, n => `${EN_ORD(n)} seat`], [/^(\d+)ᵉ place$/, n => `${EN_ORD(n)} seat`], [/^pioche (\d+)$/, "draws $1"],
+  [/^Les équipes jouent en alternance : (\d)ʳᵉ et (\d)ᵉ places contre (\d)ᵉ et (\d)ᵉ\. Plus on joue tôt, moins on pioche au premier tour\.$/, (a, b, c, d) => `Teams take turns alternately: ${EN_ORD(a)} and ${EN_ORD(b)} seats against ${EN_ORD(c)} and ${EN_ORD(d)}. The earlier you play, the fewer cards you draw on your first turn.`],
+  [/^il devient un esprit et revient à la vie au bout de (\d+) tours avec (\d+) PV, si son allié tient bon\. À sa chute, son allié récupère$/, "they become a spirit and come back to life after $1 turns with $2 HP, if their ally holds on. When they fall, their ally recovers"],
+  [/^se recharge sur une jauge commune à l’équipe \((\d+) créatures ennemies détruites\)\.$/, "charges on a gauge shared by the team ($1 enemy creatures destroyed)."],
+  [/^Un marché de (\d+) cartes,$/, "A market of $1 cards,"],
+  [/^à partir du tour (\d+), les soins sont réduits de moitié, et au début de chaque tour, chaque héros perd 1 PV, puis 2, puis 3… Aucune partie ne s’éternise\.$/, "from turn $1, healing is halved, and at the start of each turn every hero loses 1 HP, then 2, then 3… No game drags on forever."],
+  [/^Version ([\d.]+)$/, "Version $1"], [/^(\d+) deck,$/, "$1 deck,"], [/^(\d+) défausse$/, "$1 discard"], [/^, (\d+) en main$/, ", $1 in hand"], [/^(\d+) cartes en main$/, "$1 cards in hand"],
+  [/^(\d+) en réserve$/, "$1 in reserve"], [/^(\d+) puissance$/, "$1 power"], [/^Deck : (\d+) cartes$/, "Deck: $1 cards"], [/^Deck : (\d+), défausse : (\d+), main : (\d+)$/, "Deck: $1, discard: $2, hand: $3"],
+  [/^Voir la défausse : (\d+) cartes?(, dessus : (.+))?$/, (n, x, top) => `See the discard pile: ${EN_PL(n, "card")}${top ? `, top: ${traduireNom(top)}` : ""}`], [/^Tour (\d+)$/, "Turn $1"],
+  [/^(.+) : (\d+) \/ (\d+)$/, (p, a, b) => `${traduire(p)}: ${a} / ${b}`], [/^(.+) est prêt$/, "$1 is ready"],
+  [/^Pouvoir de votre équipe : (\d+) \/ (\d+)$/, "Your team’s power: $1 / $2"], [/^Pouvoir adverse : (\d+) \/ (\d+)$/, "Enemy power: $1 / $2"],
+  [/^Esprit : revient dans (\d+) tours?$/, n => `Spirit: returns in ${EN_PL(n, "turn")}`], [/^\+(\d+) puissance en réserve$/, "+$1 power in reserve"], [/^(.+) \(allié\)$/, "$1 (ally)"],
+  [/^Depuis le tour (\d+), les soins sont réduits de (\d+) %, et au début de chaque tour, chaque héros vivant perd des PV, un peu plus à chaque tour\.$/, "Since turn $1, healing is reduced by $2%, and at the start of each turn every living hero loses HP, a little more each turn."],
+  [/^(\d+) PV$/, "$1 HP"], [/^⏳ La Fin des Temps approche : elle commence au tour (\d+), dans (\d+) tours?\.$/, (a, n) => `⏳ The End of Days is coming: it begins on turn ${a}, in ${EN_PL(n, "turn")}.`],
+  [/^Partie terminée au tour (\d+)\.$/, "Game over on turn $1."], [/^\+(\d+) puissance\. Se charge quand (\d+) créatures ennemies sont (mortes|détruites)(?: : la jauge est commune à l’équipe)?\.$/, (a, b, m, ...r) => `+${a} power. Charges when ${b} enemy creatures are destroyed${/équipe/.test(r.join("")) ? "" : ""}.`],
+  [/^(.+)\. Se charge quand (\d+) créatures ennemies sont (?:mortes|détruites)( : la jauge est commune à l’équipe)?\.$/, (e, n, eq) => `${traduire(e + ".").replace(/\.$/, "")}. Charges when ${n} enemy creatures are destroyed${eq ? ": the gauge is shared by the team" : ""}.`],
+  [/^(.+) commence\.$/, "$1 starts."], [/^Vous jouez en (\d+)(?:ʳᵉ|ᵉ) position\.$/, n => `You play in ${EN_ORD(n)} position.`], [/^Tour de (.+)\.$/, "$1’s turn."],
+  [/^Temps écoulé : fin du tour de (.+)\.$/, "Time’s up: end of $1’s turn."], [/^(.+) joue$/, "$1 plays"], [/^(.+) achète$/, "$1 buys"], [/^(.+) attaque$/, "$1 attacks"], [/^(.+) bannit$/, "$1 banishes"],
+  [/^(.+) invoque$/, "$1 summons"], [/^(.+) sacrifie$/, "$1 sacrifices"], [/^(.+) équipe$/, "$1 equips"], [/^(.+) inflige (\d+) dégâts à$/, "$1 deals $2 damage to"], [/^(.+) subit (\d+) dégâts\.$/, "$1 takes $2 damage."],
+  [/^(.+) subit (\d+) dégâts de riposte de$/, "$1 takes $2 counter-damage from"], [/^(.+) est détruite?\.$/, "$1 is destroyed."], [/^(.+) se brise\.$/, "$1 shatters."], [/^Echo de (.+)\.$/, "Echo of $1."],
+  [/^(.+) mélange sa défausse pour reformer son deck\.$/, "$1 shuffles their discard pile into a new deck."], [/^(.+) tombe et devient un esprit\.$/, "$1 falls and becomes a spirit."],
+  [/^(.+) revient à la vie avec (\d+) PV !$/, "$1 comes back to life with $2 HP!"], [/^Vengeance : (.+) récupère (\d+) PV\.$/, "Vengeance: $1 recovers $2 HP."],
+  [/^(.+) reçoit (\d+) puissance de son allié esprit\.$/, "$1 receives $2 power from their spirit ally."], [/^La Fin des Temps : chaque héros perd (\d+) PV\.$/, "The End of Days: each hero loses $1 HP."],
+  [/^(.+) utilise (.+) : \+(\d+) puissance\.$/, "$1 uses $2: +$3 power."], [/^(.+) brise la Résistance de$/, "$1 breaks the Shield of"], [/^(.+) n’a pas joué pendant (\d+) tours de suite : il est considéré comme absent\.$/, "$1 has not played for $2 turns in a row: they are considered absent."],
+  [/^(.+) a quitté la partie : victoire\.$/, "$1 has left the game: victory."], [/^(.+) a quitté la partie\.$/, "$1 has left the game."], [/^(.+) perd la partie par inactivité\.$/, "$1 loses the game through inactivity."],
+  [/^(.+) a quitté la partie : l’ordinateur prend sa place\.$/, "$1 has left the game: the computer takes their seat."], [/^(.+) n’a pas joué pendant (\d+) tours : l’ordinateur prend sa place\.$/, "$1 has not played for $2 turns: the computer takes their seat."],
+  [/^(.+) \(hôte\) a quitté la partie : (.+) la reprend\.$/, "$1 (host) has left the game: $2 takes it over."], [/^Dévotion (.+) \((\d+) cartes\) : (.+) est guidé par$/, "$1 Devotion ($2 cards): $3 is guided by"],
+  [/^Toute l’équipe (A|B) a quitté la partie : victoire par forfait de l’équipe (A|B)\. La partie continue contre les ordinateurs, pour le plaisir\.$/, "All of team $1 has left the game: team $2 wins by forfeit. The game continues against the computers, just for fun."],
+  [/^Il vous faut (\d+) or pour acheter (.+)\.$/, "You need $1 gold to buy $2."], [/^Il vous faut (\d+) or pour (.+)\.$/, "You need $1 gold for $2."], [/^Votre plateau est plein \((\d+) créatures\)\.$/, "Your board is full ($1 creatures)."],
+  [/^Le deck contient déjà (\d+) cartes\.$/, "The deck already contains $1 cards."], [/^Le pouvoir de (.+) se charge : (\d+) créatures ennemies détruites sur (\d+)\.$/, "$1’s power is charging: $2 enemy creatures destroyed out of $3."],
+  [/^Cadeau récupéré : (.+) !$/, (x) => `Gift collected: ${x.split(", ").map(p => traduire(p)).join(", ")}!`], [/^Trophée obtenu : (.+) !$/, "Trophy earned: $1!"],
+  [/^Défi envoyé à (.+) : la partie commence dès qu’il accepte\.$/, "Challenge sent to $1: the game starts as soon as they accept."], [/^Le pseudo « (.+) » est déjà pris : choisissez-en un autre dans votre profil\.$/, "The username “$1” is already taken: choose another one in your profile."],
+  [/^Retirer (.+) de vos amis \?$/, "Remove $1 from your friends?"], [/^Supprimer définitivement la partie (.+) \? Elle ne pourra plus être reprise\.$/, "Permanently delete game $1? It can no longer be resumed."],
+  [/^Recycler (\d+) exemplaires? en trop pour (\d+) encre \? Vous gardez toujours le maximum utile de chaque carte pour vos decks\.$/, (n, e) => `Recycle ${EN_PL(n, "extra copy", "extra copies")} for ${e} ink? You always keep the useful maximum of each card for your decks.`],
+  [/^(\d+) exemplaires? recyclés? : \+([\d  ,.]+) encre !$/, (n, e) => `${EN_PL(n, "copy", "copies")} recycled: +${e} ink!`], [/^\+(\d+) or !$/, "+$1 gold!"], [/^Code : (.+)$/, "Code: $1"],
+  [/^Partie non comptée : (.+)\.$/, "Game not counted: $1."], [/^Cote du 2 contre 2 : ([+-]?\d+)$/, "2 vs 2 rating: $1"], [/^🏆 Victoire du jour : \+(\d+) or$/, "🏆 Daily win: +$1 gold"],
+  [/^🏆 Victoire par forfait enregistrée(?: \(cote ([+-]?\d+)\))?\. Vous pouvez finir la partie contre les ordinateurs, pour le plaisir\.$/, (c) => `🏆 Win by forfeit recorded${c ? ` (rating ${c})` : ""}. You can finish the game against the computers, just for fun.`],
+  [/^Votre adversaire semble déconnecté\. Il a encore (\d+) s pour revenir\.$/, "Your opponent seems disconnected. They have $1 s left to come back."], [/^Tour de (.+)$/, "$1’s turn"],
+  [/^(\d+):(\d\d)$/, "$1:$2"], [/^🏆 Victoire par forfait de l’équipe adverse, déjà enregistrée\.$/, "🏆 Win by forfeit of the enemy team, already recorded."],
+  [/^(.+) a quitté la partie : victoire par abandon\.$/, "$1 has left the game: victory by forfeit."], [/^(.+) n’a plus joué : victoire par inactivité de l’adversaire\.$/, "$1 stopped playing: victory through the opponent’s inactivity."],
+  [/^Vous avez abandonné la partie\.$/, "You forfeited the game."], [/^Défaite par inactivité : vous n’avez pas joué pendant plusieurs tours\.$/, "Defeat through inactivity: you did not play for several turns."],
+  [/^Donnez ce code à vos amis pour qu’ils vous rejoignent\. (\d+) joueurs? sur (\d+) · en attente depuis (\d+) s\.$/, (a, b, c) => `Give this code to your friends so they can join you. ${a} of ${b} players · waiting for ${c} s.`],
+  [/^Les joueurs qui lancent une recherche rejoignent ce salon\. (\d+) joueurs? sur (\d+) · en attente depuis (\d+) s\.$/, (a, b, c) => `Players who start a search join this lobby. ${a} of ${b} players · waiting for ${c} s.`],
+  [/^(\d+) places? tenues? par l’ordinateur$/, n => `${EN_PL(n, "seat")} held by the computer`], [/^Lancement possible dans (\d+) s, ou dès que le salon est complet\.$/, "Can start in $1 s, or as soon as the lobby is full."],
+  [/^(.+) \(vous\)$/, "$1 (you)"], [/^Travail ([IVX]+) : (.+)$/, "Labour $1: $2"], [/^Ouvre le (.+)$/, "Opens on $1"], [/^dans (\d+) jours?$/, n => `in ${EN_PL(n, "day")}`], [/^Encore (\d+)$/, "$1 more"],
+  [/^fin le (.+)$/, "ends on $1"], [/^\/ (\d+) travaux accomplis$/, "/ $1 labours completed"], [/^Titre « (.+) »$/, t => `Title “${traduire(t)}”`], [/^Héros de la saison (\d+)$/, "Hero of season $1"],
+  [/^jours? avant l’ouverture$/, "days before opening"], [/^jour restant$/, "day left"], [/^(\d+) travaux$/, "$1 labours"], [/^(\d+) \/ (\d+) travaux · encore (\d+) j$/, "$1 / $2 labours · $3 d left"],
+  [/^Ouverture le (.+)$/, "Opens on $1"], [/^(\d+) jours? avant l’ouverture$/, n => `${EN_PL(n, "day")} before opening`], [/^Encore (\d+)$/, "$1 more"],
+  [/^victoires \((\d+) %\)$/, "wins ($1%)"], [/^Votre cote : ([\d  ,.]+)$/, "Your rating: $1"], [/^(\d+)(?:er|e)$/, "$1"],
+  [/^Tutoriel, étape (\d+) sur (\d+)$/, "Tutorial, step $1 of $2"], [/^Tutoriel du 2 contre 2 : (.+)$/, (t) => `2 vs 2 tutorial: ${traduire(t)}`], [/^Tutoriel terminé : (.+)$/, (t) => `Tutorial complete: ${traduire(t)}`],
+  [/^(\d) · (Vous|Adversaire|Votre allié)$/, (n, r) => `${n} · ${({Vous:"You", Adversaire:"Opponent", "Votre allié":"Your ally"})[r]}`], [/^(\d+) novembre( \d{4})?$/, "November $1$2"], [/^(\d+) décembre( \d{4})?$/, "December $1$2"],
+  [/^Connecté : (.+)$/, "Logged in: $1"], [/^Joueur (\d) joue$/, "Player $1 plays"], [/^(.+) : (\+.+)$/, (n, e) => `${traduire(n)}: ${traduireEffetFR(e) || traduire(e)}`]
+]);
+
+/* ----- Dictionnaire anglais (2/2) : règles du jeu, tutoriels ----- */
+ajouterTraductions("en", {
+  // ----- Règles : titres et sommaire
+  "Sommaire":"Contents", "Le but du jeu":"The goal of the game", "La mise en place":"Setup", "Le déroulement d’un tour":"How a turn works", "Le marché":"The market",
+  "Le marché commun":"The shared market", "Les ressources":"Resources", "Les créatures et le combat":"Creatures and combat", "Les mots-clés":"Keywords", "Les combos":"Combos",
+  "Les héros et leurs pouvoirs":"Heroes and their powers", "Dévotion":"Devotion", "Dévotion : se spécialiser dans un panthéon":"Devotion: specialising in a pantheon",
+  "Construire son deck":"Building your deck", "Lire le plateau":"Reading the board", "Collection et progression":"Collection and progression", "Le classement":"The leaderboard",
+  "Les saisons":"Seasons", "Votre compte":"Your account", "Conseils pour bien débuter":"Tips for getting started", "Victoire et défaite":"Victory and defeat",
+  "Votre deck de départ":"Your starter deck", "Votre héros":"Your hero", "Pendant votre tour, ce que vous pouvez faire":"What you can do during your turn",
+  // ----- Règles : fragments
+  "Deux héros s’affrontent. Chacun commence avec":"Two heroes face off. Each starts with", "points de vie":"hit points", "Le premier joueur est tiré au sort. Il ne pioche que":"The first player is drawn at random. They draw only",
+  "Pendant votre tour, vous faites ce que vous voulez, dans l’ordre que vous voulez :":"During your turn, you do what you want, in the order you want:",
+  "Jouer vos cartes.":"Play your cards.", "C’est gratuit : chaque carte rapporte de l’or, de la puissance, du soin, une pioche ou pose une créature.":"It’s free: each card gives gold, power, healing, a draw, or puts a creature into play.",
+  "Acheter au marché":"Buy at the market", "avec votre or.":"with your gold.", "Attaquer":"Attack", "avec vos créatures et avec votre héros.":"with your creatures and with your hero.",
+  "Activer le pouvoir de votre héros":"Activate your hero’s power", ", s’il est chargé.":", if it is charged.", "Puis cliquez sur":"Then click", "Fin du tour":"End turn",
+  "Le marché est":"The market is", "commun":"shared", "En partie, votre deck ne vous appartient pas tout à fait : il rejoint celui de l’adversaire pour former le":"In a game, your deck isn’t quite yours: it joins your opponent’s to form the",
+  "marché commun":"shared market", ": votre adversaire peut acheter les cartes de votre deck, et vous les siennes.":": your opponent can buy the cards from your deck, and you can buy theirs.",
+  "Cliquez sur une carte du marché pour l’acheter avec votre or. Elle va dans votre":"Click a market card to buy it with your gold. It goes to your", "défausse":"discard pile",
+  ": vous la piocherez plus tard.":": you will draw it later.", "L’emplacement libéré est aussitôt rempli par une nouvelle carte.":"The freed slot is immediately filled by a new card.",
+  "Or :":"Gold:", "Les créatures sont le cœur d’un deck.":"Creatures are the heart of a deck.", "Une créature posée reste sur le plateau jusqu’à sa mort. Elle a une":"A creature in play stays on the board until it dies. It has an",
+  "attaque":"attack", "(médaillon rouge, en bas à gauche) et des":"(red medallion, bottom left) and", "Une créature ne peut pas attaquer le tour où elle arrive, sauf avec":"A creature cannot attack on the turn it arrives, unless it has",
+  "Rapidité. Ensuite, elle attaque une fois par tour.":"Haste. After that, it attacks once per turn.", "Quand deux créatures se battent, elles s’infligent leurs dégâts":"When two creatures fight, they deal their damage to each other",
+  "en même temps":"at the same time", "Pour viser le héros adverse, il faut d’abord détruire toutes ses créatures visibles.":"To target the enemy hero, you must first destroy all their visible creatures.",
+  "Les créatures avec":"Creatures with", "Provocation doivent être visées en premier, et celles avec":"Taunt must be targeted first, and those with",
+  "Ethéré ne peuvent pas être visées tant qu’elles n’ont pas attaqué (elles ne protègent pas leur héros).":"Ethereal cannot be targeted until they have attacked (they do not protect their hero).",
+  "Un":"A", "Une":"A", "Des":"Some", "Les":"The", "L’":"The", "Toutes les":"All", "Chaque joueur a une":"Each player has a", "Cliquez sur une":"Click a", "Dans le":"In the", "Dans l’":"In the",
+  "autre":"other", "brille":"glows", "divinité":"deity", "équipement":"piece of equipment", "journal":"log", "saison":"season", "quêtes":"quests", "paliers":"milestones",
+  "cartes de saison":"season cards", "cote":"rating", "partie classée":"ranked game", "parties en ligne":"online games", "riposte":"counter-damage", "symbole de faction":"faction symbol",
+  "or et la puissance de l’adversaire":"gold and power of the opponent", "atelier de deck":"deck workshop", "Panthéon":"Pantheon",
+  "Un effet précédé d’un":"An effect preceded by a", "est un combo : il se déclenche si une":"is a combo: it triggers if an", "carte de cette faction est jouée dans le même tour, avant ou après. Une carte ne déclenche jamais son propre combo.":"card of this faction is played in the same turn, before or after. A card never triggers its own combo.",
+  "Le pouvoir d’un héros se charge à chaque créature ennemie détruite. Après":"A hero’s power charges with each enemy creature destroyed. After",
+  ", il est prêt : cliquez sur votre médaillon pour l’activer. Il se recharge ensuite.":", it is ready: click your medallion to activate it. It then recharges.",
+  "Chaque panthéon a trois divinités, selon le nombre de cartes de ce panthéon dans votre deck (voir Dévotion) :":"Each pantheon has three deities, depending on how many cards of that pantheon are in your deck (see Devotion):",
+  "est une divinité du panthéon le plus représenté dans le deck que vous avez choisi (en cas d’égalité, il est tiré au sort). Laquelle dépend de votre Dévotion : voir plus bas.":"is a deity of the most represented pantheon in the deck you chose (if there is a tie, it is drawn at random). Which one depends on your Devotion: see below.",
+  "Votre héros est une divinité du panthéon le plus représenté dans votre deck. Plus votre deck est spécialisé, plus la divinité est importante, et plus vos cartes de départ prennent la couleur de son panthéon :":"Your hero is a deity of the most represented pantheon in your deck. The more specialised your deck, the more important the deity, and the more your starter cards take on the colour of its pantheon:",
+  "divinité du panthéon, et vos cartes de départ habituelles.":"deity of the pantheon, and your usual starter cards.",
+  "la divinité primordiale, au pouvoir encore plus fort, et votre Vagabon devient une créature du panthéon, avec un effet et un combo.":"the primordial deity, with an even stronger power, and your Vagabond becomes a creature of the pantheon, with an effect and a combo.",
+  "Ces avantages restent volontairement modestes : un deck mélangé reste parfaitement capable de gagner. Le palier de chaque joueur s’affiche sous le nom de sa divinité (✦ ou ✦✦).":"These advantages are deliberately modest: a mixed deck is perfectly able to win. Each player’s tier is shown under their deity’s name (✦ or ✦✦).",
+  "Le panthéon le plus représenté détermine votre":"The most represented pantheon determines your",
+  "Pendant la partie, vous ne jouez pas avec un deck figé : vous partez d’un petit deck de départ et vous le renforcez en achetant des cartes au marché.":"During the game, you don’t play with a fixed deck: you start from a small starter deck and strengthen it by buying cards at the market.",
+  ". Votre propre deck de jeu commence toujours avec les mêmes cartes de départ.":". Your own game deck always starts with the same starter cards.",
+  "Le plateau d’un joueur ne peut pas contenir plus de":"A player’s board cannot hold more than",
+  "S’il frappe le héros adverse, il ne subit rien.":"If it hits the enemy hero, it takes nothing.",
+  ", la vôtre ou celle de l’adversaire, pour voir les cartes qu’elle contient.":", yours or your opponent’s, to see the cards it contains.",
+  ", les noms de cartes sont en gras : survolez-les (ou touchez-les sur téléphone) pour voir la carte. Un appui long sur n’importe quelle carte l’affiche en grand.":", card names are in bold: hover over them (or tap them on a phone) to see the card. A long press on any card shows it full size.",
+  "s’affichent à côté de son médaillon, en temps réel.":"are shown next to their medallion, in real time.", ", et son nombre de cartes votre":", and its number of cards your",
+  "attaque avec votre puissance. S’il frappe une créature, il subit sa":"attacks with your power. If it hits a creature, it takes its",
+  "(l’attaque de la créature). S’il frappe le héros adverse, il ne subit rien.":"(the creature’s attack). If it hits the enemy hero, it takes nothing.",
+  "(écu rouge, en bas à droite). Le médaillon doré en haut indique son prix. Les dégâts subis restent d’un tour sur l’autre.":"(red shield, bottom right). The gold medallion at the top shows its price. Damage taken carries over from one turn to the next.",
+  ", ouverts au rythme de deux par semaine. Un travail ouvert le reste jusqu’à la fin de la saison : vous pouvez rattraper votre retard.":", opening at a rate of two a week. An opened labour stays open until the end of the season: you can catch up.",
+  ", qui rapportent un peu d’or ou d’encre. Elles comptent les parties jouées contre l’ordinateur ou en ligne depuis l’ouverture du travail. Un travail est accompli quand toutes ses quêtes sont réclamées.":", which give a little gold or ink. They count games played against the computer or online since the labour opened. A labour is accomplished when all its quests are claimed.",
+  ", qui vous trouve un adversaire de votre niveau.":", which finds you an opponent at your level.",
+  "Achetez d’abord la carte la plus chère possible, puis dépensez le reste : l’or non utilisé est perdu à la fin du tour.":"Buy the most expensive card you can first, then spend the rest: unused gold is lost at the end of the turn.",
+  "Boutique :":"Shop:", "Cartes offertes :":"Free cards:", "Decks :":"Decks:", "Encre :":"Ink:", "Paquets offerts :":"Free packs:", "Profil et trophées :":"Profile and trophies:", "Trophées :":"Trophies:",
+  "Celui qui a créé la partie fait tourner les règles : il doit garder sa page ouverte jusqu’à la fin.":"Whoever created the game runs the rules: they must keep their page open until the end.",
+  "Chaque travail compte plusieurs":"Each labour has several", "Choisissez « En ligne », puis « Créer une partie » : un code de 5 caractères s’affiche.":"Choose “Online”, then “Create a game”: a 5-character code appears.",
+  "Envoyez ce code à votre adversaire : il choisit « En ligne », tape le code et clique sur « Rejoindre ».":"Send this code to your opponent: they choose “Online”, type the code and click “Join”.",
+  "Ne gaspillez pas votre or.":"Don’t waste your gold.", "Une carte chère vaut mieux que deux cartes bon marché.":"One expensive card is better than two cheap ones.",
+  "comptent pour le classement, qu’elles soient lancées avec un code ou par la":"count for the leaderboard, whether started with a code or through the",
+  "À la fin de chaque partie, le résultat est confirmé par les deux joueurs. En cas de désaccord, les points de la partie sont annulés.":"At the end of each game, the result is confirmed by both players. If they disagree, the game’s points are cancelled.",
+  "choisissez votre pseudo, suivez vos statistiques et débloquez des trophées en bronze, argent et or.":"choose your username, follow your statistics and unlock bronze, silver and gold trophies.",
+  "ils s’ouvrent gratuitement dans la boutique, avec les mêmes chances qu’un paquet acheté.":"they open for free in the shop, with the same odds as a bought pack.",
+  "ne s’obtiennent qu’en accomplissant les travaux pendant la saison ; elles rejoignent ensuite les paquets.":"can only be earned by accomplishing the labours during the season; they then join the packs.",
+  "Votre compte garde votre collection, vos decks, votre or, votre encre et vos statistiques, sur tous vos appareils. Vous restez connecté sur votre appareil jusqu’à ce que vous vous déconnectiez. En cas d’oubli, utilisez « Mot de passe oublié » sur l’écran de connexion.":"Your account keeps your collection, decks, gold, ink and statistics, on all your devices. You stay logged in on your device until you log out. If you forget your password, use “Forgot your password” on the login screen.",
+  "Un sort sert une fois, puis part à la défausse ; une créature reste sur le plateau, attaque à chaque tour et protège votre héros, puisque l’adversaire doit la détruire avant de vous toucher. Un deck sans créatures perd presque toujours. Les sorts restent indispensables pour produire l’or et la puissance du tour : le meilleur deck mélange les deux, avec une majorité de créatures.":"A spell is used once, then goes to the discard pile; a creature stays on the board, attacks every turn and protects your hero, since the opponent must destroy it before reaching you. A deck without creatures almost always loses. Spells remain essential to produce the turn’s gold and power: the best deck mixes both, with a majority of creatures.",
+  ": les cartes jouables de votre main en jaune, les créatures prêtes à attaquer en vert (avec une petite épée), les cibles possibles en rouge, et les cartes du marché que vous pouvez acheter en vert. Le jeton de puissance pulse quand votre héros peut attaquer.":": playable cards in your hand in yellow, creatures ready to attack in green (with a small sword), possible targets in red, and market cards you can buy in green. The power token pulses when your hero can attack.",
+  ": filtrez par panthéon, type et coût, triez par panthéon, coût, nom ou rareté, suivez le nombre de créatures, de sorts et d’équipements et la courbe des coûts, voyez en direct votre divinité, et laissez « Compléter automatiquement » remplir les places libres.":": filter by pantheon, type and cost, sort by pantheon, cost, name or rarity, follow the number of creatures, spells and equipment and the cost curve, see your deity live, and let “Auto-complete” fill the free slots.",
+  "donne immédiatement sa valeur en puissance à votre héros. Si vous avez une créature, vous l’équipez en plus : elle gagne autant d’attaque et de PV, tant qu’elle reste en vie. Sans créature, l’équipement reste donc utile.":"immediately gives its value in power to your hero. If you have a creature, you also equip it: it gains as much attack and HP, as long as it stays alive. Without a creature, equipment is still useful.",
+  "Lancer le tutoriel":"Start the tutorial",
+  // ----- Tutoriel
+  "Bienvenue !":"Welcome!", "Tutoriel : à vous de jouer !":"Tutorial: your turn!", "Vous incarnez":"You play", "Rapidité.":"Haste.",
+  "Jouez votre or":"Play your gold", "Jouer une carte est":"Playing a card is", "gratuit":"free", "pour ce tour.":"for this turn.",
+  "» : elles vous donnent de l’or":"”: they give you gold", "» et sur la carte «":"” and on the card “", "Achetez au marché":"Buy at the market", "Le":"The", "marché":"market",
+  "est à droite. Il est formé des":"is on the right. It is made of the", "decks construits des deux joueurs":"built decks of both players",
+  ", mélangés : vous pouvez acheter les cartes de votre adversaire, et lui les vôtres.":", shuffled together: you can buy your opponent’s cards, and they can buy yours.",
+  "Avec votre or, achetez la carte «":"With your gold, buy the card “", "). Une carte achetée va dans votre":"). A bought card goes to your", ": vous la piocherez lors d’un prochain tour.":": you will draw it on a later turn.",
+  "Posez une créature":"Play a creature", "Cliquez sur la créature «":"Click the creature “",
+  "les créatures sont le cœur d’un deck. Un sort sert une fois, alors qu’une créature attaque à chaque tour et protège votre héros : l’adversaire doit la détruire avant de vous toucher.":"creatures are the heart of a deck. A spell is used once, while a creature attacks every turn and protects your hero: the opponent must destroy it before reaching you.",
+  ". D’habitude, elle ne peut pas attaquer le tour où elle arrive, mais celle-ci a":". Usually it cannot attack the turn it arrives, but this one has", ": elle peut attaquer tout de suite.":": it can attack right away.",
+  "Attaquez une créature":"Attack a creature", ". Cliquez sur votre créature «":". Click your creature “", "», puis sur la créature «":"”, then the creature “",
+  "» adverse. Les deux créatures s’infligent leurs dégâts en même temps.":"” of the opponent. Both creatures deal their damage at the same time.", "Pour viser le héros adverse, il faut d’abord détruire":"To target the enemy hero, you must first destroy",
+  "toutes ses créatures visibles":"all their visible creatures", "Gagnez de la puissance":"Gain power", "Jouez la carte «":"Play the card “", "» : elle vous donne +":"”: it gives you +",
+  ". La puissance, ce sont les points d’attaque de votre":". Power is the attack points of your", "héros":"hero", "Votre héros attaque":"Your hero attacks",
+  "L’adversaire n’a plus de créature : cliquez sur le":"The opponent has no creatures left: click the", "pour que votre héros le frappe avec votre puissance.":"so your hero strikes them with your power.",
+  "Finissez votre tour":"End your turn", "Cliquez sur":"Click", "Attention : à la fin du tour,":"Careful: at the end of the turn,", "tout ce qui n’a pas été utilisé est défaussé":"everything unused is discarded",
+  ". Les cartes jouées et celles restées en main partent dans votre défausse, et l’or":". Cards played and those left in hand go to your discard pile, and gold", "et la puissance":"and power",
+  "Combo":"Combo", "L’adversaire a posé la créature «":"The opponent has played the creature “", "La carte «":"The card “", "» a un effet précédé du symbole":"” has an effect preceded by the symbol",
+  ": c’est un":": it is a", ". Il se déclenche si une":". It triggers if an", "carte égyptienne est jouée dans le même tour. Jouez la carte «":"Egyptian card is played in the same turn. Play the card “",
+  "», puis la carte «":"”, then the card “", "». À vous !":"”. Your turn!", "Le pouvoir de votre héros":"Your hero’s power",
+  "médaillon":"medallion", "(ou sur « Activer ») pour déclencher":"(or on “Activate”) to trigger", "Le coup final":"The final blow", "La voie est libre ! Cliquez sur le":"The way is clear! Click the",
+  "pour frapper avec la puissance qu’il vous reste.":"to strike with the power you have left.",
+  // Fin du tutoriel
+  "Vous connaissez maintenant l’essentiel d’une partie :":"You now know the essentials of a game:", "jouer ses cartes et acheter au marché avec son or ;":"playing your cards and buying at the market with your gold;",
+  "poser des créatures et attaquer, en détruisant d’abord les défenseurs ;":"playing creatures and attacking, destroying defenders first;", "attaquer avec son héros grâce à la puissance ;":"attacking with your hero thanks to power;",
+  "déclencher des combos et le pouvoir de sa divinité.":"triggering combos and your deity’s power.", "Encore quatre pages pour découvrir vos decks, la Dévotion et votre progression.":"Four more pages to discover your decks, Devotion and your progression.",
+  "Victoire !":"Victory!", "Vos decks":"Your decks", "Votre":"Your", "Conseils :":"Tips:", "En partie, votre deck rejoint celui de l’adversaire pour former le":"In a game, your deck joins your opponent’s to form the",
+  "; vous commencez toujours avec les mêmes cartes de départ.":"; you always start with the same starter cards.", "est celle du panthéon le plus représenté dans votre deck.":"is that of the most represented pantheon in your deck.",
+  ", filtrez et triez vos cartes, suivez le nombre de créatures, de sorts et d’équipements, et voyez en direct la divinité que vous obtiendrez.":", filter and sort your cards, follow the number of creatures, spells and equipment, and see live the deity you will get.",
+  "mettez une majorité de créatures (elles agissent à chaque tour et protègent votre héros), et préférez une carte chère à deux cartes bon marché.":"include a majority of creatures (they act every turn and protect your hero), and prefer one expensive card to two cheap ones.",
+  "La Dévotion":"Devotion", "Plus votre deck est spécialisé dans un panthéon, plus votre divinité est importante :":"The more your deck specialises in a pantheon, the more important your deity:",
+  "Cartes du panthéon":"Pantheon cards", "Divinité (ex. Égyptiens)":"Deity (e.g. Egyptians)", "Bonus":"Bonus", "Aucun":"None",
+  "Pouvoir encore plus fort, et votre Vagabon devient une créature du panthéon":"Even stronger power, and your Vagabond becomes a creature of the pantheon",
+  "Les cartes de départ colorées comptent comme des cartes du panthéon : elles déclenchent vos combos. Ces bonus restent modestes, un deck mélangé peut parfaitement gagner.":"Coloured starter cards count as pantheon cards: they trigger your combos. These bonuses stay modest; a mixed deck can perfectly well win.",
+  "Équipements et plateau":"Equipment and board", "Ce que vous pouvez faire":"What you can do",
+  ": cartes jouables en jaune, créatures prêtes à attaquer en vert, cibles en rouge, cartes achetables en vert.":": playable cards in yellow, creatures ready to attack in green, targets in red, buyable cards in green.",
+  "donne aussitôt sa valeur en puissance à votre héros, et si vous avez une créature, elle gagne autant d’attaque et de points de vie, tant qu’elle reste en vie.":"immediately gives its value in power to your hero, and if you have a creature, it gains as much attack and hit points, as long as it stays alive.",
+  "pour voir ses cartes. L’or et la puissance de l’adversaire s’affichent à côté de son médaillon.":"to see its cards. The opponent’s gold and power are shown next to their medallion.",
+  ", survolez le nom d’une carte pour la voir. Sur téléphone, un appui long sur une carte l’affiche en grand.":", hover over a card’s name to see it. On a phone, a long press on a card shows it full size.",
+  "Progresser":"Progressing", "Chaque partie":"Every game", "rapporte de l’or, et":"earns gold, and", "en rapportent davantage (vous pouvez en changer une par jour).":"earn more (you can change one per day).",
+  "boutique":"shop", "Dans la":"In the", ", le paquet classique mélange tous les panthéons, et chaque panthéon a son paquet : idéal pour viser la Dévotion.":", the classic pack mixes all pantheons, and each pantheon has its own pack: ideal for aiming at Devotion.",
+  "Recyclez vos exemplaires en trop pour obtenir de l’":"Recycle your extra copies to get", ", et fabriquez les cartes qui vous manquent.":", and craft the cards you are missing.",
+  "trophées":"trophies", "paquets offerts":"free packs", ", à ouvrir dans la boutique.":", to open in the shop.", "Pendant une":"During a",
+  // ----- Tutoriel du 2 contre 2
+  "Deux équipes, quatre héros":"Two teams, four heroes", "Vous faites équipe avec un allié contrôlé par l’ordinateur. Les équipes jouent":"You team up with a computer-controlled ally. Teams play",
+  "en alternance":"alternately", ": un héros de votre équipe, puis un adversaire, et ainsi de suite.":": a hero from your team, then an opponent, and so on.",
+  "Choisissez votre place dans le menu : jouer tôt donne l’initiative, mais une première pioche plus petite.":"Choose your seat in the menu: playing early gives you the initiative, but a smaller first draw.",
+  "Votre allié":"Your ally", "Votre allié joue seul, mais":"Your ally plays on their own, but", "vous combattez ensemble":"you fight together", "une créature à":"a creature with",
+  "protège toute l’équipe ;":"protects the whole team;", "une carte jouée par votre allié":"a card played by your ally", "compte pour vos combos":"counts for your combos",
+  "du même tour, et inversement ;":"in the same turn, and vice versa;", "vos":"your", "soins":"healing", "peuvent aller à votre allié : choisissez le bénéficiaire sous votre médaillon.":"can go to your ally: choose who receives it under your medallion.",
+  "Le pouvoir divin, à deux":"The divine power, shared", "jauge du pouvoir est commune":"power gauge is shared", "à l’équipe : chaque créature ennemie détruite, par vous ou par votre allié, la fait monter.":"by the team: every enemy creature destroyed, by you or your ally, fills it.",
+  "Quand elle est pleine, le premier héros de l’équipe qui joue peut activer son pouvoir. Coordonnez-vous : détruire les créatures adverses profite à toute l’équipe.":"When it is full, the first hero of the team to play can activate their power. Coordinate: destroying enemy creatures benefits the whole team.",
+  "Tomber n’est pas perdre":"Falling is not losing", "devient un esprit":"becomes a spirit", ": il ne joue plus de créatures, mais revient à la vie au bout de quelques tours, avec une partie de ses PV.":": they no longer play creatures, but come back to life after a few turns, with some of their HP.",
+  "À sa chute, son allié récupère des PV grâce à la":"When they fall, their ally recovers HP thanks to", "vengeance":"vengeance", ". Protégez votre allié tombé jusqu’à son retour !":". Protect your fallen ally until they return!",
+  "Remporter la victoire":"Winning", "Votre équipe gagne quand":"Your team wins when", "les deux héros adverses sont tombés en même temps":"both enemy heroes are down at the same time",
+  "Conseil :":"Tip:", "concentrez vos attaques sur un seul adversaire. Une fois tombé, son allié est seul quelques tours : c’est le moment de le faire tomber à son tour.":"focus your attacks on a single opponent. Once they fall, their ally is alone for a few turns: that’s the moment to bring them down too.",
+  "Ne traînez pas :":"Don’t dawdle:", "Chaque jour,":"Every day,", "rapporte un bonus d’or, et trois quêtes propres au mode vous attendent.":"earns bonus gold, and three quests specific to the mode await you."
+});
+ajouterGabarits("en", {
+  "# cartes :":"# cards:", "# créatures ennemies":"# enemy creatures", "# points de vie":"# hit points", "# travaux":"# labours", "# à # cartes":"# to # cards", "De # à # cartes :":"From # to # cards:",
+  "Moins de # cartes":"Fewer than # cards", "Moins de # cartes du panthéon :":"Fewer than # pantheon cards:", "Moins de #":"Fewer than #", "# à #":"# to #", "Un deck compte":"A deck has",
+  "# cartes, # exemplaires au maximum par carte et # pour une légendaire. Vous pouvez en enregistrer jusqu’à #.":"# cards, at most # copies per card and # for a legendary. You can save up to #.",
+  "(# au départ). Le gagnant prend des points au perdant : battre un joueur mieux classé rapporte beaucoup, battre un joueur moins bien classé rapporte peu. Vos # premières parties comptent double, pour trouver vite votre niveau.":"(# at the start). The winner takes points from the loser: beating a higher-rated player earns a lot, beating a lower-rated player earns little. Your first # games count double, to find your level quickly.",
+  ". Le premier qui fait tomber le héros adverse à # remporte la partie.":". The first to bring the enemy hero down to # wins the game.",
+  ": les cartes jouées et celles restées en main partent à la défausse, l’or et la puissance non utilisés sont perdus, et vous piochez # nouvelles cartes. Quand votre deck est vide, votre défausse est mélangée pour former un nouveau deck.":": cards played and those left in hand go to the discard pile, unused gold and power are lost, and you draw # new cards. When your deck is empty, your discard pile is shuffled into a new deck.",
+  "Ce qui vous limite, ce ne sont pas vos pièces mais les # cartes que vous piochez par tour : chaque carte achetée prend une place dans votre deck. Une créature à # or est bien plus forte qu’une créature à #, et ne prend qu’une place au lieu de deux.":"What limits you isn’t your coins but the # cards you draw each turn: every card you buy takes a place in your deck. A #-gold creature is much stronger than a #-gold one, and takes only one place instead of two.",
+  "Le plateau d’un joueur ne peut pas contenir plus de # créatures. Une créature détruite part dans la défausse de son propriétaire.":"A player’s board cannot hold more than # creatures. A destroyed creature goes to its owner’s discard pile.",
+  "Un héros qui tombe à # point de vie perd la partie. Si les deux tombent en même temps, c’est une égalité.":"A hero who drops to # hit points loses the game. If both drop at the same time, it’s a draw.",
+  "pour son premier tour, et l’autre joueur # : jouer en premier permet de choisir le premier au marché, un gros avantage que cette main réduite compense. Ensuite, chacun pioche # cartes à la fin de chaque tour.":"for their first turn, and the other player #: playing first lets you pick first at the market, a big advantage that this smaller hand compensates. After that, each player draws # cards at the end of each turn.",
+  "chaque trophée a # rangs (bronze, argent, or, platine). Les rangs bronze, argent et or rapportent #, # puis # or, et le rang platine un paquet classique. Les trophées de panthéon (Champion d’Égypte, d’Inde, du Nord, de l’Olympe) rapportent un paquet de leur panthéon aux rangs or et platine. Réclamez vos récompenses dans votre profil.":"each trophy has # ranks (bronze, silver, gold, platinum). The bronze, silver and gold ranks give #, # then # gold, and the platinum rank a classic pack. Pantheon trophies (Champion of Egypt, of India, of the North, of Olympus) give a pack of their pantheon at the gold and platinum ranks. Claim your rewards in your profile.",
+  "compte # cartes, identiques pour les deux joueurs : # Trésor, # Joyau, # Vagabon, # Encourager. Avec la Dévotion, certaines prennent la couleur de votre panthéon.":"has # cards, identical for both players: # Treasure, # Jewel, # Vagabond, # Encourage. With Devotion, some take on the colour of your pantheon.",
+  "de votre collection : # exemplaires au maximum par carte, et # pour une légendaire. Vous pouvez en enregistrer jusqu’à #, et enregistrer un deck incomplet pour le finir plus tard.":"from your collection: at most # copies per card, and # for a legendary. You can save up to #, and save an unfinished deck to finish it later.",
+  "divinité, au pouvoir un peu plus fort, et # de vos Trésors prennent la couleur du panthéon : elles comptent comme des cartes du panthéon et peuvent déclencher vos combos.":"deity, with a slightly stronger power, and # of your Treasures take on the pantheon’s colour: they count as pantheon cards and can trigger your combos.",
+  "dure environ six semaines et propose":"lasts about six weeks and offers",
+  "est formé des deux decks choisis par les joueurs, mélangés. # cartes sont visibles, plus Amulette Magique, toujours disponible.":"is made of the two decks chosen by the players, shuffled. # cards are visible, plus Magic Amulet, always available.",
+  "la #":"the #", "récompensent le nombre de travaux accomplis (par exemple #, #, # et #) : cartes de saison, paquets offerts, illustrations exclusives, titres.":"reward the number of labours accomplished (for example #, #, # and #): season cards, free packs, exclusive artwork, titles.",
+  "recyclez vos exemplaires en trop pour obtenir de l’encre (# pour une commune, jusqu’à # pour une légendaire), et fabriquez les cartes qui vous manquent (de # à # encre).":"recycle your extra copies to get ink (# for a common, up to # for a legendary), and craft the cards you are missing (from # to # ink).",
+  "un paquet coûte # or et contient # cartes, dont au moins une rare. Le paquet classique mélange toutes les factions ; chaque faction a aussi son paquet, qui ne contient que ses cartes. Des boosters spéciaux peuvent proposer des cartes promotionnelles (absentes des autres paquets et non fabricables) et des illustrations alternatives (même carte, apparence différente, à choisir dans votre collection). Chances par carte : commune # %, rare # %, épique # %, légendaire # %.":"a pack costs # gold and contains # cards, including at least one rare. The classic pack mixes all factions; each faction also has its own pack, containing only its cards. Special boosters may offer promotional cards (not in other packs and not craftable) and alternative artwork (same card, different look, to choose in your collection). Odds per card: common #%, rare #%, epic #%, legendary #%.",
+  "une victoire rapporte # or, une défaite # (au maximum # or par jour). Chaque jour, # quêtes rapportent # or chacune (une quête peut être changée une fois par jour).":"a win earns # gold, a defeat # (at most # gold per day). Every day, # quests earn # gold each (a quest can be changed once a day).",
+  "à votre arrivée, vous recevez # cartes pour former votre premier deck, et # or afin d’ouvrir un booster.":"when you arrive, you receive # cards to build your first deck, and # gold to open a booster.",
+  ", n’a que # points de vie pour ce tutoriel : faites-le tomber à # pour gagner.":", has only # hit points for this tutorial: bring them down to # to win.",
+  ". Cliquez sur vos # cartes «":". Click your # cards “", "» pour la poser sur le plateau. Une créature reste en jeu jusqu’à sa mort, et votre côté du plateau ne peut pas en contenir plus de":"” to put it on the board. A creature stays in play until it dies, and your side of the board cannot hold more than",
+  "» : elle vous donne +#":"”: it gives you +#", "non dépensés sont perdus. Vous piochez ensuite # nouvelles cartes pour votre prochain tour.":"not spent are lost. You then draw # new cards for your next turn.",
+  "Le pouvoir d’un héros se charge à chaque créature ennemie détruite (# au total). Pour ce tutoriel, celui d’Osiris est déjà prêt : son anneau doré est plein. Cliquez sur votre":"A hero’s power charges with each enemy creature destroyed (# in total). For this tutorial, Osiris’s is already ready: its golden ring is full. Click your",
+  "Votre héros et ses points de vie sont en bas, ceux de l’adversaire en haut. Votre main est préparée pour ce tutoriel ; en partie normale, le joueur qui commence ne pioche que # cartes au lieu de #, pour compenser l’avantage de choisir le premier au marché. En dehors du tutoriel, votre divinité dépend du panthéon le plus représenté dans votre deck : vous découvrirez la Dévotion à la fin.":"Your hero and their hit points are at the bottom, the opponent’s at the top. Your hand is prepared for this tutorial; in a normal game, the player who starts draws only # cards instead of #, to compensate for the advantage of picking first at the market. Outside the tutorial, your deity depends on the most represented pantheon in your deck: you will discover Devotion at the end.",
+  "une carte chère vaut mieux que deux cartes bon marché. Vous ne piochez que # cartes par tour : chaque carte achetée prend une place dans votre deck, autant qu’elle soit forte. Dépensez quand même l’or qui reste, car il est perdu à la fin du tour.":"one expensive card is better than two cheap ones. You only draw # cards per turn: every card you buy takes a place in your deck, so it might as well be strong. Still spend the remaining gold, because it is lost at the end of the turn.",
+  "de votre collection, avec # exemplaires au maximum par carte (# pour une légendaire).":"from your collection, with at most # copies per card (# for a legendary).",
+  "Pouvoir un peu plus fort, # Trésors aux couleurs du panthéon":"Slightly stronger power, # Treasures in the pantheon’s colours",
+  "# quêtes du jour":"# daily quests", ", accomplissez ses # travaux pour gagner des cartes exclusives et une illustration unique.":", accomplish its # labours to earn exclusive cards and a unique artwork.",
+  "ont # rangs, de bronze à platine : ils rapportent de l’or et des":"have # ranks, from bronze to platinum: they earn gold and",
+  "Un héros à # PV":"A hero at # HP", "En # contre #, la":"In # vs #, the", "au tour # commence la Fin des Temps. Les soins faiblissent et chaque héros s’épuise un peu plus à chaque tour, jusqu’à ce qu’une équipe tombe.":"on turn # the End of Days begins. Healing weakens and each hero wears down a little more every turn, until a team falls.",
+  "votre première victoire en # contre #":"your first # vs # win", "# · Vous":"# · You", "# · Votre allié":"# · Your ally", "# · Adversaire":"# · Opponent"
+});
+// Fragments génériques : « Nom : » et « : texte »
+ajouterTraductions("en", {}, [
+  [/^(.+) :$/, n => `${traduire(n)}:`], [/^, (.+)$/, t => `, ${traduire(t)}`], [/^: (.+)$/, t => `: ${traduire(t)}`]
+]);
+
+
+// Compléments relevés à la vérification
+ajouterTraductions("en", {
+  "Cartes achetées au marché":"Cards bought at the market", "Cartes différentes possédées, puis toutes au maximum d’exemplaires":"Different cards owned, then all at maximum copies",
+  "Toutes les parties en ligne comptent, avec un code ou en partie classée. Battre un joueur mieux classé rapporte davantage.":"All online games count, with a code or in a ranked game. Beating a higher-rated player earns more.",
+  "Seules les parties en ligne face à au moins un joueur adverse comptent : contre deux ordinateurs, la cote ne change pas. Chaque équipe vaut la moyenne de ses deux cotes.":"Only online games against at least one opposing player count: against two computers, the rating doesn’t change. Each team is worth the average of its two ratings.",
+  ", dieu des morts égyptien. Votre adversaire,":", Egyptian god of the dead. Your opponent,", "À la":"At the"
+}, [
+  [/^\((.+)\)$/, t => `(${traduireEffetFR(t) || traduire(t)})`],
+  [/^Travail (\d+) : (.+)$/, (n, t) => `Labour ${n}: ${traduire(t)}`],
+  [/^médaillon de (.+)$/, n => `${traduireNom(n)}’s medallion`],
+  [/^Il manque (\d+) cartes?\. (.+)$/, (n, r) => `${n} card${n>1 ? "s" : ""} missing. ` + r.split(/(?<=\.) /).map(x => traduire(x)).join(" ")],
+  [/^Vous ne possédez que (\d+) (.+)\.$/, (n, c) => `You only own ${n} ${traduireNom(c)}.`],
+  [/^Équipe une créature ?: \+(\d+)\/\+(\d+)\.$/, (a, v) => `Equip a creature: +${a}/+${v}.`],
+  [/^Équipe une créature ?: \+(\d+) attaque\.$/, a => `Equip a creature: +${a} attack.`],
+  [/^Équipe une créature ?: \+(\d+) attaque, (\d+) attaques\.$/, (a, d) => `Equip a creature: +${a} attack, ${d} attacks.`],
+  [/^(\d+) dégâts à chaque créature adverse\.$/, n => `${n} damage to each enemy creature.`],
+  [/^(\d+) dégâts à une créature adverse au hasard\.$/, n => `${n} damage to a random enemy creature.`],
+  [/^Vos créatures gagnent \+(\d+)\/\+(\d+)\.$/, (a, v) => `Your creatures get +${a}/+${v}.`],
+  [/^Invoque (\d+) (.+)\.$/, (n, c) => `Summon ${n} ${traduireNom(c)}.`],
+  [/^Pouvoir de votre équipe ?: (.+)$/, v => `Your team’s power: ${v}`],
+  [/^Héros de la saison (\d+)$/, n => `Hero of Season ${n}`]
+]);
+ajouterGabarits("en", {"# / # pour le rang or":"# / # for the gold rank", "# / # pour le rang argent":"# / # for the silver rank", "# / # pour le rang bronze":"# / # for the bronze rank", "# / # pour le rang platine":"# / # for the platinum rank"});
+
+/* ----- Dictionnaire anglais (3) : messages, erreurs, connexion, journal ----- */
+ajouterTraductions("en", {
+  "Achetable au marché":"Buyable at the market", "Acheter des cartes":"Buy cards", "Achetez au marché, attaquez avec vos créatures, puis finissez le tour.":"Buy at the market, attack with your creatures, then end your turn.",
+  "Adresse e-mail ou mot de passe incorrect.":"Incorrect email address or password.", "Ajoutez des cartes : votre divinité sera celle du panthéon le plus représenté dans votre deck.":"Add cards: your deity will be from the most represented pantheon in your deck.",
+  "Apprendre à jouer (tutoriel)":"Learn to play (tutorial)", "Après avoir cliqué sur le lien reçu, vous choisirez votre mot de passe.":"After clicking the link you received, you will choose your password.",
+  "Attente d’un adversaire en ligne":"Waiting for an online opponent", "Aucune carte disponible pour compléter le deck.":"No cards available to complete the deck.",
+  "Aucune partie ne correspond à ce code.":"No game matches this code.", "Aucune partie trouvée avec ce code. Vérifiez-le, et que votre adversaire garde la page de la partie ouverte.":"No game found with this code. Check it, and make sure your opponent keeps the game page open.",
+  "Aucune statistique pour le moment.":"No statistics yet.", "Avec elles, nous avons déjà préparé un premier deck : vous pourrez jouer tout de suite, puis l’améliorer au fil des parties.":"With them, we have already prepared a first deck: you can play right away, then improve it game after game.",
+  "Bannir des cartes":"Banish cards", "Bannir une carte":"Banish a card", "Bonus (puissance, attaque et PV)":"Bonus (power, attack and HP)", "Bonus de faction":"Faction bonus",
+  "Bonus déclenché si une autre carte de la faction indiquée par le symbole a été jouée ce tour.":"Bonus triggered if another card of the faction shown by the symbol was played this turn.",
+  "Calcul des récompenses…":"Calculating rewards…", "Carte de saison : dans les paquets à la fin de la saison":"Season card: in packs at the end of the season", "Carte offerte":"Free card", "Carte promotionnelle":"Promotional card",
+  "Cartes":"Cards", "Cartes à bannir":"Cards to banish", "Ce défi n’est plus disponible.":"This challenge is no longer available.", "Ce n’est pas votre tour.":"It’s not your turn.",
+  "Cette créature a déjà attaqué ce tour.":"This creature has already attacked this turn.", "Cette créature est Ethérée : impossible de la viser tant qu’elle n’a pas attaqué.":"This creature is Ethereal: it cannot be targeted until it has attacked.",
+  "Cette partie a déjà deux joueurs.":"This game already has two players.",
+  "Chaque partie rapporte de l’or, et la quête du jour aussi. Vos cartes en trop se recyclent en encre, qui permet de fabriquer celles qui vous manquent.":"Every game earns gold, and so does the daily quest. Your extra cards are recycled into ink, which lets you craft the ones you are missing.",
+  "Choisir mon mot de passe":"Choose my password", "Choisir un mot de passe":"Choose a password", "Choisir un pseudo":"Choose a username", "Choisissez au moins un joueur.":"Choose at least one player.",
+  "Choisissez la créature à équiper.":"Choose the creature to equip.", "Choisissez une carte à retirer définitivement de votre deck. Bannir vos cartes de départ les plus faibles rend votre deck plus fort.":"Choose a card to remove permanently from your deck. Banishing your weakest starter cards makes your deck stronger.",
+  "Choisissez votre nouveau mot de passe.":"Choose your new password.", "Cliquez sur le lien de confirmation reçu par e-mail.":"Click the confirmation link you received by email.",
+  "Combos et pouvoirs":"Combos and powers", "Compte invité":"Guest account", "Confirmation en attente":"Awaiting confirmation", "Confirmez d’abord votre adresse avec le lien reçu par e-mail.":"First confirm your address with the link you received by email.",
+  "Confirmez le mot de passe":"Confirm password", "Connexion au serveur de jeu impossible. Vérifiez votre connexion internet, puis réessayez.":"Unable to connect to the game server. Check your internet connection, then try again.",
+  "Connexion impossible pour le moment. Réessayez dans un instant.":"Unable to connect right now. Try again in a moment.", "Créer mon compte":"Create my account", "Créez votre compte pour continuer":"Create your account to continue",
+  "C’est celle que vous affichez.":"It’s the one you display.", "C’est votre propre partie : votre adversaire doit la rejoindre depuis son compte.":"This is your own game: your opponent must join it from their account.",
+  "De retour dans le jeu, choisissez un mot de passe.":"Back in the game, choose a password.", "Deck de départ":"Starter deck", "Deck dupliqué.":"Deck duplicated.", "Deck enregistré.":"Deck saved.", "Deck supprimé.":"Deck deleted.",
+  "Demande d’ami envoyée.":"Friend request sent.", "Dernière étape : choisissez un mot de passe pour pouvoir vous connecter sur un autre appareil.":"Last step: choose a password so you can log in on another device.",
+  "Dernière étape : votre mot de passe":"Last step: your password", "Des cavales mangeuses d’hommes, à nourrir sans cesse.":"Man-eating mares, to be fed endlessly.", "Des nuées aux plumes de bronze qui obscurcissent le ciel.":"Swarms with bronze feathers that darken the sky.",
+  "Doit être visée en premier":"Must be targeted first", "Donnez ce code à vos amis pour qu’ils vous rejoignent.":"Give this code to your friends so they can join you.",
+  "Début de partie":"Start of game", "Déclencher des combos":"Trigger combos", "Découvrir mes cartes":"Discover my cards", "Défausse de l’ordinateur":"Computer’s discard pile", "Défausse de votre adversaire":"Opponent’s discard pile", "Défausse de votre allié":"Ally’s discard pile",
+  "Défi impossible.":"Challenge impossible.", "Dégâts à chaque créature adverse":"Damage to each enemy creature", "Dégâts à une créature adverse au hasard":"Damage to a random enemy creature", "Déjà obtenue : convertie en encre":"Already owned: converted into ink",
+  "Détruisez d’abord toutes les créatures adverses visibles.":"First destroy all visible enemy creatures.", "Détruisez le défenseur":"Destroy the defender",
+  "Dévotion maximale : ton dieu primordial et tes cartes de départ ont atteint leur forme la plus puissante.":"Maximum Devotion: your primordial god and your starter cards have reached their most powerful form.",
+  "Effet à la mort":"Effect on death", "Effet à l’arrivée en jeu":"Effect on entering play", "Enregistrer et jouer":"Save and play", "Envoi de votre action…":"Sending your action…", "Envoyer le lien":"Send the link", "Envoyer le lien de confirmation":"Send the confirmation link",
+  "Faction à jouer pour déclencher le combo":"Faction to play to trigger the combo", "Gagner avec la Dévotion":"Win with Devotion", "Gagner avec un panthéon":"Win with a pantheon", "Gagner de la puissance":"Gain power", "Gagner de l’or":"Gain gold",
+  "Gagner des parties":"Win games", "Gagner en gardant des PV":"Win while keeping HP", "Gagner en ligne":"Win online", "Héros et divinités":"Heroes and deities", "Hôte":"Host", "Identifiant envoyé":"Login sent",
+  "Ignore les premiers dégâts subis":"Ignores the first damage taken", "Impossible de rejoindre ce salon.":"Unable to join this lobby.", "Indiquez l’adresse de votre compte : vous recevrez un lien pour choisir un nouveau mot de passe.":"Enter your account’s address: you will receive a link to choose a new password.",
+  "Indiquez votre adresse e-mail.":"Enter your email address.", "Infliger des dégâts":"Deal damage", "Intouchable tant qu’elle n’a pas attaqué":"Untouchable until it has attacked", "Invité":"Guest", "Jeton (invoqué seulement)":"Token (summoned only)",
+  "Jouer 10 créatures":"Play 10 creatures", "Jouer des parties":"Play games", "Jouer des sorts":"Play spells", "Jouer des équipements":"Play equipment", "Jouer ma première partie":"Play my first game", "Jouer une carte":"Play a card", "Joueurs":"Players",
+  "Jouez-la normalement, ou sacrifiez-la pour un autre effet. Une carte sacrifiée quitte la partie.":"Play it normally, or sacrifice it for another effect. A sacrificed card leaves the game.", "J’ai déjà un compte":"I already have an account",
+  "La partie classée n’est pas encore disponible sur ce serveur.":"Ranked games are not available on this server yet.", "La quête du jour a déjà été récompensée.":"The daily quest has already been rewarded.", "La quête du jour n’est pas encore terminée.":"The daily quest isn’t finished yet.",
+  "Le chien à trois têtes, gardien des Enfers : le dernier et le plus terrible.":"The three-headed dog, guardian of the Underworld: the last and most terrible.",
+  "Le classement du 2 contre 2 n’est pas encore disponible.":"The 2 vs 2 leaderboard is not available yet.", "Le classement n’est pas encore disponible.":"The leaderboard is not available yet.", "Le code fait 5 caractères (lettres et chiffres).":"The code is 5 characters (letters and numbers).",
+  "Le deck de l’invité n’a pas été validé par le serveur : un deck au hasard le remplace.":"The guest’s deck was not validated by the server: a random deck replaces it.", "Le domptez sans y laisser votre vie.":"Tame it without losing your life.", "Le jardin des dieux, gardé par un dragon.":"The garden of the gods, guarded by a dragon.",
+  "Le jeu":"The game", "Le jeu demande maintenant un compte à chaque joueur. Votre progression d’invité sur ce navigateur sera conservée : collection, decks, or et encre.":"The game now requires an account for each player. Your guest progress on this browser will be kept: collection, decks, gold and ink.",
+  "Le nouveau mot de passe doit être différent de l’ancien.":"The new password must be different from the old one.", "Le présent d’Arès à la reine des Amazones.":"Ares’s gift to the queen of the Amazons.", "Le serveur de jeu ne répond pas. Réessayez dans un instant.":"The game server isn’t responding. Try again in a moment.",
+  "Le serveur d’e-mails du jeu n’est pas encore configuré pour cette adresse. Prévenez l’administrateur du jeu.":"The game’s email server isn’t configured for this address yet. Let the game administrator know.",
+  "Les deux decks sont mélangés pour former le marché commun de la partie.":"The two decks are shuffled together to form the game’s shared market.", "Les deux héros adverses sont tombés.":"Both enemy heroes have fallen.",
+  "Les joueurs qui lancent une recherche rejoignent ce salon.":"Players who start a search join this lobby.", "Les parties à deux sur le même écran ne comptent pas pour les quêtes, les trophées et les récompenses.":"Two-player games on the same screen don’t count for quests, trophies or rewards.",
+  "Les points d’attaque de votre héros pour ce tour. Il frappe l’adversaire, ou une créature : il subit alors la riposte de celle-ci.":"Your hero’s attack points for this turn. They strike the opponent, or a creature: they then take its counter-damage.",
+  "Liste des joueurs":"Player list", "Légendaires":"Legendaries", "L’administration est réservée à l’administrateur du jeu.":"Administration is reserved for the game administrator.", "L’ordinateur joue son tour…":"The computer is playing its turn…", "L’ouverture du paquet a échoué.":"Opening the pack failed.",
+  "Merci aux artistes dont les œuvres accompagnent les parties.":"Thanks to the artists whose works accompany the games.", "Mot de passe (8 caractères minimum, lettres et chiffres)":"Password (at least 8 characters, letters and numbers)", "Mot de passe oublié":"Forgot your password",
+  "Mot de passe trop faible : utilisez au moins 8 caractères, avec des lettres et des chiffres.":"Password too weak: use at least 8 characters, with letters and numbers.", "Mélanger la défausse":"Shuffle the discard pile",
+  "Notes de mise à jour":"Patch notes", "Nouveau mot de passe":"New password", "Nouvelle carte":"New card", "Ouverture du paquet":"Opening the pack", "Ouvrir un paquet":"Open a pack", "Panthéons":"Pantheons", "Partie":"Game",
+  "Partie contre l’ordinateur":"Game against the computer", "Partie en ligne":"Online game", "Partie refusée : l’hôte n’utilise pas la même version des cartes que vous. Rechargez la page tous les deux, puis recommencez.":"Game refused: the host isn’t using the same card version as you. Both of you reload the page, then try again.",
+  "Partie trop courte":"Game too short", "Partie à deux sur un écran":"Two players on one screen", "Pas encore classé : jouez une partie de 2 contre 2 en ligne face à des joueurs.":"Not ranked yet: play an online 2 vs 2 game against players.", "Pas encore classé : jouez une partie en ligne.":"Not ranked yet: play an online game.",
+  "Peut attaquer dès son arrivée":"Can attack as soon as it arrives", "Piochez ce nombre de cartes de votre deck.":"Draw this number of cards from your deck.", "Plafond d’or du jour atteint : revenez demain pour gagner plus d’or.":"Daily gold cap reached: come back tomorrow to earn more gold.",
+  "Poser des créatures":"Play creatures", "Pouvoir de la divinité":"Deity’s power", "Préparez l’assaut":"Prepare the assault", "Prêt à jouer":"Ready to play", "Pseudo (3 à 20 caractères)":"Username (3 to 20 characters)", "Pseudo enregistré.":"Username saved.",
+  "Quatre panthéons s’affrontent : Égyptiens, Hindous, Nordiques et Grecs. Pour vos premiers combats, vous allez recevoir":"Four pantheons clash: Egyptians, Hindus, Norse and Greeks. For your first battles, you will receive",
+  "Quitter maintenant compte comme un abandon : la partie est perdue et votre cote baisse d’au moins 15 points.\n\nAbandonner la partie ?":"Leaving now counts as forfeiting: the game is lost and your rating drops by at least 15 points.\n\nForfeit the game?",
+  "Quête":"Quest", "Quête du jour":"Daily quest", "Quête remplacée.":"Quest replaced.", "Recevoir le lien de confirmation":"Get the confirmation link", "Rend des points de vie à votre héros.":"Restores hit points to your hero.", "Renvoyer à cette adresse":"Resend to this address",
+  "Retirer la carte pour un effet":"Remove the card for an effect", "Retour au jeu":"Back to the game", "Retour à la connexion":"Back to login",
+  "Rien reçu après quelques minutes ? Regardez dans les courriers indésirables, puis renvoyez l’e-mail.":"Nothing after a few minutes? Check your spam folder, then resend the email.", "Rien reçu après quelques minutes ? Regardez dans les courriers indésirables, puis réessayez.":"Nothing after a few minutes? Check your spam folder, then try again.",
+  "Règles":"Rules", "Récompense obtenue":"Reward obtained", "Récompenses":"Rewards", "Résultat contesté : les points de classement de cette partie sont annulés, l’administrateur est prévenu.":"Result disputed: this game’s rating points are cancelled, and the administrator has been notified.",
+  "Sacrifice : en la retirant de la partie après l’avoir jouée":"Sacrifice: by removing it from the game after playing it", "Sacrifice à la place de l’effet : choix au moment de la jouer":"Sacrifice instead of the effect: choose when playing it",
+  "Sert à acheter des cartes au marché pendant ce tour.":"Used to buy cards at the market this turn.", "Suivez les étapes du tutoriel.":"Follow the tutorial steps.", "Toujours disponible au marché, à chaque partie.":"Always available at the market, in every game.", "Tour adverse":"Opponent’s turn",
+  "Trente ans de fumier à nettoyer en un jour : faites le vide.":"Thirty years of dung to clear in one day: make a clean sweep.", "Trop de parties en une heure":"Too many games in an hour", "Trop d’e-mails envoyés pour le moment : réessayez un peu plus tard.":"Too many emails sent for now: try again a little later.",
+  "Trésors":"Treasures", "Un cadeau pour bien démarrer":"A gift to get started", "Un compte existe déjà avec cette adresse : connectez-vous, ou utilisez « Mot de passe oublié ».":"An account already exists with this address: log in, or use “Forgot your password”.",
+  "Un e-mail a été envoyé à":"An email has been sent to", "Un e-mail de confirmation vous sera envoyé. Cliquez sur son lien pour activer votre compte.":"A confirmation email will be sent to you. Click its link to activate your account.", "Un e-mail vient d’être envoyé à":"An email has just been sent to",
+  "Un géant à trois corps et ses bœufs rouges, au bout du monde.":"A three-bodied giant and his red oxen, at the end of the world.", "Une créature avec Provocation doit être visée en premier.":"A creature with Taunt must be targeted first.",
+  "Une créature ne peut pas attaquer le tour où elle arrive, sauf avec Rapidité.":"A creature cannot attack the turn it arrives, unless it has Haste.", "Une erreur est survenue. Réessayez.":"An error occurred. Try again.", "Une seule légendaire de chaque sorte par deck.":"Only one of each legendary per deck.",
+  "Utiliser le pouvoir":"Use the power", "Valeur estimée":"Estimated value", "Version de base":"Base version", "Version de base, utilisée sans Dévotion.":"Base version, used without Devotion.", "Version de dévotion":"Devotion version", "Versions de Dévotion":"Devotion versions", "Versions de dévotion":"Devotion versions",
+  "Victoire de votre équipe !":"Your team wins!", "Voir la carte de base":"See the base card", "Volume de la musique":"Music volume", "Vos cartes":"Your cards", "Votre cadeau":"Your gift",
+  "Votre compte garde votre collection, vos decks et votre progression, sur tous vos appareils.":"Your account keeps your collection, decks and progress, on all your devices.", "Votre deck est vide. Cliquez sur une carte de la collection pour l’ajouter.":"Your deck is empty. Click a card in the collection to add it.",
+  "Votre défausse":"Your discard pile", "Votre héros et celui de votre allié sont tombés.":"Your hero and your ally’s have fallen.", "Votre paquet":"Your pack",
+  "Votre progression reste sauvegardée sur votre compte. Sur cet appareil, il faudra vous reconnecter pour jouer.":"Your progress stays saved on your account. On this device, you will need to log in again to play.",
+  "Vous recevez aussi":"You also receive", "Vous êtes maintenant amis !":"You are now friends!", "Vérifiez vos e-mails":"Check your email", "a quitté la partie : victoire par abandon.":"left the game: win by forfeit.",
+  "aucun effet chiffré":"no numeric effect", "carte":"card", "cartes":"cards", "carte achetée":"card bought", "ce joueur":"this player", "créature de départ":"starter creature", "créature jouée":"creature played", "du panthéon":"of the pantheon", "dégât infligé":"damage dealt",
+  "délai dépassé":"time expired", "en ligne":"online", "joueurs":"players", "les decks":"the decks", "l’illustration de la carte":"the card’s artwork", "mots-clés":"keywords", "même écran":"same screen",
+  "n’a plus joué : victoire par inactivité de l’adversaire.":"stopped playing: win by opponent’s inactivity.", "partie non enregistrée par le serveur":"game not recorded by the server", "partie trop courte (moins de 75 secondes) : elle n’est pas comptée":"game too short (under 75 seconds): it isn’t counted",
+  "point de vie soigné":"hit point healed", "qui formeront le début de votre collection.":"which will form the start of your collection.", "réponse":"reply", "sorts joués":"spells played", "tour":"turn", "tous les joueurs":"all players",
+  "trop de parties commencées en une heure":"too many games started in an hour", "une illustration exclusive":"an exclusive artwork", "votre ami":"your friend", "votre créature":"your creature", "votre deck":"your deck",
+  "vous invite dans son salon de 2 contre 2 !":"invites you to their 2 vs 2 lobby!", "· Résistance":"· Shield", "· en ligne":"· online", "· hôte":"· host", "À vous de jouer (en ligne)":"Your turn (online)",
+  "Épiques":"Epics", "Équiper une créature":"Equip a creature", "✓ Deck prêt à jouer.":"✓ Deck ready to play.", "✓ Victoire du jour obtenue. Revenez demain pour un nouveau bonus.":"✓ Daily win earned. Come back tomorrow for a new bonus.",
+  "le 2 contre 2 n’est pas encore enregistré sur ce serveur":"2 vs 2 isn’t recorded on this server yet", "le 2 contre 2 n’est pas encore installé sur le serveur":"2 vs 2 isn’t installed on the server yet",
+  "le serveur a refusé d’ouvrir la partie (trop de parties en une heure ?)":"the server refused to open the game (too many games in an hour?)", "(carte de saison)":"(season card)", "(vous)":"(you)", "2 contre 2 : choisir votre deck":"2 vs 2: choose your deck",
+  ": elle doit être détruite en premier. Cliquez dessus pour que votre héros l’attaque avec sa puissance. Attention : un héros qui frappe une créature subit sa":": it must be destroyed first. Click it so your hero attacks it with their power. Careful: a hero who strikes a creature takes its",
+  ": son illustration est floutée tant que vous ne l’avez pas":": its artwork is blurred until you own it", "+1 000 or et +1 000 encre.":"+1,000 gold and +1,000 ink.", "Le jeu en ligne n’est pas disponible sur cette page. Il faut être connecté à Claude, et la page doit être partagée avec chaque joueur comme Contributeur ou Éditeur.":"Online play isn’t available on this page.",
+  "Pour l’instant, suivez l’étape":"For now, follow the step", "Combo égyptien":"Egyptian combo", "Combo hindou":"Hindu combo", "Combo nordique":"Norse combo", "Combo grec":"Greek combo", "Pouvoir adverse":"Enemy power", "Pouvoir de votre équipe":"Your team’s power"
+}, [
+  [/^(.+) achète (.+)\.$/, (a, b) => `${traduireNom(a)} buys ${traduireNom(b)}.`],
+  [/^(.+) inflige (\d+) dégâts à (.+)\.$/, (a, n, b) => `${traduireNom(a)} deals ${n} damage to ${traduireNom(b)}.`],
+  [/^(.+) subit (\d+) dégâts de riposte de (.+)\.$/, (a, n, b) => `${traduireNom(a)} takes ${n} counter-damage from ${traduireNom(b)}.`],
+  [/^(.+) subit (\d+) dégâts\.$/, (a, n) => `${traduireNom(a)} takes ${n} damage.`],
+  [/^(.+) brise la Résistance de (.+) \(1 puissance\)\.$/, (a, b) => `${traduireNom(a)} breaks the Shield of ${traduireNom(b)} (1 power).`],
+  [/^(.+) déchaîne (.+?) \((.*)\)$/, (a, b, e) => `${traduireNom(a)} unleashes ${traduireNom(b)} (${traduireEffetFR(e) || e})`],
+  [/^(.+) est détruite?\.$/, a => `${traduireNom(a)} is destroyed.`],
+  [/^(.+) attaque (.+)\.$/, (a, b) => `${traduireNom(a)} attacks ${traduireNom(b)}.`], [/^Echo de (.+)\.$/, a => `Echo of ${traduireNom(a)}.`],
+  [/^(.+) utilise (.+) : \+(\d+) puissance\.$/, (a, b, n) => `${traduireNom(a)} uses ${traduireNom(b)}: +${n} power.`],
+  [/^(.+) joue (.+)\.$/, (a, b) => `${traduireNom(a)} plays ${traduireNom(b)}.`], [/^(.+) invoque (.+)\.$/, (a, b) => `${traduireNom(a)} summons ${traduireNom(b)}.`],
+  [/^(.+) sacrifie (.+) \((.+)\)$/, (a, b, e) => `${traduireNom(a)} sacrifices ${traduireNom(b)} (${traduireEffetFR(e) || traduire(e)})`],
+  [/^(.+) : (.+) \((.+)\)$/, (a, b, e) => { const t = traduireEffetFR(e); return t ? `${traduire(a)}: ${traduireNom(b)} (${t})` : null; }],
+  [/^(.+) équipe (.+) de (.+)\.$/, (a, b, c) => `${traduireNom(a)} equips ${traduireNom(b)} with ${traduireNom(c)}.`],
+  [/^(.+) remporte la partie$/, a => `${traduireNom(a)} wins the game`],
+  [/^(.+) ajoutée à votre collection\.$/, a => `${traduireNom(a)} added to your collection.`],
+  [/^(.+) n’est plus disponible\.$/, a => `${traduireNom(a)} is no longer available.`],
+  [/^Choisissez la cible de (.+) \(contour rouge\)\.$/, a => `Choose the target for ${traduire(a)} (red outline).`],
+  [/^Cliquez sur une cible au contour rouge pour que (.+) l’attaque avec votre puissance \(une créature riposte\)\.$/, a => `Click a target with a red outline so ${traduireNom(a)} attacks it with your power (a creature strikes back).`],
+  [/^(\d+) cartes? ajoutées?\.$/, n => `${n} card${n>1 ? "s" : ""} added.`], [/^(\d+) cartes?$/, n => `${n} card${n>1 ? "s" : ""}`],
+  [/^(\d+) cartes?, de la plus récente à la plus ancienne$/, n => `${n} card${n>1 ? "s" : ""}, newest to oldest`], [/^(\d+) cartes \(divinité primordiale\)$/, n => `${n} cards (primordial deity)`],
+  [/^(\d+) joueurs?$/, n => `${n} player${n>1 ? "s" : ""}`], [/^(\d+) exemplaires au maximum par carte\.$/, n => `At most ${n} copies per card.`],
+  [/^(\d+) parties commencées en une heure \(limite : (\d+)\)\.$/, (a, b) => `${a} games started in an hour (limit: ${b}).`],
+  [/^(\d+) joueurs? sur 4 · en attente depuis (\d+) s\.$/, (n, s) => `${n} player${n>1 ? "s" : ""} out of 4 · waiting for ${s} s.`],
+  [/^(.+) offerts? : à ouvrir dans la boutique !$/, a => `Free ${a.split(" et ").map(traduire).join(" and ")}: open in the shop!`],
+  [/^\+(\d[\d  ,.]*) or : quête (du jour )?réussie !$/, (n, j) => `+${n} gold: ${j ? "daily " : ""}quest completed!`],
+  [/^Partie terminée au tour (\d+)\.$/, n => `Game over on turn ${n}.`],
+  [/^Se charge quand (\d+) créatures ennemies sont détruites : la jauge est commune à l’équipe\.$/, n => `Charges when ${n} enemy creatures are destroyed: the gauge is shared by the team.`],
+  [/^Se charge quand (\d+) créatures ennemies sont mortes\.$/, n => `Charges when ${n} enemy creatures have died.`],
+  [/^Bannir (\d+) cartes$/, n => `Banish ${n} cards`], [/^Bienvenue dans (.+) !$/, a => `Welcome to ${traduireNom(a)}!`],
+  [/^Connexion à la partie (.+), en attente de l’hôte…$/, a => `Joining game ${a}, waiting for the host…`], [/^Dans cette partie : (.+)\.$/, a => `In this game: ${a.split(", ").map(traduireNom).join(", ")}.`],
+  [/^Défausse de (.+)$/, a => `${traduireNom(a)}’s discard pile`], [/^Dévotion (.+) \((\d+) cartes\) : (.+) est guidé par (.+)\.$/, (t, n, a, b) => `Devotion ${t} (${n} cards): ${traduireNom(a)} is guided by ${traduireNom(b)}.`],
+  [/^Enregistré : (.+) or et (.+) encre\.$/, (a, b) => `Saved: ${a} gold and ${b} ink.`], [/^Envoyer « (.+) »(.*) à (.+) \?$/, (a, x, b) => `Send “${a}”${x} to ${b}?`],
+  [/^Esprit : revient dans (\d+) tours?$/, n => `Spirit: returns in ${n} turn${n>1 ? "s" : ""}`],
+  [/^Gagner (\d+) parties?$/, n => `Win ${n} game${n>1 ? "s" : ""}`], [/^Gagner (\d+) parties? avec les (.+)$/, (n, f) => `Win ${n} game${n>1 ? "s" : ""} with the ${traduireNom(f)}`],
+  [/^Gagner (\d+) parties? en (\d+) tours ou moins$/, (n, t) => `Win ${n} game${n>1 ? "s" : ""} in ${t} turns or fewer`], [/^Gagner (\d+) parties? en ligne$/, n => `Win ${n} online game${n>1 ? "s" : ""}`],
+  [/^Gagner (\d+) parties? en terminant avec au moins (\d+) PV$/, (n, p) => `Win ${n} game${n>1 ? "s" : ""} finishing with at least ${p} HP`],
+  [/^Jouer (\d+) parties?$/, n => `Play ${n} game${n>1 ? "s" : ""}`], [/^Jouer (\d+) parties? en ligne$/, n => `Play ${n} online game${n>1 ? "s" : ""}`], [/^Jouer (\d+) équipements?$/, n => `Play ${n} equipment`],
+  [/^Il manque (\d+) cartes?\.$/, n => `${n} card${n>1 ? "s" : ""} missing.`], [/^Il y a (\d+) cartes? en trop\.$/, n => `There ${n>1 ? "are" : "is"} ${n} card${n>1 ? "s" : ""} too many.`],
+  [/^Jouez (.+) : elle vous donne \+(\d+) (.+)$/, (a, n, r) => `Play ${traduireNom(a)}: it gives you +${n} ${traduire(r)}`],
+  [/^L’adversaire a posé (.+)\. À vous !$/, a => `The opponent played ${traduireNom(a)}. Your turn!`],
+  [/^Les deux équipes s’effondrent ensemble : l’(.+), qui tenait le mieux, résiste de justesse\.$/, a => `Both teams collapse together: ${traduire(a)}, which held best, barely survives.`],
+  [/^équipe ([AB])$/, a => `team ${a}`], [/^Équipe ([AB])$/, a => `Team ${a}`],
+  [/^Message envoyé à (\d+) joueurs?\.$/, n => `Message sent to ${n} player${n>1 ? "s" : ""}.`], [/^Pas de récompense : (.+)\.$/, a => `No reward: ${traduire(a)}.`],
+  [/^Récompense obtenue : (.+) !$/, a => `Reward obtained: ${traduire(a)}!`], [/^Recycler (\d+) exemplaires? en trop pour (.+) encre \? Vous gardez toujours le maximum utile de chaque carte pour vos decks\.$/, (n, e) => `Recycle ${n} extra cop${n>1 ? "ies" : "y"} for ${e} ink? You always keep the useful maximum of each card for your decks.`],
+  [/^Retourner la carte (.+)$/, a => `Flip card ${a}`],
+  [/^Toute l’équipe ([AB]) a quitté la partie : victoire par forfait de l’équipe ([AB])\. La partie continue contre les ordinateurs, pour le plaisir\.$/, (a, b) => `All of team ${a} left the game: team ${b} wins by forfeit. The game continues against the computers, just for fun.`],
+  [/^Trop d’exemplaires de (.+) \((\d+) sur (\d+) autorisés\)\.$/, (a, n, m) => `Too many copies of ${traduireNom(a)} (${n} of ${m} allowed).`],
+  [/^Uniquement des cartes (.+)s\.$/, a => `${traduireNom(a)} cards only.`], [/^Un exemplaire de (.+) retiré\.$/, a => `One copy of ${traduireNom(a)} removed.`],
+  [/^Vous jouez en (\d)(.+) position\.$/, n => `You play in position ${n}.`], [/^Vos (\d+) premières cartes$/, n => `Your first ${n} cards`],
+  [/^vous défie(s?) !$/, () => "challenges you!"], [/^Attente : (\d+) s\. Écart de cote accepté : ±(\d+) \(il s’élargit avec l’attente\)\.(.*)$/, (a, b, r) => `Waiting: ${a} s. Accepted rating gap: ±${b} (it widens as you wait).${r}`],
+  [/^⏳ La Fin des Temps approche : elle commence au tour (\d+), dans (\d+) tours?\.$/, (a, n) => `⏳ The End of Days approaches: it begins on turn ${a}, in ${n} turn${n>1 ? "s" : ""}.`],
+  [/^Égalité entre (.+) \((\d+) cartes chacun\) : la divinité sera tirée au sort au début de chaque partie\. Ajoutez une carte de l’un d’eux pour la fixer\.$/, (a, n) => `Tie between ${a.split(/, | et /).map(traduireNom).join(" and ")} (${n} cards each): the deity will be drawn at random at the start of each game. Add a card from one of them to settle it.`],
+  [/^(\d+) dégâts à chaque créature adverse$/, n => `${n} damage to each enemy creature`], [/^(\d+) dégâts à une créature adverse au hasard$/, n => `${n} damage to a random enemy creature`],
+  [/^bannissez (\d+) cartes? de votre main ou défausse$/, n => `banish ${n} card${n>1 ? "s" : ""} from your hand or discard pile`], [/^piochez (\d+) cartes?$/, n => `draw ${n} card${n>1 ? "s" : ""}`],
+  [/^vos créatures gagnent \+(\d+)\/\+(\d+)$/, (a, v) => `your creatures get +${a}/+${v}`], [/^moins de (\d+) cartes$/, n => `fewer than ${n} cards`],
+  [/^la carte « (.+) »$/, a => `the card “${traduireNom(a)}”`], [/^la carte (.+)$/, a => `the card ${traduireNom(a)}`], [/^la créature (.+)$/, a => `the creature ${traduireNom(a)}`], [/^le titre « (.+) »$/, a => `the title “${traduire(a)}”`],
+  [/^Version (.+) de « (.+) »\. (.*) Elle compte comme une carte (.+) pour les combos\.$/, (f, c, x, g) => `${traduireNom(f)} version of “${traduireNom(c)}”. ${traduire(x)} It counts as a ${traduireNom(g)} card for combos.`]
+]);
+
+/* ----- Dictionnaire anglais (4) : messages du serveur, effets dans le journal ----- */
+ajouterTraductions("en", {
+  "Adversaire en ligne inconnu.":"Unknown online opponent.", "Attendez encore quelques secondes que d’autres joueurs arrivent.":"Wait a few more seconds for other players to arrive.",
+  "Aucun salon ne correspond à ce code.":"No lobby matches this code.", "Aucune carte disponible pour ce paquet.":"No cards available for this pack.", "Aucune saison en cours.":"No season in progress.",
+  "Carte inconnue du catalogue du serveur (envoyez le catalogue).":"Card unknown to the server catalogue.", "Carte inconnue.":"Unknown card.", "Ce booster est vide.":"This booster is empty.",
+  "Ce booster n’est pas disponible.":"This booster isn’t available.", "Ce cadeau a déjà été récupéré.":"This gift has already been collected.", "Ce palier n’est pas encore atteint.":"This milestone hasn’t been reached yet.",
+  "Ce pseudo est déjà pris : choisissez-en un autre.":"This username is already taken: choose another one.", "Ce rang n’est pas encore atteint.":"This rank hasn’t been reached yet.",
+  "Ce salon est complet.":"This lobby is full.", "Cet ami est déjà dans le salon.":"This friend is already in the lobby.",
+  "Cette carte ne peut pas être fabriquée (carte de saison ou promotionnelle).":"This card can’t be crafted (season or promotional card).", "Cette carte ne peut pas être fabriquée.":"This card can’t be crafted.",
+  "Cette carte ne peut pas être recyclée.":"This card can’t be recycled.", "Cette place est prise.":"This seat is taken.", "Cette quête ne peut pas être remplacée.":"This quest can’t be replaced.",
+  "Cette quête n’est pas encore terminée.":"This quest isn’t finished yet.", "Connexion requise.":"Login required.", "Deck d’un autre joueur.":"Another player’s deck.", "Deck introuvable.":"Deck not found.",
+  "Demande déjà envoyée ou déjà amis.":"Request already sent, or already friends.", "Demande impossible.":"Request not possible.", "Données de partie trop volumineuses.":"Game data too large.",
+  "Encre insuffisante.":"Not enough ink.", "Il manque un des deux camps.":"One of the two sides is missing.", "Illustration inconnue du serveur (envoyez le catalogue).":"Artwork unknown to the server.",
+  "Invitation déjà envoyée.":"Invitation already sent.", "Invitation expirée.":"Invitation expired.", "Joueur introuvable.":"Player not found.", "La partie a déjà été lancée.":"The game has already started.",
+  "La partie de ce salon a déjà commencé.":"This lobby’s game has already started.", "Le catalogue de cartes est vide.":"The card catalogue is empty.", "Le joueur désigné n’a pas perdu.":"The named player hasn’t lost.",
+  "Le mode ne correspond pas au ticket.":"The mode doesn’t match the ticket.", "Les boosters spéciaux ne peuvent pas être offerts.":"Special boosters can’t be given.", "Mode de partie inconnu.":"Unknown game mode.",
+  "Nombre maximum de decks atteint.":"Maximum number of decks reached.", "Or insuffisant pour acheter un paquet.":"Not enough gold to buy a pack.", "Palier inconnu.":"Unknown milestone.",
+  "Partie déjà enregistrée.":"Game already recorded.", "Partie inconnue.":"Unknown game.", "Partie pas encore enregistrée.":"Game not recorded yet.", "Partie sans identifiant.":"Game without an identifier.",
+  "Partie sans ticket : elle ne peut pas être enregistrée.":"Game without a ticket: it can’t be recorded.", "Partie trop courte : elle est annulée, sans effet sur la cote.":"Game too short: it is cancelled, with no effect on the rating.",
+  "Partie trop courte pour être enregistrée.":"Game too short to be recorded.", "Place impossible.":"Seat not possible.", "Place inconnue.":"Unknown seat.", "Profil introuvable.":"Profile not found.",
+  "Quête déjà récompensée.":"Quest already rewarded.", "Quête inconnue.":"Unknown quest.", "Reprise impossible.":"Unable to resume.", "Récompense déjà obtenue pour cette partie.":"Reward already obtained for this game.",
+  "Récompense déjà obtenue.":"Reward already obtained.", "Récupérez d’abord le cadeau de ce message.":"Collect this message’s gift first.", "Réservé à l’administrateur.":"Reserved for the administrator.",
+  "Salon introuvable.":"Lobby not found.", "Seul l’hôte du salon peut lancer la partie.":"Only the lobby host can start the game.", "Seul l’hôte peut déclarer l’abandon d’un autre joueur.":"Only the host can declare another player’s forfeit.",
+  "Seuls les exemplaires en trop peuvent être recyclés.":"Only extra copies can be recycled.", "Statistiques invalides.":"Invalid statistics.", "Ticket de partie expiré.":"Game ticket expired.",
+  "Ticket de partie inconnu.":"Unknown game ticket.", "Ticket introuvable.":"Ticket not found.", "Trop de demandes en attente.":"Too many pending requests.",
+  "Trop de parties commencées en une heure : patientez un peu.":"Too many games started in an hour: please wait a little.", "Trophée inconnu.":"Unknown trophy.",
+  "Valeurs invalides : l’or et l’encre doivent être des nombres entiers positifs.":"Invalid values: gold and ink must be positive whole numbers.", "Version du jeu obsolète : rechargez la page.":"Outdated game version: reload the page.",
+  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
+  "Vous avez déjà le nombre maximum d’exemplaires.":"You already have the maximum number of copies.", "Vous avez déjà remplacé une quête aujourd’hui.":"You have already replaced a quest today.",
+  "Vous ne pouvez défier que vos amis.":"You can only challenge your friends.", "Vous ne pouvez inviter que vos amis.":"You can only invite your friends.",
+  "Vous n’avez pas de paquet offert de ce type.":"You have no free pack of this type.", "Vous n’êtes pas dans ce salon.":"You are not in this lobby.",
+  "Vous n’êtes plus considéré comme présent dans cette partie.":"You are no longer considered present in this game.", "Sacrifier":"Sacrifice", "Pouvoir":"Power", "Ou sacrifice":"Or sacrifice", "aventurier":"adventurer"
+});
+// Texte d’effet généré en français (journal partagé, textes composés) → anglais ; null si ce n’en est pas un
+function traduireEffetFR(s){
+  let t = String(s).trim(), point = false;
+  if(t.endsWith(".")){ t = t.slice(0, -1); point = true; }
+  if(t==="Aucun effet") return point ? "No effect." : "No effect";
+  const P = [
+    [/^\+(\d+) or$/i, n => `+${n} gold`], [/^\+(\d+) puissance$/i, n => `+${n} power`], [/^\+(\d+) soin$/i, n => `+${n} healing`],
+    [/^piochez (\d+) cartes?$/i, n => `draw ${n} card${n>1 ? "s" : ""}`], [/^bannissez (\d+) cartes? de votre main ou défausse$/i, n => `banish ${n} card${n>1 ? "s" : ""} from your hand or discard pile`],
+    [/^(\d+) dégâts à chaque créature adverse$/i, n => `${n} damage to each enemy creature`], [/^(\d+) dégâts à une créature adverse au hasard$/i, n => `${n} damage to a random enemy creature`],
+    [/^vos créatures gagnent \+(\d+)\/\+(\d+)$/i, (a, v) => `your creatures get +${a}/+${v}`], [/^invoque (\d+) (.+)$/i, (n, c) => `summon ${n} ${traduireNom(c)}`]
+  ];
+  const morceaux = t.split(", ").map(m => { for(const [re, f] of P){ const x = m.match(re); if(x) return f(...x.slice(1)); } return null; });
+  if(!morceaux.length || morceaux.includes(null)) return null;
+  const r = morceaux.join(", ");
+  return r.charAt(0).toUpperCase() + r.slice(1) + (point ? "." : "");
+}
+ajouterTraductions("en", {}, [
+  [/^(.+\.) Se charge quand (\d+) créatures ennemies sont mortes\.$/, (e, n) => `${traduireEffetFR(e) || traduire(e)} Charges when ${n} enemy creatures have died.`],
+  [/^(.+\.) Se charge quand (\d+) créatures ennemies sont détruites : la jauge est commune à l’équipe\.$/, (e, n) => `${traduireEffetFR(e) || traduire(e)} Charges when ${n} enemy creatures are destroyed: the gauge is shared by the team.`],
+  [/^\((.+)\)$/, e => { const t = traduireEffetFR(e); return t ? `(${t})` : null; }],
+  [/^(.*?)\s*\((.+)\)$/, (a, e) => { const t = traduireEffetFR(e); return t ? `${a ? traduire(a) + " " : ""}(${t})` : null; }],
+  [/^(.*[a-zà-ÿ].*)$/i, t => traduireEffetFR(t)]
+]);
+
+
 const NOM_JEU = window.claude ? "Prototype de combat" : "Mythomachie";
 const HASH_INITIAL = location.hash;  // liens reçus par e-mail (confirmation, mot de passe oublié)
-if(!window.claude) document.title = NOM_JEU;
+if(!window.claude) document.title = traduireNom(NOM_JEU);
 /* ============================================================
    CONFIGURATION DU JEU
    Valeurs d’origine. Le panneau d’administration les modifie
@@ -2199,6 +2991,7 @@ function fusionner(obj){
           saisons:(obj.saisons && typeof obj.saisons==="object") ? copie(obj.saisons) : {},
           bruitages:(obj.bruitages && typeof obj.bruitages==="object") ? copie(obj.bruitages) : {},
           regles2v2:(obj.regles2v2 && typeof obj.regles2v2==="object") ? copie(obj.regles2v2) : {},
+          traductions:(obj.traductions && typeof obj.traductions==="object") ? copie(obj.traductions) : {},
           apparencePaquets:(obj.apparencePaquets && typeof obj.apparencePaquets==="object") ? copie(obj.apparencePaquets) : {},
           credits:{musiques:(obj.credits && Array.isArray(obj.credits.musiques)) ? copie(obj.credits.musiques) : copie(d.credits.musiques)},
           regles:{...reglesObj, deckDepart:{...((obj.regles && obj.regles.deckDepart) || d.regles.deckDepart)}},
@@ -2242,6 +3035,7 @@ function encre(hex){
 function appliquerConfig(cfg){
   const c = cfg || CONFIG;
   CARTES = c.cartes; FACTIONS = c.factions; MOTS = c.mots; TERMES = c.termes; REGLES = c.regles; HEROS = c.heros || {};
+  if(c===CONFIG && typeof majTraductionsConfig==="function") majTraductionsConfig();
   const css = Object.entries(FACTIONS).map(([k,f]) => `.f-${k}{--fc:${f.couleur};--fci:${encre(f.couleur)}}`).join("\n");
   const el = document.getElementById("styles-factions");
   if(el) el.textContent = css;
@@ -2251,6 +3045,10 @@ function appliquerConfig(cfg){
    TEXTES DES CARTES (générés à partir des données)
    ============================================================ */
 function decrire(e){
+  return LANGUE==="en" ? decrireEN(e) : decrireFR(e);
+}
+// Toujours en français : le journal est partagé entre joueurs de langues différentes, chacun le traduit à l’affichage
+function decrireFR(e){
   const p = [];
   if(e.or) p.push(`+${e.or} or`);
   if(e.combat) p.push(`+${e.combat} puissance`);
@@ -2409,7 +3207,7 @@ function activerPouvoir(){
   fxEvt({t:"pouvoir", j:i});
   if(est2v2()) S.jauge[j.eq] = 0; else j.morts = 0;
   if(S.stats && S.stats[i]) S.stats[i].pouvoirs = (S.stats[i].pouvoirs || 0) + 1;
-  log(`${h.nom} déchaîne ${h.pouvoir.nom} (${decrire(h.pouvoir.effet || {})})`);
+  log(`${h.nom} déchaîne ${h.pouvoir.nom} (${decrireFR(h.pouvoir.effet || {})})`);
   appliquer(i, h.pouvoir.effet || {}, "heros");
   verifierVictoire();
   return true;
@@ -2553,7 +3351,7 @@ function verifierAllies(i){
         t.allieFait = true; encore = true;
         if(S.stats && S.stats[i]) S.stats[i].combos = (S.stats[i].combos || 0) + 1;
         fxEvt({t:"combo", j:i, src:t.uid, faction:cible});
-        log(`${TERMES.allie || "Combo"} : ${d.nom} (${decrire(d.allie)})`);
+        log(`${TERMES.allie || "Combo"} : ${d.nom} (${decrireFR(d.allie)})`);
         appliquer(i, d.allie, t.uid);
       }
     }
@@ -2594,7 +3392,7 @@ function jouer(id, opts={}){
     if(opts.sacrifierDirect && d.choixSacrifice){
       j.bannies.push(c);
       fxEvt({t:"sacrifice", j:i, uid:c.uid});
-      log(`${j.nom} sacrifie ${d.nom} (${decrire(d.choixSacrifice)})`);
+      log(`${j.nom} sacrifie ${d.nom} (${decrireFR(d.choixSacrifice)})`);
       appliquer(i, d.choixSacrifice, c.uid);
     } else {
       j.joues.push(c);
@@ -2622,7 +3420,7 @@ function sacrifier(id){
   if(!d.sacrifice) return;
   j.joues.splice(k,1); j.bannies.push(c);
   fxEvt({t:"sacrifice", j:S.courant, uid:c.uid});
-  log(`${j.nom} sacrifie ${d.nom} (${decrire(d.sacrifice)})`);
+  log(`${j.nom} sacrifie ${d.nom} (${decrireFR(d.sacrifice)})`);
   appliquer(S.courant, d.sacrifice, c.uid);
   verifierVictoire();
 }
@@ -3349,14 +4147,14 @@ function renderAdmin(){
     cle = actif.dataset.chemin ? `[data-chemin="${actif.dataset.chemin}"]` : actif.dataset.adm ? `[data-adm="${actif.dataset.adm}"]` : null;
     try { pos = actif.selectionStart; } catch(e) { pos = null; }
   }
-  const pages = {accueil:admAccueil, cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => PROG.fiche ? admFicheJoueur() : admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons, messages:admMessages, notes:admNotes, bruitages:admBruitages, "cadeaux-auto":admCadeauxAuto};
+  const pages = {accueil:admAccueil, cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => PROG.fiche ? admFicheJoueur() : admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons, messages:admMessages, notes:admNotes, bruitages:admBruitages, "cadeaux-auto":admCadeauxAuto, traductions:admTraductions};
   // Mémoriser la position des listes et de la page avant de réafficher
   const defil = {}; app.querySelectorAll(".adm-items, .adm-menu, .grille-choix").forEach((el, k) => { defil[el.className + k] = el.scrollTop; });
   const yPage = window.scrollY;
   const nbAlertes = PROG.surv && PROG.surv.alertes ? PROG.surv.alertes.filter(a => !a.traite).length : 0;
   const groupes = [
     ["Accueil", [["accueil","Tableau de bord"]]],
-    ["Le jeu", [["cartes","Cartes"],["heros","Héros et divinités"],["factions","Panthéons"],["regles","Règles"]]],
+    ["Le jeu", [["cartes","Cartes"],["heros","Héros et divinités"],["factions","Panthéons"],["regles","Règles"],["traductions","Traductions"]]],
     ["Récompenses", [["boosters","Boosters"],["saisons","Saisons"], ...(PROG.actif ? [["cadeaux-auto","Cadeaux automatiques"]] : [])]],
     ...(PROG.actif ? [["Joueurs", [["stats-joueurs","Liste des joueurs"],["messages","Boîte aux lettres"],["surveillance","Surveillance", nbAlertes]]],
                       ["Statistiques", [["stats","Vue d’ensemble"],["stats-heros","Héros"],["stats-cartes","Cartes"]]]] : []),
@@ -3442,7 +4240,7 @@ function formCarte(id){
     const choixCombo = cle==="allie" ? `<div class="champs" style="margin-top:10px">${champSelect("Faction à jouer pour déclencher le combo", `cartes.${id}.comboFaction`, d.comboFaction || "",
       [["", d.faction && FACTIONS[d.faction] ? `Sa propre faction (${FACTIONS[d.faction].nom})` : "Aucune (carte neutre : choisissez une faction)"], ...Object.entries(FACTIONS).filter(([k]) => k!==d.faction).map(([k,f]) => [k, f.nom])])}</div>` : "";
     return `<details class="effet" data-bloc="${id}.${cle}" ${ouvert ? "open" : ""}>
-      <summary>${BLOCS[cle]}<span>${rempli ? esc(decrire(e)) : "Aucun effet"}</span></summary>${choixCombo}
+      <summary>${BLOCS[cle]}<span>${rempli ? esc(decrireFR(e)) : "Aucun effet"}</span></summary>${choixCombo}
       <div class="champs petits">
         ${EFFETS.map(([k,l]) => champNombre(l, `${pc}.${k}`, e[k] || 0)).join("")}
         ${champNombre("Renfort : attaque", `${pc}.renfort.atk`, e.renfort ? e.renfort.atk : 0)}
@@ -3562,7 +4360,7 @@ function admHeros(){
           ${champTexte("Titre", `heros.${cle}.titre`, hr.titre || "")}
           ${champTexte("Nom du pouvoir", `heros.${cle}.pouvoir.nom`, hr.pouvoir ? hr.pouvoir.nom : "")}
         </div>
-        <p class="effet-resume" style="margin-top:12px">Pouvoir : ${esc(decrire(e))}</p>
+        <p class="effet-resume" style="margin-top:12px">Pouvoir : ${esc(decrireFR(e))}</p>
         <div class="champs petits">
           ${EFFETS.map(([c,l]) => champNombre(l, `${pc}.${c}`, e[c] || 0)).join("")}
           ${champNombre("Renfort : attaque", `${pc}.renfort.atk`, e.renfort ? e.renfort.atk : 0)}
@@ -3609,7 +4407,7 @@ function admDonnees(){
     <div class="adm-actions"><button type="button" class="btn" data-act="config-telecharger">Télécharger config.json</button></div>
     ${adm.dernierExport ? (e => `<p class="aide" style="color:${e.manquantes ? "var(--danger)" : "var(--cible)"}">Export de ${e.quand} depuis ${e.ou} : ${e.integrees} image${e.integrees>1 ? "s" : ""} intégrée${e.integrees>1 ? "s" : ""} sur ${e.total}${e.manquantes ? `, ${e.manquantes} échec${e.manquantes>1 ? "s" : ""} (${esc(e.raison)})` : ""}.${e.hdRetirees ? ` Les ${e.hdRetirees} versions haute définition stockées sur Claude ne sont pas incluses : pour les avoir sur votre site, ajoutez les images depuis l’administration de votre site.` : ""}</p>`)(adm.dernierExport) : ""}
     ${(() => { const s = lireSecours(); return s && s.config ? `<h2>Copie de secours</h2>
-      <p class="aide">Copie automatique de votre configuration, faite le ${new Date(s.quand).toLocaleString("fr-FR")} juste avant une mise à jour automatique${s.sansImages ? " (sans les images, trop lourdes pour le navigateur)" : ""}.</p>
+      <p class="aide">Copie automatique de votre configuration, faite le ${new Date(s.quand).toLocaleString(LOC())} juste avant une mise à jour automatique${s.sansImages ? " (sans les images, trop lourdes pour le navigateur)" : ""}.</p>
       <div class="adm-actions">${adm.restaurer ? `<button type="button" class="btn danger" data-act="secours-ok">Confirmer la restauration</button><button type="button" class="btn second" data-act="secours-non">Annuler</button>` : `<button type="button" class="btn second" data-act="secours">Restaurer cette copie</button>`}</div>` : ""; })()}
     <h2>Valeurs d’origine</h2>
     <p class="aide">Efface toutes vos modifications et restaure les cartes et règles du prototype.</p>
@@ -3730,6 +4528,14 @@ function actionAdmin(act, id, el){
     case "admin": ui.ecran = "admin"; break;
     case "admin-quitter": ui.ecran = "jeu"; S = null; break;
     case "onglet": adm.onglet = id; adm.reset = false; break;
+    case "trad-filtre": adm.tradFiltre = id; break;
+    case "trad-accepter-un": { const p = propositionTraduction(id); if(p){ fixerTraduction(id, p); sauver(); } break; }
+    case "trad-suppr": fixerTraduction(id, ""); sauver(); break;
+    case "trad-accepter": {
+      const t = (CONFIG.traductions && CONFIG.traductions.en) || {}; let n = 0;
+      for(const [, l] of textesContenu()) for(const [fr] of l) if(!t[fr]){ const p = propositionTraduction(fr); if(p){ fixerTraduction(fr, p); n++; } }
+      sauver(); erreur(`${n} proposition${n>1 ? "s" : ""} acceptée${n>1 ? "s" : ""}. Exportez config.json pour les publier.`); break;
+    }
     case "carte-sel": adm.cibleCollage = null; adm.sel = id; adm.suppr = null; break;
     case "carte-nouvelle": {
       const nid = idUnique("carte");
@@ -3826,6 +4632,13 @@ document.addEventListener("input", e => {
   if(el.dataset.adm==="recherche"){ adm.recherche = el.value; return renderAdmin(); }
   if(el.dataset.adm==="filtre"){ adm.filtre = el.value; return renderAdmin(); }
   if(el.dataset.adm==="tri"){ adm.tri = el.value; return renderAdmin(); }
+  if(el.dataset.adm==="trad-recherche"){ adm.tradRecherche = el.value; return renderAdmin(); }
+  if(el.dataset.trad!=null){
+    fixerTraduction(el.dataset.trad, el.value); sauver();
+    const cel = el.closest(".trad-ligne") && el.closest(".trad-ligne").querySelector(".trad-cellule");
+    if(cel) cel.innerHTML = el.value.trim() ? `<span class="trad-etat ok">✓ Traduit</span>` : propositionTraduction(el.dataset.trad) ? `<span class="trad-etat prop">Proposition</span>` : `<span class="trad-etat manque">À traduire</span>`;
+    return;
+  }
   if(el.dataset.chemin){
     if(el.type==="number" && el.value==="") return;
     majChemin(el.dataset.chemin, el.value, el.type==="number");
@@ -3926,7 +4739,7 @@ async function telechargerConfig(){
     if(v.imageHD && estServeur(v.imageHD)) delete v.imageHD;
     if(v.image && estServeur(v.image)){ const d = await versDataURL(v.image); if(d) v.image = d; else delete v.image; }
   }
-  adm.dernierExport = {total, integrees, manquantes, hdRetirees, raison:raisonEchec, quand:new Date().toLocaleTimeString("fr-FR"), ou: window.claude ? "le prototype sur Claude" : "votre site"};
+  adm.dernierExport = {total, integrees, manquantes, hdRetirees, raison:raisonEchec, quand:new Date().toLocaleTimeString(LOC()), ou: window.claude ? "le prototype sur Claude" : "votre site"};
   if(ui.ecran==="admin") renderAdmin();
   const texte = JSON.stringify(cfg);
   CONFIG.exporte = cfg.exporte; sauver();
@@ -4452,6 +5265,7 @@ document.addEventListener("click", e => {
   if(act==="nouvelle"){ if(typeof quitterPartie2v2Ligne==="function" && S && S.enLigne2v2) quitterPartie2v2Ligne(); else if(enLigne() || EN.role) quitterEnLigne(); S = null; ui.couvert = false; ui.aiEnCours = false; return render(); }
   if(act.startsWith("en-")) return actionEnLigne(act, id);
   if(act==="son"){ basculerSon(); return render(); }
+  if(act==="langue"){ changerLangue(id); return; }
   if(act==="bruitages-basculer"){ const p = prefsBruitages(); p.actif = !p.actif; sauverPrefsBruitages(p); if(p.actif) lireSon("carte", {}); return render(); }
   if(act==="reglages-ouvrir" || act==="reglages-fermer"){ PROG.reglagesOuverts = act==="reglages-ouvrir"; return render(); }
   if(act==="tuto") return lancerTuto();
@@ -5059,7 +5873,7 @@ function filtrerCartes(seulementPossedees){
     if(f.rar!=="toutes" && (d.rarete || "commune")!==f.rar) return false;
     if(f.type!=="tous" && d.type!==f.type) return false;
     if(f.cout && coutTranche(id)!==f.cout) return false;
-    return !f.rech || d.nom.toLowerCase().includes(f.rech.toLowerCase());
+    return !f.rech || nomCherche(d.nom, f.rech);
   }));
 }
 function trierCartesProg(ids){
@@ -5069,7 +5883,7 @@ function trierCartesProg(ids){
     const A = CARTES[a], B = CARTES[b];
     if(tri==="cout") return ((A.prix||0) - (B.prix||0)) || (fac.indexOf(A.faction) - fac.indexOf(B.faction)) || A.nom.localeCompare(B.nom, "fr");
     if(tri==="cout-desc") return ((B.prix||0) - (A.prix||0)) || (fac.indexOf(A.faction) - fac.indexOf(B.faction)) || A.nom.localeCompare(B.nom, "fr");
-    if(tri==="nom") return A.nom.localeCompare(B.nom, "fr");
+    if(tri==="nom") return traduireNom(A.nom).localeCompare(traduireNom(B.nom), LOC());
     if(tri==="rarete") return (rar.indexOf(B.rarete) - rar.indexOf(A.rarete)) || ((A.prix||0) - (B.prix||0)) || A.nom.localeCompare(B.nom, "fr");
     return (fac.indexOf(A.faction) - fac.indexOf(B.faction)) || (rar.indexOf(A.rarete) - rar.indexOf(B.rarete)) || ((A.prix||0) - (B.prix||0)) || A.nom.localeCompare(B.nom, "fr");
   });
@@ -5139,7 +5953,7 @@ function htmlZoom(){
         <p class="meta">${NOMS_RARETE[r]}, ${esc(fac)}</p>
         ${d.depart || d.base ? `<p>${d.base ? "Toujours disponible au marché, à chaque partie." : `Carte de départ : vous commencez chaque partie avec <b>${(REGLES.deckDepart || {})[id] || 0}</b> exemplaire${((REGLES.deckDepart || {})[id] || 0)>1 ? "s" : ""}.`} Elle ne se fabrique pas et ne se recycle pas.</p>` : `
         <p>Vous en possédez <b>${nb}</b>${nb ? "" : " : son illustration est floutée tant que vous ne l’avez pas"}. Un deck peut en contenir ${mx}.</p>
-        ${d.saisonFin && new Date(d.saisonFin + "T23:59:59") > new Date() ? `<p class="note-saison"><b>Carte de saison.</b> Elle s’obtient en accomplissant les travaux de la saison en cours, et sera disponible dans les boosters à la fin de la saison, le ${new Date(d.saisonFin + "T00:00:00").toLocaleDateString("fr-FR", {day:"numeric", month:"long", year:"numeric"})}. D’ici là, elle ne se fabrique pas.</p>` : ""}
+        ${d.saisonFin && new Date(d.saisonFin + "T23:59:59") > new Date() ? `<p class="note-saison"><b>Carte de saison.</b> Elle s’obtient en accomplissant les travaux de la saison en cours, et sera disponible dans les boosters à la fin de la saison, le ${new Date(d.saisonFin + "T00:00:00").toLocaleDateString(LOC(), {day:"numeric", month:"long", year:"numeric"})}. D’ici là, elle ne se fabrique pas.</p>` : ""}
         <p class="meta">Votre encre : ${encre}</p>
         <div class="actions">
           ${d.promo ? `<p class="meta">Carte promotionnelle : elle ne se fabrique pas et ne se recycle pas.</p>` : `<button type="button" class="btn" data-act="col-fabriquer" data-id="${id}" ${nb>=mx || encre<cout || PROG.occupe ? "disabled" : ""}>Fabriquer (${cout} encre)</button>`}
@@ -5761,7 +6575,7 @@ function verifierTrophees(annoncer){
 }
 
 // ----- Écran « Mon profil »
-const nf = n => (n || 0).toLocaleString("fr-FR");
+const nf = n => (n || 0).toLocaleString(LOC());
 const pct = (v, n) => n ? Math.round(100*v/n) + " %" : "–";
 function pageProfil(){
   const s = PROG.mesStats, pseudo = PROG.profil && PROG.profil.pseudo;
@@ -5889,7 +6703,7 @@ ${vueStats==="resume" ? `    <h2>Résumé</h2>
       <div class="tuile"><b>${nf(r.parties_ia)} / ${nf(r.parties_en_ligne)} / ${nf(r.parties_duo || 0)}</b><span>parties contre l’ordinateur / en ligne / sur un même écran</span></div>
       <div class="tuile"><b>${pct(r.ordinateur_victoires || 0, r.ordinateur_parties || 0)}</b><span>de victoires pour l’ordinateur (${nf(r.ordinateur_parties || 0)} parties)</span></div>
       <div class="tuile"><b>${nf(r.camps_victoires || 0)} / ${nf(r.camps || 0)}</b><span>camps gagnants / camps comptés (toujours la moitié, hors égalités)</span></div>
-      <div class="tuile"><b>${r.tours_moyens!=null ? Number(r.tours_moyens).toLocaleString("fr-FR") : "–"}</b><span>tours par partie, ${r.duree_moyenne_s ? Math.round(r.duree_moyenne_s/60) + " min" : "–"} en moyenne</span></div>
+      <div class="tuile"><b>${r.tours_moyens!=null ? Number(r.tours_moyens).toLocaleString(LOC()) : "–"}</b><span>tours par partie, ${r.duree_moyenne_s ? Math.round(r.duree_moyenne_s/60) + " min" : "–"} en moyenne</span></div>
     </div>
     <h2>En ligne maintenant</h2>
     ${enLigneMaint.length ? `<ul class="liste-en-ligne">${enLigneMaint.map(j => `<li><span class="point-vert" aria-hidden="true"></span><b>${esc(nomJoueur(j))}</b><span>${esc(NOMS_ECRANS[j.ecran] || j.ecran || "?")}</span><span class="aide">${ilYa(j.derniere_vue)}</span></li>`).join("")}</ul>` : `<p class="aide">Personne n’est connecté en ce moment.</p>`}
@@ -5897,7 +6711,7 @@ ${vueStats==="resume" ? `    <h2>Résumé</h2>
 ${vueStats==="heros" ? `    <h2>Héros</h2>
     <div class="tableau-defile"><table class="tableau"><thead><tr><th>Héros</th><th>Parties</th><th>Victoires</th><th>Taux</th><th>Tours moyens</th></tr></thead><tbody>
       ${facs.map(k => { const x = hs[k] || {parties:0, victoires:0}; const t = x.parties ? x.victoires/x.parties : null;
-        return `<tr><td><span class="pastille f-${k}"></span> ${esc(heroDe({heros:k}).nom)}</td><td>${nf(x.parties)}</td><td>${nf(x.victoires)}</td><td class="${couleurTaux(t)}">${pct(x.victoires, x.parties)}</td><td>${x.tours!=null ? Number(x.tours).toLocaleString("fr-FR") : "–"}</td></tr>`; }).join("")}
+        return `<tr><td><span class="pastille f-${k}"></span> ${esc(heroDe({heros:k}).nom)}</td><td>${nf(x.parties)}</td><td>${nf(x.victoires)}</td><td class="${couleurTaux(t)}">${pct(x.victoires, x.parties)}</td><td>${x.tours!=null ? Number(x.tours).toLocaleString(LOC()) : "–"}</td></tr>`; }).join("")}
     </tbody></table></div>
     <h3>Duels (taux de victoire du héros en ligne contre celui en colonne)</h3>
     <div class="tableau-defile"><table class="tableau duels"><thead><tr><th></th>${facs.map(k => `<th>${esc(heroDe({heros:k}).nom)}</th>`).join("")}</tr></thead><tbody>
@@ -5918,7 +6732,7 @@ ${vueStats==="cartes" ? `    <h2>Cartes</h2>
     </tbody></table></div>
 ` : ""}${vueStats==="joueurs" ? `    <h2>Joueurs</h2>
     <div class="tableau-defile"><table class="tableau"><thead><tr>${th("nom","Joueur")}${th("email","Compte")}${th("cree","Inscrit")}${th("derniere_vue","Dernière visite")}${th("ecran","Écran")}${th("parties","Parties")}${th("taux","Victoires")}${th("cartes","Cartes")}${th("pieces_or","Or")}${th("encre","Encre")}<th></th></tr></thead><tbody>
-      ${joueurs.map(j => `<tr><td>${esc(j.nom)}</td><td>${j.email ? esc(j.email) : `<span class="aide">invité</span>`}</td><td>${j.cree ? new Date(j.cree).toLocaleDateString("fr-FR") : "–"}</td><td>${ilYa(j.derniere_vue)}</td><td>${esc(NOMS_ECRANS[j.ecran] || j.ecran || "–")}</td><td>${nf(j.parties)}</td><td>${nf(j.victoires)} (${pct(j.victoires, j.parties)})</td><td>${nf(j.cartes)}</td>${A.edition===j.id
+      ${joueurs.map(j => `<tr><td>${esc(j.nom)}</td><td>${j.email ? esc(j.email) : `<span class="aide">invité</span>`}</td><td>${j.cree ? new Date(j.cree).toLocaleDateString(LOC()) : "–"}</td><td>${ilYa(j.derniere_vue)}</td><td>${esc(NOMS_ECRANS[j.ecran] || j.ecran || "–")}</td><td>${nf(j.parties)}</td><td>${nf(j.victoires)} (${pct(j.victoires, j.parties)})</td><td>${nf(j.cartes)}</td>${A.edition===j.id
         ? `<td><input type="number" min="0" step="1" class="champ-res" data-stats-res="or" value="${A.formRes.or}" aria-label="Or de ${esc(j.nom)}"></td>
            <td><input type="number" min="0" step="1" class="champ-res" data-stats-res="encre" value="${A.formRes.encre}" aria-label="Encre de ${esc(j.nom)}"></td>
            <td class="actions-res"><button type="button" class="btn" data-act="stats-res-ok" data-id="${j.id}">Enregistrer</button><button type="button" class="btn-discret" data-act="stats-res-annuler">Annuler</button></td>`
@@ -7135,7 +7949,7 @@ function htmlDetails(d){
 const badgeGravite = g => `<span class="gravite g-${g}">${g==="forte" ? "Forte" : g==="moyenne" ? "Moyenne" : "Faible"}</span>`;
 function ficheJoueur(f){
   if(!f) return "";
-  return `<span class="aide">${nf(f.parties)} parties, ${nf(f.victoires)} victoires, ${nf(f.pieces_or)} or, ${nf(f.encre)} encre, ${nf(f.nb_alertes)} alerte${f.nb_alertes>1 ? "s" : ""}, inscrit le ${f.cree ? new Date(f.cree).toLocaleDateString("fr-FR") : "–"}</span>`;
+  return `<span class="aide">${nf(f.parties)} parties, ${nf(f.victoires)} victoires, ${nf(f.pieces_or)} or, ${nf(f.encre)} encre, ${nf(f.nb_alertes)} alerte${f.nb_alertes>1 ? "s" : ""}, inscrit le ${f.cree ? new Date(f.cree).toLocaleDateString(LOC()) : "–"}</span>`;
 }
 async function chargerSurveillance(){
   if(PROG.catalogueServeur===undefined){ PROG.catalogueServeur = null; rpc("cartes_du_catalogue").then(l => { PROG.catalogueServeur = new Set(l || []); }, () => {}); }
@@ -7176,7 +7990,7 @@ function admSurveillance(){
       return `<article class="alerte ${a.traite ? "traitee" : ""}">
         <header>${badgeGravite(a.gravite)}<b class="joueur-alerte">${nomJ(a)}</b>${a.email && a.pseudo ? `<span class="aide">${esc(a.email)}</span>` : ""}
           ${a.details && a.details.ticket ? `<span class="ticket-alerte" title="Numéro du ticket de la partie">Ticket ${esc(String(a.details.ticket))}</span>` : ""}
-          <span class="quand">${a.compteur>1 ? `${nf(a.compteur)} fois, ` : ""}${new Date(a.derniere).toLocaleString("fr-FR", {dateStyle:"short", timeStyle:"short"})}</span></header>
+          <span class="quand">${a.compteur>1 ? `${nf(a.compteur)} fois, ` : ""}${new Date(a.derniere).toLocaleString(LOC(), {dateStyle:"short", timeStyle:"short"})}</span></header>
         <p class="motif-alerte"><b>${esc(m[0])}</b>${m[1] ? ` : ${esc(m[1])}` : ""}</p>
         ${causeAlerte(a) ? `<p class="cause-alerte"><b>Cause du blocage :</b> ${esc(causeAlerte(a))}</p>` : ""}
         <div class="details-alerte">${htmlDetails(a.details)}</div>
@@ -7261,7 +8075,7 @@ function htmlHall(){
         ${tuile("prog-collection", "collection", "Collection", `${possedees} / ${total} cartes`)}
         ${tuile("prog-decks", "decks", "Decks", `${PROG.decks.length} / 9 decks`)}
         ${tuile("prog-boutique", "boutique", "Boutique", `Paquets à ${prixPaquet} or`)}
-        ${PROG.saison && false ? tuile("prog-saison", "saison", "Saison", PROG.saison.a_venir ? `<span class="pastille-ouverture">Fermée</span>Ouverture le ${new Date(PROG.saison.debut + "T00:00:00").toLocaleDateString("fr-FR", {day:"numeric", month:"long"})}`
+        ${PROG.saison && false ? tuile("prog-saison", "saison", "Saison", PROG.saison.a_venir ? `<span class="pastille-ouverture">Fermée</span>Ouverture le ${new Date(PROG.saison.debut + "T00:00:00").toLocaleDateString(LOC(), {day:"numeric", month:"long"})}`
           : (recompensesSaisonEnAttente() ? `<span class="pastille-recompense">${recompensesSaisonEnAttente()} récompense${recompensesSaisonEnAttente()>1 ? "s" : ""} à réclamer</span>` : "") + `${PROG.saison.finis} / ${PROG.saison.travaux.length} travaux, encore ${joursRestants(PROG.saison.fin)} j`) : ""}
         ${PROG.actif && PROG.pret ? tuile("prog-amis", "amis", "Amis", (demandesAmis() ? `<span class="pastille-recompense">${demandesAmis()} demande${demandesAmis()>1 ? "s" : ""}</span>` : "") + (SOC.amis && (SOC.amis.amis || []).length ? `${(SOC.amis.amis || []).filter(a => a.en_ligne).length} en ligne sur ${SOC.amis.amis.length}` : "Défiez vos amis")) : ""}
         ${tuile("prog-classement", "classement", "Classement", p.elo_parties ? `Cote ${nf(p.elo)}` : "Parties en ligne")}
@@ -7275,9 +8089,25 @@ function htmlHall(){
     </div>
   </div>`;
 }
+function decrireEN(e){
+  const p = [], pl = (n, m) => `${n} ${m}${n>1 ? "s" : ""}`;
+  if(e.or) p.push(`+${e.or} gold`);
+  if(e.combat) p.push(`+${e.combat} power`);
+  if(e.soin) p.push(`+${e.soin} healing`);
+  if(e.pioche) p.push(`draw ${pl(e.pioche, "card")}`);
+  if(e.bannir) p.push(`banish ${pl(e.bannir, "card")} from your hand or discard pile`);
+  if(e.degatsTous) p.push(`${e.degatsTous} damage to each enemy creature`);
+  if(e.degatsHasard) p.push(`${e.degatsHasard} damage to a random enemy creature`);
+  if(e.renfort) p.push(`your creatures get +${e.renfort.atk}/+${e.renfort.vie}`);
+  if(e.invoque && e.invoque.id && e.invoque.n) p.push(`summon ${e.invoque.n} ${CARTES[e.invoque.id] ? traduireNom(CARTES[e.invoque.id].nom) : "?"}`);
+  const s = p.join(", ");
+  if(!s) return "No effect.";
+  return s.charAt(0).toUpperCase() + s.slice(1) + ".";
+}
 function htmlReglages(){
   return `<div class="boite boite-reglages" role="dialog" aria-label="Réglages">
     <h2>Réglages</h2>
+    <section><h3>Langue / Language</h3>${htmlReglageLangue()}</section>
     ${aDesMusiques() ? `<section><h3>Musique</h3>${htmlSon(true)}</section>` : ""}
     ${aDesBruitages() ? `<section><h3>Bruitages</h3>${htmlReglageBruitages()}</section>` : ""}
     <section><h3>Animations</h3>${htmlReglageAnimations(false)}<p class="aide">« Réduites » garde les éclats et les chiffres, sans objets qui volent.</p></section>
@@ -7350,7 +8180,7 @@ function htmlAdminVariantes(id){
       ${htmlValeurCarte(d)}
       <label class="case"><input type="checkbox" data-act="carte-promo" data-id="${id}" ${d.promo ? "checked" : ""}> Carte promotionnelle</label>
       <label class="champ champ-saison"><span>Carte de saison : exclusive jusqu’au (vide = carte normale)</span><input type="date" data-chemin="cartes.${id}.saisonFin" value="${esc(d.saisonFin || "")}"></label>
-      ${d.saisonFin ? `<p class="aide">Carte de saison : absente des paquets et non fabricable jusqu’au ${new Date(d.saisonFin + "T00:00:00").toLocaleDateString("fr-FR")}, puis elle rejoint automatiquement les paquets. Pensez à « Envoyer le catalogue ».</p>` : ""}
+      ${d.saisonFin ? `<p class="aide">Carte de saison : absente des paquets et non fabricable jusqu’au ${new Date(d.saisonFin + "T00:00:00").toLocaleDateString(LOC())}, puis elle rejoint automatiquement les paquets. Pensez à « Envoyer le catalogue ».</p>` : ""}
       <p class="aide">${d.promo
         ? "Carte promotionnelle : absente du booster principal et des boosters de panthéon, elle ne se fabrique pas et ne se recycle pas. Les joueurs l’obtiennent uniquement dans les boosters spéciaux cochés ci-dessous."
         : `Présente automatiquement dans le booster principal${fac ? ` et dans le booster ${esc(fac.m)}` : ""}.`}</p>
@@ -7932,9 +8762,13 @@ function htmlVoirDefausse(){
 // Noms de cartes du journal : en gras, avec la carte au survol
 let RX_NOMS = null, RX_CLE = "";
 function journalHTML(l){
-  const cle = Object.keys(CARTES).length + ":" + (CONFIG.exporte || "");
+  // Le journal est écrit en français (partagé en ligne) : chacun le traduit en entier dans sa langue, avant de repérer les noms de cartes
+  if(LANGUE!=="fr") l = traduire(l);
+  const cfgTrad = (TRAD[LANGUE] && TRAD[LANGUE].cfg) ? TRAD[LANGUE].cfg.size : 0;
+  const cle = Object.keys(CARTES).length + ":" + (CONFIG.exporte || "") + ":" + LANGUE + ":" + cfgTrad;
   if(!RX_NOMS || RX_CLE!==cle){
-    const noms = Object.entries(CARTES).filter(([, d]) => d && d.nom).map(([id, d]) => [d.nom, id]).sort((a, b) => b[0].length - a[0].length);
+    const paires = Object.entries(CARTES).filter(([, d]) => d && d.nom).flatMap(([id, d]) => { const t = traduireNom(d.nom); return t!==d.nom ? [[d.nom, id], [t, id]] : [[d.nom, id]]; });
+    const noms = [...new Map(paires).entries()].sort((a, b) => b[0].length - a[0].length);
     RX_NOMS = {map:Object.fromEntries(noms), rx:noms.length ? new RegExp(`(?<![\\p{L}])(${noms.map(([n]) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})(?![\\p{L}])`, "gu") : null};
     RX_CLE = cle;
   }
@@ -8248,10 +9082,12 @@ function htmlPaquetsOfferts(){
 /* ----- Collection : cartes de départ et leurs versions de Dévotion ----- */
 const idsDepart = () => [...new Set([...Object.keys(REGLES.deckDepart || {}), REGLES.carteBase])].filter(id => CARTES[id]);
 const versionsDe = id => Object.keys(CARTES).filter(k => CARTES[k].versionDe===id).sort((a, b) => Object.keys(FACTIONS).indexOf(CARTES[a].faction) - Object.keys(FACTIONS).indexOf(CARTES[b].faction));
+// Recherche d’une carte par son nom, dans la langue affichée ou en français
+const nomCherche = (nom, q) => { q = q.toLowerCase(); return nom.toLowerCase().includes(q) || traduireNom(nom).toLowerCase().includes(q); };
 function htmlCartesDepart(){
   const f = PROG.filtres;
   if(f.fac!=="toutes" || f.rar!=="toutes" || f.cout || f.possedees) return "";
-  const ids = idsDepart().filter(id => (f.type==="tous" || CARTES[id].type===f.type) && (!f.rech || CARTES[id].nom.toLowerCase().includes(f.rech.toLowerCase())));
+  const ids = idsDepart().filter(id => (f.type==="tous" || CARTES[id].type===f.type) && (!f.rech || nomCherche(CARTES[id].nom, f.rech)));
   if(!ids.length) return "";
   return `<h2 class="titre-section-col">Cartes de départ</h2>
     <p class="aide">Chaque joueur commence ses parties avec ces cartes. Avec la Dévotion, certaines prennent la couleur de votre panthéon : ouvrez-les pour voir leurs versions.</p>
@@ -8368,7 +9204,7 @@ function saisonDouzeTravaux(){
     paliers:[{travaux:4, recompense:{paquets:["classique"]}}, {travaux:8, recompense:{paquets:["classique"], or:50}},
              {travaux:11, recompense:{paquets:["classique"]}}, {travaux:12, recompense:{titre:"Héros de la saison 1"}}]};
 }
-const dateSaison = (s, jours) => { const d = new Date(s.debut + "T00:00:00"); d.setDate(d.getDate() + jours); return d.toLocaleDateString("fr-FR", {weekday:"short", day:"numeric", month:"short"}); };
+const dateSaison = (s, jours) => { const d = new Date(s.debut + "T00:00:00"); d.setDate(d.getDate() + jours); return d.toLocaleDateString(LOC(), {weekday:"short", day:"numeric", month:"short"}); };
 function htmlRecompenseAdmin(chemin, r){
   const cartes = Object.keys(CARTES).filter(k => estCollectionnable(CARTES[k])).sort((a, b) => ((CARTES[b].saisonFin ? 1 : 0) - (CARTES[a].saisonFin ? 1 : 0)) || CARTES[a].nom.localeCompare(CARTES[b].nom, "fr"));
   const vars = Object.entries(CONFIG.variantes || {});
@@ -8638,7 +9474,7 @@ function admFicheJoueur(){
     <button type="button" class="btn second bouton-msg-fiche" data-act="msg-joueur" data-id="${f.id}">Envoyer un message</button>
     <section class="tete-fiche">
       <div><h2>${esc(f.pseudo || "Sans pseudo")}</h2>
-        <p class="aide">${esc(f.email || "")}${f.titre ? ` · titre : <b>${esc(f.titre)}</b>` : ""} · inscrit le ${f.cree ? new Date(f.cree).toLocaleDateString("fr-FR") : "–"} · dernière visite : ${ilYa(f.derniere_vue)}${f.alertes ? ` · <b style="color:var(--danger)">${f.alertes} alerte${f.alertes>1 ? "s" : ""}</b> (onglet Surveillance)` : ""}</p></div>
+        <p class="aide">${esc(f.email || "")}${f.titre ? ` · titre : <b>${esc(f.titre)}</b>` : ""} · inscrit le ${f.cree ? new Date(f.cree).toLocaleDateString(LOC()) : "–"} · dernière visite : ${ilYa(f.derniere_vue)}${f.alertes ? ` · <b style="color:var(--danger)">${f.alertes} alerte${f.alertes>1 ? "s" : ""}</b> (onglet Surveillance)` : ""}</p></div>
     </section>
     <section><h3>Ressources</h3>
       <div class="ligne-fiche">
@@ -8654,7 +9490,7 @@ function admFicheJoueur(){
         ${Object.entries(FACTIONS).map(([k, x]) => { const v = (s.par_heros || {})[k] || {parties:0, victoires:0}; return `<tr><td><span class="pastille f-${k}"></span> ${esc(x.nom)}</td><td>${nf(v.parties)}</td><td>${nf(v.victoires)}</td><td>${pct(v.victoires, v.parties)}</td></tr>`; }).join("")}
       </tbody></table></div>
       ${(f.dernieres || []).length ? `<h3>Dernières parties</h3><div class="defile-tableau"><table class="tableau"><thead><tr><th>Date</th><th>Mode</th><th>Résultat</th><th>Panthéon</th><th>Adversaire</th><th>Tours</th><th>Dégâts</th></tr></thead><tbody>
-        ${f.dernieres.map(p => `<tr><td>${new Date(p.cree).toLocaleString("fr-FR", {dateStyle:"short", timeStyle:"short"})}</td><td>${esc(NOMS_MODES[p.mode] || p.mode)}</td><td>${p.victoire ? "Victoire" : "Défaite"}</td><td>${esc((FACTIONS[p.heros] || {}).nom || p.heros || "–")}</td><td>${esc((FACTIONS[p.heros_adverse] || {}).nom || p.heros_adverse || "–")}</td><td>${p.tours ?? "–"}</td><td>${p.degats ?? "–"}</td></tr>`).join("")}
+        ${f.dernieres.map(p => `<tr><td>${new Date(p.cree).toLocaleString(LOC(), {dateStyle:"short", timeStyle:"short"})}</td><td>${esc(NOMS_MODES[p.mode] || p.mode)}</td><td>${p.victoire ? "Victoire" : "Défaite"}</td><td>${esc((FACTIONS[p.heros] || {}).nom || p.heros || "–")}</td><td>${esc((FACTIONS[p.heros_adverse] || {}).nom || p.heros_adverse || "–")}</td><td>${p.tours ?? "–"}</td><td>${p.degats ?? "–"}</td></tr>`).join("")}
       </tbody></table></div>` : ""}
     </section>
     <section><h3>Collection <span class="aide">${possedees.length} / ${cartesColl.length} cartes différentes, ${(f.decks || []).length} deck${(f.decks || []).length>1 ? "s" : ""}</span></h3>
@@ -8846,14 +9682,16 @@ const texteRiche = t => esc(t || "").split(/\n/).reduce((acc, l) => {
   return acc;
 }, {html:"", liste:false});
 const enHtml = t => { const r = texteRiche(t); return (r.html + (r.liste ? "</ul>" : "")).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); };
+// Champ dans la langue du joueur (titre_en…), sinon le texte français
+const enLangue = (o, champ) => (LANGUE!=="fr" && o && typeof o[`${champ}_${LANGUE}`]==="string" && o[`${champ}_${LANGUE}`].trim()) ? o[`${champ}_${LANGUE}`] : (o ? o[champ] : "");
 function pageBoite(){
   const B = SOC.boite;
   if(!B){ chargerBoite().then(() => { if(ui.ecran==="boite") renderProg(); }); return `${entete("Boîte aux lettres")}<p class="attente">Chargement…</p>`; }
   return `${entete("Boîte aux lettres")}
     <div class="page-boite">
       ${(B.messages || []).length ? B.messages.map(m => `<details class="message ${m.lu ? "" : "non-lu"}" data-message="${m.id}" ${SOC.ouvert===m.id ? "open" : ""}>
-        <summary><span class="enveloppe" aria-hidden="true">${m.lu ? "✉" : "📩"}</span><b>${esc(m.titre)}</b>${m.cadeau && !m.recupere ? `<span class="pastille-recompense">Cadeau</span>` : ""}<span class="quand">${new Date(m.cree).toLocaleDateString("fr-FR", {day:"numeric", month:"long"})}</span></summary>
-        <div class="corps-message">${enHtml(m.texte)}
+        <summary><span class="enveloppe" aria-hidden="true">${m.lu ? "✉" : "📩"}</span><b>${esc(enLangue(m, "titre"))}</b>${m.cadeau && !m.recupere ? `<span class="pastille-recompense">Cadeau</span>` : ""}<span class="quand">${new Date(m.cree).toLocaleDateString(LOC(), {day:"numeric", month:"long"})}</span></summary>
+        <div class="corps-message">${enHtml(enLangue(m, "texte"))}
           ${m.cadeau ? `<div class="cadeau ${m.recupere ? "recupere" : ""}"><span>🎁 ${esc(texteRecompenseSaison(m.cadeau))}</span>${m.recupere ? `<span class="recu-palier">✓ Récupéré</span>` : `<button type="button" class="btn" data-act="boite-recuperer" data-id="${m.id}">Récupérer</button>`}</div>` : ""}
           <div class="actions-message"><button type="button" class="btn-discret" data-act="boite-supprimer" data-id="${m.id}">Supprimer</button></div>
         </div></details>`).join("") : `<p class="aide">Aucun message pour le moment.</p>`}
@@ -8865,8 +9703,8 @@ function pageNouveautes(){
   try { if(N.length) localStorage.setItem("notes-vues", String(Math.max(...N.map(n => n.id)))); } catch(e) {}
   return `${entete("Nouveautés")}
     <div class="page-nouveautes">${N.length ? N.map(n => `<article class="note-maj">
-      <header>${n.version ? `<span class="version">${esc(n.version)}</span>` : ""}<h2>${esc(n.titre)}</h2><span class="quand">${new Date(n.cree).toLocaleDateString("fr-FR", {day:"numeric", month:"long", year:"numeric"})}</span></header>
-      <div class="corps-note">${enHtml(n.texte)}</div></article>`).join("") : `<p class="aide">Aucune note de mise à jour pour le moment.</p>`}</div>`;
+      <header>${n.version ? `<span class="version">${esc(n.version)}</span>` : ""}<h2>${esc(enLangue(n, "titre"))}</h2><span class="quand">${new Date(n.cree).toLocaleDateString(LOC(), {day:"numeric", month:"long", year:"numeric"})}</span></header>
+      <div class="corps-note">${enHtml(enLangue(n, "texte"))}</div></article>`).join("") : `<p class="aide">Aucune note de mise à jour pour le moment.</p>`}</div>`;
 }
 document.addEventListener("toggle", e => {
   const d = e.target;
@@ -8905,7 +9743,7 @@ function actionSociale(act, id, el){
 adm.msg = adm.msg || {dest:"tous", choix:[], filtre:"", titre:"", texte:"", or:0, encre:0, carte:"", paquet:"", variante:""};
 function admMessages(){
   const M = adm.msg, J = (PROG.adminStats && PROG.adminStats.joueurs) || null;
-  if(!J && PROG.pret){ chargerAdminStats().then(() => { if(adm.onglet==="messages") renderAdmin(); }); }
+  if(!J && PROG.pret && !adm.joueursDemandes){ adm.joueursDemandes = true; chargerAdminStats().then(() => { if(adm.onglet==="messages") renderAdmin(); }).finally(() => setTimeout(() => { adm.joueursDemandes = false; }, 15000)); }
   const f = M.filtre.toLowerCase(), liste = (J || []).filter(j => !f || `${j.pseudo || ""} ${j.email || ""}`.toLowerCase().includes(f));
   const cartes = trierCartes(Object.keys(CARTES).filter(k => estCollectionnable(CARTES[k])));
   return `<div class="adm-page adm-messages">
@@ -8919,6 +9757,10 @@ function admMessages(){
     </fieldset>
     <label class="champ"><span>Titre</span><input type="text" data-msg="titre" maxlength="120" value="${esc(M.titre)}"></label>
     <label class="champ"><span>Message (une ligne commençant par « - » devient une puce, **texte** en gras)</span><textarea data-msg="texte" rows="6">${esc(M.texte)}</textarea></label>
+    <details class="version-anglaise" ${M.titre_en || M.texte_en ? "open" : ""}><summary>🌐 Version anglaise (facultative)</summary>
+      <label class="champ"><span>Title</span><input type="text" lang="en" data-msg="titre_en" maxlength="120" value="${esc(M.titre_en || "")}"></label>
+      <label class="champ"><span>Message</span><textarea lang="en" data-msg="texte_en" rows="5">${esc(M.texte_en || "")}</textarea></label>
+      <p class="aide">Vide : les joueurs anglophones voient le texte français.</p></details>
     <fieldset class="cadeau-message"><legend>Cadeau (facultatif)</legend>
       <label class="champ"><span>Or</span><input type="number" min="0" data-msg="or" value="${M.or}"></label>
       <label class="champ"><span>Encre</span><input type="number" min="0" data-msg="encre" value="${M.encre}"></label>
@@ -8939,10 +9781,14 @@ function admNotes(){
       <div class="champs"><label class="champ"><span>Version</span><input type="text" data-note="version" maxlength="20" value="${esc(E.version || "")}" placeholder="1.5"></label>
         <label class="champ"><span>Titre</span><input type="text" data-note="titre" maxlength="120" value="${esc(E.titre || "")}"></label></div>
       <label class="champ"><span>Texte (une ligne commençant par « - » devient une puce, **texte** en gras)</span><textarea data-note="texte" rows="10">${esc(E.texte || "")}</textarea></label>
+      <details class="version-anglaise" ${E.titre_en || E.texte_en ? "open" : ""}><summary>🌐 Version anglaise (facultative)</summary>
+        <label class="champ"><span>Title</span><input type="text" lang="en" data-note="titre_en" maxlength="120" value="${esc(E.titre_en || "")}"></label>
+        <label class="champ"><span>Text</span><textarea lang="en" data-note="texte_en" rows="8">${esc(E.texte_en || "")}</textarea></label>
+        <p class="aide">Vide : les joueurs anglophones voient le texte français. Nécessite le script supabase-langues.sql.</p></details>
       <label class="case"><input type="checkbox" data-note="publie" ${E.publie ? "checked" : ""}> Publiée (visible des joueurs)</label>
       <div class="adm-actions"><button type="button" class="btn" data-act="note-enregistrer">Enregistrer</button><button type="button" class="btn-discret" data-act="note-annuler">Annuler</button></div>
     </div>` : `<div class="adm-actions"><button type="button" class="btn" data-act="note-nouvelle">Nouvelle note</button></div>`}
-    <div class="liste-notes">${(adm.notes || []).map(n => `<div class="ligne-note"><span class="version">${esc(n.version || "–")}</span><b>${esc(n.titre)}</b><span class="aide">${new Date(n.cree).toLocaleDateString("fr-FR")} · ${n.publie ? "publiée" : "brouillon"}</span>
+    <div class="liste-notes">${(adm.notes || []).map(n => `<div class="ligne-note"><span class="version">${esc(n.version || "–")}</span><b>${esc(n.titre)}</b><span class="aide">${new Date(n.cree).toLocaleDateString(LOC())} · ${n.publie ? "publiée" : "brouillon"}</span>
       <button type="button" class="btn-discret" data-act="note-modifier" data-id="${n.id}">Modifier</button><button type="button" class="btn-discret" data-act="note-supprimer" data-id="${n.id}">Supprimer</button></div>`).join("") || `<p class="aide">Aucune note.</p>`}</div>
   </div>`;
 }
@@ -8968,7 +9814,12 @@ function actionCommunication(act, id){
       if(M.carte) cadeau.cartes = [M.carte]; if(M.paquet) cadeau.paquets = [M.paquet]; if(M.variante) cadeau.variantes = [M.variante];
       const qui = M.dest==="tous" ? "tous les joueurs" : `${M.choix.length} joueur${M.choix.length>1 ? "s" : ""}`;
       if(!confirm(`Envoyer « ${M.titre} »${Object.keys(cadeau).length ? ` avec ${texteRecompenseSaison(cadeau)}` : ""} à ${qui} ?`)) return;
-      rpc("admin_envoyer_message", {p_dest:M.dest==="tous" ? null : M.choix, p_titre:M.titre, p_texte:M.texte, p_cadeau:Object.keys(cadeau).length ? cadeau : null}).then(n => {
+      const base = {p_dest:M.dest==="tous" ? null : M.choix, p_titre:M.titre, p_texte:M.texte, p_cadeau:Object.keys(cadeau).length ? cadeau : null};
+      const avecEn = (M.titre_en || "").trim() || (M.texte_en || "").trim();
+      rpc("admin_envoyer_message", avecEn ? {...base, p_titre_en:M.titre_en || "", p_texte_en:M.texte_en || ""} : base).catch(err => {
+        if(avecEn && /function|does not exist|schema cache/i.test(err.message)) throw new Error("Exécutez d’abord le script supabase-langues.sql dans Supabase pour envoyer la version anglaise.");
+        throw err;
+      }).then(n => {
         erreur(`Message envoyé à ${n} joueur${n>1 ? "s" : ""}.`);
         adm.msg = {dest:"tous", choix:[], filtre:"", titre:"", texte:"", or:0, encre:0, carte:"", paquet:"", variante:""}; renderAdmin();
       }, e => erreur(/function|does not exist|schema cache/i.test(e.message) ? "Exécutez d’abord le script supabase-social.sql dans Supabase." : e.message));
@@ -8980,7 +9831,7 @@ function actionCommunication(act, id){
     case "note-annuler": adm.noteEdit = null; break;
     case "note-enregistrer": {
       const E = adm.noteEdit; if(!E || !(E.titre || "").trim()) return erreur("Donnez un titre à la note.");
-      rpc("admin_maj_note", {p:{id:E.id ?? null, version:E.version, titre:E.titre, texte:E.texte, publie:!!E.publie}}).then(() => { adm.noteEdit = null; adm.notes = null; SOC.notes = null; erreur("Note enregistrée."); renderAdmin(); },
+      rpc("admin_maj_note", {p:{id:E.id ?? null, version:E.version, titre:E.titre, texte:E.texte, titre_en:E.titre_en || "", texte_en:E.texte_en || "", publie:!!E.publie}}).then(() => { adm.noteEdit = null; adm.notes = null; SOC.notes = null; erreur("Note enregistrée."); renderAdmin(); },
         e => erreur(/function|does not exist|schema cache/i.test(e.message) ? "Exécutez d’abord le script supabase-social.sql dans Supabase." : e.message));
       return;
     }
@@ -9060,7 +9911,7 @@ async function chargerSaison(){
 }
 const ROMAINS = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
 const imageTravail = (sid, k) => { const s = CONFIG.saisons && CONFIG.saisons[sid]; const t = s && (s.travaux || [])[k]; return t && t.image || ""; };
-const dateLongue = d => new Date(d).toLocaleDateString("fr-FR", {weekday:"long", day:"numeric", month:"long"});
+const dateLongue = d => new Date(d).toLocaleDateString(LOC(), {weekday:"long", day:"numeric", month:"long"});
 function htmlRecompensesSaison(s){
   const recu = k => (s.paliers_reclames || []).includes(String(k));
   return (s.paliers || []).map((p, k) => {
@@ -9474,6 +10325,10 @@ function admCadeauxAuto(){
         <label class="case"><input type="checkbox" data-palier="${n}.actif" ${p.actif===false ? "" : "checked"}> Actif</label>
       </div>
       <label class="champ"><span>Texte (une ligne commençant par « - » devient une puce, **texte** en gras)</span><textarea rows="3" data-palier="${n}.texte">${esc(p.texte || "")}</textarea></label>
+      <details class="version-anglaise" ${p.titre_en || p.texte_en ? "open" : ""}><summary>🌐 Version anglaise (facultative)</summary>
+        <label class="champ"><span>Title</span><input type="text" lang="en" maxlength="120" data-palier="${n}.titre_en" value="${esc(p.titre_en || "")}"></label>
+        <label class="champ"><span>Text</span><textarea lang="en" rows="3" data-palier="${n}.texte_en">${esc(p.texte_en || "")}</textarea></label>
+        <p class="aide">Vide : les joueurs anglophones voient le texte français. Nécessite le script supabase-langues.sql.</p></details>
       <div class="cadeau-message">
         <label class="champ"><span>Or</span><input type="number" min="0" data-palier="${n}.or" value="${c.or || 0}"></label>
         <label class="champ"><span>Encre</span><input type="number" min="0" data-palier="${n}.encre" value="${c.encre || 0}"></label>
@@ -9497,7 +10352,7 @@ document.addEventListener("input", e => {
   const c = p.cadeau = p.cadeau || {};
   const v = e.target.type==="checkbox" ? e.target.checked : e.target.value;
   if(champ==="seuil") p.seuil = Number(v) || 0;
-  else if(champ==="titre" || champ==="texte") p[champ] = v;
+  else if(["titre", "texte", "titre_en", "texte_en"].includes(champ)) p[champ] = v;
   else if(champ==="actif") p.actif = v;
   else if(champ==="or" || champ==="encre"){ if(Number(v)>0) c[champ] = Number(v); else delete c[champ]; }
   else { const cle = {carte:"cartes", paquet:"paquets", variante:"variantes"}[champ]; if(v) c[cle] = [v]; else delete c[cle]; }
@@ -9676,7 +10531,7 @@ async function recyclerToutSurplus(){
 }
 
 /* ----- Administration : tableau de bord ----- */
-const ICONES_ADMIN = {accueil:"🏠", cartes:"🃏", heros:"👑", factions:"🏛", regles:"📜", boosters:"🎁", saisons:"🗓", "cadeaux-auto":"🎀",
+const ICONES_ADMIN = {accueil:"🏠", traductions:"🌐", cartes:"🃏", heros:"👑", factions:"🏛", regles:"📜", boosters:"🎁", saisons:"🗓", "cadeaux-auto":"🎀",
   "stats-joueurs":"👥", messages:"✉", surveillance:"🛡", stats:"📊", "stats-heros":"⚔", "stats-cartes":"📈", musiques:"🎵", bruitages:"🔊",
   notes:"📰", donnees:"💾", serveur:"🖥"};
 const marquerModifie = () => { try { localStorage.setItem("config-modifiee", String(Date.now())); } catch(e) {} };
@@ -9689,7 +10544,7 @@ function admAccueil(){
   const alertes = PROG.surv && PROG.surv.alertes ? PROG.surv.alertes.filter(a => !a.traite).length : null;
   const sa = Object.entries(CONFIG.saisons || {}).filter(([, s]) => s.active).sort((a, b) => String(a[1].debut).localeCompare(String(b[1].debut)))
     .map(([k, s]) => { const d = new Date(s.debut + "T00:00:00"), f = new Date(d.getTime() + (s.duree_jours || 42)*864e5), n = new Date();
-      return {nom:s.nom, etat: n<d ? `ouvre le ${d.toLocaleDateString("fr-FR", {day:"numeric", month:"long"})}` : n<f ? `en cours jusqu’au ${f.toLocaleDateString("fr-FR", {day:"numeric", month:"long"})}` : "terminée"}; })
+      return {nom:s.nom, etat: n<d ? `ouvre le ${d.toLocaleDateString(LOC(), {day:"numeric", month:"long"})}` : n<f ? `en cours jusqu’au ${f.toLocaleDateString(LOC(), {day:"numeric", month:"long"})}` : "terminée"}; })
     .find(x => x.etat!=="terminée");
   const afaire = [
     nonExporte() && !window.claude ? [`Des changements n’ont pas encore été exportés dans config.json : les joueurs ne les voient pas.`, "config-telecharger", "Exporter config.json"] : null,
@@ -10416,8 +11271,126 @@ setInterval(() => {
   } catch(e) {}
 }, 1000);
 
+/* ============================================================
+   TRADUCTIONS DU CONTENU (admin) : config.traductions.en = {texte français : texte anglais}
+   ============================================================ */
+const PROPOSITIONS_EN = {
+  "Trésor":"Treasure", "Ankh d’or":"Golden Ankh", "Pièce de Lakshmi":"Lakshmi’s Coin", "Or des Nibelungen":"Nibelung Gold", "Drachme d’Athéna":"Athena’s Drachma",
+  "Gardien d’Héliopolis":"Guardian of Heliopolis", "Garde de Lakshmi":"Lakshmi’s Guard", "Jeune einherjar":"Young Einherjar", "Éphèbe d’Athènes":"Ephebe of Athens",
+  "Joyau":"Jewel", "Vagabon":"Vagabond", "Encourager":"Encourage", "Amulette Magique":"Magic Amulet",
+  "Porteur de jarres":"Jar Bearer", "Gardien du temple":"Temple Guardian", "Scarabée sacré":"Sacred Scarab", "Garde d’Anubis":"Anubis Guard", "Prêtresse d’Isis":"Priestess of Isis",
+  "Archer de Nubie":"Nubian Archer", "Chameau de guerre":"War Camel", "Sphinx des sables":"Sand Sphinx", "Embaumeur":"Embalmer", "Chat de Bastet":"Cat of Bastet",
+  "Prêtre de Thot":"Priest of Thoth", "Char de Ramsès":"Chariot of Ramesses", "Sentinelle de Thèbes":"Sentinel of Thebes", "Grand vizir":"Grand Vizier", "Colosse de Memnon":"Colossus of Memnon",
+  "Prêtre d’Osiris":"Priest of Osiris", "Pharaon-Soleil":"Sun Pharaoh", "Scribe du Nil":"Nile Scribe", "Pain du Nil":"Nile Bread", "Bénédiction d’Hathor":"Blessing of Hathor",
+  "Fureur de Sekhmet":"Fury of Sekhmet", "Papyrus sacré":"Sacred Papyrus", "Jugement d’Anubis":"Judgement of Anubis", "Bénédiction de Râ":"Blessing of Ra", "Crue du Nil":"Nile Flood",
+  "Tempête de sable":"Sandstorm", "Rituel de momification":"Mummification Ritual", "Œil de Râ":"Eye of Ra", "Khépesh":"Khopesh", "Fléau du pharaon":"Pharaoh’s Flail",
+  "Singe du temple":"Temple Monkey", "Apsara voilée":"Veiled Apsara", "Marchand d’épices":"Spice Merchant", "Cobra royal":"King Cobra", "Éléphant de guerre":"War Elephant",
+  "Yogi errant":"Wandering Yogi", "Tigre du Bengale":"Bengal Tiger", "Garde du rajah":"Rajah’s Guard", "Naga des temples":"Temple Naga", "Danseuse sacrée":"Sacred Dancer",
+  "Caravanier de la soie":"Silk Road Caravaneer", "Rakshasa":"Rakshasa", "Éléphant du maharaja":"Maharaja’s Elephant", "Deva gardien":"Guardian Deva", "Roi des nagas":"Naga King",
+  "Architecte céleste":"Celestial Architect", "Garuda":"Garuda", "Marchand de Varanasi":"Varanasi Merchant", "Épices rares":"Rare Spices", "Grand bazar":"Grand Bazaar",
+  "Tambours de guerre":"War Drums", "Collecteur d’offrandes":"Offering Collector", "Mantra de prospérité":"Mantra of Prosperity", "Don de Lakshmi":"Gift of Lakshmi", "Roue du karma":"Wheel of Karma",
+  "Trésor de Kubera":"Kubera’s Treasure", "Trésor des rajahs":"Treasure of the Rajahs", "Trésor de l’Himalaya":"Himalayan Treasure", "Chakram":"Chakram", "Trident sacré":"Sacred Trident",
+  "Éclaireur des fjords":"Fjord Scout", "Berserker du fjord":"Fjord Berserker", "Jeune porte-bouclier":"Young Shield-Bearer", "Loup des neiges":"Snow Wolf", "Skalde":"Skald",
+  "Pillard du drakkar":"Longship Raider", "Ours des glaces":"Ice Bear", "Huscarl":"Housecarl", "Corbeau d’Odin":"Odin’s Raven", "Valkyrie":"Valkyrie", "Géant du givre":"Frost Giant",
+  "Ulfhednar":"Ulfhednar", "Vierge au bouclier":"Shieldmaiden", "Jarl des glaces":"Ice Jarl", "Troll des montagnes":"Mountain Troll", "Meute de Fenrir":"Fenrir’s Pack",
+  "Fils de la tempête":"Son of the Storm", "Corne d’hydromel":"Mead Horn", "Butin de pillage":"Plunder", "Cri de guerre":"War Cry", "Rune de force":"Rune of Strength",
+  "Raid nocturne":"Night Raid", "Colère de Thor":"Wrath of Thor", "Fureur du berserker":"Berserker Fury", "Grand hiver":"Fimbulwinter", "Festin du Valhalla":"Valhalla Feast",
+  "Corne de Heimdall":"Horn of Heimdall", "Ragnarök":"Ragnarök", "Hache de guerre":"War Axe", "Marteau runique":"Runic Hammer",
+  "Messager d’Hermès":"Messenger of Hermes", "Satyre":"Satyr", "Archer crétois":"Cretan Archer", "Hoplite":"Hoplite", "Centaure":"Centaur", "Phalangiste":"Phalangite",
+  "Harpie":"Harpy", "Cyclope":"Cyclops", "Pégase":"Pegasus", "Sirène":"Siren", "Minotaure":"Minotaur", "Méduse":"Medusa", "Cerbère":"Cerberus", "Héraclès":"Heracles",
+  "Talos de bronze":"Bronze Talos", "Chimère":"Chimera", "Hydre de Lerne":"Lernaean Hydra", "Oracle de Delphes":"Oracle of Delphi", "Amphore d’huile":"Oil Amphora",
+  "Philosophe d’Athènes":"Athenian Philosopher", "Volée de javelots":"Javelin Volley", "Symposium":"Symposium", "Sagesse d’Athéna":"Wisdom of Athena", "Ruse d’Ulysse":"Cunning of Odysseus",
+  "Foudre de Zeus":"Zeus’s Thunderbolt", "Festin de l’Olympe":"Olympian Feast", "Travaux d’Héraclès":"Labours of Heracles", "Boîte de Pandore":"Pandora’s Box",
+  "Glaive d’hoplite":"Hoplite Sword", "Lance d’Achille":"Spear of Achilles", "Momie":"Mummy", "Esprit vengeur":"Vengeful Spirit", "Loup de Fenrir":"Fenrir Wolf", "Tête d’hydre":"Hydra Head",
+  // Saison 1
+  "Les Travaux d’Héraclès":"The Labours of Heracles", "Héros de la saison 1":"Hero of Season 1",
+  // Titres des divinités
+  "Dieu destructeur hindou":"Hindu god of destruction", "Dieu protecteur hindou":"Hindu god of preservation", "Dieu créateur hindou":"Hindu creator god",
+  "Père des dieux nordiques":"Father of the Norse gods", "Géant primordial nordique":"Norse primordial giant", "Roi des dieux grecs":"King of the Greek gods", "Abîme primordial grec":"Greek primordial abyss"
+};
+const TRAD_LANGUES_CONTENU = ["en"];
+// Proposition pour un texte : mes brouillons, sinon le dictionnaire intégré
+function propositionTraduction(fr, langue = "en"){
+  if(langue==="en" && PROPOSITIONS_EN[fr]) return PROPOSITIONS_EN[fr];
+  const d = TRAD[langue]; if(!d) return "";
+  const r = d.noms.get(fr) || d.exact.get(fr);
+  if(r) return r;
+  const l0 = LANGUE, c0 = d.cfg; LANGUE = langue; d.cfg = null;
+  try { const t = traduire(fr); return t!==fr ? t : ""; } finally { LANGUE = l0; d.cfg = c0; CACHE_TRAD.clear(); }
+}
+// Textes du contenu à traduire, regroupés : [titre du groupe, [[texte, contexte]]]
+function textesContenu(){
+  const vus = new Set(), groupes = [];
+  const groupe = titre => { const l = []; groupes.push([titre, l]); return (fr, ctx) => {
+    if(typeof fr!=="string") return; const t = fr.trim();
+    if(!t || !/[A-Za-zÀ-ÿ]/.test(t) || vus.has(t) || /^(data:|https?:)/.test(t)) return;
+    vus.add(t); l.push([t, ctx || ""]);
+  }; };
+  const nomF = f => (FACTIONS[f] && FACTIONS[f].nom) || "Neutre";
+  const aC = groupe("Cartes");
+  Object.values(CARTES).sort((a, b) => nomF(a.faction).localeCompare(nomF(b.faction), "fr") || a.nom.localeCompare(b.nom, "fr"))
+    .forEach(c => aC(c.nom, nomF(c.faction) + (c.jeton ? " · jeton" : c.depart ? " · départ" : "")));
+  const aH = groupe("Divinités et pouvoirs");
+  Object.values(HEROS).forEach(h => { aH(h.nom, "Divinité"); aH(h.titre, `Titre de ${h.nom}`); aH(h.pouvoir && h.pouvoir.nom, `Pouvoir de ${h.nom}`); });
+  const aP = groupe("Panthéons et mots-clés");
+  Object.values(FACTIONS).forEach(f => { aP(f.nom, "Panthéon"); aP(f.m, `Adjectif masculin (${f.nom})`); aP(f.f, `Adjectif féminin (${f.nom})`); });
+  Object.values(MOTS).forEach(m => aP(m, "Mot-clé")); Object.values(TERMES).forEach(m => aP(m, "Terme de règle"));
+  const aS = groupe("Saisons");
+  Object.values(CONFIG.saisons || {}).forEach(s => {
+    aS(s.nom, "Nom de la saison"); aS(s.description, `Description (${s.nom || "saison"})`);
+    (s.travaux || []).forEach((t, k) => { aS(t.nom, `Travail ${k + 1}`); aS(t.description, `Description du travail ${k + 1}`); });
+    (s.paliers || []).forEach(p => { const r = p.recompense || {}; aS(r.titre, `Titre offert (${p.travaux} travaux)`); });
+  });
+  const aB = groupe("Boosters et illustrations");
+  Object.values(CONFIG.boosters || {}).forEach(b => { aB(b.nom, "Booster spécial"); aB(b.description, `Description (${b.nom || "booster"})`); });
+  Object.values(CONFIG.variantes || {}).forEach(v => { aB(v.nom, "Illustration alternative"); aB(v.edition, "Mention d’édition"); });
+  return groupes.filter(([, l]) => l.length);
+}
+function majTraductionsConfig(){
+  for(const l of TRAD_LANGUES_CONTENU){
+    const d = TRAD[l] = TRAD[l] || {exact:new Map(), motifs:[], noms:new Map()};
+    d.cfg = new Map(Object.entries((CONFIG.traductions && CONFIG.traductions[l]) || {}).filter(([, v]) => v && String(v).trim()));
+  }
+  CACHE_TRAD.clear();
+}
+function fixerTraduction(fr, valeur, langue = "en"){
+  CONFIG.traductions = CONFIG.traductions || {};
+  const t = CONFIG.traductions[langue] = CONFIG.traductions[langue] || {};
+  const v = String(valeur || "").trim();
+  if(v) t[fr] = v; else delete t[fr];
+  majTraductionsConfig();
+}
+function admTraductions(){
+  const groupes = textesContenu(), t = (CONFIG.traductions && CONFIG.traductions.en) || {};
+  const tous = groupes.flatMap(([, l]) => l);
+  const faits = tous.filter(([fr]) => t[fr]).length, props = tous.filter(([fr]) => !t[fr] && propositionTraduction(fr)).length;
+  const filtre = adm.tradFiltre || "tous", rech = (adm.tradRecherche || "").toLowerCase();
+  const garde = ([fr]) => (filtre==="tous" || (filtre==="faits" ? !!t[fr] : filtre==="props" ? !t[fr] && !!propositionTraduction(fr) : !t[fr] && !propositionTraduction(fr)))
+    && (!rech || fr.toLowerCase().includes(rech) || (t[fr] || "").toLowerCase().includes(rech));
+  const etat = fr => t[fr] ? `<span class="trad-etat ok">✓ Traduit</span>` : propositionTraduction(fr) ? `<button type="button" class="btn-discret trad-etat prop" data-act="trad-accepter-un" data-id="${esc(fr)}">Accepter la proposition</button>` : `<span class="trad-etat manque">À traduire</span>`;
+  const orphelins = Object.keys(t).filter(fr => !tous.some(([x]) => x===fr));
+  return `<div class="adm-page adm-traductions"><h2>Traductions (anglais)</h2>
+    <p class="aide">Le jeu s’affiche en anglais pour les joueurs qui choisissent « English ». Écrivez ici le texte anglais de vos cartes, divinités, saisons et boosters.
+      Un champ vide affiche en grisé ma proposition : acceptez-la, corrigez-la, ou laissez vide pour garder le texte français. Comme le reste, exportez config.json pour publier.</p>
+    <div class="trad-resume"><b>${faits} / ${tous.length}</b> textes traduits · ${props} proposition${props>1 ? "s" : ""} en attente
+      ${props ? `<button type="button" class="btn" data-act="trad-accepter">Accepter toutes les propositions (${props})</button>` : ""}</div>
+    <div class="trad-outils">
+      <div class="choix-pastilles">${[["tous","Tous"],["props","Propositions"],["manque","Sans proposition"],["faits","Traduits"]].map(([k, l]) =>
+        `<button type="button" class="pastille-choix ${filtre===k ? "choisie" : ""}" data-act="trad-filtre" data-id="${k}">${l}</button>`).join("")}</div>
+      <input type="search" data-adm="trad-recherche" placeholder="Rechercher" value="${esc(adm.tradRecherche || "")}">
+    </div>
+    ${groupes.map(([g, l]) => { const v = l.filter(garde); return v.length ? `<section class="trad-groupe"><h3>${esc(g)} <span class="aide">${l.filter(([fr]) => t[fr]).length} / ${l.length}</span></h3>
+      ${v.map(([fr, ctx]) => `<div class="trad-ligne"><div class="trad-fr"><b>${esc(fr)}</b>${ctx ? `<span>${esc(ctx)}</span>` : ""}</div>
+        <input type="text" lang="en" data-trad="${esc(fr)}" value="${esc(t[fr] || "")}" placeholder="${esc(propositionTraduction(fr))}" aria-label="Anglais : ${esc(fr)}">
+        <span class="trad-cellule">${etat(fr)}</span></div>`).join("")}</section>` : ""; }).join("")}
+    ${orphelins.length ? `<section class="trad-groupe"><h3>Traductions sans texte français correspondant</h3><p class="aide">Le texte français a changé ou a été supprimé : ces traductions ne servent plus.</p>
+      ${orphelins.map(fr => `<div class="trad-ligne"><div class="trad-fr"><b>${esc(fr)}</b></div><span>${esc(t[fr])}</span><button type="button" class="btn-discret" data-act="trad-suppr" data-id="${esc(fr)}">Supprimer</button></div>`).join("")}</section>` : ""}
+  </div>`;
+}
+
 chargerConfig();
 appliquerReglageAnimations();
+appliquerLangue();
 render();
 chargerFichierConfig().then(chargerProgression);
 </script>
