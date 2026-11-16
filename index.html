@@ -492,6 +492,14 @@ body.compact .lien-hall{padding:2px 4px;font-size:13px}
 .adm-lien[aria-current="page"]{background:color-mix(in srgb, var(--bronze) 24%, transparent);box-shadow:inset 3px 0 0 var(--bronze);font-weight:700}
 .badge-menu{background:#b8402f;color:#fff;border-radius:99px;font-size:12px;font-weight:700;padding:0 7px;line-height:20px}
 .adm-contenu{min-width:0}
+.fenetre-don{position:fixed;inset:0;z-index:9000;display:grid;place-items:center;padding:16px;background:rgba(20,16,10,.55)}
+.boite-don{max-width:460px;width:100%;text-align:center}
+.boite-don .actions{justify-content:center;flex-wrap:wrap}
+.boite-don a.btn{text-decoration:none;display:inline-flex;align-items:center}
+.coeur-don svg{width:40px;height:40px;color:#c0392b}
+.lien-don svg{color:#c0392b}
+.avis-mineurs{font-weight:600;font-size:14px}
+.don-invalide{color:var(--danger,#b03a2e)}
 .version-anglaise{margin:8px 0 12px;padding:8px 12px;border:1px dashed var(--line);border-radius:8px}.version-anglaise summary{cursor:pointer;font-weight:600}
 .adm-traductions .trad-resume{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin:10px 0 14px}
 .adm-traductions .trad-outils{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
@@ -2568,7 +2576,7 @@ ajouterTraductions("en", {
   [/^Vos créatures gagnent \+(\d+)\/\+(\d+)\.$/, (a, v) => `Your creatures get +${a}/+${v}.`],
   [/^Invoque (\d+) (.+)\.$/, (n, c) => `Summon ${n} ${traduireNom(c)}.`],
   [/^Pouvoir de votre équipe ?: (.+)$/, v => `Your team’s power: ${v}`],
-  [/^Héros de la saison (\d+)$/, n => `Hero of Season ${n}`]
+  [/^Héros de la saison (\d+)$/, n => `Hero of Season ${n}`], [/^Soutenir (.+)$/, n => `Support ${traduireNom(n)}`]
 ]);
 ajouterGabarits("en", {"# / # pour le rang or":"# / # for the gold rank", "# / # pour le rang argent":"# / # for the silver rank", "# / # pour le rang bronze":"# / # for the bronze rank", "# / # pour le rang platine":"# / # for the platinum rank"});
 
@@ -2749,7 +2757,9 @@ ajouterTraductions("en", {
   "Vous avez déjà le nombre maximum d’exemplaires.":"You already have the maximum number of copies.", "Vous avez déjà remplacé une quête aujourd’hui.":"You have already replaced a quest today.",
   "Vous ne pouvez défier que vos amis.":"You can only challenge your friends.", "Vous ne pouvez inviter que vos amis.":"You can only invite your friends.",
   "Vous n’avez pas de paquet offert de ce type.":"You have no free pack of this type.", "Vous n’êtes pas dans ce salon.":"You are not in this lobby.",
-  "Vous n’êtes plus considéré comme présent dans cette partie.":"You are no longer considered present in this game.", "Sacrifier":"Sacrifice", "Pouvoir":"Power", "Ou sacrifice":"Or sacrifice", "aventurier":"adventurer"
+  "Vous n’êtes plus considéré comme présent dans cette partie.":"You are no longer considered present in this game.", "Sacrifier":"Sacrifice", "Pouvoir":"Power", "Soutenir le jeu":"Support the game", "Soutenir le jeu avec PayPal":"Support the game with PayPal", "Si vous êtes mineur, demandez l’accord de vos parents avant de payer.":"If you are under 18, ask your parents’ permission before paying.", "Pas maintenant":"Not now",
+  "Le paiement se fait sur le site de PayPal, dans un nouvel onglet. Le jeu ne voit ni ne conserve aucune donnée de paiement.":"Payment takes place on PayPal’s site, in a new tab. The game never sees or stores any payment data.",
+  "Mythomachie est développé par une seule personne, sur son temps libre. Si le jeu vous plaît, vous pouvez soutenir son développement par une contribution du montant de votre choix. Elle est entièrement libre et ne donne aucun avantage en jeu.":"Mythomachy is developed by one person, in their free time. If you enjoy the game, you can support its development with a contribution of any amount. It is entirely optional and gives no in-game advantage.", "Ou sacrifice":"Or sacrifice", "aventurier":"adventurer"
 });
 // Texte d’effet généré en français (journal partagé, textes composés) → anglais ; null si ce n’en est pas un
 function traduireEffetFR(s){
@@ -2994,6 +3004,7 @@ function fusionner(obj){
           traductions:(obj.traductions && typeof obj.traductions==="object") ? copie(obj.traductions) : {},
           apparencePaquets:(obj.apparencePaquets && typeof obj.apparencePaquets==="object") ? copie(obj.apparencePaquets) : {},
           credits:{musiques:(obj.credits && Array.isArray(obj.credits.musiques)) ? copie(obj.credits.musiques) : copie(d.credits.musiques)},
+          don:(obj.don && typeof obj.don==="object") ? copie(obj.don) : {},
           regles:{...reglesObj, deckDepart:{...((obj.regles && obj.regles.deckDepart) || d.regles.deckDepart)}},
           mots:{...d.mots, ...(obj.mots||{})}, termes:renommerTermes({...d.termes, ...(obj.termes||{})})};
 }
@@ -4147,7 +4158,7 @@ function renderAdmin(){
     cle = actif.dataset.chemin ? `[data-chemin="${actif.dataset.chemin}"]` : actif.dataset.adm ? `[data-adm="${actif.dataset.adm}"]` : null;
     try { pos = actif.selectionStart; } catch(e) { pos = null; }
   }
-  const pages = {accueil:admAccueil, cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => PROG.fiche ? admFicheJoueur() : admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons, messages:admMessages, notes:admNotes, bruitages:admBruitages, "cadeaux-auto":admCadeauxAuto, traductions:admTraductions};
+  const pages = {accueil:admAccueil, cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => PROG.fiche ? admFicheJoueur() : admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons, messages:admMessages, notes:admNotes, bruitages:admBruitages, "cadeaux-auto":admCadeauxAuto, traductions:admTraductions, don:admDon};
   // Mémoriser la position des listes et de la page avant de réafficher
   const defil = {}; app.querySelectorAll(".adm-items, .adm-menu, .grille-choix").forEach((el, k) => { defil[el.className + k] = el.scrollTop; });
   const yPage = window.scrollY;
@@ -4159,7 +4170,7 @@ function renderAdmin(){
     ...(PROG.actif ? [["Joueurs", [["stats-joueurs","Liste des joueurs"],["messages","Boîte aux lettres"],["surveillance","Surveillance", nbAlertes]]],
                       ["Statistiques", [["stats","Vue d’ensemble"],["stats-heros","Héros"],["stats-cartes","Cartes"]]]] : []),
     ["Ambiance", [["musiques","Musiques"],["bruitages","Bruitages"]]],
-    ["Publication", [...(PROG.actif ? [["notes","Notes de mise à jour"]] : []), ["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"]] : [])]]
+    ["Publication", [...(PROG.actif ? [["notes","Notes de mise à jour"]] : []), ["don","Soutenir le jeu"], ["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"]] : [])]]
   ];
   if(!groupes.some(([, l]) => l.some(([k]) => k===adm.onglet))) adm.onglet = "accueil";
   const titres = Object.fromEntries(groupes.flatMap(([, l]) => l.map(([k, t]) => [k, t])));
@@ -5271,6 +5282,7 @@ document.addEventListener("click", e => {
   if(act==="tuto") return lancerTuto();
   if(act==="regles"){ if(tutoActif()) S = null; ui.ecran = "regles"; window.scrollTo(0, 0); return render(); }
   if(act==="regles-retour"){ ui.ecran = "jeu"; return render(); }
+  if(act==="don"){ ouvrirDon(); return; }
   if(act==="credits"){ if(tutoActif()) S = null; ui.ecran = "credits"; window.scrollTo(0, 0); return render(); }
   if(act==="tuto-quitter"){ S = null; ui.ecran = "jeu"; const p = document.getElementById("tuto-panneau"); if(p) p.remove(); return render(); }
   if(act==="tuto-suivant"){ TUTO.etape++; return render(); }
@@ -6949,6 +6961,8 @@ function pageCredits(){
           : `<p class="aide">Aucune musique créditée pour l’instant.</p>`}
         <p class="aide">Merci aux artistes dont les œuvres accompagnent les parties.</p>
       </section>
+      ${lienDon() ? `<section class="bloc-profil"><h2>Soutenir le jeu</h2><p>${esc(texteDon())}</p>
+        <button type="button" class="btn" data-act="don">${ico("don")} Soutenir le jeu</button></section>` : ""}
     </div>`;
 }
 function pageRegles(){
@@ -8032,6 +8046,7 @@ const ICO = {
   profil:'<path d="M7 3h10v3a5 5 0 0 1-10 0zM7 4H4v2a3 3 0 0 0 3 3M17 4h3v2a3 3 0 0 1-3 3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 11.5h4v3l2 3H8l2-3zM7 19h10v2H7z" fill="currentColor"/>',
   tuto:'<path d="M12 4 2 9l10 5 10-5zM6 11.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5l-6 3z" fill="currentColor"/>',
   regles:'<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5zM4 21.5A2.5 2.5 0 0 1 6.5 19H20v3H6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 7h8M8 10.5h6" stroke="currentColor" stroke-width="1.6"/>',
+  don:'<path d="M12 20.5l-1.3-1.2C5.4 14.5 2 11.4 2 7.6 2 4.5 4.4 2 7.5 2c1.7 0 3.4.8 4.5 2.1C13.1 2.8 14.8 2 16.5 2 19.6 2 22 4.5 22 7.6c0 3.8-3.4 6.9-8.7 11.7z" fill="currentColor"/>',
   credits:'<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z" fill="currentColor"/>',
   reglages:'<path d="M10.3 2h3.4l.5 2.6 1.8.8 2.2-1.5 2.4 2.4-1.5 2.2.8 1.8 2.6.5v3.4l-2.6.5-.8 1.8 1.5 2.2-2.4 2.4-2.2-1.5-1.8.8-.5 2.6h-3.4l-.5-2.6-1.8-.8-2.2 1.5-2.4-2.4 1.5-2.2-.8-1.8L2 13.7v-3.4l2.6-.5.8-1.8-1.5-2.2 2.4-2.4 2.2 1.5 1.8-.8z" fill="currentColor"/><circle cx="12" cy="12" r="3.4" fill="var(--zone)"/>',
   admin:'<path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 12l2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="2"/>'
@@ -8085,6 +8100,7 @@ function htmlHall(){
         <button type="button" class="lien-hall" data-act="tuto">${ico("tuto")} Tutoriel ${tutoFait ? "" : `<span class="pastille-nouveau">Nouveau</span>`}</button>
         <button type="button" class="lien-hall" data-act="regles">${ico("regles")} Règles du jeu</button>
         <button type="button" class="lien-hall" data-act="credits">${ico("credits")} Crédits</button>
+        ${lienDon() ? `<button type="button" class="lien-hall lien-don" data-act="don">${ico("don")} Soutenir le jeu</button>` : ""}
       </nav>
     </div>
   </div>`;
@@ -10531,7 +10547,7 @@ async function recyclerToutSurplus(){
 }
 
 /* ----- Administration : tableau de bord ----- */
-const ICONES_ADMIN = {accueil:"🏠", traductions:"🌐", cartes:"🃏", heros:"👑", factions:"🏛", regles:"📜", boosters:"🎁", saisons:"🗓", "cadeaux-auto":"🎀",
+const ICONES_ADMIN = {accueil:"🏠", don:"❤", traductions:"🌐", cartes:"🃏", heros:"👑", factions:"🏛", regles:"📜", boosters:"🎁", saisons:"🗓", "cadeaux-auto":"🎀",
   "stats-joueurs":"👥", messages:"✉", surveillance:"🛡", stats:"📊", "stats-heros":"⚔", "stats-cartes":"📈", musiques:"🎵", bruitages:"🔊",
   notes:"📰", donnees:"💾", serveur:"🖥"};
 const marquerModifie = () => { try { localStorage.setItem("config-modifiee", String(Date.now())); } catch(e) {} };
@@ -11385,6 +11401,55 @@ function admTraductions(){
         <span class="trad-cellule">${etat(fr)}</span></div>`).join("")}</section>` : ""; }).join("")}
     ${orphelins.length ? `<section class="trad-groupe"><h3>Traductions sans texte français correspondant</h3><p class="aide">Le texte français a changé ou a été supprimé : ces traductions ne servent plus.</p>
       ${orphelins.map(fr => `<div class="trad-ligne"><div class="trad-fr"><b>${esc(fr)}</b></div><span>${esc(t[fr])}</span><button type="button" class="btn-discret" data-act="trad-suppr" data-id="${esc(fr)}">Supprimer</button></div>`).join("")}</section>` : ""}
+  </div>`;
+}
+
+/* ============================================================
+   DONS (PayPal) : lien réglé dans l’admin, enregistré dans config.json
+   ============================================================ */
+const TEXTE_DON = "Mythomachie est développé par une seule personne, sur son temps libre. Si le jeu vous plaît, vous pouvez soutenir son développement par une contribution du montant de votre choix. Elle est entièrement libre et ne donne aucun avantage en jeu.";
+const TEXTE_MINEURS = "Si vous êtes mineur, demandez l’accord de vos parents avant de payer.";
+// Seuls les liens PayPal en https sont acceptés
+function lienPayPalValide(u){
+  try { const x = new URL(String(u || "").trim()); return x.protocol==="https:" && /^(www\.)?(paypal\.com|paypal\.me)$/i.test(x.hostname) ? x.href : ""; }
+  catch(e) { return ""; }
+}
+const lienDon = () => lienPayPalValide(CONFIG.don && CONFIG.don.url);
+const texteDon = () => {
+  const d = CONFIG.don || {};
+  return (LANGUE!=="fr" && (d[`message_${LANGUE}`] || "").trim()) || (d.message || "").trim() || TEXTE_DON;
+};
+function ouvrirDon(){
+  const url = lienDon(); if(!url) return;
+  fermerDon();
+  const f = document.createElement("div");
+  f.id = "fenetre-don"; f.className = "fenetre-don"; f.setAttribute("role", "dialog"); f.setAttribute("aria-modal", "true"); f.setAttribute("aria-labelledby", "titre-don");
+  f.innerHTML = `<div class="boite boite-don">
+    <div class="coeur-don" aria-hidden="true">${ico("don")}</div>
+    <h2 id="titre-don">Soutenir ${esc(traduireNom(NOM_JEU))}</h2>
+    <p>${esc(texteDon())}</p>
+    <p class="avis-mineurs">${esc(TEXTE_MINEURS)}</p>
+    <p class="aide">Le paiement se fait sur le site de PayPal, dans un nouvel onglet. Le jeu ne voit ni ne conserve aucune donnée de paiement.</p>
+    <div class="actions"><a class="btn" href="${esc(url)}" target="_blank" rel="noopener noreferrer" data-don-lien>Soutenir le jeu avec PayPal</a>
+      <button type="button" class="btn-discret" data-don-fermer>Pas maintenant</button></div></div>`;
+  f.addEventListener("click", e => { if(e.target===f || e.target.closest("[data-don-fermer]")) fermerDon(); if(e.target.closest("[data-don-lien]")) setTimeout(fermerDon, 300); });
+  document.body.appendChild(f);
+  const b = f.querySelector("[data-don-lien]"); if(b) b.focus();
+}
+function fermerDon(){ const f = document.getElementById("fenetre-don"); if(f) f.remove(); }
+document.addEventListener("keydown", e => { if(e.key==="Escape") fermerDon(); });
+function admDon(){
+  const d = CONFIG.don || {}, brut = (d.url || "").trim(), ok = lienPayPalValide(brut);
+  return `<div class="adm-page adm-don"><h2>Soutenir le jeu</h2>
+    <p class="aide">Collez ici le lien de votre bouton de don PayPal. Un bouton « Soutenir le jeu » apparaît alors sur l’accueil des joueurs et dans les crédits. Laissez vide pour le masquer. Comme le reste, exportez config.json pour publier.</p>
+    <div class="champs">${champTexte("Lien PayPal (https://www.paypal.com/donate/… ou https://paypal.me/…)", "don.url", brut)}</div>
+    <p class="${brut && !ok ? "don-invalide" : "aide"}">${!brut ? "Aucun lien : le bouton est masqué." : ok ? `✓ Lien valide. <a href="${esc(ok)}" target="_blank" rel="noopener noreferrer">Tester le lien</a>` : "Ce lien n’est pas un lien PayPal en https : le bouton reste masqué."}</p>
+    <label class="champ"><span>Message affiché avant le paiement (facultatif ; vide = texte par défaut)</span><textarea data-chemin="don.message" rows="4" placeholder="${esc(TEXTE_DON)}">${esc(d.message || "")}</textarea></label>
+    <label class="champ"><span>🌐 Version anglaise du message (facultative)</span><textarea lang="en" data-chemin="don.message_en" rows="4">${esc(d.message_en || "")}</textarea></label>
+    <h3>Où trouver le lien ?</h3>
+    <ol class="aide"><li>Connectez-vous à PayPal, puis ouvrez <b>paypal.com/donate/buttons</b> (« Créer un bouton Faire un don »).</li>
+      <li>Suivez les étapes, puis copiez le <b>lien</b> proposé à la fin (il commence par https://www.paypal.com/donate/?hosted_button_id=…).</li>
+      <li>Autre possibilité : votre lien <b>paypal.me</b> (https://paypal.me/votrenom).</li></ol>
   </div>`;
 }
 

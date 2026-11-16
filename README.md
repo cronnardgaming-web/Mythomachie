@@ -264,3 +264,6 @@ Le joueur choisit sa langue dans les Réglages (« Langue / Language ») ; par d
 L’interface est traduite dans le code. Le contenu (noms des cartes, divinités, pouvoirs, saisons, boosters, illustrations) se traduit dans **Admin › Le jeu › Traductions** : chaque texte français a un champ anglais, avec une proposition à accepter ou corriger. Les traductions partent dans config.json : exportez-le pour les publier. Un texte sans traduction reste affiché en français.
 Messages de la boîte aux lettres, notes de mise à jour et cadeaux automatiques : chacun a une « Version anglaise (facultative) » dans l’admin. Exécutez une fois **supabase-langues.sql** (après supabase-social.sql et supabase-cadeaux-auto.sql) pour l’activer.
 En ligne, le journal de partie circule en français et chaque joueur le lit dans sa langue : un joueur anglophone peut affronter un joueur francophone.
+
+## Soutenir le jeu (PayPal)
+Dans **Admin › Publication › Soutenir le jeu**, collez le lien de votre bouton de don PayPal (https://www.paypal.com/donate/?hosted_button_id=… ou https://paypal.me/…), puis exportez config.json. Un bouton « Soutenir le jeu » apparaît sur l’accueil et dans les crédits ; il ouvre PayPal dans un nouvel onglet. Seuls les liens PayPal en https sont acceptés. Lien vide : le bouton est masqué.
