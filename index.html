@@ -1098,6 +1098,17 @@ body.compact .nom-heros-deck{font-size:17px}
 
 .joues-2v2{display:flex;flex-wrap:wrap;gap:6px;align-items:center;max-width:420px}
 
+/* Minuteur de tour et abandons */
+#chrono-tour{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:55;display:flex;align-items:center;gap:8px;padding:5px 14px;border-radius:99px;font-size:14px;
+  background:color-mix(in srgb, var(--zone) 92%, transparent);border:1px solid var(--line);box-shadow:0 8px 20px -10px rgba(0,0,0,.7);color:var(--ink);pointer-events:none}
+#chrono-tour b{font-variant-numeric:tabular-nums;font-size:16px}
+#chrono-tour.urgent{border-color:#e08a2a;color:#ffb35c;background:color-mix(in srgb, #e08a2a 18%, var(--zone))}
+#alerte-abandon{position:fixed;top:52px;left:50%;transform:translateX(-50%);z-index:55;max-width:min(560px, calc(100vw - 32px));display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:8px 14px;border-radius:10px;font-size:14px;background:var(--zone);border:1px solid var(--or, var(--bronze));box-shadow:0 12px 26px -12px rgba(0,0,0,.75)}
+#alerte-abandon .btn{margin:0;padding:5px 12px}
+@media (prefers-reduced-motion: no-preference){ #chrono-tour.urgent b{animation:pouls-chrono 1s ease-in-out infinite} }
+@keyframes pouls-chrono{50%{opacity:.55}}
+
 /* Bulles d’aide */
 #bulle{position:fixed;z-index:40;max-width:270px;background:var(--ink);color:var(--table);font-size:14px;line-height:1.35;padding:8px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.3);left:0;top:0}
 #bulle.visible{opacity:1}
@@ -2448,6 +2459,7 @@ function fxEvt(o){
   S.evt.push({n:S.evtN, ...o});
   if(S.evt.length > 60) S.evt.splice(0, S.evt.length - 60);
   if(typeof sonsDirects==="function") sonsDirects(S.evt[S.evt.length-1]);
+  if(S.chrono && o.j===S.chrono.j && typeof ACTIONS_CHRONO!=="undefined" && ACTIONS_CHRONO.has(o.t)) S.chrono.agi = true;
 }
 function appliquer(i, e, src){
   if(!e) return;
@@ -3213,7 +3225,7 @@ function renderCouche(){
       : `<div class="actions"><button type="button" class="btn" data-act="rejouer">${enLigne() ? "Proposer une revanche" : "Rejouer"}</button>
          <button type="button" class="btn second" data-act="nouvelle">${enLigne() ? "Quitter" : "Changer de mode"}</button></div>`;
     h = `<div class="boite" role="dialog" aria-label="Fin de partie">
-      <h2>${titre}</h2><p>Partie terminée au tour ${S.tour}.</p>${htmlGainFin()}${actions}</div>`;
+      <h2>${titre}</h2><p>${S.abandon ? (S.abandon.joueur===vue() ? (S.abandon.raison==="inactif" ? "Défaite par inactivité : vous n’avez pas joué pendant plusieurs tours." : "Vous avez abandonné la partie.") : `${esc(S.joueurs[S.abandon.joueur].nom)} ${S.abandon.raison==="inactif" ? "n’a plus joué : victoire par inactivité de l’adversaire." : "a quitté la partie : victoire par abandon."}`) + " " : ""}Partie terminée au tour ${S.tour}.</p>${htmlGainFin()}${actions}</div>`;
   } else if(ui.couvert){
     const n = S.joueurs[S.courant].nom;
     h = `<div class="boite" role="dialog" aria-label="Changement de joueur">
@@ -3475,6 +3487,14 @@ function admRegles(){
       ${champNombre("Créatures max sur le plateau", p+".plateauMax", r.plateauMax)}
       ${champNombre("Créatures ennemies à détruire pour charger le pouvoir du héros", p+".seuilPouvoir", r.seuilPouvoir || 10)}
     </div>
+    <h2>Parties en ligne (au moins 2 joueurs humains)</h2>
+    <div class="champs">
+      ${champNombre("Durée d’un tour (secondes)", p+".chronoTour", r.chronoTour ?? 90)}
+      ${champNombre("Alerte de fin de tour (dernières secondes)", p+".chronoAlerte", r.chronoAlerte ?? 20)}
+      ${champNombre("Tours expirés de suite avant défaite", p+".chronoExpires", r.chronoExpires ?? 2)}
+      ${champNombre("Délai pour revenir après une déconnexion (secondes)", p+".delaiRetour", r.delaiRetour ?? 60)}
+    </div>
+    <p class="aide">Pas de minuteur contre l’ordinateur ni à deux sur le même écran. Le délai de retour vérifié par le serveur est de 60 secondes (réglage « delai_retour » de l’économie), et la perte de cote d’un abandon d’au moins 15 points (« penalite_abandon »).</p>
     <h2>Marché et decks</h2>
     <div class="champs">
       ${champNombre("Cartes visibles au marché", p+".tailleMarche", r.tailleMarche)}
@@ -4402,6 +4422,14 @@ document.addEventListener("click", e => {
     Object.assign(ui, {attaquant:null, armeEnAttente:null, choixPierre:null, aiEnCours:false, couvert: act==="mode-duo"});
     return apresAction();
   }
+  if(act==="nouvelle" && S && typeof partieHumaine==="function" && partieHumaine() && S.vainqueur===null && !S.abandonLocal){
+    abandonnerPartie().then(quitter => {
+      if(!quitter) return;
+      if(S && S.enLigne2v2) quitterPartie2v2Ligne(); else if(enLigne() || EN.role) quitterEnLigne();
+      S = null; ui.couvert = false; ui.aiEnCours = false; render();
+    });
+    return;
+  }
   if(act==="nouvelle"){ if(typeof quitterPartie2v2Ligne==="function" && S && S.enLigne2v2) quitterPartie2v2Ligne(); else if(enLigne() || EN.role) quitterEnLigne(); S = null; ui.couvert = false; ui.aiEnCours = false; return render(); }
   if(act.startsWith("en-")) return actionEnLigne(act, id);
   if(act==="son"){ basculerSon(); return render(); }
@@ -4589,6 +4617,7 @@ if(!window.claude && SUPA.url){
     });
   }
   const emettre = (ev, payload) => { if(canal) Promise.resolve(canal.send({type:"broadcast", event:ev, payload})).catch(() => {}); };
+  window.__emettreEN = emettre;
 
   // ----- Hôte
   function sauverPartie(statut){
@@ -4620,9 +4649,12 @@ if(!window.claude && SUPA.url){
         else if(p.id===EN.inviteId) envoyerEtat(true);
         else emettre("complet", {id:p.id});
       },
+      vivant: p => { if(p.id===EN.inviteId) CHR.vuAdv = Date.now(); },
+      abandon: p => { if(p.id===EN.inviteId && enLigne() && S && S.vainqueur===null){ CHR.vuAdv = Date.now(); declarerAbandon(1, "abandon"); } },
       bonjour: p => { if(p.id===EN.inviteId) envoyerEtat(true); },
       ordres: p => {
         if(p.id!==EN.inviteId || !enLigne()) return;
+        CHR.vuAdv = Date.now();
         let fait = false;
         for(const o of [...(p.ordres || [])].sort((a,b) => a.seq-b.seq)){
           if(o.seq > (S.seqTraite || 0)){ S.seqTraite = o.seq; executerOrdre(o); fait = true; }
@@ -4684,6 +4716,7 @@ if(!window.claude && SUPA.url){
     appliquerConfig(c);
   }
   function recevoirEtat(p){
+    CHR.dernierHote = Date.now();
     if(p.config && !EN.cfgRecu){
       if(!window.claude && CONFIG_SITE_PRET){
         // Sur le site, chaque joueur utilise les cartes officielles : une configuration différente est refusée
@@ -5653,7 +5686,9 @@ async function enregistrerDuel(){
   const nomV = S.vainqueur, v = nomV===S.joueurs[0].nom ? 0 : nomV===S.joueurs[1].nom ? 1 : null;
   const d = {id_partie:S.ticket, mode:S.mode, vainqueur:v, tours:S.tour, cotes:[camp(0), camp(1)]};
   for(let essai=0; ; essai++){
-    try { const refus = await rpc("enregistrer_duel", {d}); if(refus) throw new Error(refus); return; }
+    try { const refus = await rpc("enregistrer_duel", {d}); if(refus) throw new Error(refus);
+      if(S.abandon && S.mode==="enligne") await rpc("marquer_abandon_duel", {p_ticket:S.ticket, p_place:S.abandon.joueur, p_raison:S.abandon.raison}).catch(() => {});
+      return; }
     catch(e) { if(essai>=2 || /ticket|Ticket|courte|invalides|mode|expiré|Connexion/.test(e.message)) throw e; await new Promise(r => setTimeout(r, 1500*(essai+1))); }
   }
 }
@@ -7794,7 +7829,7 @@ function render2v2(){
   animerChangements();
   jouerEffets();
   if(PROG.pret) signaler();
-  if(S.vainqueur!==null) verifierRecompense();   // enregistrement de la partie de 2 contre 2
+  if(S.vainqueur!==null || S.forfait!=null) verifierRecompense();   // enregistrement de la partie de 2 contre 2 (ou du forfait)
 }
 // Clics propres au 2 contre 2 (les autres actions passent par le jeu habituel)
 function clic2v2(act, id){
@@ -9650,13 +9685,15 @@ async function verifierRecompense2v2(){
   if(PROG.pret && S && est2v2() && S.vainqueur!==null && !S.ticket2v2 && S.ticket2v2Erreur && !(PROG.gain2v2 && PROG.gain2v2.id===S.idPartie)){
     PROG.gain2v2 = {id:S.idPartie, erreur:S.ticket2v2Erreur}; renderCouche(); return;
   }
-  if(!PROG.pret || !S || !est2v2() || S.vainqueur===null || !S.ticket2v2 || PROG.recompensees.has(S.idPartie)) return;
+  const forfaitPourMoi = S && S.forfait!=null && S.joueurs[siege2()] && S.forfait===S.joueurs[siege2()].eq;
+  if(!PROG.pret || !S || !est2v2() || (S.vainqueur===null && !forfaitPourMoi) || !S.ticket2v2 || PROG.recompensees.has(S.idPartie)) return;
+  if(S.abandonLocal || (S.abandons2v2 || []).includes(siege2())) return;   // la défaite d’abandon est déjà enregistrée
   PROG.recompensees.add(S.idPartie);
   const sg = siege2(), id = S.idPartie, j = S.joueurs[sg], st = S.stats[sg] || {};
   const base = o => { const r = {}; for(const [k, n] of Object.entries(o || {})){ const b = (CARTES[k] && CARTES[k].versionDe) || k; r[b] = (r[b] || 0) + n; } return r; };
   let res;
   try {
-    res = await rpc("enregistrer_2v2", {d:{ticket:S.ticket2v2, victoire:S.equipeGagnante===j.eq, tours:Math.max(1, Math.ceil(S.tour/4)),
+    res = await rpc("enregistrer_2v2", {d:{ticket:S.ticket2v2, victoire:S.equipeGagnante===j.eq || S.forfait===j.eq, tours:Math.max(1, Math.ceil(S.tour/4)),
       camp:{heros:j.heros, degats:st.degats || 0, soins:st.soins || 0, creatures:st.creatures || 0, sorts:st.sorts || 0, achats:st.achats || 0, pouvoirs:st.pouvoirs || 0,
             jouees:base(st.jouees), achetees:base(st.achetees), palier:j.palier || 0, pv_fin:j.pv},
       details:{allie:S.joueurs[allieDe(sg)].heros, resurrections:((S.c2v2 || {}).resurrections || [])[j.eq] || 0, chutes:((S.c2v2 || {}).chutes || [])[j.eq] || 0}}});
@@ -9671,6 +9708,7 @@ function htmlGain2v2(){
   if(!PROG.actif) return "";
   if(!g || g.id!==S.idPartie) return `<p class="aide">Enregistrement de la partie…</p>`;
   if(g.erreur) return `<p class="avertissement">Partie non comptée : ${esc(String(g.erreur).replace(/\.+$/, ""))}.</p>`;
+  if(g.forfait && S.vainqueur!==null) return `<p class="gain">🏆 Victoire par forfait de l’équipe adverse, déjà enregistrée.</p>`;
   return `<p class="gain">${g.gain ? `+${g.gain} or` : "Plafond d’or du jour atteint."}</p>${g.bonus ? `<p class="gain bonus-fin">🏆 Victoire du jour : +${g.bonus} or</p>` : ""}${g.elo!=null ? `<p class="gain">Cote du 2 contre 2 : ${g.elo>0 ? "+" : ""}${g.elo}</p>` : ""}<p class="aide">La partie compte pour vos quêtes et statistiques de 2 contre 2.</p>`;
 }
 function htmlStats2v2(s){
@@ -9918,6 +9956,7 @@ function gestionHote2v2(){
     bonjour: () => publier2v2(),
     deck: p => { if(Number.isInteger(p.siege) && Array.isArray(p.cartes)) L2.decks[p.siege] = {cartes:p.cartes.slice(0, 60), id:p.id}; },
     vivant: p => { if(Number.isInteger(p.siege)) L2.vus[p.siege] = Date.now(); },
+    abandon: p => { if(Number.isInteger(p.siege) && L2.sieges[p.siege] && L2.sieges[p.siege].joueur===p.id) declarerAbandon(p.siege, "abandon"); },
     ordre: p => {
       if(!enPartie2v2Ligne() || !Number.isInteger(p.siege)) return;
       const s = L2.sieges && L2.sieges[p.siege];
@@ -9936,12 +9975,8 @@ function surveillerPresence2v2(){
   let change = false;
   S.joueurs.forEach((j, k) => {
     if(k===L2.siege || !j.humain || !L2.sieges[k]) return;
-    if(Date.now() - (L2.vus[k] || L2.debut) > 20000){
-      j.humain = false; change = true;
-      log(`${j.nom} s’est déconnecté : l’ordinateur prend le relais.`);
-    }
+    if(Date.now() - (L2.vus[k] || L2.debut) > delaiRetour()*1000){ change = true; declarerAbandon(k, "deconnexion"); }
   });
-  if(change) apresAction();
 }
 // ----- Démarrage, appelé par le salon quand l’hôte lance la partie
 async function demarrerPartie2v2Ligne(E){
@@ -9976,6 +10011,7 @@ async function demarrerPartie2v2Ligne(E){
         S = p.etat; S.siegeLocal = L2.siege; S.ticket2v2 = L2.ticket;
         if(S.courant!==L2.siege){ ui.attaquant = null; ui.armeEnAttente = null; }
         render();
+        if(S.forfait!=null) verifierRecompense2v2();
       },
       "demande-deck": () => emettre2v2("deck", {siege:L2.siege, id:EN.monId || (PROG.user && PROG.user.id), cartes:monDeck || []}),
       "hote-parti": () => { L2.dernierEtat = Date.now() - 30000; L2.hotePerdu = true; render(); }
@@ -10073,7 +10109,10 @@ async function reprendreHote2v2(){
   if(L2.hote || !S || S.vainqueur!==null) return;
   const ancien = L2.siegeHote;
   L2.hote = true; L2.hotePerdu = false; L2.siegeHote = L2.siege; L2.version += 1000;
-  if(S.joueurs[ancien] && S.joueurs[ancien].humain){ S.joueurs[ancien].humain = false; log(`${S.joueurs[ancien].nom} (hôte) a quitté la partie : ${S.joueurs[L2.siege].nom} la reprend, l’ordinateur joue sa place.`); }
+  if(S.joueurs[ancien] && S.joueurs[ancien].humain){
+    log(`${S.joueurs[ancien].nom} (hôte) a quitté la partie : ${S.joueurs[L2.siege].nom} la reprend.`);
+    L2.hote = true; declarerAbandon(ancien, "deconnexion");
+  }
   S.seqs2v2 = S.seqs2v2 || {}; S.siegeLocal = L2.siege; S.ticket2v2 = L2.ticket;
   L2.minuteurs.forEach(m => clearInterval(m)); L2.minuteurs = [];
   await ouvrirCanal2v2(L2.code, gestionHote2v2());
@@ -10136,6 +10175,189 @@ setInterval(() => { if(SURVOL.cible && !SURVOL.cible.isConnected) cacherSurvol()
 // ----- Joueurs en ligne (accueil)
 async function chargerEnLigne(){ try { PROG.enLigneNb = await rpc("joueurs_en_ligne"); } catch(e) { PROG.enLigneNb = null; } }
 setInterval(() => { if(PROG.actif && PROG.pret && !document.hidden && !S){ chargerEnLigne().then(() => { if(!S && ui.ecran==="jeu") render(); }); } }, 60000);
+
+/* ============================================================
+   MINUTEUR DE TOUR ET ABANDONS (parties en ligne avec au moins 2 joueurs humains)
+   L’hôte fait foi : il compte le temps, termine les tours expirés et constate les absences.
+   ============================================================ */
+const CHR = {partie:null, vuAdv:0, dernierHote:0, horlogeVue:null, arrivee:0, alerteJouee:null, dernierePresence:0, enAttente:[], dernierEnvoi:0, reclame:false};
+const ACTIONS_CHRONO = new Set(["carte", "achat", "attaque", "frappe", "pouvoir", "bannir", "sacrifice", "arme"]);
+const regleChrono = (cle, def) => { const v = Number(REGLES && REGLES[cle]); return v>0 ? v : def; };
+const dureeTour = () => regleChrono("chronoTour", 90), alerteTour = () => regleChrono("chronoAlerte", 20);
+const toursExpiresMax = () => regleChrono("chronoExpires", 2), delaiRetour = () => regleChrono("delaiRetour", 60);
+const enLigne1v1 = () => !!S && !est2v2() && S.mode==="enligne";
+function humainsPartie(){
+  if(!S) return 0;
+  if(S.enLigne2v2) return S.joueurs.filter(j => j.humain).length;
+  return enLigne1v1() ? 2 : 0;   // à deux sur le même écran ou contre l’ordinateur : pas de minuteur
+}
+const partieHumaine = () => !!S && !S.tuto && humainsPartie()>=2;
+const chronoActif = () => partieHumaine() && S.vainqueur===null && (!S.enLigne2v2 || !!S.joueurs[S.courant].humain);
+const autoriteChrono = () => !!S && (S.enLigne2v2 ? !!L2.hote : enLigne1v1() && EN.role==="hote");
+const idPartieLigne = () => S && (S.enLigne2v2 ? L2.code : S.ticket);
+function publierPartie(){
+  if(!S) return;
+  S.horloge = Date.now();
+  if(S.enLigne2v2) publier2v2(); else if(typeof publier==="function") publier();
+}
+function statsCamp(k){
+  const st = (S.stats && S.stats[k]) || {}, j = S.joueurs[k];
+  return {heros:j.heros, degats:st.degats || 0, soins:st.soins || 0, creatures:st.creatures || 0, sorts:st.sorts || 0, achats:st.achats || 0, pouvoirs:st.pouvoirs || 0};
+}
+// ----- L’hôte : un tour démarre, expire, ou s’achève normalement
+function tickAutorite(){
+  const cle = `${S.tour}|${S.courant}`;
+  if(S.chrono && S.chrono.cle!==cle){
+    // Tour terminé par le joueur lui-même : il n’est pas inactif
+    if(!S.chrono.expire){ S.inactifs = S.inactifs || {}; S.inactifs[S.chrono.j] = 0; }
+    delete S.chrono;
+  }
+  if(!chronoActif()){ if(S.chrono){ delete S.chrono; publierPartie(); } return; }
+  if(!S.chrono){ S.chrono = {cle, j:S.courant, fin:Date.now() + dureeTour()*1000, agi:false}; publierPartie(); return; }
+  if(!S.chrono.expire && Date.now() >= S.chrono.fin) expirerTour();
+}
+function expirerTour(){
+  const k = S.chrono.j, j = S.joueurs[k];
+  S.inactifs = S.inactifs || {};
+  S.inactifs[k] = S.chrono.agi ? 0 : (S.inactifs[k] || 0) + 1;
+  S.chrono.expire = true;
+  if(S.inactifs[k] >= toursExpiresMax()){
+    log(`${j.nom} n’a pas joué pendant ${toursExpiresMax()} tours de suite : il est considéré comme absent.`);
+    return declarerAbandon(k, "inactif");
+  }
+  log(`Temps écoulé : fin du tour de ${j.nom}.`);
+  S.bannirEnAttente = 0; ui.attaquant = null; ui.armeEnAttente = null; ui.choixPierre = null;
+  EN.capture = true;
+  try { finTour(); } finally { EN.capture = false; }
+  apresAction(); publierPartie(); render();
+}
+// ----- Abandon d’un joueur, constaté par l’hôte (ou par lui-même s’il est l’hôte)
+function declarerAbandon(k, raison){
+  if(!S || S.vainqueur!==null) return;
+  if(!S.enLigne2v2){
+    const autre = 1 - k;
+    S.abandon = {joueur:k, raison};
+    log(raison==="inactif" ? `${S.joueurs[k].nom} perd la partie par inactivité.` : `${S.joueurs[k].nom} a quitté la partie.`);
+    S.vainqueur = S.joueurs[autre].nom;
+    fxEvt({t:"fin", perdant:k});
+    delete S.chrono;
+    apresAction(); publierPartie(); render();
+    return;
+  }
+  const j = S.joueurs[k];
+  if(!j || !j.humain) return;
+  j.humain = false;
+  S.abandons2v2 = [...new Set([...(S.abandons2v2 || []), k])];
+  log(raison==="inactif" ? `${j.nom} n’a pas joué pendant ${toursExpiresMax()} tours : l’ordinateur prend sa place.`
+    : `${j.nom} a quitté la partie : l’ordinateur prend sa place.`);
+  if(L2.hote) CHR.enAttente.push({siege:k, raison, camp:statsCamp(k), tours:Math.max(1, Math.ceil(S.tour/4))});
+  verifierForfait();
+  if(S.chrono && S.chrono.j===k) delete S.chrono;
+  apresAction(); publierPartie(); render();
+}
+function verifierForfait(){
+  if(S.forfait!=null || !L2.sieges) return;
+  for(const eq of [0, 1]){
+    const humains = [0, 1, 2, 3].filter(k => k%2===eq && L2.sieges[k]);
+    if(humains.length && humains.every(k => (S.abandons2v2 || []).includes(k))){
+      S.forfait = 1 - eq;
+      log(`Toute l’équipe ${eq===0 ? "A" : "B"} a quitté la partie : victoire par forfait de l’équipe ${eq===0 ? "B" : "A"}. La partie continue contre les ordinateurs, pour le plaisir.`);
+    }
+  }
+}
+// Défaites d’abandon à enregistrer sur le serveur (le serveur peut demander d’attendre la fin du délai de retour)
+async function envoyerAbandons(){
+  if(!CHR.enAttente.length || Date.now() - CHR.dernierEnvoi < 5000) return;
+  CHR.dernierEnvoi = Date.now();
+  for(const a of [...CHR.enAttente]){
+    try {
+      const r = await rpc("abandon_2v2", {p_code:L2.code, p_siege:a.siege, p_raison:a.raison, d:{camp:a.camp, tours:a.tours}});
+      if(!(r && r.attente)) CHR.enAttente = CHR.enAttente.filter(x => x!==a);
+    } catch(e) { if(/function|does not exist|schema cache/i.test(e.message)) CHR.enAttente = []; }
+  }
+}
+// ----- Bouton « Quitter » d’une partie en ligne : c’est un abandon
+async function abandonnerPartie(){
+  if(!S || !partieHumaine() || S.vainqueur!==null || S.abandonLocal) return true;
+  if(!confirm("Quitter maintenant compte comme un abandon : la partie est perdue et votre cote baisse d’au moins 15 points.\n\nAbandonner la partie ?")) return false;
+  S.abandonLocal = true;
+  if(S.enLigne2v2){
+    const k = L2.siege;
+    try { await rpc("abandon_2v2", {p_code:L2.code, p_siege:k, p_raison:"abandon", d:{camp:statsCamp(k), tours:Math.max(1, Math.ceil(S.tour/4))}}); } catch(e) {}
+    if(!L2.hote) emettre2v2("abandon", {siege:k, id:EN.monId || (PROG.user && PROG.user.id)});
+    return true;
+  }
+  if(EN.role==="hote"){ declarerAbandon(0, "abandon"); return false; }   // l’écran de fin s’affiche ; l’hôte enregistre sa défaite
+  try { await rpc("declarer_abandon", {p_partie:S.ticket}); } catch(e) {}
+  if(window.__emettreEN) window.__emettreEN("abandon", {id:EN.monId});
+  return true;
+}
+// ----- L’invité réclame la victoire quand l’hôte est parti
+async function reclamerVictoire(){
+  if(CHR.reclame) return; CHR.reclame = true;
+  try {
+    if(enLigne1v1() && EN.role==="hote"){ declarerAbandon(1, "deconnexion"); return; }
+    if(enLigne1v1()){
+      const r = await rpc("reclamer_victoire_abandon", {p_ticket:S.ticket, d:{camp:statsCamp(1), tours:S.tour, heros_adverse:S.joueurs[0].heros}});
+      if(r && r.annulee){ erreur(r.erreur); quitterEnLigne(); S = null; return render(); }
+      if(r && r.erreur) return erreur(r.erreur);
+      S.abandon = {joueur:0, raison:"deconnexion"}; S.vainqueur = S.joueurs[1].nom;
+      log(`${S.joueurs[0].nom} a quitté la partie : victoire.`); render();
+    }
+  } catch(e) { erreur(e.message); } finally { CHR.reclame = false; }
+}
+// ----- Affichage : compte à rebours et alertes d’absence
+function secondesRestantes(){
+  if(!S || !S.chrono) return null;
+  if(autoriteChrono()) return Math.max(0, Math.ceil((S.chrono.fin - Date.now()) / 1000));
+  if(S.horloge!==CHR.horlogeVue){ CHR.horlogeVue = S.horloge; CHR.arrivee = Date.now(); }
+  return Math.max(0, Math.ceil((S.chrono.fin - (S.horloge || Date.now()) - (Date.now() - CHR.arrivee)) / 1000));
+}
+function majAffichageChrono(){
+  let el = document.getElementById("chrono-tour"), al = document.getElementById("alerte-abandon");
+  const visible = S && ui.ecran==="jeu" && S.vainqueur===null && partieHumaine();
+  const reste = visible ? secondesRestantes() : null;
+  if(reste==null){ if(el) el.remove(); }
+  else {
+    if(!el){ el = document.createElement("div"); el.id = "chrono-tour"; el.setAttribute("role", "timer"); el.setAttribute("aria-live", "off"); document.body.appendChild(el); }
+    const moi = S.chrono.j===vue(), nom = S.joueurs[S.chrono.j].nom;
+    el.className = reste<=alerteTour() ? "urgent" : "";
+    el.innerHTML = `<span aria-hidden="true">⏱</span> <b>${Math.floor(reste/60)}:${String(reste%60).padStart(2, "0")}</b> <span>${moi ? "À vous de jouer" : `Tour de ${esc(nom)}`}</span>`;
+    if(moi && reste<=alerteTour() && CHR.alerteJouee!==S.chrono.cle){ CHR.alerteJouee = S.chrono.cle; jouerSon("notification"); }
+  }
+  // Absence de l’adversaire (1 contre 1) ou de l’hôte
+  let msg = "";
+  if(visible && enLigne1v1()){
+    const silence = (Date.now() - (EN.role==="hote" ? CHR.vuAdv : CHR.dernierHote)) / 1000, d = delaiRetour();
+    if(silence > 15) msg = silence < d
+      ? `Votre adversaire semble déconnecté. Il a encore ${Math.ceil(d - silence)} s pour revenir.`
+      : `Votre adversaire a quitté la partie. <button type="button" class="btn" data-act="reclamer-victoire">Réclamer la victoire</button>`;
+  }
+  const g = PROG.gain2v2;
+  if(S && S.enLigne2v2 && S.vainqueur===null && g && g.id===S.idPartie && g.forfait && !g.erreur)
+    msg = `🏆 Victoire par forfait enregistrée${g.elo!=null ? ` (cote ${g.elo>0 ? "+" : ""}${g.elo})` : ""}. Vous pouvez finir la partie contre les ordinateurs, pour le plaisir.`;
+  if(!msg){ if(al) al.remove(); return; }
+  if(!al){ al = document.createElement("div"); al.id = "alerte-abandon"; al.setAttribute("role", "status"); document.body.appendChild(al); }
+  if(al.dataset.msg!==msg){ al.dataset.msg = msg; al.innerHTML = msg; }
+}
+document.addEventListener("click", e => { if(e.target.closest && e.target.closest('#alerte-abandon [data-act="reclamer-victoire"]')){ e.stopPropagation(); reclamerVictoire(); } }, true);
+// ----- Boucle d’une seconde
+setInterval(() => {
+  try {
+    if(!S || ui.ecran!=="jeu"){ majAffichageChrono(); return; }
+    const id = idPartieLigne();
+    if(id && id!==CHR.partie){ Object.assign(CHR, {partie:id, vuAdv:Date.now(), dernierHote:Date.now(), alerteJouee:null, enAttente:[]}); }
+    if(id && partieHumaine() || S.enLigne2v2){
+      // Signe de présence au serveur, toutes les 15 secondes
+      if(PROG.actif && id && Date.now() - CHR.dernierePresence > 15000){ CHR.dernierePresence = Date.now(); rpc("signe_presence", {p_partie:id}).catch(() => {}); }
+      // L’invité (1 contre 1) signale qu’il est toujours là
+      if(enLigne1v1() && EN.role==="invite" && window.__emettreEN && Date.now() - (CHR.dernierVivant || 0) > 10000){ CHR.dernierVivant = Date.now(); window.__emettreEN("vivant", {id:EN.monId}); }
+    }
+    if(autoriteChrono()) tickAutorite();
+    if(S && S.enLigne2v2 && L2.hote) envoyerAbandons();
+    majAffichageChrono();
+  } catch(e) {}
+}, 1000);
 
 chargerConfig();
 appliquerReglageAnimations();

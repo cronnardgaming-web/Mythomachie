@@ -101,6 +101,15 @@ index.html) : l’hôte fait tourner la partie et les bots, chaque joueur voit l
 actions en ordres numérotés (refusés hors de son tour), un joueur silencieux 20 secondes est remplacé par l’ordinateur,
 et chaque joueur humain enregistre sa partie avec son propre ticket (or, quêtes, statistiques, bonus, cote).
 
+## Minuteur de tour et abandons
+
+`supabase-abandons.sql` (après `supabase-2v2-ligne-suite.sql`) : présence des joueurs pendant la partie, abandons
+(bouton, déconnexion de plus de 60 secondes, 2 tours expirés de suite), réclamation de la victoire quand l’adversaire
+est parti, perte de cote d’au moins 15 points pour un abandon, forfait en 2 contre 2 quand toute une équipe humaine est
+partie, perte divisée par deux pour un joueur dont l’allié est parti, clôture des parties abandonnées par tous.
+Le minuteur (90 secondes par tour) ne s’applique qu’aux parties en ligne comptant au moins 2 joueurs humains ;
+ses réglages sont dans l’administration, onglet Règles.
+
 ## Joueurs en ligne
 
 `supabase-joueurs-en-ligne.sql` : nombre de joueurs actifs ces 2 dernières minutes, affiché sur l’accueil.
