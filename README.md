@@ -267,3 +267,6 @@ En ligne, le journal de partie circule en français et chaque joueur le lit dans
 
 ## Soutenir le jeu (PayPal)
 Dans **Admin › Publication › Soutenir le jeu**, collez le lien de votre bouton de don PayPal (https://www.paypal.com/donate/?hosted_button_id=… ou https://paypal.me/…), puis exportez config.json. Un bouton « Soutenir le jeu » apparaît sur l’accueil et dans les crédits ; il ouvre PayPal dans un nouvel onglet. Seuls les liens PayPal en https sont acceptés. Lien vide : le bouton est masqué.
+
+## Bêta test
+Pendant la bêta, l’accueil affiche un bandeau « Bêta test » et un tampon « Bêta » sur le logo. **Admin › Publication › Bêta test** : modifier le texte (et sa version anglaise) ou décocher la mention à la sortie de la bêta, puis exporter config.json.

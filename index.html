@@ -492,6 +492,17 @@ body.compact .lien-hall{padding:2px 4px;font-size:13px}
 .adm-lien[aria-current="page"]{background:color-mix(in srgb, var(--bronze) 24%, transparent);box-shadow:inset 3px 0 0 var(--bronze);font-weight:700}
 .badge-menu{background:#b8402f;color:#fff;border-radius:99px;font-size:12px;font-weight:700;padding:0 7px;line-height:20px}
 .adm-contenu{min-width:0}
+.bandeau-beta{display:flex;align-items:center;gap:14px 18px;padding:14px 20px;border-radius:14px;border:2px solid #c9862b;
+  background:linear-gradient(100deg,#fff1d6,#ffe2ad);color:#4a3210;box-shadow:0 6px 18px rgba(120,70,10,.18)}
+.bandeau-beta p{margin:0;font-size:15px;line-height:1.45}
+.etiquette-beta{flex:none;font-family:var(--titre, Georgia, serif);font-weight:800;font-size:19px;letter-spacing:.06em;text-transform:uppercase;
+  color:#fff;background:#b8561b;padding:7px 14px;border-radius:9px;transform:rotate(-3deg);box-shadow:0 3px 0 #7d3a10}
+.hall-logo .logo{position:relative}
+.tampon-beta{position:absolute;top:-8px;right:-58px;font-family:system-ui,sans-serif;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  color:#fff;background:#b8561b;padding:3px 8px;border-radius:6px;transform:rotate(12deg);-webkit-text-fill-color:#fff;text-shadow:none;box-shadow:0 2px 0 #7d3a10}
+@media (max-width:760px){.bandeau-beta{flex-direction:column;align-items:flex-start;padding:12px 14px}.bandeau-beta p{font-size:14px}.tampon-beta{right:-46px;font-size:11px}}
+@media (prefers-color-scheme:dark){.bandeau-beta{background:linear-gradient(100deg,#3b2a12,#4a3311);color:#ffe6bd;border-color:#d08a35}}
+.bloc-createurs .createur{font-size:18px;margin:4px 0 12px}
 .fenetre-don{position:fixed;inset:0;z-index:9000;display:grid;place-items:center;padding:16px;background:rgba(20,16,10,.55)}
 .boite-don{max-width:460px;width:100%;text-align:center}
 .boite-don .actions{justify-content:center;flex-wrap:wrap}
@@ -2757,7 +2768,8 @@ ajouterTraductions("en", {
   "Vous avez déjà le nombre maximum d’exemplaires.":"You already have the maximum number of copies.", "Vous avez déjà remplacé une quête aujourd’hui.":"You have already replaced a quest today.",
   "Vous ne pouvez défier que vos amis.":"You can only challenge your friends.", "Vous ne pouvez inviter que vos amis.":"You can only invite your friends.",
   "Vous n’avez pas de paquet offert de ce type.":"You have no free pack of this type.", "Vous n’êtes pas dans ce salon.":"You are not in this lobby.",
-  "Vous n’êtes plus considéré comme présent dans cette partie.":"You are no longer considered present in this game.", "Sacrifier":"Sacrifice", "Pouvoir":"Power", "Soutenir le jeu":"Support the game", "Soutenir le jeu avec PayPal":"Support the game with PayPal", "Si vous êtes mineur, demandez l’accord de vos parents avant de payer.":"If you are under 18, ask your parents’ permission before paying.", "Pas maintenant":"Not now",
+  "Vous n’êtes plus considéré comme présent dans cette partie.":"You are no longer considered present in this game.", "Sacrifier":"Sacrifice", "Pouvoir":"Power", "Soutenir le jeu":"Support the game", "Bêta":"Beta", "Bêta test":"Beta test", "Version bêta":"Beta version", "Création":"Made by", "Un jeu créé par":"A game created by", "Conception, règles et direction artistique":"Design, rules and art direction", "Code":"Code", "Illustrations":"Artwork",
+  "Le jeu est en cours de développement. Vous pouvez rencontrer des bugs, et les cartes comme l’équilibrage vont encore évoluer. Merci de votre aide pour améliorer Mythomachie !":"The game is still in development. You may run into bugs, and the cards and balance will keep changing. Thank you for helping us improve Mythomachy!", "Soutenir le jeu avec PayPal":"Support the game with PayPal", "Si vous êtes mineur, demandez l’accord de vos parents avant de payer.":"If you are under 18, ask your parents’ permission before paying.", "Pas maintenant":"Not now",
   "Le paiement se fait sur le site de PayPal, dans un nouvel onglet. Le jeu ne voit ni ne conserve aucune donnée de paiement.":"Payment takes place on PayPal’s site, in a new tab. The game never sees or stores any payment data.",
   "Mythomachie est développé par une seule personne, sur son temps libre. Si le jeu vous plaît, vous pouvez soutenir son développement par une contribution du montant de votre choix. Elle est entièrement libre et ne donne aucun avantage en jeu.":"Mythomachy is developed by one person, in their free time. If you enjoy the game, you can support its development with a contribution of any amount. It is entirely optional and gives no in-game advantage.", "Ou sacrifice":"Or sacrifice", "aventurier":"adventurer"
 });
@@ -3005,6 +3017,7 @@ function fusionner(obj){
           apparencePaquets:(obj.apparencePaquets && typeof obj.apparencePaquets==="object") ? copie(obj.apparencePaquets) : {},
           credits:{musiques:(obj.credits && Array.isArray(obj.credits.musiques)) ? copie(obj.credits.musiques) : copie(d.credits.musiques)},
           don:(obj.don && typeof obj.don==="object") ? copie(obj.don) : {},
+          beta:(obj.beta && typeof obj.beta==="object") ? copie(obj.beta) : {},
           regles:{...reglesObj, deckDepart:{...((obj.regles && obj.regles.deckDepart) || d.regles.deckDepart)}},
           mots:{...d.mots, ...(obj.mots||{})}, termes:renommerTermes({...d.termes, ...(obj.termes||{})})};
 }
@@ -4158,7 +4171,7 @@ function renderAdmin(){
     cle = actif.dataset.chemin ? `[data-chemin="${actif.dataset.chemin}"]` : actif.dataset.adm ? `[data-adm="${actif.dataset.adm}"]` : null;
     try { pos = actif.selectionStart; } catch(e) { pos = null; }
   }
-  const pages = {accueil:admAccueil, cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => PROG.fiche ? admFicheJoueur() : admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons, messages:admMessages, notes:admNotes, bruitages:admBruitages, "cadeaux-auto":admCadeauxAuto, traductions:admTraductions, don:admDon};
+  const pages = {accueil:admAccueil, cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => PROG.fiche ? admFicheJoueur() : admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons, messages:admMessages, notes:admNotes, bruitages:admBruitages, "cadeaux-auto":admCadeauxAuto, traductions:admTraductions, don:admDon, beta:admBeta};
   // Mémoriser la position des listes et de la page avant de réafficher
   const defil = {}; app.querySelectorAll(".adm-items, .adm-menu, .grille-choix").forEach((el, k) => { defil[el.className + k] = el.scrollTop; });
   const yPage = window.scrollY;
@@ -4170,7 +4183,7 @@ function renderAdmin(){
     ...(PROG.actif ? [["Joueurs", [["stats-joueurs","Liste des joueurs"],["messages","Boîte aux lettres"],["surveillance","Surveillance", nbAlertes]]],
                       ["Statistiques", [["stats","Vue d’ensemble"],["stats-heros","Héros"],["stats-cartes","Cartes"]]]] : []),
     ["Ambiance", [["musiques","Musiques"],["bruitages","Bruitages"]]],
-    ["Publication", [...(PROG.actif ? [["notes","Notes de mise à jour"]] : []), ["don","Soutenir le jeu"], ["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"]] : [])]]
+    ["Publication", [...(PROG.actif ? [["notes","Notes de mise à jour"]] : []), ["beta","Bêta test"], ["don","Soutenir le jeu"], ["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"]] : [])]]
   ];
   if(!groupes.some(([, l]) => l.some(([k]) => k===adm.onglet))) adm.onglet = "accueil";
   const titres = Object.fromEntries(groupes.flatMap(([, l]) => l.map(([k, t]) => [k, t])));
@@ -6955,6 +6968,15 @@ function pageCredits(){
       <section class="bloc-profil">
         <h2 class="logo" style="font-size:30px">${NOM_JEU}</h2><span class="sous-logo">Le choc des panthéons</span>
       </section>
+      <section class="bloc-profil bloc-createurs">
+        <h2>Création</h2>
+        <p class="createur">Un jeu créé par <b>Cronnard Gaming</b></p>
+        <ul class="liste-credits">
+          <li><span class="titre-credit">Conception, règles et direction artistique</span><span class="artiste-credit">Cronnard Gaming</span></li>
+          <li><span class="titre-credit">Code</span><span class="artiste-credit">Claude (Anthropic)</span></li>
+          <li><span class="titre-credit">Illustrations</span><span class="artiste-credit">Yodayo</span></li>
+        </ul>
+      </section>
       <section class="bloc-profil">
         <h2>Musiques</h2>
         ${mus.length ? `<ul class="liste-credits">${mus.map(m => `<li><span class="titre-credit">${esc(m.titre || "Sans titre")}</span><span class="artiste-credit">${esc(m.artiste || "Artiste inconnu")}</span></li>`).join("")}</ul>`
@@ -8063,7 +8085,7 @@ function htmlHall(){
   const compteIncomplet = typeof compteEtat==="function" && compteEtat()!=="complet";
   return `<div class="hall" role="main" aria-label="${NOM_JEU}">
     <header class="hall-tete">
-      <div class="hall-logo"><h1 class="logo">${NOM_JEU}</h1><span class="sous-logo">Le choc des panthéons</span>${PROG.actif && PROG.enLigneNb ? `<span class="pastille-en-ligne"><i aria-hidden="true"></i>${nf(PROG.enLigneNb)} joueur${PROG.enLigneNb>1 ? "s" : ""} en ligne</span>` : ""}</div>
+      <div class="hall-logo"><h1 class="logo">${NOM_JEU}${betaActive() ? `<span class="tampon-beta" aria-hidden="true">Bêta</span>` : ""}</h1><span class="sous-logo">Le choc des panthéons</span>${PROG.actif && PROG.enLigneNb ? `<span class="pastille-en-ligne"><i aria-hidden="true"></i>${nf(PROG.enLigneNb)} joueur${PROG.enLigneNb>1 ? "s" : ""} en ligne</span>` : ""}</div>
       <div class="hall-droite">
         ${bourse()}
         <button type="button" class="hall-profil" data-act="prog-profil" title="Mon profil"><span class="avatar" aria-hidden="true">${esc((pseudo || "?").charAt(0).toUpperCase())}</span><span class="nom-profil">${pseudo ? esc(pseudo) : "Choisir un pseudo"}${p.titre ? `<small class="titre-joueur">${esc(p.titre)}</small>` : ""}</span></button>
@@ -8074,6 +8096,7 @@ function htmlHall(){
       </div>
     </header>
     ${compteIncomplet ? htmlCompte() : ""}
+    ${htmlBandeauBeta()}
     <div class="hall-grille ${PROG.saison ? "avec-saison" : ""}">
       <section class="hall-jouer" aria-labelledby="titre-jouer">
         <h2 id="titre-jouer">Jouer</h2>
@@ -10547,7 +10570,7 @@ async function recyclerToutSurplus(){
 }
 
 /* ----- Administration : tableau de bord ----- */
-const ICONES_ADMIN = {accueil:"🏠", don:"❤", traductions:"🌐", cartes:"🃏", heros:"👑", factions:"🏛", regles:"📜", boosters:"🎁", saisons:"🗓", "cadeaux-auto":"🎀",
+const ICONES_ADMIN = {accueil:"🏠", beta:"🧪", don:"❤", traductions:"🌐", cartes:"🃏", heros:"👑", factions:"🏛", regles:"📜", boosters:"🎁", saisons:"🗓", "cadeaux-auto":"🎀",
   "stats-joueurs":"👥", messages:"✉", surveillance:"🛡", stats:"📊", "stats-heros":"⚔", "stats-cartes":"📈", musiques:"🎵", bruitages:"🔊",
   notes:"📰", donnees:"💾", serveur:"🖥"};
 const marquerModifie = () => { try { localStorage.setItem("config-modifiee", String(Date.now())); } catch(e) {} };
@@ -11452,6 +11475,32 @@ function admDon(){
       <li>Autre possibilité : votre lien <b>paypal.me</b> (https://paypal.me/votrenom).</li></ol>
   </div>`;
 }
+
+/* ============================================================
+   BÊTA TEST : bandeau sur l’accueil (réglé dans l’admin)
+   ============================================================ */
+const TEXTE_BETA = "Le jeu est en cours de développement. Vous pouvez rencontrer des bugs, et les cartes comme l’équilibrage vont encore évoluer. Merci de votre aide pour améliorer Mythomachie !";
+const betaActive = () => !(CONFIG.beta && CONFIG.beta.actif===false);
+function htmlBandeauBeta(){
+  if(!betaActive()) return "";
+  const b = CONFIG.beta || {};
+  const texte = (LANGUE!=="fr" && (b[`texte_${LANGUE}`] || "").trim()) || (b.texte || "").trim() || TEXTE_BETA;
+  return `<aside class="bandeau-beta" role="note" aria-label="Version bêta"><span class="etiquette-beta">Bêta test</span><p>${esc(texte)}</p></aside>`;
+}
+function admBeta(){
+  const b = CONFIG.beta || {};
+  return `<div class="adm-page adm-beta"><h2>Bêta test</h2>
+    <p class="aide">Pendant la bêta, un bandeau apparaît en haut de l’accueil des joueurs, et un tampon « Bêta » sur le logo. Décochez la case à la sortie de la bêta, puis exportez config.json.</p>
+    <label class="case"><input type="checkbox" data-beta-actif ${betaActive() ? "checked" : ""}> Afficher la mention « Bêta test »</label>
+    <label class="champ"><span>Texte du bandeau (facultatif ; vide = texte par défaut)</span><textarea data-chemin="beta.texte" rows="3" placeholder="${esc(TEXTE_BETA)}">${esc(b.texte || "")}</textarea></label>
+    <label class="champ"><span>🌐 Version anglaise (facultative)</span><textarea lang="en" data-chemin="beta.texte_en" rows="3">${esc(b.texte_en || "")}</textarea></label>
+    <h3>Aperçu</h3><div class="apercu-beta">${htmlBandeauBeta() || `<p class="aide">Mention masquée.</p>`}</div>
+  </div>`;
+}
+document.addEventListener("change", e => {
+  if(ui.ecran!=="admin" || !e.target.matches || !e.target.matches("[data-beta-actif]")) return;
+  CONFIG.beta = {...(CONFIG.beta || {}), actif:e.target.checked}; sauver(); renderAdmin();
+});
 
 chargerConfig();
 appliquerReglageAnimations();
