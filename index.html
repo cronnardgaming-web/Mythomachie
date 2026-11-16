@@ -2810,6 +2810,7 @@ const DEFAUT = {
   version:3,
   // Valeurs d’origine = config.json du site (GitHub), sans les images
   musiques:{menu:"", duel:[]}, variantes:{}, boosters:{}, saisons:{}, bruitages:{}, apparencePaquets:{}, regles2v2:{},
+  don:{url:"https://www.paypal.com/donate/?business=6894H6K9A4SLY&currency_code=EUR&item_name=Soutenir%20Mythomachie"},
   credits:{musiques:[{titre:"Battle Cinematic Heroic Orchestra", artiste:"Echoes of Lumen"}, {titre:"Battle Music", artiste:"PaulYudin"}, {titre:"Battle", artiste:"NastelBom"}, {titre:"Epic Battle", artiste:"YevhenAstafiev"}, {titre:"Cinematic Powerful Battle Music", artiste:"Tunetank"}, {titre:"Epic Cinematic Battle Music", artiste:"Tunetank"}]},
   regles:{devotionSeuils:[16, 30], devotionNbTresors:2, devotionTresor:"piece", devotionCreature:"dague", armesHeros:true, armesImmediat:true, armesPermanentes:true, armesVie:true, pvDepart:40, seuilPouvoir:10, mainDepart:5, mainPremier:3, piocheParTour:5, tailleMarche:5, plateauMax:7, tailleDeck:30, copiesMax:2, copiesLegendaire:1, carteBase:"pierre", deckDepart:{piece:7, rubis:1, dague:1, epee:1}},
   mots:{provocation:"Provocation", rapidite:"Rapidité", resistance:"Résistance", ethere:"Ethéré"},
@@ -3016,7 +3017,7 @@ function fusionner(obj){
           traductions:(obj.traductions && typeof obj.traductions==="object") ? copie(obj.traductions) : {},
           apparencePaquets:(obj.apparencePaquets && typeof obj.apparencePaquets==="object") ? copie(obj.apparencePaquets) : {},
           credits:{musiques:(obj.credits && Array.isArray(obj.credits.musiques)) ? copie(obj.credits.musiques) : copie(d.credits.musiques)},
-          don:(obj.don && typeof obj.don==="object") ? copie(obj.don) : {},
+          don:(obj.don && typeof obj.don==="object") ? copie(obj.don) : copie(d.don),
           beta:(obj.beta && typeof obj.beta==="object") ? copie(obj.beta) : {},
           regles:{...reglesObj, deckDepart:{...((obj.regles && obj.regles.deckDepart) || d.regles.deckDepart)}},
           mots:{...d.mots, ...(obj.mots||{})}, termes:renommerTermes({...d.termes, ...(obj.termes||{})})};
@@ -11434,7 +11435,7 @@ const TEXTE_DON = "Mythomachie est développé par une seule personne, sur son t
 const TEXTE_MINEURS = "Si vous êtes mineur, demandez l’accord de vos parents avant de payer.";
 // Seuls les liens PayPal en https sont acceptés
 function lienPayPalValide(u){
-  try { const x = new URL(String(u || "").trim()); return x.protocol==="https:" && /^(www\.)?(paypal\.com|paypal\.me)$/i.test(x.hostname) ? x.href : ""; }
+  try { const x = new URL(String(u || "").trim()); return x.protocol==="https:" && /^(www\.)?(paypal\.com|paypal\.me|paypal\.biz)$/i.test(x.hostname) ? x.href : ""; }
   catch(e) { return ""; }
 }
 const lienDon = () => lienPayPalValide(CONFIG.don && CONFIG.don.url);
@@ -11465,14 +11466,14 @@ function admDon(){
   const d = CONFIG.don || {}, brut = (d.url || "").trim(), ok = lienPayPalValide(brut);
   return `<div class="adm-page adm-don"><h2>Soutenir le jeu</h2>
     <p class="aide">Collez ici le lien de votre bouton de don PayPal. Un bouton « Soutenir le jeu » apparaît alors sur l’accueil des joueurs et dans les crédits. Laissez vide pour le masquer. Comme le reste, exportez config.json pour publier.</p>
-    <div class="champs">${champTexte("Lien PayPal (https://www.paypal.com/donate/… ou https://paypal.me/…)", "don.url", brut)}</div>
+    <div class="champs">${champTexte("Lien PayPal (https://www.paypal.biz/…, https://paypal.me/… ou https://www.paypal.com/donate/…)", "don.url", brut)}</div>
     <p class="${brut && !ok ? "don-invalide" : "aide"}">${!brut ? "Aucun lien : le bouton est masqué." : ok ? `✓ Lien valide. <a href="${esc(ok)}" target="_blank" rel="noopener noreferrer">Tester le lien</a>` : "Ce lien n’est pas un lien PayPal en https : le bouton reste masqué."}</p>
     <label class="champ"><span>Message affiché avant le paiement (facultatif ; vide = texte par défaut)</span><textarea data-chemin="don.message" rows="4" placeholder="${esc(TEXTE_DON)}">${esc(d.message || "")}</textarea></label>
     <label class="champ"><span>🌐 Version anglaise du message (facultative)</span><textarea lang="en" data-chemin="don.message_en" rows="4">${esc(d.message_en || "")}</textarea></label>
     <h3>Où trouver le lien ?</h3>
     <ol class="aide"><li>Connectez-vous à PayPal, puis ouvrez <b>paypal.com/donate/buttons</b> (« Créer un bouton Faire un don »).</li>
       <li>Suivez les étapes, puis copiez le <b>lien</b> proposé à la fin (il commence par https://www.paypal.com/donate/?hosted_button_id=…).</li>
-      <li>Autre possibilité : votre lien <b>paypal.me</b> (https://paypal.me/votrenom).</li></ol>
+      <li>Autre possibilité : votre lien <b>paypal.me</b> (https://paypal.me/votrenom) ou celui de votre profil professionnel <b>paypal.biz</b> (https://www.paypal.biz/votrenom).</li></ol>
   </div>`;
 }
 
