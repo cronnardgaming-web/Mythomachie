@@ -7934,19 +7934,36 @@ function majCompact(){
   }
   if(typeof prevoirAjustement==="function") prevoirAjustement();
 }
-// Ordinateur : si le plateau dépasse la hauteur de la fenêtre, il est réduit juste assez pour tenir entièrement
+// Ordinateur : tout le jeu est dessiné pour une surface de référence, puis agrandi (grand écran)
+// ou réduit (petite fenêtre) d’un seul bloc pour remplir la fenêtre sans jamais en sortir.
+const REF_UI = {w:1280, h:800}, ECHELLE_MAX = 3;
+function echelleMenus(){
+  // Menus : agrandis sur les grands écrans (jamais réduits : ils défilent et s’adaptent déjà aux petites fenêtres)
+  const z = Math.min(innerWidth / REF_UI.w, innerHeight / REF_UI.h);
+  return Math.max(1, Math.min(ECHELLE_MAX, Math.floor(z * 100) / 100));
+}
+function zoomer(el, z){ if(!el) return; const v = z && Math.abs(z - 1) > .005 ? String(z) : ""; if(el.style.zoom!==v) el.style.zoom = v; }
 function ajusterBureau(){
   const app = document.getElementById("app");
   if(!app) return;
-  const actif = !document.body.classList.contains("compact") && document.body.classList.contains("en-partie");
+  const couche = document.getElementById("couche");
+  const compact = document.body.classList.contains("compact");
+  const partie = document.body.classList.contains("en-partie");
+  const actif = !compact && partie;
   if(!actif){
     if(app.dataset.ajuste){ app.style.transform = ""; app.style.transformOrigin = ""; app.style.marginBottom = ""; delete app.dataset.ajuste; }
+    // Menus (hors admin et hors téléphone) : agrandissement par « zoom », qui garde le défilement et les positions justes
+    const z = compact || ui.ecran==="admin" ? 1 : echelleMenus();
+    zoomer(app, z); zoomer(couche, compact ? 1 : z);
     return;
   }
+  zoomer(app, 1);
   app.style.transform = ""; app.style.marginBottom = "";
   const r = app.getBoundingClientRect(), dispo = innerHeight - Math.max(0, r.top + scrollY) - 6;
-  if(r.height <= dispo){ delete app.dataset.ajuste; return; }
-  const s = Math.max(0.42, dispo / r.height);
+  // Partie : le plateau prend toute la place disponible, en largeur comme en hauteur
+  const s = Math.max(0.42, Math.min(ECHELLE_MAX, dispo / r.height, (innerWidth - 8) / r.width));
+  zoomer(couche, Math.max(1, Math.min(s, echelleMenus())));
+  if(Math.abs(s - 1) < .01){ delete app.dataset.ajuste; return; }
   app.style.transformOrigin = "50% 0";
   app.style.transform = `scale(${s.toFixed(4)})`;
   app.style.marginBottom = `${-(r.height * (1 - s)).toFixed(1)}px`;
