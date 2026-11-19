@@ -276,3 +276,7 @@ Exécutez **supabase-correctif-cartes-saison.sql** : il rétablit l’interdicti
 
 ## Saison : travaux enchaînés
 Exécutez **supabase-saison-travaux-enchaines.sql** (après supabase-saisons.sql) : un travail ne se débloque qu’une fois le précédent accompli (et sa date d’ouverture passée), et ses quêtes ne comptent que les parties jouées depuis ce déblocage. Les parties de 2 contre 2 comptent désormais pour les quêtes de saison.
+
+## Cadeaux automatiques sous condition, registre des achats
+- Exécutez **supabase-cadeaux-conditions.sql** : dans Admin › Récompenses › Cadeaux automatiques, un palier peut dépendre d’un nombre de parties jouées entre deux dates (ex. 100 parties pendant la bêta) ou d’un nombre de travaux accomplis dans une saison (ex. les 12 travaux d’Héraclès). Le message et son cadeau (une carte promotionnelle par exemple) partent dès que la condition est remplie.
+- Exécutez **supabase-achats.sql** : Admin › Publication › Achats et soutiens, registre des sommes reçues (brut, frais PayPal, net), totaux par mois, export CSV pour la comptabilité. Le lien de soutien PayPal ajoute le pseudo et le début de l’identifiant du joueur à l’objet de la transaction.

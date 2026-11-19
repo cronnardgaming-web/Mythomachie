@@ -493,6 +493,7 @@ body.compact .lien-hall{padding:2px 4px;font-size:13px}
 .adm-lien[aria-current="page"]{background:color-mix(in srgb, var(--bronze) 24%, transparent);box-shadow:inset 3px 0 0 var(--bronze);font-weight:700}
 .badge-menu{background:#b8402f;color:#fff;border-radius:99px;font-size:12px;font-weight:700;padding:0 7px;line-height:20px}
 .adm-contenu{min-width:0}
+.form-achat{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
 .table-travaux{width:100%;border-collapse:collapse;margin:6px 0 10px}.table-travaux th,.table-travaux td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line)}.table-travaux input[type=date]{min-width:150px}
 .alerte-date{color:#b4532a;font-weight:600}
 .bandeau-beta{display:flex;align-items:center;gap:14px 18px;padding:14px 20px;border-radius:14px;border:2px solid #c9862b;
@@ -2590,7 +2591,7 @@ ajouterTraductions("en", {
   [/^Vos créatures gagnent \+(\d+)\/\+(\d+)\.$/, (a, v) => `Your creatures get +${a}/+${v}.`],
   [/^Invoque (\d+) (.+)\.$/, (n, c) => `Summon ${n} ${traduireNom(c)}.`],
   [/^Pouvoir de votre équipe ?: (.+)$/, v => `Your team’s power: ${v}`],
-  [/^Héros de la saison (\d+)$/, n => `Hero of Season ${n}`], [/^Accomplissez d’abord le travail (.+)$/, n => `First accomplish labour ${n}`], [/^Soutenir (.+)$/, n => `Support ${traduireNom(n)}`]
+  [/^Héros de la saison (\d+)$/, n => `Hero of Season ${n}`],
 ]);
 ajouterGabarits("en", {"# / # pour le rang or":"# / # for the gold rank", "# / # pour le rang argent":"# / # for the silver rank", "# / # pour le rang bronze":"# / # for the bronze rank", "# / # pour le rang platine":"# / # for the platinum rank"});
 
@@ -4180,7 +4181,7 @@ function renderAdmin(){
     cle = actif.dataset.chemin ? `[data-chemin="${actif.dataset.chemin}"]` : actif.dataset.adm ? `[data-adm="${actif.dataset.adm}"]` : null;
     try { pos = actif.selectionStart; } catch(e) { pos = null; }
   }
-  const pages = {accueil:admAccueil, cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => PROG.fiche ? admFicheJoueur() : admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons, messages:admMessages, notes:admNotes, bruitages:admBruitages, "cadeaux-auto":admCadeauxAuto, traductions:admTraductions, don:admDon, beta:admBeta};
+  const pages = {accueil:admAccueil, cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => PROG.fiche ? admFicheJoueur() : admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons, messages:admMessages, notes:admNotes, bruitages:admBruitages, "cadeaux-auto":admCadeauxAuto, traductions:admTraductions, don:admDon, beta:admBeta, achats:admAchats};
   // Mémoriser la position des listes et de la page avant de réafficher
   const defil = {}; app.querySelectorAll(".adm-items, .adm-menu, .grille-choix").forEach((el, k) => { defil[el.className + k] = el.scrollTop; });
   const yPage = window.scrollY;
@@ -4192,7 +4193,7 @@ function renderAdmin(){
     ...(PROG.actif ? [["Joueurs", [["stats-joueurs","Liste des joueurs"],["messages","Boîte aux lettres"],["surveillance","Surveillance", nbAlertes]]],
                       ["Statistiques", [["stats","Vue d’ensemble"],["stats-heros","Héros"],["stats-cartes","Cartes"]]]] : []),
     ["Ambiance", [["musiques","Musiques"],["bruitages","Bruitages"]]],
-    ["Publication", [...(PROG.actif ? [["notes","Notes de mise à jour"]] : []), ["beta","Bêta test"], ["don","Soutenir le jeu"], ["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"]] : [])]]
+    ["Publication", [...(PROG.actif ? [["notes","Notes de mise à jour"]] : []), ["beta","Bêta test"], ["don","Soutenir le jeu"], ...(PROG.actif ? [["achats","Achats et soutiens"]] : []), ["donnees","Sauvegarde"], ...(PROG.actif ? [["serveur","Serveur"]] : [])]]
   ];
   if(!groupes.some(([, l]) => l.some(([k]) => k===adm.onglet))) adm.onglet = "accueil";
   const titres = Object.fromEntries(groupes.flatMap(([, l]) => l.map(([k, t]) => [k, t])));
@@ -4512,6 +4513,7 @@ function actionAdmin(act, id, el){
   if(act.startsWith("mus-")){ actionMusiques(act, id); return; }
   if(act.startsWith("variante-") || act.startsWith("booster-") || act==="carte-promo"){ actionVariantes(act, id); return; }
   if(act.startsWith("saison-")){ actionSaisons(act, id); return; }
+  if(act==="achats-csv" || act.startsWith("achat-")){ actionAchats(act, id); return; }
   if(act.startsWith("son-")){ actionBruitages(act, id); return; }
   if(act.startsWith("pauto-")){ actionCadeauxAuto(act, id); return; }
   if(act.startsWith("msg-") || act.startsWith("note-")){ actionCommunication(act, id); return; }
@@ -8253,7 +8255,7 @@ function htmlAdminVariantes(id){
       <label class="champ champ-saison"><span>Carte de saison : exclusive jusqu’au (vide = carte normale)</span><input type="date" data-chemin="cartes.${id}.saisonFin" value="${esc(d.saisonFin || "")}"></label>
       ${d.saisonFin ? `<p class="aide">Carte de saison : absente des paquets et non fabricable jusqu’au ${new Date(d.saisonFin + "T00:00:00").toLocaleDateString(LOC())}, puis elle rejoint automatiquement les paquets. Pensez à « Envoyer le catalogue ».</p>` : ""}
       <p class="aide">${d.promo
-        ? "Carte promotionnelle : absente du booster principal et des boosters de panthéon, elle ne se fabrique pas et ne se recycle pas. Les joueurs l’obtiennent uniquement dans les boosters spéciaux cochés ci-dessous."
+        ? "Carte promotionnelle : absente du booster principal et des boosters de panthéon, elle ne se fabrique pas et ne se recycle pas. Les joueurs l’obtiennent dans les boosters spéciaux cochés ci-dessous, ou en cadeau (boîte aux lettres, cadeaux automatiques)."
         : `Présente automatiquement dans le booster principal${fac ? ` et dans le booster ${esc(fac.m)}` : ""}.`}</p>
       <div class="boosters-variante"><b>Boosters spéciaux :</b> ${speciaux.length ? speciaux.map(([bid, b]) => caseBooster(bid, b, "carte", id)).join("") : `<span class="aide">aucun pour l’instant (écran Boosters).</span>`}</div>
     </fieldset>`;
@@ -9403,7 +9405,7 @@ document.addEventListener("change", e => {
   const el = e.target, ds = el.dataset || {};
   if(ds.ouverture && ui.ecran==="admin"){
     const [sid, k] = ds.ouverture.split("|"), s = CONFIG.saisons[sid], t = s && (s.travaux || [])[Number(k)];
-    if(t && el.value && s.debut){ t.ouverture_jour = Math.round(jourUTC(el.value) - jourUTC(s.debut)); if(typeof marquerModifie==="function") marquerModifie(); sauver(); renderAdmin(); }
+    if(t && el.value && s.debut){ t.ouverture_jour = Math.round(jourUTC(el.value) - jourUTC(s.debut)); if(typeof marquerModifie==="function") marquerModifie(); sauver(); setTimeout(renderAdmin, 0); }
     return;
   }
   if(!(ds.saisonType || ds.saisonRec || ds.saisonListe) || ui.ecran!=="admin") return;
@@ -10419,12 +10421,17 @@ function admCadeauxAuto(){
   const sel = (n, champ, val, options) => `<select data-palier="${n}.${champ}"><option value="">Aucun${champ==="carte" || champ==="variante" ? "e" : ""}</option>${options.map(([v, l]) => `<option value="${v}" ${val===v ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>`;
   return `<div class="adm-page adm-cadeaux-auto">
     <h2>Cadeaux automatiques</h2>
-    <p class="aide">Dès qu’un joueur atteint un nombre de parties (contre l’ordinateur ou en ligne), il reçoit automatiquement le message et son cadeau dans sa boîte aux lettres. Chaque palier n’est envoyé qu’une fois par joueur. Dans le titre et le texte, <b>{pseudo}</b> et <b>{parties}</b> sont remplacés automatiquement.</p>
+    <p class="aide">Dès qu’un joueur remplit la condition d’un palier, il reçoit automatiquement le message et son cadeau dans sa boîte aux lettres. Deux conditions possibles : un nombre de parties (contre l’ordinateur, en ligne ou en 2 contre 2), éventuellement jouées entre deux dates (par exemple pendant la bêta) ; ou un nombre de travaux accomplis dans une saison. Chaque palier n’est envoyé qu’une fois par joueur. Dans le titre et le texte, <b>{pseudo}</b> et <b>{parties}</b> (l’objectif du palier) sont remplacés automatiquement. Les conditions nécessitent le script supabase-cadeaux-conditions.sql.</p>
     ${adm.paliersAutoErreur ? `<p style="color:var(--danger)">${esc(adm.paliersAutoErreur)}</p>` : ""}
     <div class="liste-paliers-auto">${P.map((p, n) => { const c = p.cadeau || {}; return `<fieldset class="palier-auto ${p.actif===false ? "inactif" : ""}">
-      <legend>${p.seuil || "?"} parties${p.id ? ` · ${nf(p.envois || 0)} envoyé${(p.envois || 0)>1 ? "s" : ""} sur ${nf(p.eligibles || 0)} joueur${(p.eligibles || 0)>1 ? "s" : ""} éligible${(p.eligibles || 0)>1 ? "s" : ""}` : " · nouveau"}</legend>
+      <legend>${esc(texteConditionPalier(p))}${p.id ? ` · ${nf(p.envois || 0)} envoyé${(p.envois || 0)>1 ? "s" : ""} sur ${nf(p.eligibles || 0)} joueur${(p.eligibles || 0)>1 ? "s" : ""} éligible${(p.eligibles || 0)>1 ? "s" : ""}` : " · nouveau"}</legend>
       <div class="ligne-palier-auto">
-        <label class="champ"><span>Nombre de parties</span><input type="number" min="1" step="1" data-palier="${n}.seuil" value="${p.seuil || ""}"></label>
+        <label class="champ"><span>Condition</span><select data-palier="${n}.condition"><option value="parties" ${p.condition!=="travaux" ? "selected" : ""}>Nombre de parties</option><option value="travaux" ${p.condition==="travaux" ? "selected" : ""}>Travaux de saison accomplis</option></select></label>
+        <label class="champ"><span>${p.condition==="travaux" ? "Nombre de travaux" : "Nombre de parties"}</span><input type="number" min="1" step="1" data-palier="${n}.seuil" value="${p.seuil || ""}"></label>
+        ${p.condition==="travaux"
+          ? `<label class="champ"><span>Saison</span><select data-palier="${n}.saison"><option value="">Choisir…</option>${Object.entries(CONFIG.saisons || {}).map(([k, s]) => `<option value="${k}" ${p.saison===k ? "selected" : ""}>${esc(s.nom || k)}</option>`).join("")}</select></label>`
+          : `<label class="champ"><span>Parties jouées à partir du (facultatif)</span><input type="date" data-palier="${n}.depuis" value="${esc(p.depuis || "")}"></label>
+             <label class="champ"><span>Jusqu’au, inclus (facultatif)</span><input type="date" data-palier="${n}.jusque" value="${esc(p.jusque || "")}"></label>`}
         <label class="champ large"><span>Titre du message</span><input type="text" maxlength="120" data-palier="${n}.titre" value="${esc(p.titre || "")}"></label>
         <label class="case"><input type="checkbox" data-palier="${n}.actif" ${p.actif===false ? "" : "checked"}> Actif</label>
       </div>
@@ -10456,12 +10463,25 @@ document.addEventListener("input", e => {
   const c = p.cadeau = p.cadeau || {};
   const v = e.target.type==="checkbox" ? e.target.checked : e.target.value;
   if(champ==="seuil") p.seuil = Number(v) || 0;
-  else if(["titre", "texte", "titre_en", "texte_en"].includes(champ)) p[champ] = v;
+  else if(["titre", "texte", "titre_en", "texte_en", "depuis", "jusque", "saison"].includes(champ)) p[champ] = v || null;
+  else if(champ==="condition"){
+    p.condition = v;
+    if(v==="travaux"){ p.depuis = p.jusque = null; if(!p.saison){ const k = Object.keys(CONFIG.saisons || {})[0]; if(k){ p.saison = k; p.seuil = (CONFIG.saisons[k].travaux || []).length || p.seuil; } } }
+    else p.saison = null;
+    setTimeout(renderAdmin, 0);
+  }
   else if(champ==="actif") p.actif = v;
   else if(champ==="or" || champ==="encre"){ if(Number(v)>0) c[champ] = Number(v); else delete c[champ]; }
   else { const cle = {carte:"cartes", paquet:"paquets", variante:"variantes"}[champ]; if(v) c[cle] = [v]; else delete c[cle]; }
 });
 document.addEventListener("change", e => { const ch = e.target.dataset && e.target.dataset.palier; if(ch && (e.target.tagName==="SELECT" || e.target.type==="checkbox")) e.target.dispatchEvent(new Event("input", {bubbles:true})); });
+// Résumé de la condition d’un palier (légende de l’admin)
+function texteConditionPalier(p){
+  const n = p.seuil || "?";
+  if(p.condition==="travaux"){ const s = (CONFIG.saisons || {})[p.saison]; return `${n} travaux accomplis${s ? ` · ${s.nom}` : ""}`; }
+  const d = iso => new Date(iso + "T00:00:00").toLocaleDateString("fr-FR");
+  return `${n} parties${p.depuis && p.jusque ? ` entre le ${d(p.depuis)} et le ${d(p.jusque)}` : p.depuis ? ` depuis le ${d(p.depuis)}` : p.jusque ? ` jusqu’au ${d(p.jusque)}` : ""}`;
+}
 function actionCadeauxAuto(act, id){
   const P = adm.paliersAuto || (adm.paliersAuto = []);
   const erreurSql = e => erreur(/function|does not exist|schema cache/i.test(e.message) ? "Exécutez d’abord le script supabase-cadeaux-auto.sql dans Supabase." : e.message);
@@ -10469,7 +10489,8 @@ function actionCadeauxAuto(act, id){
     case "pauto-ajouter": { const dernier = P.reduce((m, p) => Math.max(m, p.seuil || 0), 0); P.push({seuil:dernier ? dernier*2 : 20, titre:"Merci {pseudo} !", texte:"Vous avez déjà joué {parties} parties sur Mythomachie. Voici un petit cadeau pour vous remercier de votre participation à la bêta.", cadeau:{or:100}, actif:true}); break; }
     case "pauto-suppr": if(confirm("Supprimer ce palier ? (Il sera retiré du serveur à l’enregistrement.)")) P.splice(Number(id), 1); break;
     case "pauto-enregistrer":
-      if(P.some(p => !(p.seuil>0) || !(p.titre || "").trim())) return erreur("Chaque palier doit avoir un nombre de parties et un titre.");
+      if(P.some(p => !(p.seuil>0) || !(p.titre || "").trim())) return erreur("Chaque palier doit avoir un objectif et un titre.");
+      if(P.some(p => p.condition==="travaux" && !p.saison)) return erreur("Choisissez la saison des paliers « travaux de saison ».");
       rpc("admin_maj_paliers_parties", {p:P.map(({envois, eligibles, ...p}) => p)}).then(n => { erreur(`${n} palier${n>1 ? "s" : ""} enregistré${n>1 ? "s" : ""}.`); adm.paliersAuto = null; chargerPaliersAuto(); }, erreurSql);
       return;
     case "pauto-appliquer":
@@ -10635,7 +10656,7 @@ async function recyclerToutSurplus(){
 }
 
 /* ----- Administration : tableau de bord ----- */
-const ICONES_ADMIN = {accueil:"🏠", beta:"🧪", don:"❤", traductions:"🌐", cartes:"🃏", heros:"👑", factions:"🏛", regles:"📜", boosters:"🎁", saisons:"🗓", "cadeaux-auto":"🎀",
+const ICONES_ADMIN = {accueil:"🏠", achats:"💶", beta:"🧪", don:"❤", traductions:"🌐", cartes:"🃏", heros:"👑", factions:"🏛", regles:"📜", boosters:"🎁", saisons:"🗓", "cadeaux-auto":"🎀",
   "stats-joueurs":"👥", messages:"✉", surveillance:"🛡", stats:"📊", "stats-heros":"⚔", "stats-cartes":"📈", musiques:"🎵", bruitages:"🔊",
   notes:"📰", donnees:"💾", serveur:"🖥"};
 const marquerModifie = () => { try { localStorage.setItem("config-modifiee", String(Date.now())); } catch(e) {} };
@@ -11508,7 +11529,16 @@ const texteDon = () => {
   return (LANGUE!=="fr" && (d[`message_${LANGUE}`] || "").trim()) || (d.message || "").trim() || TEXTE_DON;
 };
 function ouvrirDon(){
-  const url = lienDon(); if(!url) return;
+  let url = lienDon(); if(!url) return;
+  // Sur la page de don PayPal, l’objet porte le pseudo et le début de l’identifiant du joueur : on sait qui a soutenu le jeu
+  try {
+    const x = new URL(url), u = PROG.user;
+    if(u && u.id && /(^|\.)paypal\.com$/i.test(x.hostname) && x.pathname.startsWith("/donate")){
+      const pseudo = (PROG.profil && PROG.profil.pseudo) || "joueur";
+      x.searchParams.set("item_name", `${x.searchParams.get("item_name") || "Soutenir Mythomachie"} – ${pseudo} #${String(u.id).slice(0, 8)}`.slice(0, 127));
+      url = x.href;
+    }
+  } catch(e) {}
   fermerDon();
   const f = document.createElement("div");
   f.id = "fenetre-don"; f.className = "fenetre-don"; f.setAttribute("role", "dialog"); f.setAttribute("aria-modal", "true"); f.setAttribute("aria-labelledby", "titre-don");
@@ -11628,6 +11658,102 @@ function revelerCarteJouee(ev, niveau){
       }).then(terminer, terminer);
   });
   REVELE.fin = REVELE.fin.then(etape, etape);
+}
+
+/* ============================================================
+   ADMIN : REGISTRE DES ACHATS ET SOUTIENS (comptabilité)
+   ============================================================ */
+const TYPES_ACHAT = {soutien:"Soutien", achat:"Achat", remboursement:"Remboursement"};
+const euros = v => Number(v || 0).toLocaleString("fr-FR", {style:"currency", currency:"EUR"});
+function nouvelAchat(){ return {quand:new Date().toISOString().slice(0, 10), joueur:"", nom:"", type:"soutien", montant:"", frais:"", reference:"", note:""}; }
+async function chargerAchats(annee){
+  adm.achatsCharge = annee;
+  try { adm.achats = await rpc("admin_achats", {p_annee:annee}); adm.achatsErreur = ""; }
+  catch(e) { adm.achats = []; adm.achatsErreur = /function|does not exist|schema cache/i.test(e.message) ? "Exécutez d’abord le script supabase-achats.sql dans Supabase." : e.message; }
+  if(adm.onglet==="achats") renderAdmin();
+}
+function admAchats(){
+  const annee = adm.achatsAnnee || new Date().getFullYear();
+  if(adm.achatsCharge!==annee && PROG.pret) chargerAchats(annee);
+  const J = (PROG.adminStats && PROG.adminStats.joueurs) || null;
+  if(!J && PROG.pret && !adm.joueursDemandes){ adm.joueursDemandes = true; chargerAdminStats().then(() => { if(adm.onglet==="achats") renderAdmin(); }).finally(() => setTimeout(() => { adm.joueursDemandes = false; }, 15000)); }
+  const F = adm.achatForm = adm.achatForm || nouvelAchat();
+  const L = adm.achats || [], net = a => Number(a.montant) - Number(a.frais || 0);
+  const tot = L.reduce((t, a) => ({n:t.n + 1, brut:t.brut + Number(a.montant), frais:t.frais + Number(a.frais || 0)}), {n:0, brut:0, frais:0});
+  const mois = Array.from({length:12}, (_, m) => { const x = L.filter(a => new Date(a.quand + "T00:00:00").getMonth()===m); return {m, n:x.length, brut:x.reduce((s, a) => s + Number(a.montant), 0), frais:x.reduce((s, a) => s + Number(a.frais || 0), 0)}; }).filter(x => x.n);
+  const nomMois = m => new Date(2000, m, 1).toLocaleDateString("fr-FR", {month:"long"});
+  const joueurs = (J || []).slice().sort((a, b) => nomJoueur(a).localeCompare(nomJoueur(b), "fr"));
+  return `<div class="adm-page adm-achats"><h2>Achats et soutiens</h2>
+    <p class="aide">Le registre de l’argent reçu, pour votre comptabilité. Pour l’instant, PayPal ne prévient pas le jeu : notez ici chaque soutien reçu. Pour savoir qui a donné, regardez l’objet de la transaction dans PayPal : le jeu y ajoute le pseudo du joueur et le début de son identifiant (par exemple « Soutenir Mythomachie – Crono #1a2b3c4d »). Les futurs achats en jeu s’ajouteront ici automatiquement.</p>
+    ${adm.achatsErreur ? `<p class="don-invalide">${esc(adm.achatsErreur)}</p>` : ""}
+    <div class="adm-actions"><label class="champ"><span>Année</span><select data-adm="achats-annee">${Array.from({length:5}, (_, k) => new Date().getFullYear() - k).map(a => `<option value="${a}" ${a===annee ? "selected" : ""}>${a}</option>`).join("")}</select></label>
+      <button type="button" class="btn second" data-act="achats-csv" ${L.length ? "" : "disabled"}>Exporter l’année en CSV (Excel)</button></div>
+    <div class="tuiles">
+      <div class="tuile"><b>${euros(tot.brut)}</b><span>reçus en ${annee} (brut)</span></div>
+      <div class="tuile"><b>${euros(tot.frais)}</b><span>frais PayPal</span></div>
+      <div class="tuile"><b>${euros(tot.brut - tot.frais)}</b><span>net</span></div>
+      <div class="tuile"><b>${tot.n}</b><span>opération${tot.n>1 ? "s" : ""}</span></div>
+    </div>
+    ${mois.length ? `<h3>Par mois</h3><div class="tableau-defile"><table class="tableau"><thead><tr><th>Mois</th><th>Opérations</th><th>Brut</th><th>Frais</th><th>Net</th></tr></thead><tbody>
+      ${mois.map(x => `<tr><td>${nomMois(x.m)}</td><td>${x.n}</td><td>${euros(x.brut)}</td><td>${euros(x.frais)}</td><td>${euros(x.brut - x.frais)}</td></tr>`).join("")}</tbody></table></div>` : ""}
+    <h3>Ajouter une opération</h3>
+    <div class="champs form-achat">
+      <label class="champ"><span>Date</span><input type="date" data-achat="quand" value="${esc(F.quand)}"></label>
+      <label class="champ"><span>Type</span><select data-achat="type">${Object.entries(TYPES_ACHAT).map(([k, l]) => `<option value="${k}" ${F.type===k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+      <label class="champ"><span>Compte du joueur</span><select data-achat="joueur"><option value="">Non identifié</option>${joueurs.map(j => `<option value="${j.id}" ${F.joueur===j.id ? "selected" : ""}>${esc(nomJoueur(j))} (#${String(j.id).slice(0, 8)})</option>`).join("")}</select></label>
+      <label class="champ"><span>Nom affiché par PayPal</span><input type="text" data-achat="nom" value="${esc(F.nom)}" placeholder="si non identifié"></label>
+      <label class="champ"><span>Montant reçu (€, brut)</span><input type="number" step="0.01" data-achat="montant" value="${esc(F.montant)}"></label>
+      <label class="champ"><span>Frais PayPal (€)</span><input type="number" step="0.01" min="0" data-achat="frais" value="${esc(F.frais)}"></label>
+      <label class="champ"><span>N° de transaction PayPal</span><input type="text" data-achat="reference" value="${esc(F.reference)}"></label>
+      <label class="champ"><span>Note</span><input type="text" data-achat="note" value="${esc(F.note)}"></label>
+    </div>
+    <div class="adm-actions"><button type="button" class="btn" data-act="achat-ajouter">Enregistrer l’opération</button></div>
+    <h3>Opérations ${annee}</h3>
+    ${L.length ? `<div class="tableau-defile"><table class="tableau"><thead><tr><th>Date</th><th>Joueur</th><th>Type</th><th>Brut</th><th>Frais</th><th>Net</th><th>Transaction</th><th>Note</th><th></th></tr></thead><tbody>
+      ${L.map(a => `<tr><td>${new Date(a.quand + "T00:00:00").toLocaleDateString("fr-FR")}</td><td>${a.joueur ? `${esc(a.pseudo || "Joueur")} <span class="aide">#${String(a.joueur).slice(0, 8)}</span>` : esc(a.nom || "Non identifié")}</td>
+        <td>${TYPES_ACHAT[a.type] || esc(a.type)}</td><td>${euros(a.montant)}</td><td>${euros(a.frais)}</td><td>${euros(net(a))}</td><td>${esc(a.reference || "")}</td><td>${esc(a.note || "")}</td>
+        <td><button type="button" class="btn-discret" data-act="achat-suppr" data-id="${a.id}">Supprimer</button></td></tr>`).join("")}</tbody></table></div>`
+      : `<p class="aide">${adm.achatsCharge===annee ? "Aucune opération pour cette année." : "Chargement…"}</p>`}
+  </div>`;
+}
+document.addEventListener("input", e => {
+  const el = e.target, k = el.dataset && el.dataset.achat;
+  if(!k || ui.ecran!=="admin") return;
+  adm.achatForm = adm.achatForm || nouvelAchat(); adm.achatForm[k] = el.value;
+});
+document.addEventListener("change", e => {
+  const el = e.target;
+  if(ui.ecran!=="admin" || !el.dataset) return;
+  if(el.dataset.achat){ adm.achatForm = adm.achatForm || nouvelAchat(); adm.achatForm[el.dataset.achat] = el.value; }
+  if(el.dataset.adm==="achats-annee"){ adm.achatsAnnee = Number(el.value); adm.achats = []; renderAdmin(); }
+});
+function actionAchats(act, id){
+  switch(act){
+    case "achats-csv": exporterAchatsCSV(); return true;
+    case "achat-suppr": {
+      if(!confirm("Supprimer cette opération du registre ?")) return true;
+      rpc("admin_suppr_achat", {p_id:Number(id)}).then(() => chargerAchats(adm.achatsAnnee || new Date().getFullYear()), e => erreur(e.message));
+      return true;
+    }
+    case "achat-ajouter": {
+      const f = adm.achatForm || nouvelAchat();
+      if(!(Number(f.montant) || 0)) { erreur("Indiquez le montant reçu."); return true; }
+      rpc("admin_maj_achat", {p:{...f, joueur:f.joueur || null, montant:Number(f.montant), frais:Number(f.frais) || 0}}).then(() => {
+        adm.achatForm = nouvelAchat(); const an = new Date(f.quand + "T00:00:00").getFullYear(); adm.achatsAnnee = an; erreur("Opération enregistrée."); return chargerAchats(an);
+      }, e => erreur(/function|does not exist|schema cache/i.test(e.message) ? "Exécutez d’abord le script supabase-achats.sql dans Supabase." : e.message));
+      return true;
+    }
+  }
+}
+function exporterAchatsCSV(){
+  const L = adm.achats || [], annee = adm.achatsAnnee || new Date().getFullYear();
+  const n = v => Number(v || 0).toFixed(2).replace(".", ",");
+  const c = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const lignes = [["Date", "Joueur", "Identifiant", "Nom PayPal", "Type", "Brut (EUR)", "Frais (EUR)", "Net (EUR)", "Moyen", "Transaction", "Note"].map(c).join(";"),
+    ...L.slice().reverse().map(a => [a.quand, a.pseudo || "", a.joueur || "", a.nom || "", TYPES_ACHAT[a.type] || a.type, n(a.montant), n(a.frais), n(Number(a.montant) - Number(a.frais || 0)), a.moyen || "", a.reference || "", a.note || ""].map((v, i) => [5, 6, 7].includes(i) ? v : c(v)).join(";"))];
+  const blob = new Blob(["﻿" + lignes.join("\r\n")], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `mythomachie-achats-${annee}.csv`;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
 }
 
 chargerConfig();
