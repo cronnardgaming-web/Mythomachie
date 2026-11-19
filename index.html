@@ -356,6 +356,7 @@ fieldset.survol{border-color:var(--cible);border-style:dashed;border-width:2px}
 
 /* Calque d’animations */
 #fx{position:fixed;inset:0;pointer-events:none;z-index:28;overflow:hidden}
+.fx-revele{z-index:2;filter:drop-shadow(0 14px 30px rgba(0,0,0,.55))}
 .fx-objet{position:absolute;left:0;top:0;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}
 .fx-objet svg{width:100%;height:100%;display:block}
 .fx-carte{position:absolute;left:0;top:0;transform-origin:center}
@@ -3136,7 +3137,7 @@ function deckConstruit(){
   // Prototype : deck de 30 cartes tiré au hasard dans toutes les factions
   const copies = [];
   for(const [id,d] of Object.entries(CARTES)){
-    if(d.depart || d.base || d.jeton) continue;
+    if(d.depart || d.base || d.jeton || saisonVerrouillee(d)) continue;
     const n = d.rarete==="legendaire" ? REGLES.copiesLegendaire : REGLES.copiesMax;
     for(let i=0;i<n;i++) copies.push(id);
   }
@@ -3200,6 +3201,8 @@ function nouvellePartie(mode, decks, variantesJeu, opts = {}){
     return c;
   }));
   S.joueurs.forEach((j, k) => { j.heros = choisirHeros(listesJ[k]); j.morts = 0; appliquerDevotion(j, listesJ[k], opts.sansDevotion && opts.sansDevotion[k]); });
+  // Pour « Rejouer » : mêmes decks, mêmes illustrations, mêmes options
+  S.relance = decks && decks[0] && decks[1] ? {decks:[decks[0].slice(), decks[1].slice()], variantesJeu, opts} : null;
   S.idPartie = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   S.stats = [0, 1].map(() => ({creatures:0, sorts:0, achats:0, degats:0, soins:0, pouvoirs:0, jouees:{}, achetees:{}}));
   S.debut = Date.now();
@@ -5310,8 +5313,10 @@ document.addEventListener("click", e => {
   if(act==="rejouer" && S && est2v2()) return lancer2v2(S.deck0, S.prep2v2);
   if(act==="mode-2v2") return lancer2v2(null);
   if(act==="rejouer"){
-    const mode = S.mode;
-    nouvellePartie(mode);
+    const mode = S.mode, rl = S.relance;
+    // Votre deck est repris ; l’ordinateur tire un nouveau deck au hasard
+    if(rl) nouvellePartie(mode, [rl.decks[0], mode==="ia" ? deckConstruit() : rl.decks[1]], rl.variantesJeu, rl.opts);
+    else nouvellePartie(mode);
     Object.assign(ui, {attaquant:null, armeEnAttente:null, choixPierre:null, aiEnCours:false, couvert: mode==="duo"});
     return apresAction();
   }
@@ -5691,6 +5696,8 @@ async function rpc(nom, args){
 // Tant qu’aucun administrateur n’existe, le premier visiteur peut s’y rendre pour se déclarer.
 const accesAdmin = () => !!window.claude || PROG.admin || PROG.adminExiste===false;
 const estCollectionnable = d => !!d && !d.depart && !d.base && !d.jeton;
+// Carte de saison encore exclusive : ni fabrication, ni paquets, ni decks de l’ordinateur (même règle que le serveur : libre à partir du jour de fin)
+const saisonVerrouillee = d => !!(d && d.saisonFin && /^\d{4}-\d{2}-\d{2}$/.test(d.saisonFin) && new Date().toISOString().slice(0, 10) < d.saisonFin);
 const maxCopies = id => CARTES[id] && CARTES[id].rarete==="legendaire" ? REGLES.copiesLegendaire : REGLES.copiesMax;
 const compter = ids => ids.reduce((m, i) => (m[i] = (m[i] || 0) + 1, m), {});
 function problemesDeck(ids){
@@ -5938,7 +5945,7 @@ function pageCollection(){
     <div class="grille">${ids.map(id => {
       const nb = PROG.collection[id] || 0;
       const alts = Object.keys(CONFIG.variantes || {}).filter(v => CONFIG.variantes[v].carte===id), altPossedee = alts.some(v => (PROG.variantes || {})[v]);
-      const saisonEnCours = CARTES[id].saisonFin && new Date(CARTES[id].saisonFin + "T23:59:59") > new Date();
+      const saisonEnCours = saisonVerrouillee(CARTES[id]);
       return `<div class="col-item ${nb ? "" : "manque"}">${saisonEnCours ? `<span class="badge-saison" title="Carte de saison : dans les paquets à la fin de la saison">Saison</span>` : ""}${alts.length ? `<span class="etoile-alt ${altPossedee ? "possedee" : ""}" title="${altPossedee ? "Vous possédez une illustration alternative de cette carte" : "Illustration alternative à découvrir"}" aria-label="Illustration alternative">${altPossedee ? "★" : "☆"}</span>` : ""}${htmlCarte({id, uid:id, v:prefVariantes()[id]}, {act:"col-sel", id})}<span class="badge-nb">${nb ? "×" + nb : "0"}</span></div>`;
     }).join("") || `<p class="aide">Aucune carte ne correspond à ces filtres.</p>`}</div>`;
 }
@@ -5979,13 +5986,13 @@ function htmlZoom(){
         <p class="meta">${NOMS_RARETE[r]}, ${esc(fac)}</p>
         ${d.depart || d.base ? `<p>${d.base ? "Toujours disponible au marché, à chaque partie." : `Carte de départ : vous commencez chaque partie avec <b>${(REGLES.deckDepart || {})[id] || 0}</b> exemplaire${((REGLES.deckDepart || {})[id] || 0)>1 ? "s" : ""}.`} Elle ne se fabrique pas et ne se recycle pas.</p>` : `
         <p>Vous en possédez <b>${nb}</b>${nb ? "" : " : son illustration est floutée tant que vous ne l’avez pas"}. Un deck peut en contenir ${mx}.</p>
-        ${d.saisonFin && new Date(d.saisonFin + "T23:59:59") > new Date() ? `<p class="note-saison"><b>Carte de saison.</b> Elle s’obtient en accomplissant les travaux de la saison en cours, et sera disponible dans les boosters à la fin de la saison, le ${new Date(d.saisonFin + "T00:00:00").toLocaleDateString(LOC(), {day:"numeric", month:"long", year:"numeric"})}. D’ici là, elle ne se fabrique pas.</p>` : ""}
+        ${saisonVerrouillee(d) ? `<p class="note-saison"><b>Carte de saison.</b> Elle s’obtient en accomplissant les travaux de la saison en cours, et sera disponible dans les boosters à la fin de la saison, le ${new Date(d.saisonFin + "T00:00:00").toLocaleDateString(LOC(), {day:"numeric", month:"long", year:"numeric"})}. D’ici là, elle ne se fabrique pas.</p>` : ""}
         <p class="meta">Votre encre : ${encre}</p>
         <div class="actions">
-          ${d.promo ? `<p class="meta">Carte promotionnelle : elle ne se fabrique pas et ne se recycle pas.</p>` : `<button type="button" class="btn" data-act="col-fabriquer" data-id="${id}" ${nb>=mx || encre<cout || PROG.occupe ? "disabled" : ""}>Fabriquer (${cout} encre)</button>`}
+          ${d.promo ? `<p class="meta">Carte promotionnelle : elle ne se fabrique pas et ne se recycle pas.</p>` : saisonVerrouillee(d) ? "" : `<button type="button" class="btn" data-act="col-fabriquer" data-id="${id}" ${nb>=mx || encre<cout || PROG.occupe ? "disabled" : ""}>Fabriquer (${cout} encre)</button>`}
           ${nb>mx && !d.promo ? `<button type="button" class="btn second" data-act="col-recycler" data-id="${id}" ${PROG.occupe ? "disabled" : ""}>Recycler 1 exemplaire en trop (+${gain} encre)</button>` : ""}
         </div>
-        ${nb>=mx ? `<p class="meta">Vous avez déjà le nombre maximum d’exemplaires utiles.</p>` : encre<cout ? `<p class="meta">Il vous manque ${cout - encre} encre pour la fabriquer.</p>` : ""}`}
+        ${nb>=mx ? `<p class="meta">Vous avez déjà le nombre maximum d’exemplaires utiles.</p>` : saisonVerrouillee(d) ? "" : encre<cout ? `<p class="meta">Il vous manque ${cout - encre} encre pour la fabriquer.</p>` : ""}`}
         ${liste.length>1 && pos>=0 ? `<div class="zoom-nav"><button type="button" class="btn second" data-act="zoom-prec" aria-label="Carte précédente">←</button><button type="button" class="btn second" data-act="zoom-suiv" aria-label="Carte suivante">→</button></div>` : ""}
       </div>
     </div></div>`;
@@ -6109,7 +6116,7 @@ function actionProg(act, id){
       if(l.length) PROG.sel = l[(i + (act==="zoom-suiv" ? 1 : -1) + l.length) % l.length];
       break;
     }
-    case "col-fabriquer": action(() => rpc("fabriquer", {c:id}), `${CARTES[id].nom} ajoutée à votre collection.`); return true;
+    case "col-fabriquer": if(saisonVerrouillee(CARTES[id])){ erreur("Cette carte ne peut pas être fabriquée (carte de saison ou promotionnelle)."); return true; } action(() => rpc("fabriquer", {c:id}), `${CARTES[id].nom} ajoutée à votre collection.`); return true;
     case "col-recycler": action(() => rpc("recycler", {c:id}), g => `+${g} encre.`); return true;
     case "deck-nouveau": PROG.deckEdit = {id:null, nom:"Nouveau deck", cartes:[]}; ui.ecran = "editeur"; break;
     case "deck-modifier": { const d = PROG.decks.find(x => x.id===id); if(d){ PROG.deckEdit = {id:d.id, nom:d.nom, cartes:[...(d.cartes || [])]}; ui.ecran = "editeur"; } break; }
@@ -7613,6 +7620,7 @@ function jouerEffets(){
   if(!S) return;
   // Une créature en plein vol reste masquée même si le plateau est réaffiché
   ATTAQUANTS_CACHES.forEach(u => { const el = document.querySelector(`.crea[data-id="${u}"]`); if(el) el.style.visibility = "hidden"; });
+  if(typeof cacherRevelees==="function") cacherRevelees();
   PIOCHE_CACHEES.forEach(u => { const el = document.querySelector(`.zone-main .main .carte[data-uid="${u}"]`); if(el) el.style.visibility = "hidden"; });
   const evts = S.evt || [];
   const dernier = evts.length ? evts[evts.length-1].n : 0;
@@ -7627,6 +7635,7 @@ function jouerEffets(){
   delaiPioche = defausse && niveau>=2 ? 460 + (defausse.uids || []).length*45 + 120 : 0;
   nouveaux.forEach(ev => {
     try {
+      if(ev.t==="carte"){ revelerCarteJouee(ev, niveau); return; }
       if(animerEvenement2(ev, niveau)) return;
       // Or, puissance, achat : les objets ne volent qu’en mode complet
       if(niveau<2 && ["or","puissance","achat"].includes(ev.t)){ if(ev.t!=="achat" && ev.j===vue()) pulser(document.querySelector(`.ressource.${ev.t==="or" ? "or" : "puissance"} .jeton`)); return; }
@@ -10201,8 +10210,12 @@ async function deroulerFile(){
 }
 // Promesse résolue quand tous les sons en attente sont terminés (au plus « max » millisecondes)
 function sonsTermines(max = 2500){
-  if(!SONS.enCours && !SONS.file.length) return Promise.resolve();
-  return Promise.race([new Promise(r => SONS.attente.push(r)), new Promise(r => setTimeout(r, max))]);
+  const revel = typeof REVELE!=="undefined" && REVELE.attente > 0;
+  if(!SONS.enCours && !SONS.file.length && !revel) return Promise.resolve();
+  const sons = (!SONS.enCours && !SONS.file.length) ? Promise.resolve() : new Promise(r => SONS.attente.push(r));
+  // L’ordinateur attend aussi que la carte qu’il vient de jouer ait été montrée
+  const delai = revel ? Math.max(max, 600 + REVELE.attente * 2000) : max;
+  return Promise.race([Promise.all([sons, revel ? REVELE.fin : null]), new Promise(r => setTimeout(r, delai))]);
 }
 function jouerSon(cle, opts = {}){
   if(!confSon(cle)) return;
@@ -10622,7 +10635,7 @@ function deckDuPantheon(f){
   if(!f || !FACTIONS[f]) return null;   // au hasard : deck mélangé de toutes les factions
   const copies = [];
   for(const [id, d] of Object.entries(CARTES)){
-    if(d.depart || d.base || d.jeton || d.promo || d.faction!==f || !estCollectionnable(d)) continue;
+    if(d.depart || d.base || d.jeton || d.promo || d.faction!==f || !estCollectionnable(d) || saisonVerrouillee(d)) continue;
     for(let n = 0; n<(d.rarete==="legendaire" ? REGLES.copiesLegendaire : REGLES.copiesMax); n++) copies.push(id);
   }
   return melange(copies).slice(0, REGLES.tailleDeck);
@@ -11502,6 +11515,69 @@ document.addEventListener("change", e => {
   if(ui.ecran!=="admin" || !e.target.matches || !e.target.matches("[data-beta-actif]")) return;
   CONFIG.beta = {...(CONFIG.beta || {}), actif:e.target.checked}; sauver(); renderAdmin();
 });
+
+/* ============================================================
+   CARTES JOUÉES PAR LES AUTRES JOUEURS : montrées en grand au centre de l’écran,
+   puis envoyées à leur place (créature sur le plateau, sort ou équipement vers le héros)
+   ============================================================ */
+const REVELE = {fin:Promise.resolve(), attente:0, cachees:new Set()};
+function cacherRevelees(){
+  REVELE.cachees.forEach(u => { const el = document.querySelector(`#app .crea[data-id="${u}"]`); if(el) el.style.visibility = "hidden"; });
+}
+function trouverCarteUid(j, uid){
+  const vus = new Set();
+  const cherche = (o, p) => {
+    if(!o || typeof o!=="object" || vus.has(o) || p>5) return null; vus.add(o);
+    if(o.uid===uid && o.id && CARTES[o.id]) return o;
+    for(const v of Array.isArray(o) ? o : Object.values(o)){ const r = cherche(v, p + 1); if(r) return r; }
+    return null;
+  };
+  return (S && S.joueurs[j] && cherche(S.joueurs[j], 0)) || null;
+}
+function revelerCarteJouee(ev, niveau){
+  if(!S || S.simulation || S.mode==="duo" || ev.j===vue() || !niveau) return;
+  // En 2 contre 2, seules les cartes des adversaires sont montrées (pas celles de votre allié)
+  if(est2v2() && typeof allieDe==="function" && ev.j===allieDe(vue())) return;
+  const c = trouverCarteUid(ev.j, ev.uid); if(!c) return;
+  const html = htmlCarte(c).replace(/\sdata-(uid|act|id)="[^"]*"/g, "");
+  const depart = origine(ev), uid = ev.uid, creature = ev.type==="creature";
+  REVELE.attente++;
+  if(creature){ REVELE.cachees.add(uid); cacherRevelees(); }
+  const etape = () => new Promise(fin => {
+    let fini = false;
+    const W = Math.round(Math.max(120, Math.min(230, innerWidth * .46, innerHeight * .42 * 63 / 88)));
+    const el = document.createElement("div"); el.className = "fx-carte fx-revele";
+    el.style.width = W + "px"; el.style.marginLeft = -W/2 + "px"; el.style.marginTop = -W*88/63/2 + "px";
+    el.innerHTML = html;
+    const terminer = () => {
+      if(fini) return; fini = true;
+      el.remove(); REVELE.cachees.delete(uid);
+      const v = document.querySelector(`#app .crea[data-id="${uid}"]`);
+      if(v){ v.style.visibility = ""; pulser(v); }
+      REVELE.attente = Math.max(0, REVELE.attente - 1); fin();
+    };
+    calqueFx().appendChild(el);
+    const m = {x:innerWidth/2, y:innerHeight/2};
+    setTimeout(terminer, 2600 * FX_LENT);   // sécurité : jamais de carte bloquée à l’écran
+    if(niveau<2){
+      el.animate([{transform:`translate(${m.x}px,${m.y}px) scale(.85)`, opacity:0}, {transform:`translate(${m.x}px,${m.y}px) scale(1)`, opacity:1, offset:.18},
+        {transform:`translate(${m.x}px,${m.y}px) scale(1)`, opacity:1, offset:.82}, {transform:`translate(${m.x}px,${m.y}px) scale(.95)`, opacity:0}],
+        {duration:720, fill:"both"}).finished.then(terminer, terminer);
+      return;
+    }
+    el.animate([{transform:`translate(${depart.x}px,${depart.y}px) scale(${40/W}) rotate(-10deg)`, opacity:.5},
+      {transform:`translate(${m.x}px,${m.y}px) scale(1) rotate(0)`, opacity:1}], {duration:190, easing:"cubic-bezier(.2,.8,.3,1)", fill:"both"}).finished
+      .then(() => new Promise(r => setTimeout(r, 400 * FX_LENT)))
+      .then(() => {
+        const cible = creature ? document.querySelector(`#app .crea[data-id="${uid}"]`) : null;
+        const r = cible ? cible.getBoundingClientRect() : rectDe(`#app .medaillon[data-joueur="${ev.j}"]`);
+        const p = r ? centre(r) : depart, e = cible ? r.width / W : .22;
+        return el.animate([{transform:`translate(${m.x}px,${m.y}px) scale(1)`, opacity:1},
+          {transform:`translate(${p.x}px,${p.y}px) scale(${e})`, opacity:creature ? 1 : 0}], {duration:210, easing:"cubic-bezier(.5,0,.75,0)", fill:"both"}).finished;
+      }).then(terminer, terminer);
+  });
+  REVELE.fin = REVELE.fin.then(etape, etape);
+}
 
 chargerConfig();
 appliquerReglageAnimations();

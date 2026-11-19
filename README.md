@@ -266,7 +266,10 @@ Messages de la boîte aux lettres, notes de mise à jour et cadeaux automatiques
 En ligne, le journal de partie circule en français et chaque joueur le lit dans sa langue : un joueur anglophone peut affronter un joueur francophone.
 
 ## Soutenir le jeu (PayPal)
-Dans **Admin › Publication › Soutenir le jeu**, collez le lien de votre bouton de don PayPal (https://www.paypal.com/donate/?hosted_button_id=… ou https://paypal.me/…), puis exportez config.json. Un bouton « Soutenir le jeu » apparaît sur l’accueil et dans les crédits ; il ouvre PayPal dans un nouvel onglet. Seuls les liens PayPal en https sont acceptés. Lien vide : le bouton est masqué.
+Dans **Admin › Publication › Soutenir le jeu**, collez le lien de votre bouton de don PayPal (https://www.paypal.biz/…, https://paypal.me/… ou https://www.paypal.com/donate/?hosted_button_id=…), puis exportez config.json. Un bouton « Soutenir le jeu » apparaît sur l’accueil et dans les crédits ; il ouvre PayPal dans un nouvel onglet. Seuls les liens PayPal en https sont acceptés. Lien vide : le bouton est masqué.
 
 ## Bêta test
 Pendant la bêta, l’accueil affiche un bandeau « Bêta test » et un tampon « Bêta » sur le logo. **Admin › Publication › Bêta test** : modifier le texte (et sa version anglaise) ou décocher la mention à la sortie de la bêta, puis exporter config.json.
+
+## Cartes de saison (correctif)
+Exécutez **supabase-correctif-cartes-saison.sql** : il rétablit l’interdiction de fabriquer ou de tirer en paquet une carte de saison avant la fin de la saison (protection effacée si supabase-variantes.sql ou supabase-boosters.sql a été relancé après supabase-saisons.sql). Puis, dans l’admin : Cartes › « Envoyer le catalogue ». À relancer si vous ré-exécutez un jour l’un de ces deux anciens scripts.
