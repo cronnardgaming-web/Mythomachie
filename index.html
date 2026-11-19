@@ -493,6 +493,8 @@ body.compact .lien-hall{padding:2px 4px;font-size:13px}
 .adm-lien[aria-current="page"]{background:color-mix(in srgb, var(--bronze) 24%, transparent);box-shadow:inset 3px 0 0 var(--bronze);font-weight:700}
 .badge-menu{background:#b8402f;color:#fff;border-radius:99px;font-size:12px;font-weight:700;padding:0 7px;line-height:20px}
 .adm-contenu{min-width:0}
+.table-travaux{width:100%;border-collapse:collapse;margin:6px 0 10px}.table-travaux th,.table-travaux td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line)}.table-travaux input[type=date]{min-width:150px}
+.alerte-date{color:#b4532a;font-weight:600}
 .bandeau-beta{display:flex;align-items:center;gap:14px 18px;padding:14px 20px;border-radius:14px;border:2px solid #c9862b;
   background:linear-gradient(100deg,#fff1d6,#ffe2ad);color:#4a3210;box-shadow:0 6px 18px rgba(120,70,10,.18)}
 .bandeau-beta p{margin:0;font-size:15px;line-height:1.45}
@@ -2588,7 +2590,7 @@ ajouterTraductions("en", {
   [/^Vos créatures gagnent \+(\d+)\/\+(\d+)\.$/, (a, v) => `Your creatures get +${a}/+${v}.`],
   [/^Invoque (\d+) (.+)\.$/, (n, c) => `Summon ${n} ${traduireNom(c)}.`],
   [/^Pouvoir de votre équipe ?: (.+)$/, v => `Your team’s power: ${v}`],
-  [/^Héros de la saison (\d+)$/, n => `Hero of Season ${n}`], [/^Soutenir (.+)$/, n => `Support ${traduireNom(n)}`]
+  [/^Héros de la saison (\d+)$/, n => `Hero of Season ${n}`], [/^Accomplissez d’abord le travail (.+)$/, n => `First accomplish labour ${n}`], [/^Soutenir (.+)$/, n => `Support ${traduireNom(n)}`]
 ]);
 ajouterGabarits("en", {"# / # pour le rang or":"# / # for the gold rank", "# / # pour le rang argent":"# / # for the silver rank", "# / # pour le rang bronze":"# / # for the bronze rank", "# / # pour le rang platine":"# / # for the platinum rank"});
 
@@ -2769,7 +2771,10 @@ ajouterTraductions("en", {
   "Vous avez déjà le nombre maximum d’exemplaires.":"You already have the maximum number of copies.", "Vous avez déjà remplacé une quête aujourd’hui.":"You have already replaced a quest today.",
   "Vous ne pouvez défier que vos amis.":"You can only challenge your friends.", "Vous ne pouvez inviter que vos amis.":"You can only invite your friends.",
   "Vous n’avez pas de paquet offert de ce type.":"You have no free pack of this type.", "Vous n’êtes pas dans ce salon.":"You are not in this lobby.",
-  "Vous n’êtes plus considéré comme présent dans cette partie.":"You are no longer considered present in this game.", "Sacrifier":"Sacrifice", "Pouvoir":"Power", "Soutenir le jeu":"Support the game", "Bêta":"Beta", "Bêta test":"Beta test", "Version bêta":"Beta version", "Création":"Made by", "Un jeu créé par":"A game created by", "Conception, règles et direction artistique":"Design, rules and art direction", "Code":"Code", "Illustrations":"Artwork",
+  "Vous n’êtes plus considéré comme présent dans cette partie.":"You are no longer considered present in this game.", "Sacrifier":"Sacrifice", "Pouvoir":"Power", "Soutenir le jeu":"Support the game", "Verrouillé":"Locked",
+  "Les travaux s’ouvrent à intervalles réguliers, deux par semaine, et s’enchaînent : chacun ne se débloque qu’une fois le précédent accompli. Chacun propose une série de quêtes : terminez-les pour accomplir le travail, et franchissez les paliers pour gagner les récompenses.":"The labours open at regular intervals, two a week, and follow one another: each one unlocks only once the previous one is accomplished. Each one offers a series of quests: complete them to accomplish the labour, and reach the milestones to earn the rewards.",
+  ", ouverts au rythme de deux par semaine. Ils s’enchaînent : un travail ne se débloque qu’une fois le précédent accompli. Un travail ouvert le reste jusqu’à la fin de la saison : vous pouvez rattraper votre retard.":", opening at a rate of two a week. They follow one another: a labour unlocks only once the previous one is accomplished. An opened labour stays open until the end of the season: you can catch up.",
+  ", qui rapportent un peu d’or ou d’encre. Elles comptent les parties jouées (contre l’ordinateur, en ligne ou en 2 contre 2) depuis le déblocage du travail. Un travail est accompli quand toutes ses quêtes sont réclamées.":", which give a little gold or ink. They count games played (against the computer, online or in 2 vs 2) since the labour was unlocked. A labour is accomplished when all its quests are claimed.", "Bêta":"Beta", "Bêta test":"Beta test", "Version bêta":"Beta version", "Création":"Made by", "Un jeu créé par":"A game created by", "Conception, règles et direction artistique":"Design, rules and art direction", "Code":"Code", "Illustrations":"Artwork",
   "Le jeu est en cours de développement. Vous pouvez rencontrer des bugs, et les cartes comme l’équilibrage vont encore évoluer. Merci de votre aide pour améliorer Mythomachie !":"The game is still in development. You may run into bugs, and the cards and balance will keep changing. Thank you for helping us improve Mythomachy!", "Soutenir le jeu avec PayPal":"Support the game with PayPal", "Si vous êtes mineur, demandez l’accord de vos parents avant de payer.":"If you are under 18, ask your parents’ permission before paying.", "Pas maintenant":"Not now",
   "Le paiement se fait sur le site de PayPal, dans un nouvel onglet. Le jeu ne voit ni ne conserve aucune donnée de paiement.":"Payment takes place on PayPal’s site, in a new tab. The game never sees or stores any payment data.",
   "Mythomachie est développé par une seule personne, sur son temps libre. Si le jeu vous plaît, vous pouvez soutenir son développement par une contribution du montant de votre choix. Elle est entièrement libre et ne donne aucun avantage en jeu.":"Mythomachy is developed by one person, in their free time. If you enjoy the game, you can support its development with a contribution of any amount. It is entirely optional and gives no in-game advantage.", "Ou sacrifice":"Or sacrifice", "aventurier":"adventurer"
@@ -7063,8 +7068,8 @@ function pageRegles(){
       <li>Chaque joueur a une <b>cote</b> (1 200 au départ). Le gagnant prend des points au perdant : battre un joueur mieux classé rapporte beaucoup, battre un joueur moins bien classé rapporte peu. Vos 20 premières parties comptent double, pour trouver vite votre niveau.</li>
       <li>À la fin de chaque partie, le résultat est confirmé par les deux joueurs. En cas de désaccord, les points de la partie sont annulés.</li></ul>`],
     ["saisons", "Les saisons", `<ul>
-      <li>Une <b>saison</b> dure environ six semaines et propose <b>12 travaux</b>, ouverts au rythme de deux par semaine. Un travail ouvert le reste jusqu’à la fin de la saison : vous pouvez rattraper votre retard.</li>
-      <li>Chaque travail compte plusieurs <b>quêtes</b>, qui rapportent un peu d’or ou d’encre. Elles comptent les parties jouées contre l’ordinateur ou en ligne depuis l’ouverture du travail. Un travail est accompli quand toutes ses quêtes sont réclamées.</li>
+      <li>Une <b>saison</b> dure environ six semaines et propose <b>12 travaux</b>, ouverts au rythme de deux par semaine. Ils s’enchaînent : un travail ne se débloque qu’une fois le précédent accompli. Un travail ouvert le reste jusqu’à la fin de la saison : vous pouvez rattraper votre retard.</li>
+      <li>Chaque travail compte plusieurs <b>quêtes</b>, qui rapportent un peu d’or ou d’encre. Elles comptent les parties jouées (contre l’ordinateur, en ligne ou en 2 contre 2) depuis le déblocage du travail. Un travail est accompli quand toutes ses quêtes sont réclamées.</li>
       <li>Des <b>paliers</b> récompensent le nombre de travaux accomplis (par exemple 4, 8, 11 et 12) : cartes de saison, paquets offerts, illustrations exclusives, titres.</li>
       <li>Les <b>cartes de saison</b> ne s’obtiennent qu’en accomplissant les travaux pendant la saison ; elles rejoignent ensuite les paquets.</li></ul>`],
     ["conseils", "Conseils pour bien débuter", `<ul>
@@ -9270,6 +9275,10 @@ function saisonDouzeTravaux(){
     paliers:[{travaux:4, recompense:{paquets:["classique"]}}, {travaux:8, recompense:{paquets:["classique"], or:50}},
              {travaux:11, recompense:{paquets:["classique"]}}, {travaux:12, recompense:{titre:"Héros de la saison 1"}}]};
 }
+// Date d’ouverture d’un travail (AAAA-MM-JJ) ↔ nombre de jours après le début de la saison
+const jourUTC = iso => { const [a, m, j] = String(iso || "").split("-").map(Number); return Date.UTC(a, (m || 1) - 1, j || 1) / 86400000; };
+const isoSaison = (s, jours) => new Date((jourUTC(s.debut) + jours) * 86400000).toISOString().slice(0, 10);
+const ouvertureJour = (t, k) => t.ouverture_jour ?? ouvertureTravail(k);
 const dateSaison = (s, jours) => { const d = new Date(s.debut + "T00:00:00"); d.setDate(d.getDate() + jours); return d.toLocaleDateString(LOC(), {weekday:"short", day:"numeric", month:"short"}); };
 function htmlRecompenseAdmin(chemin, r){
   const cartes = Object.keys(CARTES).filter(k => estCollectionnable(CARTES[k])).sort((a, b) => ((CARTES[b].saisonFin ? 1 : 0) - (CARTES[a].saisonFin ? 1 : 0)) || CARTES[a].nom.localeCompare(CARTES[b].nom, "fr"));
@@ -9290,7 +9299,7 @@ function admSaisons(){
   const fin = s ? dateSaison(s, s.duree_jours || 42) : "";
   return `<div class="adm-page adm-saisons">
     <h2>Saisons</h2>
-    <p class="aide">Une saison dure ${s ? s.duree_jours || 42 : 42} jours. Ses 12 travaux s’ouvrent deux par semaine ; chaque travail compte des quêtes, et 4 paliers récompensent le nombre de travaux finis. Une quête ne compte que les parties jouées après l’ouverture de son travail, contre l’ordinateur ou en ligne. Après vos changements : « Envoyer la saison au serveur », puis exportez config.json.</p>
+    <p class="aide">Une saison dure ${s ? s.duree_jours || 42 : 42} jours. Ses 12 travaux s’ouvrent deux par semaine ; chaque travail compte des quêtes, et 4 paliers récompensent le nombre de travaux finis. Les travaux s’enchaînent : chacun se débloque quand le précédent est accompli, et ses quêtes ne comptent que les parties jouées depuis ce déblocage (contre l’ordinateur, en ligne ou en 2 contre 2). Nécessite le script supabase-saison-travaux-enchaines.sql. Après vos changements : « Envoyer la saison au serveur », puis exportez config.json.</p>
     <div class="liste-boosters">
       ${ids.map(k => `<button type="button" class="adm-lien" data-act="saison-sel" data-id="${k}" ${k===sid ? 'aria-current="page"' : ""}>${esc(CONFIG.saisons[k].nom || k)}${CONFIG.saisons[k].active ? "" : ` <span class="aide">(inactive)</span>`}</button>`).join("")}
       <button type="button" class="btn second" data-act="saison-modele">Créer « Les Douze Travaux d’Héraclès »</button>
@@ -9319,10 +9328,20 @@ function admSaisons(){
         ${champNombre("Travaux finis requis", `saisons.${sid}.paliers.${k}.travaux`, pl.travaux)}
         ${htmlRecompenseAdmin(`saisons.${sid}.paliers.${k}.recompense`, pl.recompense || {})}</fieldset>`).join("")}
       <h3>Les travaux</h3>
+      ${s.debut ? `<div class="calendrier-travaux">
+        <p class="aide">Date d’ouverture de chaque travail. Un travail ouvert ne se débloque qu’une fois le précédent accompli. Après vos changements : « Envoyer la saison au serveur », puis exportez config.json.</p>
+        <table class="table-travaux"><thead><tr><th>Travail</th><th>Ouverture</th><th></th></tr></thead><tbody>
+        ${(s.travaux || []).map((t, k) => { const j = ouvertureJour(t, k), hors = j < 0 || j >= (s.duree_jours || 42), avant = k > 0 && j < ouvertureJour(s.travaux[k-1], k-1);
+          return `<tr><td><b>${ROMAINS[k] || k + 1}.</b> ${esc(t.nom || "Travail")}</td>
+          <td><input type="date" data-ouverture="${sid}|${k}" value="${isoSaison(s, j)}" min="${isoSaison(s, 0)}" max="${isoSaison(s, (s.duree_jours || 42) - 1)}" aria-label="Date d’ouverture du travail ${k + 1}"></td>
+          <td>${hors ? `<span class="alerte-date">En dehors de la saison</span>` : avant ? `<span class="alerte-date">Avant le travail précédent</span>` : `<span class="aide">${dateSaison(s, j)} · jour ${j + 1}</span>`}</td></tr>`; }).join("")}
+        </tbody></table>
+        <div class="adm-actions"><button type="button" class="btn second" data-act="saison-repartir" data-id="${sid}">Répartir régulièrement sur les ${s.duree_jours || 42} jours</button></div>
+      </div>` : `<p class="aide">Choisissez d’abord la date de début de la saison pour régler les dates d’ouverture.</p>`}
       ${(s.travaux || []).map((t, k) => `<details class="travail-admin" ${adm.travailOuvert===k ? "open" : ""} data-travail="${k}">
         <summary><b>${k+1}. ${esc(t.nom || "Travail")}</b> <span class="aide">ouverture le ${dateSaison(s, t.ouverture_jour ?? ouvertureTravail(k))}, ${(t.quetes || []).length} quêtes</span></summary>
         <div class="champs">${champTexte("Nom", `saisons.${sid}.travaux.${k}.nom`, t.nom || "")}${champTexte("Description", `saisons.${sid}.travaux.${k}.description`, t.description || "")}
-          ${champNombre("Ouverture (jours après le début)", `saisons.${sid}.travaux.${k}.ouverture_jour`, t.ouverture_jour ?? ouvertureTravail(k))}</div>
+          ${s.debut ? `<label class="champ"><span>Date d’ouverture</span><input type="date" data-ouverture="${sid}|${k}" value="${isoSaison(s, ouvertureJour(t, k))}" min="${isoSaison(s, 0)}" max="${isoSaison(s, (s.duree_jours || 42) - 1)}"></label>` : champNombre("Ouverture (jours après le début)", `saisons.${sid}.travaux.${k}.ouverture_jour`, ouvertureJour(t, k))}</div>
         <div class="illustration-travail-admin" data-depot="travail:${sid}|${k}">
           ${htmlCadreur(`travail:${sid}|${k}`, t.image, t.cadrage, 100, 300, `l’illustration du travail ${k+1}`)}
           <div><p class="aide">Illustration verticale, au format de la colonne. Faites glisser l’image dans l’aperçu pour choisir la partie visible, et réglez le zoom. Pour la remplacer : copiez une image puis cliquez sur « Coller », ou cliquez dans ce cadre et faites Ctrl+V.</p>
@@ -9361,11 +9380,17 @@ function actionSaisons(act, id){
     case "saison-accueil-suppr": { const s = CONFIG.saisons[id]; delete s.accueilImage; s.accueilCadrage = {...cadrageVide}; sauver(); break; }
     case "saison-image-suppr": { const [sid, k] = id.split("|"); delete CONFIG.saisons[sid].travaux[k].image; adm.travailOuvert = Number(k); sauver(); break; }
     case "saison-quete-suppr": { const [sid, k, n] = id.split("|"); CONFIG.saisons[sid].travaux[k].quetes.splice(Number(n), 1); adm.travailOuvert = Number(k); sauver(); break; }
+    case "saison-repartir": {
+      const s = CONFIG.saisons[id], n = (s.travaux || []).length, d = s.duree_jours || 42;
+      // 12 travaux sur la durée : un toutes les d/n journées, le dernier assez tôt pour être fini avant la fin
+      (s.travaux || []).forEach((t, k) => { t.ouverture_jour = Math.floor(k * (d - 7) / Math.max(1, n - 1)); });
+      if(typeof marquerModifie==="function") marquerModifie(); sauver(); break;
+    }
     case "saison-envoyer": {
       const s = CONFIG.saisons[id];
       // Textes des quêtes regénérés pour suivre leur type et leur objectif
       (s.travaux || []).forEach(t => (t.quetes || []).forEach(q => { q.texte = texteQueteSaison(q); }));
-      rpc("admin_maj_saison", {p:{id, ...(({accueilImage, accueilCadrage, ...r}) => r)(s), travaux:(s.travaux || []).map(({image, cadrage, ...t}) => t)}}).then(() => erreur(`Saison « ${s.nom} » envoyée au serveur.`), e => erreur(messageScriptManquant ? messageScriptManquant(e.message).replace("supabase-stats.sql", "supabase-saisons.sql") : e.message));
+      rpc("admin_maj_saison", {p:{id, ...(({accueilImage, accueilCadrage, ...r}) => r)(s), travaux:(s.travaux || []).map(({image, cadrage, ...t}, k) => ({...t, ouverture_jour:ouvertureJour(t, k)}))}}).then(() => erreur(`Saison « ${s.nom} » envoyée au serveur.`), e => erreur(messageScriptManquant ? messageScriptManquant(e.message).replace("supabase-stats.sql", "supabase-saisons.sql") : e.message));
       return true;
     }
     default: return false;
@@ -9376,6 +9401,11 @@ function actionSaisons(act, id){
 // Champs propres à l’éditeur de saison (type de quête, récompense, listes)
 document.addEventListener("change", e => {
   const el = e.target, ds = el.dataset || {};
+  if(ds.ouverture && ui.ecran==="admin"){
+    const [sid, k] = ds.ouverture.split("|"), s = CONFIG.saisons[sid], t = s && (s.travaux || [])[Number(k)];
+    if(t && el.value && s.debut){ t.ouverture_jour = Math.round(jourUTC(el.value) - jourUTC(s.debut)); if(typeof marquerModifie==="function") marquerModifie(); sauver(); renderAdmin(); }
+    return;
+  }
   if(!(ds.saisonType || ds.saisonRec || ds.saisonListe) || ui.ecran!=="admin") return;
   const chemin = ds.saisonType || ds.saisonRec || ds.saisonListe, parts = chemin.split(".");
   let o = CONFIG; for(const k of parts.slice(0, -1)) o = o[k];
@@ -9406,7 +9436,7 @@ function texteRecompenseSaison(r){
 function recompensesSaisonEnAttente(){
   const s = PROG.saison; if(!s || s.a_venir) return 0;
   let n = 0;
-  s.travaux.forEach(t => t.ouvert && t.quetes.forEach(q => { if(!q.faite && q.progres>=q.but) n++; }));
+  s.travaux.forEach(t => travailActif(t) && t.quetes.forEach(q => { if(!q.faite && q.progres>=q.but) n++; }));
   (s.paliers || []).forEach((p, k) => { if(s.finis>=p.travaux && !(s.paliers_reclames || []).includes(String(k))) n++; });
   return n;
 }
@@ -9996,16 +10026,20 @@ function htmlRecompensesSaison(s){
     </div>`;
   }).join("");
 }
+// Un travail est jouable quand sa date est passée et que le précédent est accompli (« debloque », donné par le serveur)
+const travailActif = t => !!t.ouvert && t.debloque!==false;
 function htmlColonneTravail(s, t, k){
-  const img = imageTravail(s.id, k), etat = t.fini ? "fini" : t.ouvert ? "ouvert" : "ferme", jr = joursRestants(t.ouverture);
-  const quetes = t.ouvert ? t.quetes.map(q => { const fini = q.progres>=q.but;
+  const actif = travailActif(t), attendPrecedent = t.ouvert && !actif;
+  const img = imageTravail(s.id, k), etat = t.fini ? "fini" : actif ? "ouvert" : "ferme", jr = joursRestants(t.ouverture);
+  const quetes = actif ? t.quetes.map(q => { const fini = q.progres>=q.but;
     return `<li class="${q.faite ? "faite" : fini ? "finie" : ""}"><span class="texte-q">${esc(q.texte)}</span>
       <span class="barre"><span style="width:${Math.min(100, 100*q.progres/q.but)}%"></span></span>
       <span class="pied-q"><span class="prog-q">${q.faite ? "✓" : `${q.progres} / ${q.but}`}</span>${q.faite ? "" : fini ? `<button type="button" class="btn btn-rang" data-act="saison-quete" data-id="${esc(q.id)}">+${esc(texteRecompenseSaison(q.recompense))}</button>` : `<span class="aide">${esc(texteRecompenseSaison(q.recompense))}</span>`}</span></li>`; }).join("") : "";
   return `<article class="colonne-travail ${etat} ${img ? "illustree" : ""}" aria-label="Travail ${k+1} : ${esc(t.nom)}">
     ${img ? `<img class="fond-travail" src="${img}" alt="" loading="lazy" style="${styleCadrage((confTravail(s.id, k) || {}).cadrage)}">` : `<span class="filigrane" aria-hidden="true">${ROMAINS[k] || k + 1}</span>`}
     <header><span class="num-travail">${ROMAINS[k] || k + 1}</span><h3>${esc(t.nom)}</h3>${t.fini ? `<span class="sceau" aria-label="Travail accompli">✓</span>` : ""}</header>
-    ${t.ouvert ? `<div class="corps-travail">${t.description ? `<p class="desc-travail">${esc(t.description)}</p>` : ""}<ul class="quetes-travail">${quetes}</ul></div>`
+    ${actif ? `<div class="corps-travail">${t.description ? `<p class="desc-travail">${esc(t.description)}</p>` : ""}<ul class="quetes-travail">${quetes}</ul></div>`
+      : attendPrecedent ? `<div class="verrou-travail"><span class="cadenas-travail" aria-hidden="true">🔒</span><b>Verrouillé</b><span>Accomplissez d’abord le travail ${ROMAINS[k-1] || k}</span></div>`
       : `<div class="verrou-travail"><span class="cadenas-travail" aria-hidden="true">🔒</span><b>Fermé</b><span>Ouvre le ${dateLongue(t.ouverture)}</span>${jr ? `<small>dans ${jr} jour${jr>1 ? "s" : ""}</small>` : ""}</div>`}
   </article>`;
 }
@@ -10017,7 +10051,7 @@ function pageSaison(){
     <div class="page-saison v2" style="--teinte:${couleurSaison(s)}">
       <section class="bandeau-saison">
         <div class="titre-bandeau"><span class="sur-titre">${s.a_venir ? "Prochaine saison" : "Saison en cours"}</span><h2>${esc(s.nom)}</h2>
-          <p class="regle-saison">Les travaux s’ouvrent à intervalles réguliers, deux par semaine. Chacun propose une série de quêtes : terminez-les pour accomplir le travail, et franchissez les paliers pour gagner les récompenses.</p></div>
+          <p class="regle-saison">Les travaux s’ouvrent à intervalles réguliers, deux par semaine, et s’enchaînent : chacun ne se débloque qu’une fois le précédent accompli. Chacun propose une série de quêtes : terminez-les pour accomplir le travail, et franchissez les paliers pour gagner les récompenses.</p></div>
         <div class="compteurs-bandeau">
           ${s.a_venir ? `<div><b>${jrOuv}</b><span>jour${jrOuv>1 ? "s" : ""} avant l’ouverture</span><small>${dateLongue(s.debut + "T00:00:00")}</small></div>`
             : `<div><b>${s.finis}</b><span>/ ${total} travaux accomplis</span></div><div><b>${jrFin}</b><span>jour${jrFin>1 ? "s" : ""} restant${jrFin>1 ? "s" : ""}</span><small>fin le ${dateLongue(s.fin)}</small></div>`}

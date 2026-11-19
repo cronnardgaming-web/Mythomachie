@@ -273,3 +273,6 @@ Pendant la bêta, l’accueil affiche un bandeau « Bêta test » et un tampon �
 
 ## Cartes de saison (correctif)
 Exécutez **supabase-correctif-cartes-saison.sql** : il rétablit l’interdiction de fabriquer ou de tirer en paquet une carte de saison avant la fin de la saison (protection effacée si supabase-variantes.sql ou supabase-boosters.sql a été relancé après supabase-saisons.sql). Puis, dans l’admin : Cartes › « Envoyer le catalogue ». À relancer si vous ré-exécutez un jour l’un de ces deux anciens scripts.
+
+## Saison : travaux enchaînés
+Exécutez **supabase-saison-travaux-enchaines.sql** (après supabase-saisons.sql) : un travail ne se débloque qu’une fois le précédent accompli (et sa date d’ouverture passée), et ses quêtes ne comptent que les parties jouées depuis ce déblocage. Les parties de 2 contre 2 comptent désormais pour les quêtes de saison.
