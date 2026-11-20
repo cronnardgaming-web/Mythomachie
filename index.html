@@ -571,6 +571,7 @@ body.compact .adm-statut{display:none}
 .vignette-choix.verrouillee .carte .illu{filter:blur(3px)}
 .vignette-choix.verrouillee .carte .art{overflow:hidden}
 .cadenas{position:absolute;inset:0;display:grid;place-items:center;font-size:22px}
+.indice-variante{margin:8px 0 0;padding:9px 12px;border-radius:8px;border:1px dashed var(--or, #c9a227);background:rgba(201,162,39,.1);font-size:14px;line-height:1.4}
 .marque-choisie{position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);font-size:10px;font-weight:700;color:#fff;background:#3f9d6b;border-radius:99px;padding:0 7px;white-space:nowrap}
 .nouvelle.illustration{background:linear-gradient(135deg,#f0c64e,#b07a1e);color:#2b1a04}
 .nouvelle.doublon{background:#6f7c88}
@@ -832,6 +833,7 @@ body.compact .nom-heros-deck{font-size:17px}
 .col-item{position:relative}
 
 /* Administration : cartes absentes du catalogue */
+.ligne-date{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ligne-date input{flex:1 1 160px}.ligne-date .btn{margin:0;padding:6px 12px;font-size:13px}
 .adm-a-venir{font-size:10.5px;font-weight:700;padding:0 6px;border-radius:99px;background:#5b6b8c;color:#fff;vertical-align:1px}
 .adm-a-venir.adm-saison{background:#c9a227;color:#2b1a06}
 .alerte-catalogue{display:flex;align-items:center;gap:6px 14px;flex-wrap:wrap;margin:10px 0 0;padding:10px 14px;border-radius:10px;
@@ -2796,7 +2798,7 @@ ajouterTraductions("en", {
   "Ticket de partie inconnu.":"Unknown game ticket.", "Ticket introuvable.":"Ticket not found.", "Trop de demandes en attente.":"Too many pending requests.",
   "Trop de parties commencées en une heure : patientez un peu.":"Too many games started in an hour: please wait a little.", "Trophée inconnu.":"Unknown trophy.",
   "Valeurs invalides : l’or et l’encre doivent être des nombres entiers positifs.":"Invalid values: gold and ink must be positive whole numbers.", "Version du jeu obsolète : rechargez la page.":"Outdated game version: reload the page.",
-  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Changer ▾":"Change ▾", "Changer de deck":"Change deck", "Aucun deck complet :":"No complete deck:", "construire un deck":"build a deck", "Choisir votre deck":"Choose your deck", "Ce deck sert pour « Jouer », contre un joueur comme contre l’ordinateur en attendant.":"This deck is used for “Play”, against a player and against the computer while you wait.", "Avec :":"With:", "1 contre 1":"1 vs 1", "victoires contre l’ordinateur":"wins against the computer", "victoires contre un joueur":"wins against a player", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
+  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Changer ▾":"Change ▾", "Changer de deck":"Change deck", "Aucun deck complet :":"No complete deck:", "construire un deck":"build a deck", "Choisir votre deck":"Choose your deck", "Ce deck sert pour « Jouer », contre un joueur comme contre l’ordinateur en attendant.":"This deck is used for “Play”, against a player and against the computer while you wait.", "Avec :":"With:", "Affichée":"Displayed", "Pas encore obtenue.":"Not obtained yet.", "À trouver dans :":"Found in:", "Afficher cette illustration":"Display this artwork", "Illustration d’origine.":"Original artwork.", "Comment l’obtenir :":"How to get it:", "1 contre 1":"1 vs 1", "victoires contre l’ordinateur":"wins against the computer", "victoires contre un joueur":"wins against a player", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
   "Vous avez déjà le nombre maximum d’exemplaires.":"You already have the maximum number of copies.", "Vous avez déjà remplacé une quête aujourd’hui.":"You have already replaced a quest today.",
   "Vous ne pouvez défier que vos amis.":"You can only challenge your friends.", "Vous ne pouvez inviter que vos amis.":"You can only invite your friends.",
   "Vous n’avez pas de paquet offert de ce type.":"You have no free pack of this type.", "Vous n’êtes pas dans ce salon.":"You are not in this lobby.",
@@ -4565,7 +4567,7 @@ function idUnique(prefixe){
 function actionAdmin(act, id, el){
   if(act.startsWith("srv-")){ actionServeur(act); return; }
   if(act.startsWith("mus-")){ actionMusiques(act, id); return; }
-  if(act.startsWith("variante-") || act.startsWith("booster-") || act==="carte-promo"){ actionVariantes(act, id); return; }
+  if(act.startsWith("variante-") || act.startsWith("booster-") || act==="carte-promo" || act==="carte-date-effacer"){ actionVariantes(act, id); return; }
   if(act.startsWith("saison-")){ actionSaisons(act, id); return; }
   if(act==="achats-csv" || act.startsWith("achat-")){ actionAchats(act, id); return; }
   if(act.startsWith("son-")){ actionBruitages(act, id); return; }
@@ -4734,6 +4736,7 @@ document.addEventListener("input", e => {
     if(el.type==="number" || el.type==="date"){
       if(el.type==="number" && el.value==="") return;
       if(el.type==="date" && el.value==="" && el.validity && el.validity.badInput) return;   // date en cours de saisie
+      if(el.type==="date" && el.value===""){ const m = el.dataset.chemin.match(/^cartes\.([^.]+)\.(saisonFin|sortie)$/); if(m && CARTES[m[1]]){ delete CARTES[m[1]][m[2]]; sauver(); adm.renduDiffere = true; return; } }
       majChemin(el.dataset.chemin, el.value, el.type==="number");
       adm.renduDiffere = true;
       majBudgetDirect();
@@ -4758,6 +4761,12 @@ document.addEventListener("pointerup", () => { pointeurAppuye = false; if(adm.re
 const estChampDiffere = el => !!(el && el.dataset && el.dataset.chemin && (el.type==="number" || el.type==="date"));
 function rendreDiffere(){ if(!adm.renduDiffere || ui.ecran!=="admin" || estChampDiffere(document.activeElement)) return; adm.renduDiffere = false; renderAdmin(); }
 document.addEventListener("focusout", e => {
+  // Date entièrement vidée au clavier (jour, mois et année effacés) : on retire la date
+  const el = e.target;
+  if(ui.ecran==="admin" && el && el.type==="date" && el.dataset && el.dataset.chemin && el.value==="" && !(el.validity && el.validity.badInput)){
+    const m = el.dataset.chemin.match(/^cartes\.([^.]+)\.(saisonFin|sortie)$/);
+    if(m && CARTES[m[1]] && CARTES[m[1]][m[2]]){ delete CARTES[m[1]][m[2]]; sauver(); adm.renduDiffere = true; }
+  }
   if(!adm.renduDiffere || !estChampDiffere(e.target)) return;
   if(!pointeurAppuye) setTimeout(rendreDiffere, 0);   // Tab, Entrée… ; avec la souris, on attend la fin du clic
 });
@@ -8338,6 +8347,8 @@ function htmlAdminVariantes(id){
         <div class="vignette-variante">${htmlCarte({id, v:vid, uid:"apv-" + vid})}</div>
         <div class="variante-champs">
           <div class="champs">${champTexte("Nom de la variante", `variantes.${vid}.nom`, v.nom || "")}${champTexte("Mention d’édition (ex. Bêta 2026)", `variantes.${vid}.edition`, v.edition || "")}${champSelect("Cadre", `variantes.${vid}.cadre`, v.cadre || "dore", CADRES)}</div>
+          <div class="champs">${champTexte("Comment l’obtenir (indice montré aux joueurs qui ne l’ont pas)", `variantes.${vid}.indice`, v.indice || "")}${champTexte("Le même indice en anglais (facultatif)", `variantes.${vid}.indice_en`, v.indice_en || "")}</div>
+          <p class="aide">Exemple : « Jouez 200 parties pendant la bêta ». Le joueur le voit dans sa collection, en ouvrant la carte et en sélectionnant cette illustration.</p>
           <input type="file" accept="image/*" data-image="variante:${vid}" hidden>
           <div class="adm-actions">
             <button type="button" class="btn second" data-act="image-choisir" data-id="variante:${vid}">${v.image ? "Changer l’illustration" : "Ajouter l’illustration"}</button>
@@ -8351,8 +8362,8 @@ function htmlAdminVariantes(id){
     </fieldset>
     <fieldset><legend>Sortie</legend>
       <label class="case"><input type="checkbox" data-act="carte-promo" data-id="${id}" ${d.promo ? "checked" : ""}> Carte promotionnelle</label>
-      <label class="champ champ-saison"><span>Carte de saison : entre dans les paquets le (vide = carte normale)</span><input type="date" data-chemin="cartes.${id}.saisonFin" value="${esc(d.saisonFin || "")}"></label>
-      <label class="champ champ-saison"><span>Date de sortie : visible par les joueurs à partir du (vide = tout de suite)</span><input type="date" data-chemin="cartes.${id}.sortie" value="${esc(d.sortie || "")}"></label>
+      <label class="champ champ-saison"><span>Carte de saison : entre dans les paquets le (vide = carte normale)</span><span class="ligne-date"><input type="date" data-chemin="cartes.${id}.saisonFin" value="${esc(d.saisonFin || "")}">${d.saisonFin ? `<button type="button" class="btn second" data-act="carte-date-effacer" data-id="${id}|saisonFin">Effacer la date</button>` : ""}</span></label>
+      <label class="champ champ-saison"><span>Date de sortie : visible par les joueurs à partir du (vide = tout de suite)</span><span class="ligne-date"><input type="date" data-chemin="cartes.${id}.sortie" value="${esc(d.sortie || "")}">${d.sortie ? `<button type="button" class="btn second" data-act="carte-date-effacer" data-id="${id}|sortie">Effacer la date</button>` : ""}</span></label>
       ${pasEncoreSortie(d) ? `<p class="aide">Carte à venir : les joueurs la verront à partir du ${new Date(d.sortie + "T00:00:00").toLocaleDateString(LOC())} (dès 1 h du matin, heure de Paris). D’ici là, ils ne la voient nulle part (collection, decks, paquets, fabrication, decks de l’ordinateur). Pensez à « Envoyer le catalogue » et à exporter config.json.</p>` : ""}
       ${d.saisonFin ? `<p class="aide">Carte de saison : visible dans la collection, mais absente des paquets et non fabricable jusqu’à la veille. Elle entre dans les paquets le ${new Date(d.saisonFin + "T00:00:00").toLocaleDateString(LOC())} (dès 1 h du matin, heure de Paris). Pensez à « Envoyer le catalogue ».</p>` : ""}
       <p class="aide">${d.promo
@@ -8433,6 +8444,7 @@ function actionVariantes(act, id){
       for(const b of Object.values(CONFIG.boosters || {})) b.variantes = (b.variantes || []).filter(x => x!==id);
       sauver(); anciens.forEach(liberer); erreur("Variante supprimée."); break;
     }
+    case "carte-date-effacer": { const [cid, champ] = String(id).split("|"); if(CARTES[cid] && ["saisonFin", "sortie"].includes(champ)){ delete CARTES[cid][champ]; adm.renduDiffere = false; sauver(); } break; }
     case "carte-promo": CARTES[id].promo = !CARTES[id].promo; if(!CARTES[id].promo) delete CARTES[id].promo; sauver(); break;
     case "booster-basculer": { const [bid, genre, ident] = String(id).split("|"); basculerDansBooster(bid, genre, ident); break; }
     case "booster-sel": adm.booster = id; break;
@@ -8459,10 +8471,15 @@ function htmlChoixIllustrations(id){
       ${htmlCarte({id, v:vid || undefined, uid:"cv-" + (vid || "o")})}${pref===vid ? `<span class="marque-choisie">Affichée</span>` : ""}${possede ? "" : `<span class="cadenas" aria-hidden="true">🔒</span>`}</div>`;
   const vVue = vue ? CONFIG.variantes[vue] : null, possedeVue = !vue || (PROG.variantes && PROG.variantes[vue]);
   const ou = vue ? boostersDe("variante", vue).filter(([, b]) => b.actif!==false).map(([, b]) => b.nom) : [];
+  const indiceFR = vVue && String(vVue.indice || "").trim(), indiceEN = vVue && String(vVue.indice_en || "").trim();
+  const indice = !possedeVue && indiceFR ? (LANGUE==="en" && indiceEN
+      ? `<p class="indice-variante" data-sans-trad><b>How to get it:</b> ${esc(indiceEN)}</p>`
+      : `<p class="indice-variante"><b>Comment l’obtenir :</b> <span>${esc(indiceFR)}</span></p>`) : "";
   return `<div class="choix-illustrations"><h3>Illustrations</h3>
     <div class="rangee-vignettes">${vignette(null, true, "Illustration d’origine")}${vars.map(([vid, v]) => vignette(vid, !!(PROG.variantes && PROG.variantes[vid]), v.nom || "Illustration alternative")).join("")}</div>
-    <p class="aide">${vue ? `${esc(vVue.nom || "Illustration alternative")}${vVue.edition ? `, ${esc(vVue.edition)}` : ""}.` : "Illustration d’origine."}
-      ${possedeVue ? (pref===vue ? " C’est celle que vous affichez." : "") : ` Pas encore obtenue${ou.length ? ` : à trouver dans ${ou.map(esc).join(", ")}` : ""}.`}</p>
+    <p class="aide">${vue ? `<span data-sans-trad>${esc(vVue.nom || "Illustration alternative")}${vVue.edition ? `, ${esc(vVue.edition)}` : ""}.</span>` : "<span>Illustration d’origine.</span>"}
+      ${possedeVue ? (pref===vue ? " <span>C’est celle que vous affichez.</span>" : "") : ` <span>Pas encore obtenue.</span>${ou.length ? ` <span>À trouver dans :</span> <span data-sans-trad>${ou.map(esc).join(", ")}</span>` : ""}`}</p>
+    ${indice}
     ${possedeVue && pref!==vue ? `<button type="button" class="btn" data-act="col-variante-choisir" data-id="${id}|${vue || ""}">Afficher cette illustration</button>` : ""}
   </div>`;
 }
