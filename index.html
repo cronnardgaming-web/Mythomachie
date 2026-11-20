@@ -94,7 +94,10 @@ button.portrait{cursor:pointer}
 .art.sans-image::before{content:"";position:absolute;inset:0;background:var(--fc);opacity:.45}
 .art.sans-image::after{content:attr(data-sym);position:absolute;inset:0;display:grid;place-items:center;font-size:42cqw;color:rgba(255,255,255,.2)}
 .art .illu{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.nom-bande{position:absolute;left:0;right:0;top:0;z-index:1;padding:2.6cqw 20cqw 8cqw 3.5cqw;text-align:left;background:linear-gradient(rgba(12,9,5,.9),rgba(12,9,5,.6) 55%,rgba(12,9,5,0));font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:7.4cqw;line-height:1.12;color:#fff;text-shadow:0 1px 2px #000;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nom-bande{position:absolute;left:0;right:0;top:0;z-index:1;padding:2.6cqw 20cqw 8cqw 3.5cqw;text-align:left;background:linear-gradient(rgba(12,9,5,.9),rgba(12,9,5,.6) 55%,rgba(12,9,5,0));font-family:Cinzel,"Times New Roman",serif;font-weight:700;font-size:7.4cqw;line-height:1.12;color:#fff;text-shadow:0 1px 2px #000;display:flex;flex-direction:column;align-items:flex-start;gap:1.4cqw}
+.nom-texte{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;max-width:100%}
+.nom-long .nom-texte{font-size:.86em}
+.nom-tres-long .nom-texte{font-size:.74em}
 .carte .texte{position:absolute;left:0;right:0;bottom:0;z-index:1;max-height:64%;overflow:hidden;padding:10cqw 4cqw 6cqw;font-size:6.5cqw;line-height:1.28;color:#fff;background:linear-gradient(to top,rgba(12,9,5,.94),rgba(12,9,5,.84) 70%,rgba(12,9,5,0));text-shadow:0 1px 2px #000}
 .carte .texte .mots-cles{color:#f2d48a;font-weight:700}
 .pied{flex:1;display:flex;align-items:center;justify-content:center;gap:2cqw;min-width:0;padding:0 15cqw;font-size:6.2cqw;letter-spacing:.03em;color:var(--fci);white-space:nowrap}
@@ -550,16 +553,24 @@ body.compact .adm-statut{display:none}
 .carte.variante.cadre-pleine .art{position:absolute;inset:0;height:auto;border-radius:inherit}
 .carte.variante.cadre-pleine .texte{background:rgba(10,8,5,.72)}
 /* ===== Cadres des illustrations alternatives ===== */
+/* Cadres complets : le contour extérieur garde la couleur du panthéon */
+.carte.variante:is(.cadre-arche,.cadre-or,.cadre-obsidienne,.cadre-frise,.cadre-celeste,.cadre-aura,.cadre-bonbon),.crea.variante:is(.cadre-arche,.cadre-or,.cadre-obsidienne,.cadre-frise,.cadre-celeste,.cadre-aura,.cadre-bonbon){background:var(--fc)}
+.carte.variante:is(.cadre-arche,.cadre-or,.cadre-obsidienne,.cadre-frise,.cadre-celeste,.cadre-aura,.cadre-bonbon) .cadre,.crea.variante:is(.cadre-arche,.cadre-or,.cadre-obsidienne,.cadre-frise,.cadre-celeste,.cadre-aura,.cadre-bonbon) .cadre{inset:1.8cqw;padding:2.7cqw;border-radius:2.6cqw}
+.carte.variante:is(.cadre-arche,.cadre-or,.cadre-obsidienne,.cadre-frise,.cadre-celeste,.cadre-aura,.cadre-bonbon) .prix{top:.6cqw;right:.6cqw}
+.carte.variante:is(.cadre-arche,.cadre-or,.cadre-obsidienne,.cadre-frise,.cadre-celeste,.cadre-aura,.cadre-bonbon) .atk,.crea.variante:is(.cadre-arche,.cadre-or,.cadre-obsidienne,.cadre-frise,.cadre-celeste,.cadre-aura,.cadre-bonbon) .atk{left:.2cqw;bottom:-.2cqw}
+.carte.variante:is(.cadre-arche,.cadre-or,.cadre-obsidienne,.cadre-frise,.cadre-celeste,.cadre-aura,.cadre-bonbon) .pv,.carte.variante:is(.cadre-arche,.cadre-or,.cadre-obsidienne,.cadre-frise,.cadre-celeste,.cadre-aura,.cadre-bonbon) .dur,.crea.variante:is(.cadre-arche,.cadre-or,.cadre-obsidienne,.cadre-frise,.cadre-celeste,.cadre-aura,.cadre-bonbon) .pv{right:.2cqw;bottom:-.2cqw}
+.carte-ouverte.variante:is(.cadre-arche,.cadre-or,.cadre-obsidienne,.cadre-frise,.cadre-celeste,.cadre-aura,.cadre-bonbon){box-shadow:inset 0 0 0 6px var(--fc),inset 0 0 0 7px rgba(255,255,255,.25),0 12px 40px rgba(0,0,0,.45);padding:14px}
+
 /* Arche : carte de pierre sombre, illustration dans une arche de temple, nom centré sous la voûte */
-.carte.variante.cadre-arche,.crea.variante.cadre-arche,.carte-ouverte.variante.cadre-arche{background:linear-gradient(165deg,#4a3f31,#211a12 55%,#120d08)}
+.carte.variante.cadre-arche .cadre,.crea.variante.cadre-arche .cadre,.carte-ouverte.variante.cadre-arche{background:linear-gradient(165deg,#4a3f31,#211a12 55%,#120d08)}
 .carte.variante.cadre-arche,.crea.variante.cadre-arche{box-shadow:0 0 0 1px #c9a45a,0 3px 8px var(--ombre)}
 .carte.variante.cadre-arche .cadre,.crea.variante.cadre-arche .cadre{box-shadow:inset 0 0 0 .8cqw #c9a45a,inset 0 0 0 1.8cqw var(--fc)}
 .carte.variante.cadre-arche .art,.crea.variante.cadre-arche .art{border-radius:46cqw 46cqw 3cqw 3cqw;box-shadow:0 0 0 .9cqw #e2c27a,0 0 0 1.9cqw var(--fc),0 0 0 2.6cqw #c9a45a}
 .carte-ouverte.variante.cadre-arche .z-illu{border-radius:50% 50% 8px 8px / 36% 36% 8px 8px;box-shadow:0 0 0 3px #e2c27a,0 0 0 7px var(--fc),0 0 0 9px #c9a45a}
-.carte.variante.cadre-arche .nom-bande,.crea.variante.cadre-arche .nom-bande{text-align:center;padding:12cqw 15cqw 9cqw;background:linear-gradient(rgba(12,9,5,0),rgba(12,9,5,.75) 45%,rgba(12,9,5,0))}
+.carte.variante.cadre-arche .nom-bande,.crea.variante.cadre-arche .nom-bande{text-align:center;align-items:center;padding:12cqw 15cqw 9cqw;background:linear-gradient(rgba(12,9,5,0),rgba(12,9,5,.75) 45%,rgba(12,9,5,0))}
 .carte.variante.cadre-arche .pied{color:#e9d8a6}
 /* Or massif : cadre de métal doré gravé, liseré du panthéon autour de l’illustration */
-.carte.variante.cadre-or,.crea.variante.cadre-or,.carte-ouverte.variante.cadre-or{background:linear-gradient(135deg,#7a5410,#f6dc8a 20%,#b8862b 42%,#fff0b8 58%,#9c6c14 78%,#e8c46a)}
+.carte.variante.cadre-or .cadre,.crea.variante.cadre-or .cadre,.carte-ouverte.variante.cadre-or{background:linear-gradient(135deg,#7a5410,#f6dc8a 20%,#b8862b 42%,#fff0b8 58%,#9c6c14 78%,#e8c46a)}
 .carte.variante.cadre-or,.crea.variante.cadre-or{box-shadow:0 0 0 1px #5a3c0a,0 3px 10px var(--ombre)}
 .carte.variante.cadre-or .cadre,.crea.variante.cadre-or .cadre{box-shadow:inset 0 0 0 .7cqw rgba(255,250,220,.75),inset 0 0 0 1.5cqw rgba(90,60,10,.55),inset 0 0 0 2.1cqw rgba(255,240,190,.5)}
 .carte.variante.cadre-or .art,.crea.variante.cadre-or .art{box-shadow:0 0 0 1cqw var(--fc),0 0 0 1.8cqw #5a3c0a}
@@ -567,14 +578,14 @@ body.compact .adm-statut{display:none}
 .carte.variante.cadre-or .pied,.carte-ouverte.variante.cadre-or{color:#3b2a06}
 .carte.variante.cadre-or .pied{text-shadow:0 1px 0 rgba(255,255,255,.55);font-weight:700}
 /* Obsidienne : carte noire, liseré lumineux aux couleurs du panthéon */
-.carte.variante.cadre-obsidienne,.crea.variante.cadre-obsidienne,.carte-ouverte.variante.cadre-obsidienne{background:radial-gradient(ellipse at 30% 0%,#30303a,#0d0d11 65%,#050506)}
+.carte.variante.cadre-obsidienne .cadre,.crea.variante.cadre-obsidienne .cadre,.carte-ouverte.variante.cadre-obsidienne{background:radial-gradient(ellipse at 30% 0%,#30303a,#0d0d11 65%,#050506)}
 .carte.variante.cadre-obsidienne,.crea.variante.cadre-obsidienne{box-shadow:0 0 0 1px color-mix(in srgb,var(--fc) 70%,white),0 0 14px color-mix(in srgb,var(--fc) 65%,transparent),0 3px 8px var(--ombre)}
 .carte.variante.cadre-obsidienne .cadre,.crea.variante.cadre-obsidienne .cadre{box-shadow:inset 0 0 0 .5cqw rgba(255,255,255,.08)}
 .carte.variante.cadre-obsidienne .art,.crea.variante.cadre-obsidienne .art{box-shadow:0 0 0 .5cqw color-mix(in srgb,var(--fc) 75%,white),0 0 5cqw color-mix(in srgb,var(--fc) 70%,transparent)}
 .carte-ouverte.variante.cadre-obsidienne .z-illu{box-shadow:0 0 0 2px color-mix(in srgb,var(--fc) 75%,white),0 0 22px color-mix(in srgb,var(--fc) 70%,transparent)}
 .carte.variante.cadre-obsidienne .pied{color:color-mix(in srgb,var(--fc) 45%,white);text-transform:uppercase;letter-spacing:.14em;font-size:5.4cqw}
 /* Frise antique : bordure ornée d’une frise à la grecque */
-.carte.variante.cadre-frise,.crea.variante.cadre-frise,.carte-ouverte.variante.cadre-frise{background-color:color-mix(in srgb,var(--fc) 80%,black);
+.carte.variante.cadre-frise .cadre,.crea.variante.cadre-frise .cadre,.carte-ouverte.variante.cadre-frise{background-color:color-mix(in srgb,var(--fc) 80%,black);
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Cpath d='M1 19V1h18v14H7V7h8v4' fill='none' stroke='%23f3dfa6' stroke-opacity='.55' stroke-width='2'/%3E%3C/svg%3E");background-size:9% auto}
 .carte.variante.cadre-frise .cadre,.crea.variante.cadre-frise .cadre{box-shadow:inset 0 0 0 .7cqw #f3dfa6}
 .carte.variante.cadre-frise .art,.crea.variante.cadre-frise .art{box-shadow:0 0 0 1cqw #f3dfa6,0 0 0 2cqw color-mix(in srgb,var(--fc) 80%,black)}
@@ -582,7 +593,7 @@ body.compact .adm-statut{display:none}
 .carte.variante.cadre-frise .pied{color:#fff6d8;text-shadow:0 0 2cqw #000,0 0 1cqw #000;font-weight:700}
 
 /* Céleste : la carte entière devient un ciel nocturne, étoiles qui scintillent et étoile filante */
-.carte.variante.cadre-celeste,.crea.variante.cadre-celeste,.carte-ouverte.variante.cadre-celeste{
+.carte.variante.cadre-celeste .cadre,.crea.variante.cadre-celeste .cadre,.carte-ouverte.variante.cadre-celeste{
   background:radial-gradient(circle at 12% 8%,#fff 0 .5%,transparent .9%),radial-gradient(circle at 88% 30%,#fff 0 .6%,transparent 1%),radial-gradient(circle at 6% 55%,#dfe6ff 0 .5%,transparent .9%),
     radial-gradient(circle at 94% 72%,#fff 0 .5%,transparent .9%),radial-gradient(circle at 20% 96%,#fff 0 .6%,transparent 1%),radial-gradient(circle at 70% 97%,#dfe6ff 0 .5%,transparent .9%),
     radial-gradient(ellipse at 50% 0%,#4b47b0,#1a1747 50%,#07061a)}
@@ -601,7 +612,7 @@ body.compact .adm-statut{display:none}
 @keyframes filante{0%,78%{left:-30%;top:6%;opacity:0}80%{opacity:1}92%{left:110%;top:36%;opacity:0}100%{left:110%;top:36%;opacity:0}}
 
 /* Aura divine : rayons de lumière qui tournent derrière la carte, carte ivoire et or */
-.carte.variante.cadre-aura,.crea.variante.cadre-aura,.carte-ouverte.variante.cadre-aura{background:linear-gradient(165deg,#fffaf0,#f3dfa8 55%,#d9b25e)}
+.carte.variante.cadre-aura .cadre,.crea.variante.cadre-aura .cadre,.carte-ouverte.variante.cadre-aura{background:linear-gradient(165deg,#fffaf0,#f3dfa8 55%,#d9b25e)}
 .carte.variante.cadre-aura,.crea.variante.cadre-aura{isolation:isolate;box-shadow:0 0 0 1px #e0b44f,0 0 18px rgba(255,214,110,.75)}
 .carte.variante.cadre-aura .cadre,.crea.variante.cadre-aura .cadre{box-shadow:inset 0 0 0 .7cqw rgba(255,255,255,.85)}
 .carte.variante.cadre-aura .art,.crea.variante.cadre-aura .art{box-shadow:0 0 0 .8cqw #fff6d6,0 0 0 1.6cqw #d4a13c,0 0 5cqw rgba(255,226,140,.9)}
@@ -614,10 +625,10 @@ body.compact .adm-statut{display:none}
 @keyframes rayons{to{transform:rotate(360deg)}}
 
 /* Bonbon (chibis) : carte pastel à pois, bord blanc façon autocollant, tout en rondeurs */
-.carte.variante.cadre-bonbon,.crea.variante.cadre-bonbon,.carte-ouverte.variante.cadre-bonbon{background-color:color-mix(in srgb,var(--fc) 28%,#ffe1ee);
+.carte.variante.cadre-bonbon .cadre,.crea.variante.cadre-bonbon .cadre,.carte-ouverte.variante.cadre-bonbon{background-color:color-mix(in srgb,var(--fc) 28%,#ffe1ee);
   background-image:radial-gradient(#fff 20%,transparent 23%),radial-gradient(#fff 20%,transparent 23%);background-size:14% 10%;background-position:0 0,7% 5%}
-.carte.variante.cadre-bonbon,.crea.variante.cadre-bonbon{border-radius:14px;box-shadow:0 0 0 3px #fff,0 0 0 5px #ffb3d1,0 4px 10px rgba(214,90,150,.35)}
-.carte.variante.cadre-bonbon .cadre,.crea.variante.cadre-bonbon .cadre{box-shadow:none}
+.carte.variante.cadre-bonbon,.crea.variante.cadre-bonbon{border-radius:12px;box-shadow:0 4px 12px rgba(214,90,150,.45)}
+.carte.variante.cadre-bonbon .cadre,.crea.variante.cadre-bonbon .cadre{border-radius:8cqw;box-shadow:inset 0 0 0 1cqw #fff}
 .carte.variante.cadre-bonbon .art,.crea.variante.cadre-bonbon .art{border-radius:11cqw;box-shadow:0 0 0 1.6cqw #fff,0 0 0 2.6cqw #ffb3d1,0 1.5cqw 3cqw rgba(214,90,150,.35)}
 .carte-ouverte.variante.cadre-bonbon .z-illu{border-radius:26px;box-shadow:0 0 0 6px #fff,0 0 0 9px #ffb3d1}
 .carte.variante.cadre-bonbon .pied{color:#c2477e;font-weight:700}
@@ -628,7 +639,7 @@ body.compact .adm-statut{display:none}
 
 @media (prefers-reduced-motion: reduce){.cadre-celeste::after,.cadre-celeste .z-illu::after,.cadre-aura::before{animation:none}.cadre-celeste .art::before,.cadre-celeste .z-illu::before{display:none}}
 body.sans-animations .cadre-celeste .art::before,body.sans-animations .cadre-celeste .z-illu::before{display:none}
-.edition{position:absolute;left:4cqw;top:16cqw;z-index:2;font-size:5.5cqw;font-weight:700;color:#3b2a06;background:linear-gradient(135deg,#fff4c2,#f0c64e);border-radius:99px;padding:.5cqw 3cqw;box-shadow:0 1px 3px rgba(0,0,0,.5)}
+.edition{position:relative;flex:none;z-index:2;font-family:"Segoe UI",system-ui,sans-serif;text-shadow:none;letter-spacing:0;line-height:1.3;font-size:5.5cqw;font-weight:700;color:#3b2a06;background:linear-gradient(135deg,#fff4c2,#f0c64e);border-radius:99px;padding:.5cqw 3cqw;box-shadow:0 1px 3px rgba(0,0,0,.5)}
 .variante-admin{display:grid;grid-template-columns:130px minmax(0,1fr);gap:14px;align-items:start;padding:10px 0;border-top:1px solid var(--line)}
 .vignette-variante .carte{--w:130px;cursor:default}
 .boosters-variante{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin-top:10px;font-size:14px}
@@ -3919,7 +3930,7 @@ function htmlCarte(c, o={}){
   const srcImg = imageAffichee(d, c, o.hd);
   return `<button type="button" class="carte f-${f} r-${d.rarete || "base"} ${classesVariante(c)} ${o.classes || ""}" ${act} ${o.style ? `style="${o.style}"` : ""}>
     <span class="cadre">
-      <span class="art ${srcImg ? "" : "sans-image"}" data-sym="${sym}">${srcImg ? `<img class="illu" src="${srcImg}" alt="" ${o.hd ? "" : `loading="lazy" decoding="async"`}>` : ""}${tamponEdition(c)}<span class="nom-bande">${d.nom}</span>${lignes.length ? `<span class="texte">${texte}</span>` : ""}</span>
+      <span class="art ${srcImg ? "" : "sans-image"}" data-sym="${sym}">${srcImg ? `<img class="illu" src="${srcImg}" alt="" ${o.hd ? "" : `loading="lazy" decoding="async"`}>` : ""}<span class="nom-bande ${tailleNom(d.nom)}"><span class="nom-texte">${d.nom}</span>${tamponEdition(c)}</span>${lignes.length ? `<span class="texte">${texte}</span>` : ""}</span>
       <span class="pied" title="${typeLigne(d)}"><span aria-hidden="true">${sym}</span><span class="type">${d.depart ? "Départ" : d.base ? "Base" : d.jeton ? "Jeton" : {creature:"Créature", sort:"Sort", arme:"Arme"}[d.type]}</span>${NOMS_RARETE[d.rarete] && !d.depart && !d.base && !d.jeton ? `<span class="gemme" title="${NOMS_RARETE[d.rarete]}"></span>` : ""}</span>
       ${d.prix!=null && !d.depart ? `<span class="prix" title="Prix en or">${d.prix}</span>` : ""}
       ${stats}${o.extra || ""}
@@ -3941,7 +3952,7 @@ function htmlCrea(c, act, classes){
   const detail = texteCarte(d).join(" ").replace(/"/g,"");
   return `<button type="button" class="crea f-${f} r-${d.rarete || "base"} ${classesVariante(c)} ${classes}" data-act="${act}" data-id="${c.uid}" data-aide="carte" data-titre="${esc(d.nom)}" data-texte="${esc(detail)}">
     <span class="cadre">
-      <span class="art ${imageAffichee(d, c) ? "" : "sans-image"}" data-sym="${sym}">${imageAffichee(d, c) ? `<img class="illu" src="${imageAffichee(d, c)}" alt="">` : ""}<span class="nom-bande">${d.nom}</span>${puces.length ? `<span class="puces">${puces.join("")}</span>` : ""}</span>
+      <span class="art ${imageAffichee(d, c) ? "" : "sans-image"}" data-sym="${sym}">${imageAffichee(d, c) ? `<img class="illu" src="${imageAffichee(d, c)}" alt="">` : ""}<span class="nom-bande ${tailleNom(d.nom)}"><span class="nom-texte">${d.nom}</span></span>${puces.length ? `<span class="puces">${puces.join("")}</span>` : ""}</span>
       <span class="pied"></span>
       <span class="atk" title="Attaque">${atkTotal(c)}</span><span class="pv ${c.deg>0 ? "blesse" : ""}" title="Points de vie">${vieRestante(c)}</span>
     </span></button>`;
@@ -8067,7 +8078,7 @@ function idCarteDe(el){
     for(const z of zones){ const c = (z || []).find(x => x && x.uid===uid); if(c) return c.id; }
   }
   if(el.dataset.id && CARTES[el.dataset.id]) return el.dataset.id;
-  const nom = el.querySelector(".nom-bande"); if(nom){ const id = Object.keys(CARTES).find(k => CARTES[k].nom===nom.textContent.trim()); if(id) return id; }
+  const nom = el.querySelector(".nom-texte") || el.querySelector(".nom-bande"); if(nom){ const id = Object.keys(CARTES).find(k => CARTES[k].nom===nom.textContent.trim()); if(id) return id; }
   return null;
 }
 let appuiLong = null, bloquerClic = false;
@@ -8391,6 +8402,8 @@ function imageAffichee(d, c, hd){
   return (hd && src.imageHD) || src.image || null;
 }
 const classesVariante = c => { const v = varianteDe(c); return v ? `variante cadre-${v.cadre || "dore"}` : ""; };
+// Noms longs : police réduite pour tenir sur 3 lignes au plus, sans être coupés
+const tailleNom = n => { const l = String(n || "").length; return l>30 ? "nom-tres-long" : l>20 ? "nom-long" : ""; };
 const tamponEdition = c => { const v = varianteDe(c); return v && v.edition ? `<span class="edition">${esc(v.edition)}</span>` : ""; };
 // Variantes débloquées par le joueur et illustration préférée pour chaque carte
 function prefVariantes(){
