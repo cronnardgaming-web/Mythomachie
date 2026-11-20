@@ -295,3 +295,7 @@ Exécuter `supabase-cartes-a-venir.sql` une fois (SQL Editor, puis Run), après 
 - Dans la liste de l’admin, ces cartes portent la mention « à venir ». Vous pouvez quand même les choisir comme cadeau.
 - Après avoir mis une date : « Envoyer le catalogue », puis exporter config.json sur GitHub.
 - Différence avec une carte de saison : la carte de saison est visible dans la collection, mais absente des paquets jusqu’à la fin de la saison.
+
+## Statistiques 1 contre 1 du profil
+Exécuter `supabase-stats-1v1.sql` une fois (SQL Editor, puis Run), après `supabase-stats.sql`. Il peut être relancé sans risque.
+Le profil affiche une section « 1 contre 1 » entre « Statistiques » et « 2 contre 2 » : parties, victoires, victoires contre l’ordinateur et contre un joueur, meilleure série, et résultats par héros.

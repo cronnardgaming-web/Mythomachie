@@ -2796,7 +2796,7 @@ ajouterTraductions("en", {
   "Ticket de partie inconnu.":"Unknown game ticket.", "Ticket introuvable.":"Ticket not found.", "Trop de demandes en attente.":"Too many pending requests.",
   "Trop de parties commencées en une heure : patientez un peu.":"Too many games started in an hour: please wait a little.", "Trophée inconnu.":"Unknown trophy.",
   "Valeurs invalides : l’or et l’encre doivent être des nombres entiers positifs.":"Invalid values: gold and ink must be positive whole numbers.", "Version du jeu obsolète : rechargez la page.":"Outdated game version: reload the page.",
-  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Changer ▾":"Change ▾", "Changer de deck":"Change deck", "Aucun deck complet :":"No complete deck:", "construire un deck":"build a deck", "Choisir votre deck":"Choose your deck", "Ce deck sert pour « Jouer », contre un joueur comme contre l’ordinateur en attendant.":"This deck is used for “Play”, against a player and against the computer while you wait.", "Avec :":"With:", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
+  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Changer ▾":"Change ▾", "Changer de deck":"Change deck", "Aucun deck complet :":"No complete deck:", "construire un deck":"build a deck", "Choisir votre deck":"Choose your deck", "Ce deck sert pour « Jouer », contre un joueur comme contre l’ordinateur en attendant.":"This deck is used for “Play”, against a player and against the computer while you wait.", "Avec :":"With:", "1 contre 1":"1 vs 1", "victoires contre l’ordinateur":"wins against the computer", "victoires contre un joueur":"wins against a player", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
   "Vous avez déjà le nombre maximum d’exemplaires.":"You already have the maximum number of copies.", "Vous avez déjà remplacé une quête aujourd’hui.":"You have already replaced a quest today.",
   "Vous ne pouvez défier que vos amis.":"You can only challenge your friends.", "Vous ne pouvez inviter que vos amis.":"You can only invite your friends.",
   "Vous n’avez pas de paquet offert de ce type.":"You have no free pack of this type.", "Vous n’êtes pas dans ce salon.":"You are not in this lobby.",
@@ -4359,6 +4359,7 @@ function formCarte(id){
     </fieldset>
     ${htmlAdminDevotion(id)}
     ${htmlAdminVariantes(id)}
+    ${htmlValeurCarte(d) ? `<fieldset class="budget-carte"><legend>Budget</legend>${htmlValeurCarte(d)}</fieldset>` : ""}
     ${d.type==="creature" ? `<fieldset><legend>Mots-clés</legend><div class="mots">${Object.entries(MOTS).map(([k,l]) =>
       `<label title="${esc(AIDE_MOTS[k] || "")}"><input type="checkbox" data-mot="${k}" data-carte="${id}" ${(d.mots || []).includes(k) ? "checked" : ""}> ${esc(l)}</label>`).join("")}</div></fieldset>` : ""}
     ${blocs}
@@ -4735,12 +4736,21 @@ document.addEventListener("input", e => {
       if(el.type==="date" && el.value==="" && el.validity && el.validity.badInput) return;   // date en cours de saisie
       majChemin(el.dataset.chemin, el.value, el.type==="number");
       adm.renduDiffere = true;
+      majBudgetDirect();
       return;
     }
     majChemin(el.dataset.chemin, el.value, false);
     renderAdmin();
   }
 });
+// Budget et aperçu de la carte mis à jour à chaque chiffre, sans redessiner le formulaire
+function majBudgetDirect(){
+  if(adm.onglet!=="cartes" || !adm.sel || !CARTES[adm.sel]) return;
+  const d = CARTES[adm.sel], b = document.querySelector(".budget-carte");
+  if(b) b.innerHTML = `<legend>Budget</legend>${htmlValeurCarte(d)}`;
+  const ap = document.querySelector(".adm-apercu");
+  if(ap) try { ap.innerHTML = `<h2>Aperçu</h2>${htmlCarte({id:adm.sel, uid:"apercu"})}`; } catch(e) {}
+}
 // Réaffichage différé après un champ nombre ou date : à la sortie du champ, après un éventuel clic
 let pointeurAppuye = false;
 document.addEventListener("pointerdown", () => { pointeurAppuye = true; }, true);
@@ -6657,7 +6667,7 @@ async function chargerQuete(){
 }
 async function chargerMesStats(annoncer){
   chargerQuete().then(() => { if(!S && PROG.pret && ui.ecran==="jeu") renderCouche(); });
-  Promise.all([chargerTrophees(), chargerPaquetsOfferts(), chargerSaison(), chargerSocial(), chargerStats2v2(), chargerBonus2v2(), chargerEnLigne()]).then(() => {
+  Promise.all([chargerTrophees(), chargerPaquetsOfferts(), chargerSaison(), chargerSocial(), chargerStats1v1(), chargerStats2v2(), chargerBonus2v2(), chargerEnLigne()]).then(() => {
     if(!S && PROG.pret){ if(ui.ecran==="jeu") renderCouche(); else if(["profil", "boutique", "saison"].includes(ui.ecran)) renderProg(); }
   });
   try { PROG.mesStats = await rpc("mes_stats"); } catch(e) { return; }
@@ -6734,6 +6744,10 @@ function pageProfil(){
         <h3>Par héros</h3>
         <div class="tableau-defile"><table class="tableau"><thead><tr><th>Héros</th><th>Parties</th><th>Victoires</th><th>Taux</th></tr></thead><tbody>${heros}</tbody></table></div>
         <p class="aide">Les parties à deux sur le même écran ne sont pas comptées.</p>
+      </section>
+      <section class="bloc-profil">
+        <h2>1 contre 1</h2>
+        ${htmlStats1v1(PROG.stats1v1)}
       </section>
       <section class="bloc-profil">
         <h2>2 contre 2</h2>
@@ -8335,8 +8349,7 @@ function htmlAdminVariantes(id){
       </div>`).join("")}
       <div class="adm-actions"><button type="button" class="btn second" data-act="variante-ajouter" data-id="${id}">Ajouter une illustration alternative</button></div>
     </fieldset>
-    <fieldset><legend>Boosters</legend>
-      ${htmlValeurCarte(d)}
+    <fieldset><legend>Sortie</legend>
       <label class="case"><input type="checkbox" data-act="carte-promo" data-id="${id}" ${d.promo ? "checked" : ""}> Carte promotionnelle</label>
       <label class="champ champ-saison"><span>Carte de saison : entre dans les paquets le (vide = carte normale)</span><input type="date" data-chemin="cartes.${id}.saisonFin" value="${esc(d.saisonFin || "")}"></label>
       <label class="champ champ-saison"><span>Date de sortie : visible par les joueurs à partir du (vide = tout de suite)</span><input type="date" data-chemin="cartes.${id}.sortie" value="${esc(d.sortie || "")}"></label>
@@ -10784,6 +10797,7 @@ function admAccueil(){
       <div class="tuile tuile-texte"><b>${sa ? esc(sa.nom) : "Aucune saison"}</b><span>${sa ? `saison ${sa.etat}` : "programmée pour le moment"}</span></div></div></section>` : ""}
     <section class="bloc-adm"><h3>Raccourcis</h3><div class="raccourcis-adm">
       ${raccourci("onglet:cartes", "🃏", "Les cartes", "Créer ou modifier une carte")}
+      ${PROG.actif ? raccourci("srv-catalogue", "📤", "Envoyer le catalogue", `${Object.keys(CARTES).length} cartes, illustrations et boosters vers le serveur`) : ""}
       ${PROG.actif ? raccourci("onglet:messages", "✉", "Écrire aux joueurs", "Message ou cadeau") : ""}
       ${raccourci("onglet:saisons", "🗓", "La saison", "Travaux, quêtes, récompenses")}
       ${raccourci("onglet:boosters", "🎁", "Les boosters", "Apparence et boosters spéciaux")}
@@ -10809,6 +10823,21 @@ function deckDuPantheon(f){
 }
 const choixPantheon = v => v==="hasard" ? Object.keys(FACTIONS)[Math.floor(Math.random() * Object.keys(FACTIONS).length)] : v;
 async function chargerQuetes2v2(){ try { PROG.quetes2v2 = await rpc("mes_quetes_2v2"); } catch(e) { PROG.quetes2v2 = {indisponible:true}; } }
+async function chargerStats1v1(){ try { PROG.stats1v1 = await rpc("mes_stats_1v1"); } catch(e) { PROG.stats1v1 = PROG.stats1v1 || null; } }
+function htmlStats1v1(s){
+  if(!s) return `<p class="aide">Aucune statistique pour le moment.</p>`;
+  const tuile = (v, l) => `<div class="tuile"><b>${v}</b><span>${l}</span></div>`;
+  const p2 = (a, b) => b ? `${Math.round(100*a/b)} %` : "–";
+  const o = s.ordi || {parties:0, victoires:0}, j = s.joueurs || {parties:0, victoires:0};
+  return `<div class="tuiles">${tuile(nf(s.parties), "parties")}${tuile(`${nf(s.victoires)} <small>(${p2(s.victoires, s.parties)})</small>`, "victoires")}
+      ${tuile(`${nf(o.victoires)} / ${nf(o.parties)} <small>(${p2(o.victoires, o.parties)})</small>`, "victoires contre l’ordinateur")}
+      ${tuile(`${nf(j.victoires)} / ${nf(j.parties)} <small>(${p2(j.victoires, j.parties)})</small>`, "victoires contre un joueur")}
+      ${tuile(nf(s.serie_max), "meilleure série de victoires")}${tuile(nf(s.degats), "dégâts infligés")}${tuile(nf(s.soins), "PV soignés")}
+      ${tuile(nf(s.creatures), "créatures jouées")}${tuile(nf(s.pouvoirs), "pouvoirs utilisés")}</div>
+    <div class="tableau-defile"><table class="tableau"><thead><tr><th>Héros</th><th>Parties</th><th>Victoires</th><th>Taux</th></tr></thead><tbody>
+      ${Object.entries(FACTIONS).map(([k, f]) => { const v = (s.par_heros || {})[k] || {parties:0, victoires:0}; return `<tr><td><span class="pastille f-${k}"></span> ${esc(heroDe({heros:k}).nom)} <span class="aide">(${esc(f.nom)})</span></td><td>${nf(v.parties)}</td><td>${nf(v.victoires)}</td><td>${p2(v.victoires, v.parties)}</td></tr>`; }).join("")}
+    </tbody></table></div>`;
+}
 async function chargerStats2v2(){ try { PROG.stats2v2 = await rpc("mes_stats_2v2"); } catch(e) { PROG.stats2v2 = null; } }
 // Enregistrement d’une partie terminée (ticket demandé au lancement)
 async function verifierRecompense2v2(){
