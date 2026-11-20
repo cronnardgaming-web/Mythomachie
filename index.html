@@ -549,34 +549,85 @@ body.compact .adm-statut{display:none}
 @keyframes holo{50%{background-position:100% 100%}}
 .carte.variante.cadre-pleine .art{position:absolute;inset:0;height:auto;border-radius:inherit}
 .carte.variante.cadre-pleine .texte{background:rgba(10,8,5,.72)}
-/* Cadre Céleste : liseré bleu nuit et étoiles qui scintillent sur l’illustration */
-.carte.variante.cadre-celeste,.crea.variante.cadre-celeste,.carte-ouverte.variante.cadre-celeste .z-illu{box-shadow:0 0 0 2px #9db0ff,0 0 0 4px #1d2350,0 0 16px rgba(120,140,255,.65),0 3px 8px var(--ombre)}
-.carte.variante.cadre-celeste .art::before,.crea.variante.cadre-celeste .art::before,.carte-ouverte.variante.cadre-celeste .z-illu::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;mix-blend-mode:screen;
-  background:radial-gradient(circle at 18% 22%,#fff 0 1.2%,transparent 1.6%),radial-gradient(circle at 72% 14%,#fff 0 .9%,transparent 1.3%),radial-gradient(circle at 86% 46%,#cfe0ff 0 1.1%,transparent 1.5%),
-    radial-gradient(circle at 34% 60%,#fff 0 .8%,transparent 1.2%),radial-gradient(circle at 60% 78%,#dfe6ff 0 1.2%,transparent 1.6%),radial-gradient(circle at 12% 86%,#fff 0 .9%,transparent 1.3%),
-    radial-gradient(circle at 48% 34%,#fff 0 .7%,transparent 1.1%),radial-gradient(ellipse at 50% 120%,rgba(70,90,220,.45),transparent 60%);animation:scintille 3.2s ease-in-out infinite}
-.carte.variante.cadre-celeste .art::after,.crea.variante.cadre-celeste .art::after,.carte-ouverte.variante.cadre-celeste .z-illu::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;mix-blend-mode:screen;
-  background:radial-gradient(circle at 28% 40%,#fff 0 .9%,transparent 1.3%),radial-gradient(circle at 80% 70%,#fff 0 1%,transparent 1.4%),radial-gradient(circle at 62% 24%,#e8eeff 0 .8%,transparent 1.2%),radial-gradient(circle at 22% 70%,#fff 0 .7%,transparent 1.1%);
-  animation:scintille 3.2s ease-in-out infinite 1.6s;opacity:0}
-@keyframes scintille{0%,100%{opacity:.25}50%{opacity:1}}
-/* Cadre Aura divine : halo doré qui respire et reflet de lumière qui traverse l’illustration */
-.carte.variante.cadre-aura,.crea.variante.cadre-aura,.carte-ouverte.variante.cadre-aura .z-illu{box-shadow:0 0 0 2px #ffe08a,0 0 16px rgba(255,224,140,.8),0 3px 8px var(--ombre);animation:aura 2.8s ease-in-out infinite}
-@keyframes aura{0%,100%{box-shadow:0 0 0 2px #ffe08a,0 0 10px rgba(255,214,110,.55),0 3px 8px var(--ombre)}50%{box-shadow:0 0 0 2px #fff6d6,0 0 22px rgba(255,236,170,.95),0 3px 8px var(--ombre)}}
-.carte.variante.cadre-aura .art::before,.crea.variante.cadre-aura .art::before,.carte-ouverte.variante.cadre-aura .z-illu::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;mix-blend-mode:overlay;
-  background:radial-gradient(ellipse at 50% -10%,rgba(255,240,190,.75),transparent 55%)}
-.carte.variante.cadre-aura .art::after,.crea.variante.cadre-aura .art::after,.carte-ouverte.variante.cadre-aura .z-illu::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;mix-blend-mode:soft-light;
-  background:linear-gradient(105deg,transparent 38%,rgba(255,252,235,.95) 50%,transparent 62%);background-size:300% 100%;background-repeat:no-repeat;animation:reflet 4.5s ease-in-out infinite}
-@keyframes reflet{0%{background-position:130% 0}45%,100%{background-position:-30% 0}}
-/* Cadre Bonbon (chibis) : double liseré rose et menthe, voile pastel et petits cœurs qui flottent */
-.carte.variante.cadre-bonbon,.crea.variante.cadre-bonbon,.carte-ouverte.variante.cadre-bonbon .z-illu{box-shadow:0 0 0 2px #fff,0 0 0 4px #ff9ec7,0 0 0 6px #a8ecd8,0 0 14px rgba(255,158,199,.7),0 3px 8px var(--ombre)}
-.carte.variante.cadre-bonbon .art,.carte-ouverte.variante.cadre-bonbon .z-illu{border-radius:6cqw}
-.carte.variante.cadre-bonbon .art::before,.crea.variante.cadre-bonbon .art::before,.carte-ouverte.variante.cadre-bonbon .z-illu::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;mix-blend-mode:soft-light;
-  background:linear-gradient(160deg,rgba(255,170,210,.55),rgba(255,255,255,0) 45%,rgba(160,235,215,.55))}
-.carte.variante.cadre-bonbon .art::after,.crea.variante.cadre-bonbon .art::after,.carte-ouverte.variante.cadre-bonbon .z-illu::after{content:"♡ ✧ ♡";position:absolute;right:5%;top:15%;z-index:2;pointer-events:none;
-  font-size:11cqw;line-height:1;letter-spacing:.1em;color:#fff;text-shadow:0 0 .6em #ff7fb5,0 0 .2em #ff7fb5;animation:flotte 2.4s ease-in-out infinite}
-.carte-ouverte.variante.cadre-bonbon .z-illu::after{font-size:30px;top:4%}
-@keyframes flotte{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-12%) rotate(4deg)}}
-@media (prefers-reduced-motion: reduce){.cadre-celeste .art::before,.cadre-celeste .art::after,.cadre-celeste .z-illu::before,.cadre-celeste .z-illu::after,.cadre-aura,.cadre-aura .z-illu,.cadre-aura .art::after,.cadre-aura .z-illu::after,.cadre-bonbon .art::after,.cadre-bonbon .z-illu::after{animation:none}.cadre-celeste .art::after,.cadre-celeste .z-illu::after{opacity:.6}}
+/* ===== Cadres des illustrations alternatives ===== */
+/* Arche : carte de pierre sombre, illustration dans une arche de temple, nom centré sous la voûte */
+.carte.variante.cadre-arche,.crea.variante.cadre-arche,.carte-ouverte.variante.cadre-arche{background:linear-gradient(165deg,#4a3f31,#211a12 55%,#120d08)}
+.carte.variante.cadre-arche,.crea.variante.cadre-arche{box-shadow:0 0 0 1px #c9a45a,0 3px 8px var(--ombre)}
+.carte.variante.cadre-arche .cadre,.crea.variante.cadre-arche .cadre{box-shadow:inset 0 0 0 .8cqw #c9a45a,inset 0 0 0 1.8cqw var(--fc)}
+.carte.variante.cadre-arche .art,.crea.variante.cadre-arche .art{border-radius:46cqw 46cqw 3cqw 3cqw;box-shadow:0 0 0 .9cqw #e2c27a,0 0 0 1.9cqw var(--fc),0 0 0 2.6cqw #c9a45a}
+.carte-ouverte.variante.cadre-arche .z-illu{border-radius:50% 50% 8px 8px / 36% 36% 8px 8px;box-shadow:0 0 0 3px #e2c27a,0 0 0 7px var(--fc),0 0 0 9px #c9a45a}
+.carte.variante.cadre-arche .nom-bande,.crea.variante.cadre-arche .nom-bande{text-align:center;padding:12cqw 15cqw 9cqw;background:linear-gradient(rgba(12,9,5,0),rgba(12,9,5,.75) 45%,rgba(12,9,5,0))}
+.carte.variante.cadre-arche .pied{color:#e9d8a6}
+/* Or massif : cadre de métal doré gravé, liseré du panthéon autour de l’illustration */
+.carte.variante.cadre-or,.crea.variante.cadre-or,.carte-ouverte.variante.cadre-or{background:linear-gradient(135deg,#7a5410,#f6dc8a 20%,#b8862b 42%,#fff0b8 58%,#9c6c14 78%,#e8c46a)}
+.carte.variante.cadre-or,.crea.variante.cadre-or{box-shadow:0 0 0 1px #5a3c0a,0 3px 10px var(--ombre)}
+.carte.variante.cadre-or .cadre,.crea.variante.cadre-or .cadre{box-shadow:inset 0 0 0 .7cqw rgba(255,250,220,.75),inset 0 0 0 1.5cqw rgba(90,60,10,.55),inset 0 0 0 2.1cqw rgba(255,240,190,.5)}
+.carte.variante.cadre-or .art,.crea.variante.cadre-or .art{box-shadow:0 0 0 1cqw var(--fc),0 0 0 1.8cqw #5a3c0a}
+.carte-ouverte.variante.cadre-or .z-illu{box-shadow:0 0 0 4px var(--fc),0 0 0 7px #5a3c0a}
+.carte.variante.cadre-or .pied,.carte-ouverte.variante.cadre-or{color:#3b2a06}
+.carte.variante.cadre-or .pied{text-shadow:0 1px 0 rgba(255,255,255,.55);font-weight:700}
+/* Obsidienne : carte noire, liseré lumineux aux couleurs du panthéon */
+.carte.variante.cadre-obsidienne,.crea.variante.cadre-obsidienne,.carte-ouverte.variante.cadre-obsidienne{background:radial-gradient(ellipse at 30% 0%,#30303a,#0d0d11 65%,#050506)}
+.carte.variante.cadre-obsidienne,.crea.variante.cadre-obsidienne{box-shadow:0 0 0 1px color-mix(in srgb,var(--fc) 70%,white),0 0 14px color-mix(in srgb,var(--fc) 65%,transparent),0 3px 8px var(--ombre)}
+.carte.variante.cadre-obsidienne .cadre,.crea.variante.cadre-obsidienne .cadre{box-shadow:inset 0 0 0 .5cqw rgba(255,255,255,.08)}
+.carte.variante.cadre-obsidienne .art,.crea.variante.cadre-obsidienne .art{box-shadow:0 0 0 .5cqw color-mix(in srgb,var(--fc) 75%,white),0 0 5cqw color-mix(in srgb,var(--fc) 70%,transparent)}
+.carte-ouverte.variante.cadre-obsidienne .z-illu{box-shadow:0 0 0 2px color-mix(in srgb,var(--fc) 75%,white),0 0 22px color-mix(in srgb,var(--fc) 70%,transparent)}
+.carte.variante.cadre-obsidienne .pied{color:color-mix(in srgb,var(--fc) 45%,white);text-transform:uppercase;letter-spacing:.14em;font-size:5.4cqw}
+/* Frise antique : bordure ornée d’une frise à la grecque */
+.carte.variante.cadre-frise,.crea.variante.cadre-frise,.carte-ouverte.variante.cadre-frise{background-color:color-mix(in srgb,var(--fc) 80%,black);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Cpath d='M1 19V1h18v14H7V7h8v4' fill='none' stroke='%23f3dfa6' stroke-opacity='.55' stroke-width='2'/%3E%3C/svg%3E");background-size:9% auto}
+.carte.variante.cadre-frise .cadre,.crea.variante.cadre-frise .cadre{box-shadow:inset 0 0 0 .7cqw #f3dfa6}
+.carte.variante.cadre-frise .art,.crea.variante.cadre-frise .art{box-shadow:0 0 0 1cqw #f3dfa6,0 0 0 2cqw color-mix(in srgb,var(--fc) 80%,black)}
+.carte-ouverte.variante.cadre-frise .z-illu{box-shadow:0 0 0 4px #f3dfa6}
+.carte.variante.cadre-frise .pied{color:#fff6d8;text-shadow:0 0 2cqw #000,0 0 1cqw #000;font-weight:700}
+
+/* Céleste : la carte entière devient un ciel nocturne, étoiles qui scintillent et étoile filante */
+.carte.variante.cadre-celeste,.crea.variante.cadre-celeste,.carte-ouverte.variante.cadre-celeste{
+  background:radial-gradient(circle at 12% 8%,#fff 0 .5%,transparent .9%),radial-gradient(circle at 88% 30%,#fff 0 .6%,transparent 1%),radial-gradient(circle at 6% 55%,#dfe6ff 0 .5%,transparent .9%),
+    radial-gradient(circle at 94% 72%,#fff 0 .5%,transparent .9%),radial-gradient(circle at 20% 96%,#fff 0 .6%,transparent 1%),radial-gradient(circle at 70% 97%,#dfe6ff 0 .5%,transparent .9%),
+    radial-gradient(ellipse at 50% 0%,#4b47b0,#1a1747 50%,#07061a)}
+.carte.variante.cadre-celeste,.crea.variante.cadre-celeste{box-shadow:0 0 0 1px #b9c6ff,0 0 16px rgba(130,150,255,.7),0 3px 8px var(--ombre)}
+.carte.variante.cadre-celeste .cadre,.crea.variante.cadre-celeste .cadre{box-shadow:inset 0 0 0 .6cqw rgba(200,212,255,.5)}
+.carte.variante.cadre-celeste .art,.crea.variante.cadre-celeste .art{box-shadow:0 0 0 .7cqw #c9d4ff,0 0 4cqw rgba(140,160,255,.8)}
+.carte-ouverte.variante.cadre-celeste .z-illu{box-shadow:0 0 0 2px #c9d4ff,0 0 20px rgba(140,160,255,.8)}
+.carte.variante.cadre-celeste .pied{color:#dfe6ff}
+.carte.variante.cadre-celeste::after,.crea.variante.cadre-celeste::after,.carte-ouverte.variante.cadre-celeste .z-illu::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:inherit;mix-blend-mode:screen;
+  background:radial-gradient(circle at 22% 18%,#fff 0 1.3%,rgba(255,255,255,.4) 1.8%,transparent 3.2%),radial-gradient(circle at 76% 40%,#fff 0 1.2%,rgba(200,215,255,.4) 1.7%,transparent 3%),radial-gradient(circle at 12% 44%,#fff 0 1%,transparent 2%),radial-gradient(circle at 46% 8%,#fff 0 1%,transparent 2%),
+    radial-gradient(circle at 30% 64%,#fff 0 .8%,rgba(255,255,255,.3) 1.2%,transparent 2.2%),radial-gradient(circle at 84% 12%,#fff 0 .8%,transparent 1.6%),radial-gradient(circle at 60% 26%,#fff 0 .7%,transparent 1.4%);
+  animation:scintille 2.6s ease-in-out infinite}
+.carte.variante.cadre-celeste .art::before,.crea.variante.cadre-celeste .art::before,.carte-ouverte.variante.cadre-celeste .z-illu::before{content:"";position:absolute;z-index:2;pointer-events:none;left:-30%;top:10%;width:30%;height:1.2%;
+  border-radius:99px;background:linear-gradient(90deg,transparent,#fff);box-shadow:0 0 6px #fff;transform:rotate(18deg);animation:filante 7s ease-in infinite;opacity:0}
+@keyframes scintille{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes filante{0%,78%{left:-30%;top:6%;opacity:0}80%{opacity:1}92%{left:110%;top:36%;opacity:0}100%{left:110%;top:36%;opacity:0}}
+
+/* Aura divine : rayons de lumière qui tournent derrière la carte, carte ivoire et or */
+.carte.variante.cadre-aura,.crea.variante.cadre-aura,.carte-ouverte.variante.cadre-aura{background:linear-gradient(165deg,#fffaf0,#f3dfa8 55%,#d9b25e)}
+.carte.variante.cadre-aura,.crea.variante.cadre-aura{isolation:isolate;box-shadow:0 0 0 1px #e0b44f,0 0 18px rgba(255,214,110,.75)}
+.carte.variante.cadre-aura .cadre,.crea.variante.cadre-aura .cadre{box-shadow:inset 0 0 0 .7cqw rgba(255,255,255,.85)}
+.carte.variante.cadre-aura .art,.crea.variante.cadre-aura .art{box-shadow:0 0 0 .8cqw #fff6d6,0 0 0 1.6cqw #d4a13c,0 0 5cqw rgba(255,226,140,.9)}
+.carte-ouverte.variante.cadre-aura .z-illu{box-shadow:0 0 0 3px #fff6d6,0 0 0 6px #d4a13c,0 0 26px rgba(255,226,140,.9)}
+.carte.variante.cadre-aura .pied{color:#5a3c0a;font-weight:700}
+.carte.variante.cadre-aura::before,.crea.variante.cadre-aura::before{content:"";position:absolute;inset:-22%;z-index:-1;pointer-events:none;border-radius:50%;
+  background:repeating-conic-gradient(from 0deg,rgba(255,222,130,0) 0deg 7deg,rgba(255,222,130,.85) 9deg 12deg,rgba(255,222,130,0) 14deg 22.5deg);
+  -webkit-mask-image:radial-gradient(closest-side,transparent 35%,#000 62%,transparent 100%);mask-image:radial-gradient(closest-side,transparent 35%,#000 62%,transparent 100%);animation:rayons 16s linear infinite}
+.crea.variante.cadre-aura::before{inset:-12%}
+@keyframes rayons{to{transform:rotate(360deg)}}
+
+/* Bonbon (chibis) : carte pastel à pois, bord blanc façon autocollant, tout en rondeurs */
+.carte.variante.cadre-bonbon,.crea.variante.cadre-bonbon,.carte-ouverte.variante.cadre-bonbon{background-color:color-mix(in srgb,var(--fc) 28%,#ffe1ee);
+  background-image:radial-gradient(#fff 20%,transparent 23%),radial-gradient(#fff 20%,transparent 23%);background-size:14% 10%;background-position:0 0,7% 5%}
+.carte.variante.cadre-bonbon,.crea.variante.cadre-bonbon{border-radius:14px;box-shadow:0 0 0 3px #fff,0 0 0 5px #ffb3d1,0 4px 10px rgba(214,90,150,.35)}
+.carte.variante.cadre-bonbon .cadre,.crea.variante.cadre-bonbon .cadre{box-shadow:none}
+.carte.variante.cadre-bonbon .art,.crea.variante.cadre-bonbon .art{border-radius:11cqw;box-shadow:0 0 0 1.6cqw #fff,0 0 0 2.6cqw #ffb3d1,0 1.5cqw 3cqw rgba(214,90,150,.35)}
+.carte-ouverte.variante.cadre-bonbon .z-illu{border-radius:26px;box-shadow:0 0 0 6px #fff,0 0 0 9px #ffb3d1}
+.carte.variante.cadre-bonbon .pied{color:#c2477e;font-weight:700}
+.carte.variante.cadre-bonbon .nom-bande,.crea.variante.cadre-bonbon .nom-bande{color:#a8285f;text-shadow:0 1px 0 #fff;background:linear-gradient(rgba(255,240,247,.95),rgba(255,240,247,.75) 55%,rgba(255,240,247,0))}
+.carte.variante.cadre-bonbon .prix,.carte.variante.cadre-bonbon .atk,.crea.variante.cadre-bonbon .atk{border-color:#fff}
+.carte.variante.cadre-bonbon .pv,.crea.variante.cadre-bonbon .pv{background:linear-gradient(#ff8fb8,#e0457f)}
+.carte.variante.cadre-bonbon .art::after,.crea.variante.cadre-bonbon .art::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;mix-blend-mode:soft-light;background:linear-gradient(160deg,rgba(255,190,220,.55),rgba(255,255,255,0) 50%,rgba(180,240,225,.45))}
+
+@media (prefers-reduced-motion: reduce){.cadre-celeste::after,.cadre-celeste .z-illu::after,.cadre-aura::before{animation:none}.cadre-celeste .art::before,.cadre-celeste .z-illu::before{display:none}}
+body.sans-animations .cadre-celeste .art::before,body.sans-animations .cadre-celeste .z-illu::before{display:none}
 .edition{position:absolute;left:4cqw;top:16cqw;z-index:2;font-size:5.5cqw;font-weight:700;color:#3b2a06;background:linear-gradient(135deg,#fff4c2,#f0c64e);border-radius:99px;padding:.5cqw 3cqw;box-shadow:0 1px 3px rgba(0,0,0,.5)}
 .variante-admin{display:grid;grid-template-columns:130px minmax(0,1fr);gap:14px;align-items:start;padding:10px 0;border-top:1px solid var(--line)}
 .vignette-variante .carte{--w:130px;cursor:default}
@@ -8331,7 +8382,7 @@ function htmlReglages(){
 /* ============================================================
    ILLUSTRATIONS ALTERNATIVES, CARTES PROMOTIONNELLES, BOOSTERS SPÉCIAUX
    ============================================================ */
-const CADRES = [["dore","Doré"],["holo","Holographique"],["celeste","Céleste (étoiles scintillantes)"],["aura","Aura divine (éclat de lumière)"],["bonbon","Bonbon (pour les chibis)"],["pleine","Pleine illustration"],["sobre","Comme l’originale"]];
+const CADRES = [["dore","Doré"],["holo","Holographique"],["pleine","Pleine illustration"],["arche","Arche du temple"],["or","Or massif"],["obsidienne","Obsidienne"],["frise","Frise antique"],["celeste","Céleste (ciel étoilé animé)"],["aura","Aura divine (rayons de lumière)"],["bonbon","Bonbon (pour les chibis)"],["sobre","Comme l’originale"]];
 const varianteDe = c => (c && c.v && CONFIG.variantes && CONFIG.variantes[c.v]) || null;
 // Illustration à afficher : celle de la variante si elle en a une, sinon celle de la carte
 function imageAffichee(d, c, hd){
