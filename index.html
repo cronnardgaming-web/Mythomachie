@@ -978,6 +978,18 @@ body.compact .nom-heros-deck{font-size:17px}
 #banniere-defi{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;
   background:var(--zone);border:2px solid var(--or);border-radius:12px;padding:10px 16px;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:calc(100vw - 24px)}
 #banniere-defi .btn{margin:0}
+.lien-recherche{display:block;margin:6px auto 0;background:none;border:0;color:var(--ink-2);text-decoration:underline;cursor:pointer;font:inherit;font-size:13.5px}
+.bonus-ligne{display:block;width:max-content;margin:8px auto 0}
+.pastille-recherche{cursor:pointer;margin-left:6px;font:inherit;font-size:12.5px}
+.pastille-recherche i{background:#f0b340;box-shadow:0 0 6px #f0b340}
+.bandeau-pause{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 16px;border-radius:12px;border:1px solid var(--or);background:color-mix(in srgb, var(--zone) 85%, transparent);margin:0 0 14px}
+.bandeau-pause span{flex:1;min-width:200px}
+.encart-ordi{margin:14px 0 4px;padding:12px 14px;border:1px solid var(--or);border-radius:10px;background:color-mix(in srgb, var(--or) 10%, transparent)}
+.encart-ordi p{margin:0 0 10px}
+.gain.bonus-jour{color:#3fae6b}
+#banniere-fond{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:61;display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;
+  background:var(--zone);border:2px solid var(--or);border-radius:12px;padding:10px 16px;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:calc(100vw - 24px)}
+#banniere-fond .btn{margin:0}#banniere-fond small{opacity:.7;margin-left:4px}
 .ico-defi{font-size:22px;color:var(--or)}
 .choix-joueurs{max-height:240px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-top:6px;display:flex;flex-direction:column;gap:2px}
 .dest-message,.cadeau-message{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:10px 0}
@@ -2400,7 +2412,7 @@ ajouterTraductions("en", {
   [/^victoires \((\d+) %\)$/, "wins ($1%)"], [/^Votre cote : ([\d  ,.]+)$/, "Your rating: $1"], [/^(\d+)(?:er|e)$/, "$1"],
   [/^Tutoriel, étape (\d+) sur (\d+)$/, "Tutorial, step $1 of $2"], [/^Tutoriel du 2 contre 2 : (.+)$/, (t) => `2 vs 2 tutorial: ${traduire(t)}`], [/^Tutoriel terminé : (.+)$/, (t) => `Tutorial complete: ${traduire(t)}`],
   [/^(\d) · (Vous|Adversaire|Votre allié)$/, (n, r) => `${n} · ${({Vous:"You", Adversaire:"Opponent", "Votre allié":"Your ally"})[r]}`], [/^(\d+) novembre( \d{4})?$/, "November $1$2"], [/^(\d+) décembre( \d{4})?$/, "December $1$2"],
-  [/^Connecté : (.+)$/, "Logged in: $1"], [/^Joueur (\d) joue$/, "Player $1 plays"], [/^(.+) : (\+.+)$/, (n, e) => `${traduire(n)}: ${traduireEffetFR(e) || traduire(e)}`]
+  [/^Connecté : (.+)$/, "Logged in: $1"], [/^Joueur (\d) joue$/, "Player $1 plays"], [/^1re victoire du jour contre un joueur : \+(\d+) or$/, n => `First win of the day vs a player: +${n} gold`], [/^(.+) : (\+.+)$/, (n, e) => `${traduire(n)}: ${traduireEffetFR(e) || traduire(e)}`]
 ]);
 
 /* ----- Dictionnaire anglais (2/2) : règles du jeu, tutoriels ----- */
@@ -2802,6 +2814,26 @@ ajouterTraductions("en", {}, [
   [/^\((.+)\)$/, e => { const t = traduireEffetFR(e); return t ? `(${t})` : null; }],
   [/^(.*?)\s*\((.+)\)$/, (a, e) => { const t = traduireEffetFR(e); return t ? `${a ? traduire(a) + " " : ""}(${t})` : null; }],
   [/^(.*[a-zà-ÿ].*)$/i, t => traduireEffetFR(t)]
+]);
+
+// Jouer entre joueurs
+ajouterTraductions("en", {
+  "Contre un joueur de votre niveau · partie classée":"Against a player at your level · ranked game", "ou chercher un adversaire":"or look for an opponent", "Entre amis":"With friends",
+  "Recherche d’un adversaire":"Looking for an opponent", "Recherche d’un joueur de votre niveau…":"Looking for a player at your level…", "Adversaire trouvé :":"Opponent found:",
+  ". Il joue contre l’ordinateur en attendant : il a 30 secondes pour accepter.":". They are playing against the computer while waiting: they have 30 seconds to accept.",
+  "Personne pour l’instant. Jouez contre l’ordinateur en attendant : si un joueur vous cherche, vous serez prévenu et pourrez mettre votre partie en pause.":"No one yet. Play against the computer while you wait: if a player looks for you, you’ll be notified and can pause your game.",
+  "Jouer contre l’ordinateur":"Play against the computer", "veut vous affronter !":"wants to play you!", "Mettre ma partie en pause et jouer":"Pause my game and play", "Attendez votre tour…":"Wait for your turn…", "Non merci":"No thanks",
+  "Vous restez contre l’ordinateur. La recherche d’adversaire est arrêtée.":"You stay against the computer. The opponent search has stopped.", "La proposition a expiré.":"The offer has expired.", "Proposition expirée.":"Offer expired.",
+  "Reprendre":"Resume", "Abandonner":"Forfeit", "Abandonner la partie en pause ? Elle ne sera pas comptée.":"Forfeit the paused game? It won’t be counted.",
+  "Une partie est déjà en cours. La remplacer par la partie en pause ?":"A game is already in progress. Replace it with the paused game?",
+  "Or par victoire contre l’ordinateur":"Gold per win vs computer"
+}, [
+  [/^(\d+) joueurs? cherche(?:nt)? un adversaire$/, n => `${n} player${n>1 ? "s" : ""} looking for an opponent`],
+  [/^Contre l’ordinateur, pour apprendre \((\d+) \/ (\d+) parties\)$/, (a, b) => `Against the computer, to learn (${a} / ${b} games)`],
+  [/^\+(\d+) or : première victoire du jour contre un joueur !$/, n => `+${n} gold: first win of the day against a player!`],
+  [/^⏸ Votre partie contre l’ordinateur est en pause \(tour (\d+)\)\.$/, n => `⏸ Your game against the computer is paused (turn ${n}).`],
+  [/^contre un joueur, une victoire rapporte (\d+) or et une défaite (\d+) ; contre l’ordinateur, (\d+) et (\d+) \(au maximum (\d+) or par jour\)\. Votre première victoire du jour contre un joueur rapporte en plus (\d+) or\. Chaque jour, (\d+) quêtes rapportent (\d+) or chacune \(une quête peut être changée une fois par jour\)\.$/,
+    (a, b, c, d, e, f, g, k) => `against a player, a win earns ${a} gold and a defeat ${b}; against the computer, ${c} and ${d} (at most ${e} gold per day). Your first win of the day against a player earns an extra ${f} gold. Every day, ${g} quests earn ${k} gold each (a quest can be changed once a day).`]
 ]);
 
 
@@ -5238,7 +5270,8 @@ function actionEnLigne(act, id){
       else if(EN.db) EN.db.doc(`salle/${id}`).set({hote:EN.monId, statut:"annulee", cree:Date.now()}).then(fin, e => erreur(e.message));
       return;
     }
-    case "en-file-annuler": EN.ecran = "choix"; rpc("quitter_file").catch(() => {}); break;
+    case "en-file-annuler": rpc("quitter_file").catch(() => {}); if(EN.depuisAccueil){ EN.depuisAccueil = false; quitterEnLigne(); render(); return; } EN.ecran = "choix"; break;
+    case "en-file-ordi": jouerOrdiEnAttendant(); return;
     case "en-rejoindre": rejoindre(); return;
     case "en-reprendre": reprendre(id); return;
     case "en-copier":
@@ -5785,13 +5818,14 @@ async function verifierRecompense(){
     if(!ticket) throw new Error(S.ticketErreur || "Ticket de partie manquant.");
     if(hoteOuSeul) await enregistrerDuel();
     // L’invité attend que l’hôte ait enregistré la partie
-    let gain = null;
+    let bonusJour = 0, gain = null;
     for(let essai=0; ; essai++){
-      try { const r = await rpc("fin_partie_ticket", {p_ticket:ticket}); if(r && r.erreur) throw new Error(r.erreur); gain = r ? r.gain : 0; break; }
+      try { const r = await rpc("fin_partie_ticket", {p_ticket:ticket}); if(r && r.erreur) throw new Error(r.erreur); gain = r ? r.gain : 0; bonusJour = (r && r.bonus) || 0; break; }
       catch(e) { if(/pas encore enregistrée/.test(e.message) && essai<5){ await new Promise(r => setTimeout(r, 1500*(essai+1))); continue; } throw e; }
     }
     const eloAvant = PROG.profil && PROG.profil.elo;
-    PROG.dernierGain = {cle, gain};
+    PROG.dernierGain = {cle, gain, bonus:bonusJour};
+    if(bonusJour) PROG.etatLigne = PROG.etatLigne && {...PROG.etatLigne, bonus:{...PROG.etatLigne.bonus, disponible:false}};
     if(S.mode==="enligne" && !hoteOuSeul){
       // L’invité confirme le résultat déclaré par l’hôte ; en cas de désaccord, les points de classement sont annulés
       const victoire = S.vainqueur===S.joueurs[vue()].nom;
@@ -5818,7 +5852,7 @@ function htmlGainFin(){
   const st = S.stats ? S.stats[vue()] : null;
   const pl = (n, un, plusieurs) => `${nf(n)} ${(n || 0) > 1 ? plusieurs : un}`;
   const resume = st ? `<p class="aide">Dans cette partie : ${pl(st.degats, "dégât infligé", "dégâts infligés")}, ${pl(st.soins || 0, "point de vie soigné", "points de vie soignés")}, ${pl(st.creatures, "créature jouée", "créatures jouées")}, ${pl(st.achats, "carte achetée", "cartes achetées")}.</p>` : "";
-  return `<p class="gain">${g.gain ? `+${g.gain} or` : "Plafond d’or du jour atteint : revenez demain pour gagner plus d’or."}</p>${lElo}${resume}`;
+  return `<p class="gain">${g.gain ? `+${g.gain} or` : "Plafond d’or du jour atteint : revenez demain pour gagner plus d’or."}</p>${g.bonus ? `<p class="gain bonus-jour">+${g.bonus} or : première victoire du jour contre un joueur !</p>` : ""}${lElo}${resume}`;
 }
 
 // ----- Affichage commun
@@ -6098,6 +6132,9 @@ function actionProg(act, id){
       return true;
     }
     case "jouer-ia": case "jouer-duo": PROG.choixDeck = {mode: act==="jouer-ia" ? "ia" : "duo"}; break;
+    case "jouer-recherche": lancerRecherche(); return true;
+    case "pause-reprendre": reprendrePause(); return true;
+    case "pause-abandonner": if(confirm("Abandonner la partie en pause ? Elle ne sera pas comptée.")){ oublierPause(); } break;
     case "jouer-2v2": ui.ecran = "mode2v2"; PROG.quetes2v2 = undefined; if(PROG.actif && PROG.pret) chargerBonus2v2().then(() => { if(ui.ecran==="mode2v2") renderProg(); });
       // Première visite : le tutoriel s’ouvre de lui-même
       try { if(!localStorage.getItem("tuto-2v2-vu")) PROG.tuto2v2 = 0; } catch(e) {}
@@ -6262,7 +6299,7 @@ function admServeur(){
     <p class="aide">Le serveur doit connaître vos cartes et leur rareté pour les paquets, la fabrication et les cartes offertes. Envoyez le catalogue après avoir ajouté, supprimé ou changé la rareté de cartes.</p>
     <div class="adm-actions"><button type="button" class="btn" data-act="srv-catalogue">Envoyer le catalogue (${Object.keys(CARTES).length} cartes)</button></div>
     <h2>Économie</h2>
-    <div class="champs">${n("Or offert au départ","or_depart")}${n("Or par victoire","or_victoire")}${n("Or par défaite","or_defaite")}${n("Plafond d’or par jour","plafond_or_jour")}${n("Or par quête du jour","or_quete")}${n("Prix d’un paquet","prix_paquet")}${n("Cartes par paquet","cartes_paquet")}</div>
+    <div class="champs">${n("Or offert au départ","or_depart")}${n("Or par victoire contre l’ordinateur","or_victoire_ordi")}${n("Or par défaite contre l’ordinateur","or_defaite_ordi")}${n("Or par victoire contre un joueur","or_victoire_joueur")}${n("Or par défaite contre un joueur","or_defaite_joueur")}${n("Bonus : 1re victoire du jour contre un joueur","bonus_victoire_en_ligne")}${n("Plafond d’or par jour","plafond_or_jour")}${n("Or par quête du jour","or_quete")}${n("Prix d’un paquet","prix_paquet")}${n("Cartes par paquet","cartes_paquet")}</div>
     <h2>Chances par carte dans un paquet</h2>
     <p class="aide">Entre 0 et 1, le total doit faire 1. Exemple : 0.72 pour 72 %.</p>
     <div class="champs">${rar.map(([k,l]) => n(l.charAt(0).toUpperCase()+l.slice(1), "probabilites."+k)).join("")}</div>
@@ -7082,7 +7119,7 @@ function pageRegles(){
     ["collection", "Collection et progression", `<ul>
       <li><b>Cartes offertes :</b> à votre arrivée, vous recevez ${eco.depart ? Object.values(eco.depart).reduce((a,b) => a+b, 0) : 30} cartes pour former votre premier deck, et ${eco.or_depart} or afin d’ouvrir un booster.</li>
       <li><b>Decks :</b> ${R.tailleDeck} cartes, ${R.copiesMax} exemplaires au maximum par carte et ${R.copiesLegendaire} pour une légendaire. Vous pouvez en enregistrer jusqu’à 9.</li>
-      <li><b>Or :</b> une victoire rapporte ${eco.or_victoire} or, une défaite ${eco.or_defaite} (au maximum ${eco.plafond_or_jour} or par jour). Chaque jour, 3 quêtes rapportent ${eco.or_quete} or chacune (une quête peut être changée une fois par jour).</li>
+      <li><b>Or :</b> contre un joueur, une victoire rapporte ${eco.or_victoire_joueur ?? 15} or et une défaite ${eco.or_defaite_joueur ?? 5} ; contre l’ordinateur, ${eco.or_victoire_ordi ?? 6} et ${eco.or_defaite_ordi ?? 2} (au maximum ${eco.plafond_or_jour} or par jour). Votre première victoire du jour contre un joueur rapporte en plus ${eco.bonus_victoire_en_ligne ?? 30} or. Chaque jour, 3 quêtes rapportent ${eco.or_quete} or chacune (une quête peut être changée une fois par jour).</li>
       <li><b>Trophées :</b> chaque trophée a 4 rangs (bronze, argent, or, platine). Les rangs bronze, argent et or rapportent 15, 30 puis 60 or, et le rang platine un paquet classique. Les trophées de panthéon (Champion d’Égypte, d’Inde, du Nord, de l’Olympe) rapportent un paquet de leur panthéon aux rangs or et platine. Réclamez vos récompenses dans votre profil.</li>
       <li><b>Paquets offerts :</b> ils s’ouvrent gratuitement dans la boutique, avec les mêmes chances qu’un paquet acheté.</li>
       <li><b>Boutique :</b> un paquet coûte ${eco.prix_paquet} or et contient ${eco.cartes_paquet} cartes, dont au moins une rare. Le paquet classique mélange toutes les factions ; chaque faction a aussi son paquet, qui ne contient que ses cartes. Des boosters spéciaux peuvent proposer des cartes promotionnelles (absentes des autres paquets et non fabricables) et des illustrations alternatives (même carte, apparence différente, à choisir dans votre collection). Chances par carte : commune ${pct(eco.probabilites.commune)}, rare ${pct(eco.probabilites.rare)}, épique ${pct(eco.probabilites.epique)}, légendaire ${pct(eco.probabilites.legendaire)}.</li>
@@ -8119,7 +8156,7 @@ function htmlHall(){
   const compteIncomplet = typeof compteEtat==="function" && compteEtat()!=="complet";
   return `<div class="hall" role="main" aria-label="${NOM_JEU}">
     <header class="hall-tete">
-      <div class="hall-logo"><h1 class="logo">${NOM_JEU}${betaActive() ? `<span class="tampon-beta" aria-hidden="true">Bêta</span>` : ""}</h1><span class="sous-logo">Le choc des panthéons</span>${PROG.actif && PROG.enLigneNb ? `<span class="pastille-en-ligne"><i aria-hidden="true"></i>${nf(PROG.enLigneNb)} joueur${PROG.enLigneNb>1 ? "s" : ""} en ligne</span>` : ""}</div>
+      <div class="hall-logo"><h1 class="logo">${NOM_JEU}${betaActive() ? `<span class="tampon-beta" aria-hidden="true">Bêta</span>` : ""}</h1><span class="sous-logo">Le choc des panthéons</span>${PROG.actif && PROG.enLigneNb ? `<span class="pastille-en-ligne"><i aria-hidden="true"></i>${nf(PROG.enLigneNb)} joueur${PROG.enLigneNb>1 ? "s" : ""} en ligne</span>` : ""}${htmlPastilleRecherche()}</div>
       <div class="hall-droite">
         ${bourse()}
         <button type="button" class="hall-profil" data-act="prog-profil" title="Mon profil"><span class="avatar" aria-hidden="true">${esc((pseudo || "?").charAt(0).toUpperCase())}</span><span class="nom-profil">${pseudo ? esc(pseudo) : "Choisir un pseudo"}${p.titre ? `<small class="titre-joueur">${esc(p.titre)}</small>` : ""}</span></button>
@@ -8131,12 +8168,13 @@ function htmlHall(){
     </header>
     ${compteIncomplet ? htmlCompte() : ""}
     ${htmlBandeauBeta()}
+    ${htmlBandeauPause()}
     <div class="hall-grille ${PROG.saison ? "avec-saison" : ""}">
       <section class="hall-jouer" aria-labelledby="titre-jouer">
         <h2 id="titre-jouer">Jouer</h2>
-        <button type="button" class="btn-geant" data-act="jouer-ia">${ico("jouer", "ico-geant")}<span><b>Contre l’ordinateur</b><small>Une partie avec l’un de vos decks</small></span></button>
+        ${htmlBoutonJouer()}
         <div class="hall-modes">
-          <button type="button" class="btn second" data-act="en-ligne">${ico("enligne")} En ligne</button>
+          <button type="button" class="btn second" data-act="en-ligne">${ico("enligne")} ${rechercheActive() ? "Entre amis" : "En ligne"}</button>
           <button type="button" class="btn second" data-act="jouer-duo">${ico("duo")} Deux joueurs sur cet écran</button>
           ${mode2v2Visible() ? `<button type="button" class="btn second" data-act="jouer-2v2">${ico("duo")} 2 contre 2 avec un allié${PROG.actif && PROG.bonus2v2 ? (PROG.bonus2v2.disponible ? `<span class="pastille-bonus-2v2" title="Votre première victoire du jour en 2 contre 2 rapporte un bonus">Victoire du jour +${PROG.bonus2v2.montant} or</span>` : `<span class="pastille-bonus-2v2 obtenu" title="Victoire du jour déjà obtenue">✓ Victoire du jour</span>`) : ""}</button>` : ""}
         </div>
@@ -9680,16 +9718,23 @@ async function lancerFileClassee(){
       return;
     }
     EN.fileInfo = r; renderCouche();
-    await pause(2000);
+    for(let k=0; k<4 && EN.ecran==="file"; k++){ await pause(500); if(k%2) renderCouche(); }
   }
 }
 function htmlFileClassee(){
   const s = Math.round((Date.now() - (EN.fileDepuis || Date.now())) / 1000), ecart = Math.min(1000, 100 + 5 * s);
-  return `<div class="boite" role="dialog" aria-label="Recherche d’un adversaire">
-    <h2>Partie classée</h2>
-    <p class="attente">Recherche d’un adversaire de votre niveau…</p>
+  const prop = EN.fileInfo && EN.fileInfo.proposition_envoyee, ordiEnAvant = s >= DELAI_ORDI && !prop;
+  const v = decksValides();
+  return `<div class="boite boite-recherche" role="dialog" aria-label="Recherche d’un adversaire">
+    <h2>Recherche d’un adversaire</h2>
+    ${prop ? `<p class="attente">Adversaire trouvé : <b>${esc(prop)}</b>. Il joue contre l’ordinateur en attendant : il a 30 secondes pour accepter.</p>`
+      : `<p class="attente">Recherche d’un joueur de votre niveau…</p>`}
     <p class="aide">Attente : ${s} s. Écart de cote accepté : ±${ecart} (il s’élargit avec l’attente).${PROG.profil && PROG.profil.elo ? ` Votre cote : ${nf(PROG.profil.elo)}.` : ""}</p>
-    <div class="actions"><button type="button" class="btn second" data-act="en-file-annuler">Annuler</button></div></div>`;
+    ${v.length>1 ? `<label class="champ"><span>Votre deck</span>${selectDeck("deckEnLigne", v.some(d => d.id===EN.deckId) ? EN.deckId : (EN.deckId = v[0].id))}</label>` : ""}
+    ${ordiEnAvant ? `<div class="encart-ordi"><p>Personne pour l’instant. Jouez contre l’ordinateur en attendant : si un joueur vous cherche, vous serez prévenu et pourrez mettre votre partie en pause.</p>
+      <button type="button" class="btn" data-act="en-file-ordi">Jouer contre l’ordinateur</button></div>` : ""}
+    <div class="actions">${ordiEnAvant ? "" : `<button type="button" class="btn-discret" data-act="en-file-ordi">Jouer contre l’ordinateur</button>`}
+      <button type="button" class="btn second" data-act="en-file-annuler">Annuler</button></div></div>`;
 }
 
 /* ============================================================
@@ -11210,8 +11255,12 @@ document.addEventListener("mouseout", e => { if(SURVOL.cible && !(e.relatedTarge
 // Un nouvel affichage remplace les cartes : l’aperçu disparaît s’il ne correspond plus à rien
 setInterval(() => { if(SURVOL.cible && !SURVOL.cible.isConnected) cacherSurvol(); }, 400);
 // ----- Joueurs en ligne (accueil)
-async function chargerEnLigne(){ try { PROG.enLigneNb = await rpc("joueurs_en_ligne"); } catch(e) { PROG.enLigneNb = null; } }
-setInterval(() => { if(PROG.actif && PROG.pret && !document.hidden && !S){ chargerEnLigne().then(() => { if(!S && ui.ecran==="jeu") render(); }); } }, 60000);
+async function chargerEnLigne(){
+  try { PROG.etatLigne = await rpc("etat_en_ligne"); PROG.enLigneNb = PROG.etatLigne ? PROG.etatLigne.en_ligne : null; }
+  catch(e) { PROG.etatLigne = null; try { PROG.enLigneNb = await rpc("joueurs_en_ligne"); } catch(e2) { PROG.enLigneNb = null; } }
+}
+// Accueil : nombre de joueurs en ligne et qui cherchent un adversaire, toutes les 15 secondes
+setInterval(() => { if(PROG.actif && PROG.pret && !document.hidden && !S && ui.ecran==="jeu" && !EN.ecran && !PROG.choixDeck){ chargerEnLigne().then(() => { if(!S && ui.ecran==="jeu" && !EN.ecran) render(); }); } }, 15000);
 
 /* ============================================================
    MINUTEUR DE TOUR ET ABANDONS (parties en ligne avec au moins 2 joueurs humains)
@@ -11754,6 +11803,122 @@ function exporterAchatsCSV(){
   const blob = new Blob(["﻿" + lignes.join("\r\n")], {type:"text/csv;charset=utf-8"});
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `mythomachie-achats-${annee}.csv`;
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+
+/* ============================================================
+   JOUER ENTRE JOUEURS : bouton « Jouer » qui cherche un adversaire, l’ordinateur proposé au bout de 10 s,
+   recherche maintenue pendant la partie contre l’ordinateur (proposition + mise en pause), débutants protégés
+   ============================================================ */
+const DELAI_ORDI = 10, PARTIES_DEBUTANT = 5;
+const rechercheActive = () => !!(PROG.actif && PROG.pret && PROG.etatLigne);
+const estDebutant = () => rechercheActive() && (PROG.etatLigne.parties || 0) < PARTIES_DEBUTANT;
+function htmlBoutonJouer(){
+  if(!rechercheActive()) return `<button type="button" class="btn-geant" data-act="jouer-ia">${ico("jouer", "ico-geant")}<span><b>Contre l’ordinateur</b><small>Une partie avec l’un de vos decks</small></span></button>`;
+  const b = PROG.etatLigne.bonus || {};
+  const pastille = b.disponible ? `<span class="pastille-bonus-2v2 bonus-ligne" title="Votre première victoire du jour contre un joueur rapporte un bonus">1re victoire du jour contre un joueur : +${b.montant} or</span>` : "";
+  if(estDebutant()) return `<button type="button" class="btn-geant" data-act="jouer-ia">${ico("jouer", "ico-geant")}<span><b>Jouer</b><small>Contre l’ordinateur, pour apprendre (${PROG.etatLigne.parties || 0} / ${PARTIES_DEBUTANT} parties)</small></span></button>
+    <button type="button" class="lien-recherche" data-act="jouer-recherche">ou chercher un adversaire</button>`;
+  return `<button type="button" class="btn-geant" data-act="jouer-recherche">${ico("jouer", "ico-geant")}<span><b>Jouer</b><small>Contre un joueur de votre niveau · partie classée</small></span></button>${pastille}`;
+}
+function htmlPastilleRecherche(){
+  const n = rechercheActive() ? PROG.etatLigne.en_recherche : 0;
+  return n ? `<button type="button" class="pastille-en-ligne pastille-recherche" data-act="jouer-recherche"><i aria-hidden="true"></i>${nf(n)} joueur${n>1 ? "s" : ""} cherche${n>1 ? "nt" : ""} un adversaire</button>` : "";
+}
+function lancerRecherche(){
+  if(!decksValides().length) return erreur(`Il vous faut un deck complet de ${REGLES.tailleDeck} cartes pour jouer en ligne.`);
+  if(FOND.actif) arreterFond();
+  EN.depuisAccueil = true;
+  actionEnLigne("en-ligne");
+  lancerFileClassee();
+}
+// Bascule de la recherche vers une partie contre l’ordinateur, en restant disponible
+function jouerOrdiEnAttendant(){
+  const deck = deckChoisi(); if(!deck) return;
+  EN.depuisAccueil = false;
+  Object.assign(EN, {ecran:null}); renderCouche && renderCouche();
+  nouvellePartie("ia", [deck, deckConstruit()], [prefVariantes(), null]);
+  PROG.choixDeck = null; PROG.bienvenue = false;
+  Object.assign(ui, {ecran:"jeu", attaquant:null, armeEnAttente:null, choixPierre:null, aiEnCours:false, couvert:false});
+  apresAction();
+  demarrerFond();
+}
+// ----- Recherche en arrière-plan pendant la partie contre l’ordinateur
+const FOND = {actif:false, prop:null, idPartie:null, reponse:false};
+function demarrerFond(){
+  FOND.actif = true; FOND.prop = null; FOND.idPartie = S && S.idPartie;
+  (async () => {
+    while(FOND.actif){
+      if(!S || S.idPartie!==FOND.idPartie || S.vainqueur!==null){ arreterFond(); break; }
+      let r; try { r = await rpc("chercher_adversaire", {p_occupe:true}); } catch(e) { arreterFond(); break; }
+      if(!FOND.actif) break;
+      const avant = FOND.prop;
+      FOND.prop = r && r.proposition ? {pseudo:r.proposition, fin:Date.now() + Math.max(5, 30 - (r.proposition_s || 0)) * 1000} : null;
+      if(FOND.prop && !avant) jouerSon("notification");
+      majBanniereFond();
+      await pause(2500);
+    }
+  })();
+}
+function arreterFond(quitter = true){
+  const etait = FOND.actif; FOND.actif = false; FOND.prop = null;
+  if(etait && quitter) rpc("quitter_file").catch(() => {});
+  majBanniereFond();
+}
+function majBanniereFond(){
+  let b = document.getElementById("banniere-fond");
+  const p = FOND.actif && FOND.prop && FOND.prop.fin > Date.now() ? FOND.prop : null;
+  if(!p){ if(b) b.remove(); return; }
+  if(!b){ b = document.createElement("div"); b.id = "banniere-fond"; b.setAttribute("role", "alert"); document.body.appendChild(b); }
+  const monTour = S && S.mode==="ia" && S.courant===0 && !ui.aiEnCours && S.vainqueur===null;
+  const reste = Math.max(0, Math.ceil((p.fin - Date.now()) / 1000));
+  b.innerHTML = `<span class="ico-defi" aria-hidden="true">⚔</span><span><b>${esc(p.pseudo)}</b> veut vous affronter ! <small>${reste} s</small></span>
+    <button type="button" class="btn" data-act="fond-accepter" ${monTour && !FOND.reponse ? "" : "disabled"}>${monTour ? "Mettre ma partie en pause et jouer" : "Attendez votre tour…"}</button>
+    <button type="button" class="btn second" data-act="fond-refuser" ${FOND.reponse ? "disabled" : ""}>Non merci</button>`;
+}
+setInterval(() => { if(FOND.prop) majBanniereFond(); }, 1000);
+document.addEventListener("click", e => {
+  const bt = e.target.closest && e.target.closest("#banniere-fond [data-act]");
+  if(!bt || bt.disabled) return;
+  e.stopPropagation();
+  FOND.reponse = true; majBanniereFond();
+  const ok = bt.dataset.act==="fond-accepter";
+  rpc("repondre_proposition", {p_ok:ok}).then(r => {
+    FOND.reponse = false;
+    arreterFond(false);
+    if(!ok) return erreur("Vous restez contre l’ordinateur. La recherche d’adversaire est arrêtée.");
+    if(!r || !r.code) return erreur((r && r.erreur) || "La proposition a expiré.");
+    mettreEnPause();
+    EN.adversaireFile = r.adversaire || null;
+    S = null; ui.ecran = "jeu"; render(); actionEnLigne("en-ligne"); creerPartie(r.code);
+  }, err => { FOND.reponse = false; majBanniereFond(); erreur(err.message); });
+}, true);
+// ----- Partie contre l’ordinateur en pause (gardée 6 heures, même après un rechargement)
+const CLE_PAUSE = "partie-ordi-en-pause";
+function mettreEnPause(){
+  if(!S) return;
+  const p = {quand:Date.now(), S:JSON.parse(JSON.stringify(S))};
+  PROG.partiePause = p;
+  try { localStorage.setItem(CLE_PAUSE, JSON.stringify(p)); } catch(e) {}
+}
+function partieEnPause(){
+  if(!PROG.partiePause){ try { PROG.partiePause = JSON.parse(localStorage.getItem(CLE_PAUSE) || "null"); } catch(e) { PROG.partiePause = null; } }
+  const p = PROG.partiePause;
+  if(p && Date.now() - p.quand > 6 * 3600 * 1000){ oublierPause(); return null; }
+  return p;
+}
+function oublierPause(){ PROG.partiePause = null; try { localStorage.removeItem(CLE_PAUSE); } catch(e) {} }
+function htmlBandeauPause(){
+  const p = PROG.actif && partieEnPause(); if(!p || !p.S) return "";
+  return `<aside class="bandeau-pause" role="note"><span>⏸ Votre partie contre l’ordinateur est en pause (tour ${p.S.tour}).</span>
+    <button type="button" class="btn" data-act="pause-reprendre">Reprendre</button><button type="button" class="btn-discret" data-act="pause-abandonner">Abandonner</button></aside>`;
+}
+function reprendrePause(){
+  const p = partieEnPause(); if(!p) return;
+  if(S && S.vainqueur===null && !confirm("Une partie est déjà en cours. La remplacer par la partie en pause ?")) return;
+  oublierPause();
+  S = p.S; EN.ecran = null;
+  Object.assign(ui, {ecran:"jeu", attaquant:null, armeEnAttente:null, choixPierre:null, aiEnCours:false, couvert:false});
+  apresAction();
 }
 
 chargerConfig();

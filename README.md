@@ -280,3 +280,11 @@ Exécutez **supabase-saison-travaux-enchaines.sql** (après supabase-saisons.sql
 ## Cadeaux automatiques sous condition, registre des achats
 - Exécutez **supabase-cadeaux-conditions.sql** : dans Admin › Récompenses › Cadeaux automatiques, un palier peut dépendre d’un nombre de parties jouées entre deux dates (ex. 100 parties pendant la bêta) ou d’un nombre de travaux accomplis dans une saison (ex. les 12 travaux d’Héraclès). Le message et son cadeau (une carte promotionnelle par exemple) partent dès que la condition est remplie.
 - Exécutez **supabase-achats.sql** : Admin › Publication › Achats et soutiens, registre des sommes reçues (brut, frais PayPal, net), totaux par mois, export CSV pour la comptabilité. Le lien de soutien PayPal ajoute le pseudo et le début de l’identifiant du joueur à l’objet de la transaction.
+
+## Jouer entre joueurs
+Exécuter `supabase-jouer-entre-joueurs.sql` une fois (SQL Editor, puis Run), après `supabase-abandons.sql`. Il peut être relancé sans risque.
+- Accueil : le bouton « Jouer » cherche un adversaire de votre niveau. Au bout de 10 secondes sans adversaire, « Jouer contre l’ordinateur » est mis en avant.
+- Pendant une partie contre l’ordinateur lancée depuis la recherche, le joueur reste disponible. Si quelqu’un le cherche, une bannière lui propose (pendant son tour, 30 secondes pour répondre) de mettre sa partie en pause pour jouer. La partie en pause se reprend depuis l’accueil pendant 6 heures.
+- Débutants (moins de 5 parties) : « Jouer » lance une partie contre l’ordinateur ; la recherche reste proposée en lien.
+- Or : réglable dans Admin › Économie (victoire et défaite contre l’ordinateur, contre un joueur, bonus de la première victoire du jour contre un joueur, hors plafond). Valeurs par défaut : 6 / 2 contre l’ordinateur, 15 / 5 contre un joueur, bonus de 30. Vos réglages existants sont conservés.
+- Toutes les parties comptent toujours pour le classement et les quêtes.
