@@ -832,6 +832,7 @@ body.compact .nom-heros-deck{font-size:17px}
 .col-item{position:relative}
 
 /* Administration : cartes absentes du catalogue */
+.adm-a-venir{font-size:10.5px;font-weight:700;padding:0 6px;border-radius:99px;background:#5b6b8c;color:#fff;vertical-align:1px}
 .alerte-catalogue{display:flex;align-items:center;gap:6px 14px;flex-wrap:wrap;margin:10px 0 0;padding:10px 14px;border-radius:10px;
   background:color-mix(in srgb, #b8402f 18%, var(--zone));border:1px solid #b8402f}
 .alerte-catalogue span{font-size:14px;flex:1 1 300px}
@@ -2779,7 +2780,7 @@ ajouterTraductions("en", {
   "Cette carte ne peut pas être recyclée.":"This card can’t be recycled.", "Cette place est prise.":"This seat is taken.", "Cette quête ne peut pas être remplacée.":"This quest can’t be replaced.",
   "Cette quête n’est pas encore terminée.":"This quest isn’t finished yet.", "Connexion requise.":"Login required.", "Deck d’un autre joueur.":"Another player’s deck.", "Deck introuvable.":"Deck not found.",
   "Demande déjà envoyée ou déjà amis.":"Request already sent, or already friends.", "Demande impossible.":"Request not possible.", "Données de partie trop volumineuses.":"Game data too large.",
-  "Encre insuffisante.":"Not enough ink.", "Il manque un des deux camps.":"One of the two sides is missing.", "Illustration inconnue du serveur (envoyez le catalogue).":"Artwork unknown to the server.",
+  "Encre insuffisante.":"Not enough ink.", "Cette carte ne peut pas être fabriquée (carte de saison, promotionnelle ou pas encore sortie).":"This card can’t be crafted (season, promo or not yet released card).", "Il manque un des deux camps.":"One of the two sides is missing.", "Illustration inconnue du serveur (envoyez le catalogue).":"Artwork unknown to the server.",
   "Invitation déjà envoyée.":"Invitation already sent.", "Invitation expirée.":"Invitation expired.", "Joueur introuvable.":"Player not found.", "La partie a déjà été lancée.":"The game has already started.",
   "La partie de ce salon a déjà commencé.":"This lobby’s game has already started.", "Le catalogue de cartes est vide.":"The card catalogue is empty.", "Le joueur désigné n’a pas perdu.":"The named player hasn’t lost.",
   "Le mode ne correspond pas au ticket.":"The mode doesn’t match the ticket.", "Les boosters spéciaux ne peuvent pas être offerts.":"Special boosters can’t be given.", "Mode de partie inconnu.":"Unknown game mode.",
@@ -3189,7 +3190,7 @@ function deckConstruit(){
   // Prototype : deck de 30 cartes tiré au hasard dans toutes les factions
   const copies = [];
   for(const [id,d] of Object.entries(CARTES)){
-    if(d.depart || d.base || d.jeton || saisonVerrouillee(d)) continue;
+    if(d.depart || d.base || d.jeton || saisonVerrouillee(d) || pasEncoreSortie(d)) continue;
     const n = d.rarete==="legendaire" ? REGLES.copiesLegendaire : REGLES.copiesMax;
     for(let i=0;i<n;i++) copies.push(id);
   }
@@ -4178,7 +4179,7 @@ function trierCartes(ids){
 }
 function listeCartes(ids){
   const item = id => `<li><button type="button" class="adm-item f-${CARTES[id].faction || "neutre"} ${id===adm.sel ? "actif" : ""}" data-act="carte-sel" data-id="${id}">
-    <span class="pastille"></span><span>${esc(CARTES[id].nom)}</span><span class="adm-item-info">${CARTES[id].prix ?? "–"}</span></button></li>`;
+    <span class="pastille"></span><span>${esc(CARTES[id].nom)}${pasEncoreSortie(CARTES[id]) ? ` <small class="adm-a-venir" title="Sortie le ${esc(CARTES[id].sortie)}">à venir</small>` : ""}</span><span class="adm-item-info">${CARTES[id].prix ?? "–"}</span></button></li>`;
   if(adm.tri!=="faction") return ids.map(item).join("");
   let html = "", fCour = null, rCour = null;
   const compte = test => ids.filter(test).length;
@@ -5749,7 +5750,11 @@ async function rpc(nom, args){
 // Sur le site, l’administration est réservée à l’administrateur déclaré dans Supabase.
 // Tant qu’aucun administrateur n’existe, le premier visiteur peut s’y rendre pour se déclarer.
 const accesAdmin = () => !!window.claude || PROG.admin || PROG.adminExiste===false;
-const estCollectionnable = d => !!d && !d.depart && !d.base && !d.jeton;
+// Toutes les cartes à collectionner, y compris celles pas encore sorties (pour l’administration)
+const estCollectionnableAdmin = d => !!d && !d.depart && !d.base && !d.jeton;
+// Carte ajoutée en avance : invisible pour les joueurs jusqu’à sa date de sortie
+const pasEncoreSortie = d => !!(d && d.sortie && /^\d{4}-\d{2}-\d{2}$/.test(d.sortie) && new Date().toISOString().slice(0, 10) < d.sortie);
+const estCollectionnable = d => estCollectionnableAdmin(d) && !pasEncoreSortie(d);
 // Carte de saison encore exclusive : ni fabrication, ni paquets, ni decks de l’ordinateur (même règle que le serveur : libre à partir du jour de fin)
 const saisonVerrouillee = d => !!(d && d.saisonFin && /^\d{4}-\d{2}-\d{2}$/.test(d.saisonFin) && new Date().toISOString().slice(0, 10) < d.saisonFin);
 const maxCopies = id => CARTES[id] && CARTES[id].rarete==="legendaire" ? REGLES.copiesLegendaire : REGLES.copiesMax;
@@ -8284,7 +8289,7 @@ function caseBooster(bid, b, genre, ident){
 // ----- Fiche de carte de l’administration : variantes et boosters
 function htmlAdminVariantes(id){
   const d = CARTES[id];
-  if(!estCollectionnable(d)) return "";
+  if(!estCollectionnableAdmin(d)) return "";
   const vars = Object.entries(CONFIG.variantes || {}).filter(([, v]) => v.carte===id);
   const speciaux = boostersSpeciaux();
   const fac = d.faction && FACTIONS[d.faction] ? FACTIONS[d.faction] : null;
@@ -8309,6 +8314,8 @@ function htmlAdminVariantes(id){
       ${htmlValeurCarte(d)}
       <label class="case"><input type="checkbox" data-act="carte-promo" data-id="${id}" ${d.promo ? "checked" : ""}> Carte promotionnelle</label>
       <label class="champ champ-saison"><span>Carte de saison : exclusive jusqu’au (vide = carte normale)</span><input type="date" data-chemin="cartes.${id}.saisonFin" value="${esc(d.saisonFin || "")}"></label>
+      <label class="champ champ-saison"><span>Date de sortie : invisible pour les joueurs avant le (vide = visible tout de suite)</span><input type="date" data-chemin="cartes.${id}.sortie" value="${esc(d.sortie || "")}"></label>
+      ${pasEncoreSortie(d) ? `<p class="aide">Carte à venir : jusqu’au ${new Date(d.sortie + "T00:00:00").toLocaleDateString(LOC())}, les joueurs ne la voient nulle part (collection, decks, paquets, fabrication, decks de l’ordinateur). Pensez à « Envoyer le catalogue » et à exporter config.json.</p>` : ""}
       ${d.saisonFin ? `<p class="aide">Carte de saison : absente des paquets et non fabricable jusqu’au ${new Date(d.saisonFin + "T00:00:00").toLocaleDateString(LOC())}, puis elle rejoint automatiquement les paquets. Pensez à « Envoyer le catalogue ».</p>` : ""}
       <p class="aide">${d.promo
         ? "Carte promotionnelle : absente du booster principal et des boosters de panthéon, elle ne se fabrique pas et ne se recycle pas. Les joueurs l’obtiennent dans les boosters spéciaux cochés ci-dessous, ou en cadeau (boîte aux lettres, cadeaux automatiques)."
@@ -8319,7 +8326,7 @@ function htmlAdminVariantes(id){
 // ----- Écran « Boosters » de l’administration
 function htmlApparencePaquets(){
   const lignes = [["", "Paquet classique"], ...Object.entries(FACTIONS).map(([k, f]) => [k, `Paquet ${f.m}`]), ...boostersSpeciaux().map(([bid, b]) => ["b:" + bid, b.nom || "Booster spécial"])];
-  const cartes = Object.keys(CARTES).filter(k => estCollectionnable(CARTES[k]) && CARTES[k].image)
+  const cartes = Object.keys(CARTES).filter(k => estCollectionnableAdmin(CARTES[k]) && CARTES[k].image)
     .sort((a, b) => (["legendaire","epique","rare","commune"].indexOf(CARTES[a].rarete || "commune") - ["legendaire","epique","rare","commune"].indexOf(CARTES[b].rarete || "commune")) || CARTES[a].nom.localeCompare(CARTES[b].nom, "fr"));
   return `<h3>Apparence des paquets</h3>
     <p class="aide">Choisissez la carte dont l’illustration orne chaque sachet (une créature légendaire, par exemple), puis cadrez-la en la faisant glisser. Elle apparaît en légère transparence sur la couleur du panthéon ; le paquet classique reste dans un ton neutre.</p>
@@ -8344,7 +8351,7 @@ function admBoosters(){
   if(!adm.booster || !B[adm.booster]) adm.booster = ids[0] || null;
   const b = adm.booster ? B[adm.booster] : null, bid = adm.booster;
   const filtre = adm.bFiltre || "toutes";
-  const coll = trierCartes(Object.keys(CARTES).filter(k => estCollectionnable(CARTES[k]) && (filtre==="toutes" || CARTES[k].faction===filtre || (filtre==="promo" && CARTES[k].promo))));
+  const coll = trierCartes(Object.keys(CARTES).filter(k => estCollectionnableAdmin(CARTES[k]) && (filtre==="toutes" || CARTES[k].faction===filtre || (filtre==="promo" && CARTES[k].promo))));
   const vars = Object.entries(CONFIG.variantes || {}).filter(([, v]) => CARTES[v.carte]);
   const parRarete = b ? RARETES.map(([r, l]) => {
     const n = (b.cartes || []).filter(k => CARTES[k] && (CARTES[k].rarete || "commune")===r).length + (b.variantes || []).filter(v => CONFIG.variantes[v] && CARTES[CONFIG.variantes[v].carte] && (CARTES[CONFIG.variantes[v].carte].rarete || "commune")===r).length;
@@ -9339,7 +9346,7 @@ const isoSaison = (s, jours) => new Date((jourUTC(s.debut) + jours) * 86400000).
 const ouvertureJour = (t, k) => t.ouverture_jour ?? ouvertureTravail(k);
 const dateSaison = (s, jours) => { const d = new Date(s.debut + "T00:00:00"); d.setDate(d.getDate() + jours); return d.toLocaleDateString(LOC(), {weekday:"short", day:"numeric", month:"short"}); };
 function htmlRecompenseAdmin(chemin, r){
-  const cartes = Object.keys(CARTES).filter(k => estCollectionnable(CARTES[k])).sort((a, b) => ((CARTES[b].saisonFin ? 1 : 0) - (CARTES[a].saisonFin ? 1 : 0)) || CARTES[a].nom.localeCompare(CARTES[b].nom, "fr"));
+  const cartes = Object.keys(CARTES).filter(k => estCollectionnableAdmin(CARTES[k])).sort((a, b) => ((CARTES[b].saisonFin ? 1 : 0) - (CARTES[a].saisonFin ? 1 : 0)) || CARTES[a].nom.localeCompare(CARTES[b].nom, "fr"));
   const vars = Object.entries(CONFIG.variantes || {});
   return `<div class="recompense-admin">
     ${champNombre("Or", chemin + ".or", r.or || 0)}${champNombre("Encre", chemin + ".encre", r.encre || 0)}
@@ -9620,7 +9627,7 @@ function admFicheJoueur(){
   if(f.erreur) return `<div class="adm-page">${retour}<p style="color:var(--danger)">${esc(f.erreur)}</p></div>`;
   const s = f.stats || {}, coll = f.collection || {};
   const tuile = (v, l) => `<div class="tuile"><b>${v}</b><span>${l}</span></div>`;
-  const cartesColl = Object.keys(CARTES).filter(k => estCollectionnable(CARTES[k]));
+  const cartesColl = Object.keys(CARTES).filter(k => estCollectionnableAdmin(CARTES[k]));
   const possedees = Object.keys(coll).filter(k => CARTES[k] && estCollectionnable(CARTES[k]));
   const vars = Object.entries(CONFIG.variantes || {}), possV = new Set(f.variantes || []);
   return `<div class="adm-page fiche-joueur">
@@ -9906,7 +9913,7 @@ function admMessages(){
   const M = adm.msg, J = (PROG.adminStats && PROG.adminStats.joueurs) || null;
   if(!J && PROG.pret && !adm.joueursDemandes){ adm.joueursDemandes = true; chargerAdminStats().then(() => { if(adm.onglet==="messages") renderAdmin(); }).finally(() => setTimeout(() => { adm.joueursDemandes = false; }, 15000)); }
   const f = M.filtre.toLowerCase(), liste = (J || []).filter(j => !f || `${j.pseudo || ""} ${j.email || ""}`.toLowerCase().includes(f));
-  const cartes = trierCartes(Object.keys(CARTES).filter(k => estCollectionnable(CARTES[k])));
+  const cartes = trierCartes(Object.keys(CARTES).filter(k => estCollectionnableAdmin(CARTES[k])));
   return `<div class="adm-page adm-messages">
     <h2>Boîte aux lettres</h2>
     <p class="aide">Envoyez un message, avec ou sans cadeau, à un joueur, à une sélection ou à tous. Le joueur le trouve dans sa boîte aux lettres (icône d’enveloppe de l’accueil) et récupère le cadeau d’un clic.</p>
@@ -10480,7 +10487,7 @@ async function chargerPaliersAuto(){
 }
 function admCadeauxAuto(){
   if(!adm.paliersAuto){ if(PROG.pret) chargerPaliersAuto(); return `<div class="adm-page"><h2>Cadeaux automatiques</h2><p class="attente">Chargement…</p></div>`; }
-  const P = adm.paliersAuto, cartes = trierCartes(Object.keys(CARTES).filter(k => estCollectionnable(CARTES[k])));
+  const P = adm.paliersAuto, cartes = trierCartes(Object.keys(CARTES).filter(k => estCollectionnableAdmin(CARTES[k])));
   const sel = (n, champ, val, options) => `<select data-palier="${n}.${champ}"><option value="">Aucun${champ==="carte" || champ==="variante" ? "e" : ""}</option>${options.map(([v, l]) => `<option value="${v}" ${val===v ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>`;
   return `<div class="adm-page adm-cadeaux-auto">
     <h2>Cadeaux automatiques</h2>

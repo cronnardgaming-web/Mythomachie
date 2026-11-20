@@ -288,3 +288,10 @@ Exécuter `supabase-jouer-entre-joueurs.sql` une fois (SQL Editor, puis Run), ap
 - Débutants (moins de 5 parties) : « Jouer » lance une partie contre l’ordinateur ; la recherche reste proposée en lien.
 - Or : réglable dans Admin › Économie (victoire et défaite contre l’ordinateur, contre un joueur, bonus de la première victoire du jour contre un joueur, hors plafond). Valeurs par défaut : 6 / 2 contre l’ordinateur, 15 / 5 contre un joueur, bonus de 30. Vos réglages existants sont conservés.
 - Toutes les parties comptent toujours pour le classement et les quêtes.
+
+## Cartes à venir (date de sortie)
+Exécuter `supabase-cartes-a-venir.sql` une fois (SQL Editor, puis Run), après `supabase-correctif-cartes-saison.sql`. Il peut être relancé sans risque.
+- Admin › Cartes › fiche d’une carte › Boosters : champ « Date de sortie ». Avant cette date, la carte n’existe pas pour les joueurs : absente de la collection, de l’éditeur de decks, des paquets, de la fabrication et des decks de l’ordinateur. Elle apparaît d’elle-même le jour venu.
+- Dans la liste de l’admin, ces cartes portent la mention « à venir ». Vous pouvez quand même les choisir comme cadeau.
+- Après avoir mis une date : « Envoyer le catalogue », puis exporter config.json sur GitHub.
+- Différence avec une carte de saison : la carte de saison est visible dans la collection, mais absente des paquets jusqu’à la fin de la saison.
