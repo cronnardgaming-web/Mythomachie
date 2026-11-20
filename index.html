@@ -833,6 +833,7 @@ body.compact .nom-heros-deck{font-size:17px}
 
 /* Administration : cartes absentes du catalogue */
 .adm-a-venir{font-size:10.5px;font-weight:700;padding:0 6px;border-radius:99px;background:#5b6b8c;color:#fff;vertical-align:1px}
+.adm-a-venir.adm-saison{background:#c9a227;color:#2b1a06}
 .alerte-catalogue{display:flex;align-items:center;gap:6px 14px;flex-wrap:wrap;margin:10px 0 0;padding:10px 14px;border-radius:10px;
   background:color-mix(in srgb, #b8402f 18%, var(--zone));border:1px solid #b8402f}
 .alerte-catalogue span{font-size:14px;flex:1 1 300px}
@@ -3395,8 +3396,8 @@ function nettoyer(){
     j.plateau = j.plateau.filter(c => vieRestante(c) > 0);
     morts.forEach(c => {
       const d = def(c);
-      if(!d.jeton) j.defausse.push({uid:c.uid, id:c.id});
-      if(c.arme) (REGLES.armesRetour ? j.main : j.defausse).push({uid:c.arme.uid, id:c.arme.id});
+      if(!d.jeton) j.defausse.push({uid:c.uid, id:c.id, v:c.v});
+      if(c.arme) (REGLES.armesRetour ? j.main : j.defausse).push({uid:c.arme.uid, id:c.arme.id, v:c.arme.v});
       log(`${d.nom} est détruit${d.jeton ? "e" : ""}.`);
       fxEvt({t:"mort", j:idx, uid:c.uid});
       if(est2v2()) S.jauge[1 - S.joueurs[idx].eq]++;
@@ -3457,8 +3458,8 @@ function jouer(id, opts={}){
     const cible = j.plateau.find(x => x.uid===opts.cible);
     if(!cible) return erreur("Choisissez une de vos créatures à équiper.");
     j.main.splice(k,1);
-    if(cible.arme) j.defausse.push({uid:cible.arme.uid, id:cible.arme.id});
-    cible.arme = {uid:c.uid, id:c.id, dur:d.durabilite};
+    if(cible.arme) j.defausse.push({uid:cible.arme.uid, id:cible.arme.id, v:cible.arme.v});
+    cible.arme = {uid:c.uid, id:c.id, v:c.v, dur:d.durabilite};
     if(REGLES.armesVie){ cible.vieMax += d.bonus || 0; }                         // l’équipement renforce aussi la créature
     if(REGLES.armesImmediat){ j.combat += d.bonus || 0; fxEvt({t:"puissance", j:i, v:d.bonus || 0, src:c.uid}); }   // et donne sa valeur en puissance ce tour-ci
     fxEvt({t:"arme", j:i, src:c.uid, cible:cible.uid});
@@ -3570,7 +3571,7 @@ function attaquer(idAtt, cible){
   if(att.arme){
     if(!REGLES.armesPermanentes) att.arme.dur--;
     if(att.arme.dur<=0){
-      j.defausse.push({uid:att.arme.uid, id:att.arme.id});
+      j.defausse.push({uid:att.arme.uid, id:att.arme.id, v:att.arme.v});
       log(`${CARTES[att.arme.id].nom} se brise.`);
       att.arme = null;
     }
@@ -4179,7 +4180,7 @@ function trierCartes(ids){
 }
 function listeCartes(ids){
   const item = id => `<li><button type="button" class="adm-item f-${CARTES[id].faction || "neutre"} ${id===adm.sel ? "actif" : ""}" data-act="carte-sel" data-id="${id}">
-    <span class="pastille"></span><span>${esc(CARTES[id].nom)}${pasEncoreSortie(CARTES[id]) ? ` <small class="adm-a-venir" title="Sortie le ${esc(CARTES[id].sortie)}">à venir</small>` : ""}</span><span class="adm-item-info">${CARTES[id].prix ?? "–"}</span></button></li>`;
+    <span class="pastille"></span><span>${esc(CARTES[id].nom)}${saisonVerrouillee(CARTES[id]) ? ` <small class="adm-a-venir adm-saison" title="Dans les paquets à partir du ${esc(CARTES[id].saisonFin)}">saison</small>` : ""}${pasEncoreSortie(CARTES[id]) ? ` <small class="adm-a-venir" title="Visible à partir du ${esc(CARTES[id].sortie)}">à venir</small>` : ""}</span><span class="adm-item-info">${CARTES[id].prix ?? "–"}</span></button></li>`;
   if(adm.tri!=="faction") return ids.map(item).join("");
   let html = "", fCour = null, rCour = null;
   const compte = test => ids.filter(test).length;
@@ -4279,13 +4280,16 @@ function renderAdmin(){
   }
 }
 
+const FILTRES_SPECIAUX = ["toutes", "aucune", "saison", "avenir"];
 function admCartes(){
   const tous = Object.keys(CARTES);
   if(!adm.sel || !CARTES[adm.sel]) adm.sel = tous[0] || null;
   const ids = tous.filter(id => {
     const d = CARTES[id];
     if(adm.filtre==="aucune" && d.faction) return false;
-    if(adm.filtre!=="toutes" && adm.filtre!=="aucune" && d.faction!==adm.filtre) return false;
+    if(adm.filtre==="saison" && !saisonVerrouillee(d)) return false;
+    if(adm.filtre==="avenir" && !pasEncoreSortie(d)) return false;
+    if(!FILTRES_SPECIAUX.includes(adm.filtre) && d.faction!==adm.filtre) return false;
     return !adm.recherche || d.nom.toLowerCase().includes(adm.recherche.toLowerCase());
   });
   const tries = trierCartes(ids);
@@ -4297,6 +4301,8 @@ function admCartes(){
           <option value="toutes">Toutes les factions</option>
           ${Object.entries(FACTIONS).map(([k,f]) => `<option value="${k}" ${adm.filtre===k ? "selected" : ""}>${esc(f.nom)}</option>`).join("")}
           <option value="aucune" ${adm.filtre==="aucune" ? "selected" : ""}>Sans faction</option>
+          <option value="saison" ${adm.filtre==="saison" ? "selected" : ""}>Cartes de saison</option>
+          <option value="avenir" ${adm.filtre==="avenir" ? "selected" : ""}>Cartes à venir</option>
         </select>
         <select data-adm="tri" aria-label="Trier les cartes">
           ${[["faction","Par faction puis rareté"],["prix","Par prix"],["nom","Par nom"],["creation","Ordre de création"]].map(([k,l]) => `<option value="${k}" ${adm.tri===k ? "selected" : ""}>${l}</option>`).join("")}
@@ -4621,7 +4627,7 @@ function actionAdmin(act, id, el){
     case "carte-sel": adm.cibleCollage = null; adm.sel = id; adm.suppr = null; break;
     case "carte-nouvelle": {
       const nid = idUnique("carte");
-      const f = adm.filtre!=="toutes" && adm.filtre!=="aucune" ? adm.filtre : Object.keys(FACTIONS)[0];
+      const f = !FILTRES_SPECIAUX.includes(adm.filtre) ? adm.filtre : Object.keys(FACTIONS)[0];
       CARTES[nid] = {nom:"Nouvelle carte", type:"sort", prix:2, rarete:"commune", effet:{or:1}};
       if(f) CARTES[nid].faction = f;
       adm.sel = nid; adm.recherche = ""; sauver(); break;
@@ -4722,11 +4728,30 @@ document.addEventListener("input", e => {
     return;
   }
   if(el.dataset.chemin){
-    if(el.type==="number" && el.value==="") return;
-    majChemin(el.dataset.chemin, el.value, el.type==="number");
+    // Nombres et dates : on enregistre sans réafficher pendant la saisie (le curseur et le calendrier restent en place) ;
+    // l’affichage se met à jour quand on quitte le champ
+    if(el.type==="number" || el.type==="date"){
+      if(el.type==="number" && el.value==="") return;
+      if(el.type==="date" && el.value==="" && el.validity && el.validity.badInput) return;   // date en cours de saisie
+      majChemin(el.dataset.chemin, el.value, el.type==="number");
+      adm.renduDiffere = true;
+      return;
+    }
+    majChemin(el.dataset.chemin, el.value, false);
     renderAdmin();
   }
 });
+// Réaffichage différé après un champ nombre ou date : à la sortie du champ, après un éventuel clic
+let pointeurAppuye = false;
+document.addEventListener("pointerdown", () => { pointeurAppuye = true; }, true);
+document.addEventListener("pointerup", () => { pointeurAppuye = false; if(adm.renduDiffere && !estChampDiffere(document.activeElement)) setTimeout(rendreDiffere, 0); }, true);
+const estChampDiffere = el => !!(el && el.dataset && el.dataset.chemin && (el.type==="number" || el.type==="date"));
+function rendreDiffere(){ if(!adm.renduDiffere || ui.ecran!=="admin" || estChampDiffere(document.activeElement)) return; adm.renduDiffere = false; renderAdmin(); }
+document.addEventListener("focusout", e => {
+  if(!adm.renduDiffere || !estChampDiffere(e.target)) return;
+  if(!pointeurAppuye) setTimeout(rendreDiffere, 0);   // Tab, Entrée… ; avec la souris, on attend la fin du clic
+});
+document.addEventListener("keydown", e => { if(e.key==="Enter" && estChampDiffere(e.target) && adm.renduDiffere){ adm.renduDiffere = false; renderAdmin(); } });
 document.addEventListener("change", e => {
   if(ui.ecran!=="admin") return;
   const el = e.target;
@@ -8313,10 +8338,10 @@ function htmlAdminVariantes(id){
     <fieldset><legend>Boosters</legend>
       ${htmlValeurCarte(d)}
       <label class="case"><input type="checkbox" data-act="carte-promo" data-id="${id}" ${d.promo ? "checked" : ""}> Carte promotionnelle</label>
-      <label class="champ champ-saison"><span>Carte de saison : exclusive jusqu’au (vide = carte normale)</span><input type="date" data-chemin="cartes.${id}.saisonFin" value="${esc(d.saisonFin || "")}"></label>
-      <label class="champ champ-saison"><span>Date de sortie : invisible pour les joueurs avant le (vide = visible tout de suite)</span><input type="date" data-chemin="cartes.${id}.sortie" value="${esc(d.sortie || "")}"></label>
-      ${pasEncoreSortie(d) ? `<p class="aide">Carte à venir : jusqu’au ${new Date(d.sortie + "T00:00:00").toLocaleDateString(LOC())}, les joueurs ne la voient nulle part (collection, decks, paquets, fabrication, decks de l’ordinateur). Pensez à « Envoyer le catalogue » et à exporter config.json.</p>` : ""}
-      ${d.saisonFin ? `<p class="aide">Carte de saison : absente des paquets et non fabricable jusqu’au ${new Date(d.saisonFin + "T00:00:00").toLocaleDateString(LOC())}, puis elle rejoint automatiquement les paquets. Pensez à « Envoyer le catalogue ».</p>` : ""}
+      <label class="champ champ-saison"><span>Carte de saison : entre dans les paquets le (vide = carte normale)</span><input type="date" data-chemin="cartes.${id}.saisonFin" value="${esc(d.saisonFin || "")}"></label>
+      <label class="champ champ-saison"><span>Date de sortie : visible par les joueurs à partir du (vide = tout de suite)</span><input type="date" data-chemin="cartes.${id}.sortie" value="${esc(d.sortie || "")}"></label>
+      ${pasEncoreSortie(d) ? `<p class="aide">Carte à venir : les joueurs la verront à partir du ${new Date(d.sortie + "T00:00:00").toLocaleDateString(LOC())} (dès 1 h du matin, heure de Paris). D’ici là, ils ne la voient nulle part (collection, decks, paquets, fabrication, decks de l’ordinateur). Pensez à « Envoyer le catalogue » et à exporter config.json.</p>` : ""}
+      ${d.saisonFin ? `<p class="aide">Carte de saison : visible dans la collection, mais absente des paquets et non fabricable jusqu’à la veille. Elle entre dans les paquets le ${new Date(d.saisonFin + "T00:00:00").toLocaleDateString(LOC())} (dès 1 h du matin, heure de Paris). Pensez à « Envoyer le catalogue ».</p>` : ""}
       <p class="aide">${d.promo
         ? "Carte promotionnelle : absente du booster principal et des boosters de panthéon, elle ne se fabrique pas et ne se recycle pas. Les joueurs l’obtiennent dans les boosters spéciaux cochés ci-dessous, ou en cadeau (boîte aux lettres, cadeaux automatiques)."
         : `Présente automatiquement dans le booster principal${fac ? ` et dans le booster ${esc(fac.m)}` : ""}.`}</p>
@@ -8546,7 +8571,7 @@ function attaquer2v2(idAtt, cible, k){
   fxEvt({t:"attaque", j:i, att:idAtt, cible:cible==="face" ? "face" : cible, k});
   if(att.arme){
     if(!REGLES.armesPermanentes) att.arme.dur--;
-    if(att.arme.dur<=0){ j.defausse.push({uid:att.arme.uid, id:att.arme.id}); log(`${CARTES[att.arme.id].nom} se brise.`); att.arme = null; }
+    if(att.arme.dur<=0){ j.defausse.push({uid:att.arme.uid, id:att.arme.id, v:att.arme.v}); log(`${CARTES[att.arme.id].nom} se brise.`); att.arme = null; }
   }
   nettoyer(); verifierVictoire();
   return true;
@@ -8579,7 +8604,7 @@ function verifierVictoire2v2(){
   S.joueurs.forEach((j, k) => {
     if(j.esprit || j.pv>0) return;
     j.esprit = true; j.tEsprit = 0; j.pv = 0;
-    for(const c of j.plateau){ if(!def(c).jeton) j.defausse.push({uid:c.uid, id:c.id}); if(c.arme) j.defausse.push({uid:c.arme.uid, id:c.arme.id}); }
+    for(const c of j.plateau){ if(!def(c).jeton) j.defausse.push({uid:c.uid, id:c.id, v:c.v}); if(c.arme) j.defausse.push({uid:c.arme.uid, id:c.arme.id, v:c.arme.v}); }
     j.plateau = [];
     log(`${heroDe(j).nom} tombe et devient un esprit.`);
     if(S.c2v2) S.c2v2.chutes[j.eq]++;
