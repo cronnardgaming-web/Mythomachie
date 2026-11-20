@@ -978,6 +978,20 @@ body.compact .nom-heros-deck{font-size:17px}
 #banniere-defi{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;
   background:var(--zone);border:2px solid var(--or);border-radius:12px;padding:10px 16px;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:calc(100vw - 24px)}
 #banniere-defi .btn{margin:0}
+.ligne-deck{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin-top:8px;padding:9px 14px;border-radius:8px;border:1px solid var(--line, rgba(127,127,127,.35));background:var(--surface-2, rgba(127,127,127,.08));color:inherit;font:inherit;font-size:14px;text-align:left}
+button.ligne-deck{cursor:pointer} button.ligne-deck:hover{filter:brightness(1.08)}
+.ligne-deck small{color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em;font-size:11px}
+.ligne-deck-nom{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
+.ligne-deck-changer{color:var(--ink-2);font-size:13px;white-space:nowrap;text-decoration:underline}
+.ligne-deck.vide{justify-content:flex-start}
+.boite-decks-jouer{max-width:640px}
+.tuiles-decks{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0}
+.tuile-deck{display:flex;flex-direction:column;gap:6px;align-items:flex-start;text-align:left;padding:12px 14px;border-radius:10px;cursor:pointer;font:inherit;color:inherit;border:2px solid var(--line, rgba(127,127,127,.35));background:var(--surface-2, rgba(127,127,127,.08))}
+.tuile-deck:hover{filter:brightness(1.1)}
+.tuile-deck.choisi{border-color:var(--or, #c9a227);box-shadow:0 0 0 2px rgba(201,162,39,.25)}
+.tuile-deck-pantheons{display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+.tuile-deck small{color:var(--ink-2)}
+.rappel-deck{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0}
 .lien-recherche{display:block;margin:6px auto 0;background:none;border:0;color:var(--ink-2);text-decoration:underline;cursor:pointer;font:inherit;font-size:13.5px}
 .bonus-ligne{display:block;width:max-content;margin:8px auto 0}
 .pastille-recherche{cursor:pointer;margin-left:6px;font:inherit;font-size:12.5px}
@@ -2780,7 +2794,7 @@ ajouterTraductions("en", {
   "Ticket de partie inconnu.":"Unknown game ticket.", "Ticket introuvable.":"Ticket not found.", "Trop de demandes en attente.":"Too many pending requests.",
   "Trop de parties commencées en une heure : patientez un peu.":"Too many games started in an hour: please wait a little.", "Trophée inconnu.":"Unknown trophy.",
   "Valeurs invalides : l’or et l’encre doivent être des nombres entiers positifs.":"Invalid values: gold and ink must be positive whole numbers.", "Version du jeu obsolète : rechargez la page.":"Outdated game version: reload the page.",
-  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
+  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Changer ▾":"Change ▾", "Changer de deck":"Change deck", "Aucun deck complet :":"No complete deck:", "construire un deck":"build a deck", "Choisir votre deck":"Choose your deck", "Ce deck sert pour « Jouer », contre un joueur comme contre l’ordinateur en attendant.":"This deck is used for “Play”, against a player and against the computer while you wait.", "Avec :":"With:", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
   "Vous avez déjà le nombre maximum d’exemplaires.":"You already have the maximum number of copies.", "Vous avez déjà remplacé une quête aujourd’hui.":"You have already replaced a quest today.",
   "Vous ne pouvez défier que vos amis.":"You can only challenge your friends.", "Vous ne pouvez inviter que vos amis.":"You can only invite your friends.",
   "Vous n’avez pas de paquet offert de ce type.":"You have no free pack of this type.", "Vous n’êtes pas dans ce salon.":"You are not in this lobby.",
@@ -2828,7 +2842,7 @@ ajouterTraductions("en", {
   "Une partie est déjà en cours. La remplacer par la partie en pause ?":"A game is already in progress. Replace it with the paused game?",
   "Or par victoire contre l’ordinateur":"Gold per win vs computer"
 }, [
-  [/^(\d+) joueurs? cherche(?:nt)? un adversaire$/, n => `${n} player${n>1 ? "s" : ""} looking for an opponent`],
+  [/^(\d+) cartes · ✓ choisi$/, "$1 cards · ✓ selected"], [/^(\d+) joueurs? cherche(?:nt)? un adversaire$/, n => `${n} player${n>1 ? "s" : ""} looking for an opponent`],
   [/^Contre l’ordinateur, pour apprendre \((\d+) \/ (\d+) parties\)$/, (a, b) => `Against the computer, to learn (${a} / ${b} games)`],
   [/^\+(\d+) or : première victoire du jour contre un joueur !$/, n => `+${n} gold: first win of the day against a player!`],
   [/^⏸ Votre partie contre l’ordinateur est en pause \(tour (\d+)\)\.$/, n => `⏸ Your game against the computer is paused (turn ${n}).`],
@@ -4083,7 +4097,7 @@ function renderCouche(){
         <button type="button" class="btn second" data-act="en-ligne">Jouer en ligne</button>
         <button type="button" class="btn second" data-act="admin">Administration</button>
       </div><div class="reglages-joueur">${htmlReglageAnimations()}</div>${regles}</div>`;
-    if(PROG.actif) h = PROG.porte ? htmlPorte() : PROG.accueilEtape && PROG.pret ? htmlBienvenue() : PROG.reglagesOuverts && PROG.pret ? htmlReglages() : PROG.compteVue && PROG.pret ? htmlFormCompte() : PROG.choixDeck ? htmlChoixDeck() : htmlAccueilProg(regles);
+    if(PROG.actif) h = PROG.porte ? htmlPorte() : PROG.accueilEtape && PROG.pret ? htmlBienvenue() : PROG.reglagesOuverts && PROG.pret ? htmlReglages() : PROG.compteVue && PROG.pret ? htmlFormCompte() : PROG.choixDeckJouer && PROG.pret ? htmlChoixDeckJouer() : PROG.choixDeck ? htmlChoixDeck() : htmlAccueilProg(regles);
     if(EN.ecran) h = htmlEnLigne();
   } else if(S.vainqueur!==null && niveauAnim()>0 && ui.finVue!==S.idPartie){
     // Laisse le temps de voir le médaillon du vaincu voler en éclats
@@ -5930,6 +5944,7 @@ function lancerAvecDecks(){
   const c = PROG.choixDeck, d1 = PROG.decks.find(d => d.id===c.d1), d2 = PROG.decks.find(d => d.id===c.d2);
   if(!d1) return;
   if(c.mode==="2v2") return lancer2v2(d1.cartes, PROG.prep2v2);
+  if(c.mode==="ia") choisirDeckJouer(d1.id);
   nouvellePartie(c.mode, [d1.cartes, c.mode==="duo" && d2 ? d2.cartes : deckConstruit()], [prefVariantes(), c.mode==="duo" ? prefVariantes() : null]);
   PROG.choixDeck = null; PROG.bienvenue = false;
   Object.assign(ui, {ecran:"jeu", attaquant:null, armeEnAttente:null, choixPierre:null, aiEnCours:false, couvert:c.mode==="duo"});
@@ -6131,8 +6146,11 @@ function actionProg(act, id){
       action(async () => { await rpc("definir_pseudo", {p:v}); PROG.formPseudo = null; }, "Pseudo enregistré.");
       return true;
     }
-    case "jouer-ia": case "jouer-duo": PROG.choixDeck = {mode: act==="jouer-ia" ? "ia" : "duo"}; break;
+    case "jouer-ia": case "jouer-duo": PROG.choixDeck = {mode: act==="jouer-ia" ? "ia" : "duo", d1: act==="jouer-ia" && deckJouer() ? deckJouer().id : undefined}; break;
     case "jouer-recherche": lancerRecherche(); return true;
+    case "deck-jouer-ouvrir": PROG.choixDeckJouer = true; break;
+    case "deck-jouer-fermer": PROG.choixDeckJouer = false; break;
+    case "deck-jouer-choisir": if(id) choisirDeckJouer(id); PROG.choixDeckJouer = false; break;
     case "pause-reprendre": reprendrePause(); return true;
     case "pause-abandonner": if(confirm("Abandonner la partie en pause ? Elle ne sera pas comptée.")){ oublierPause(); } break;
     case "jouer-2v2": ui.ecran = "mode2v2"; PROG.quetes2v2 = undefined; if(PROG.actif && PROG.pret) chargerBonus2v2().then(() => { if(ui.ecran==="mode2v2") renderProg(); });
@@ -6264,7 +6282,7 @@ document.addEventListener("input", e => {
   const el = e.target, k = el.dataset && el.dataset.prog;
   if(!k) return;
   if(k==="d1" || k==="d2"){ if(PROG.choixDeck) PROG.choixDeck[k] = el.value; return; }
-  if(k==="deckEnLigne"){ EN.deckId = el.value; return; }
+  if(k==="deckEnLigne"){ choisirDeckJouer(el.value); return; }
   if(k==="nomDeck"){ if(PROG.deckEdit) PROG.deckEdit.nom = el.value; return; }
   if(k==="pseudo"){ PROG.formPseudo = el.value; return; }
   if(k==="possedees") return;
@@ -9724,13 +9742,13 @@ async function lancerFileClassee(){
 function htmlFileClassee(){
   const s = Math.round((Date.now() - (EN.fileDepuis || Date.now())) / 1000), ecart = Math.min(1000, 100 + 5 * s);
   const prop = EN.fileInfo && EN.fileInfo.proposition_envoyee, ordiEnAvant = s >= DELAI_ORDI && !prop;
-  const v = decksValides();
+  const dj = deckJouer();
   return `<div class="boite boite-recherche" role="dialog" aria-label="Recherche d’un adversaire">
     <h2>Recherche d’un adversaire</h2>
     ${prop ? `<p class="attente">Adversaire trouvé : <b>${esc(prop)}</b>. Il joue contre l’ordinateur en attendant : il a 30 secondes pour accepter.</p>`
       : `<p class="attente">Recherche d’un joueur de votre niveau…</p>`}
     <p class="aide">Attente : ${s} s. Écart de cote accepté : ±${ecart} (il s’élargit avec l’attente).${PROG.profil && PROG.profil.elo ? ` Votre cote : ${nf(PROG.profil.elo)}.` : ""}</p>
-    ${v.length>1 ? `<label class="champ"><span>Votre deck</span>${selectDeck("deckEnLigne", v.some(d => d.id===EN.deckId) ? EN.deckId : (EN.deckId = v[0].id))}</label>` : ""}
+    ${dj ? `<p class="rappel-deck">Avec : <b>${esc(dj.nom)}</b> ${pastillesDeck(dj)}</p>` : ""}
     ${ordiEnAvant ? `<div class="encart-ordi"><p>Personne pour l’instant. Jouez contre l’ordinateur en attendant : si un joueur vous cherche, vous serez prévenu et pourrez mettre votre partie en pause.</p>
       <button type="button" class="btn" data-act="en-file-ordi">Jouer contre l’ordinateur</button></div>` : ""}
     <div class="actions">${ordiEnAvant ? "" : `<button type="button" class="btn-discret" data-act="en-file-ordi">Jouer contre l’ordinateur</button>`}
@@ -11818,7 +11836,37 @@ function htmlBoutonJouer(){
   const pastille = b.disponible ? `<span class="pastille-bonus-2v2 bonus-ligne" title="Votre première victoire du jour contre un joueur rapporte un bonus">1re victoire du jour contre un joueur : +${b.montant} or</span>` : "";
   if(estDebutant()) return `<button type="button" class="btn-geant" data-act="jouer-ia">${ico("jouer", "ico-geant")}<span><b>Jouer</b><small>Contre l’ordinateur, pour apprendre (${PROG.etatLigne.parties || 0} / ${PARTIES_DEBUTANT} parties)</small></span></button>
     <button type="button" class="lien-recherche" data-act="jouer-recherche">ou chercher un adversaire</button>`;
-  return `<button type="button" class="btn-geant" data-act="jouer-recherche">${ico("jouer", "ico-geant")}<span><b>Jouer</b><small>Contre un joueur de votre niveau · partie classée</small></span></button>${pastille}`;
+  return `<button type="button" class="btn-geant" data-act="jouer-recherche">${ico("jouer", "ico-geant")}<span><b>Jouer</b><small>Contre un joueur de votre niveau · partie classée</small></span></button>${htmlLigneDeck()}${pastille}`;
+}
+// Deck utilisé par « Jouer » : choisi sur l’accueil et mémorisé
+const CLE_DECK_JOUER = "deck-jouer";
+try { const d = localStorage.getItem(CLE_DECK_JOUER); if(d) EN.deckId = d; } catch(e) {}
+function deckJouer(){ const v = decksValides(); return v.find(d => d.id===EN.deckId) || v[0] || null; }
+function choisirDeckJouer(id){ EN.deckId = id; try { localStorage.setItem(CLE_DECK_JOUER, id); } catch(e) {} }
+function pantheonsDeck(dk){
+  const n = {};
+  (dk.cartes || []).forEach(id => { const f = CARTES[id] && CARTES[id].faction; if(f && FACTIONS[f]) n[f] = (n[f] || 0) + 1; });
+  return Object.keys(n).sort((a, b) => n[b] - n[a]);
+}
+const pastillesDeck = dk => pantheonsDeck(dk).map(f => `<span class="pastille f-${f}" title="${esc(FACTIONS[f].nom)}"></span>`).join("");
+function htmlLigneDeck(){
+  const v = decksValides(), d = deckJouer();
+  if(!d) return `<button type="button" class="ligne-deck vide" data-act="prog-decks">${ico("decks")}<span>Aucun deck complet : <b>construire un deck</b></span></button>`;
+  const corps = `<span class="ligne-deck-nom"><small>Deck</small> <b>${esc(d.nom)}</b> ${pastillesDeck(d)}</span>`;
+  return v.length>1 ? `<button type="button" class="ligne-deck" data-act="deck-jouer-ouvrir" title="Changer de deck">${corps}<span class="ligne-deck-changer">Changer ▾</span></button>`
+    : `<div class="ligne-deck seul">${corps}</div>`;
+}
+function htmlChoixDeckJouer(){
+  const v = decksValides(), d = deckJouer();
+  return `<div class="boite boite-decks-jouer" role="dialog" aria-label="Choisir votre deck"><h2>Choisir votre deck</h2>
+    <p class="aide">Ce deck sert pour « Jouer », contre un joueur comme contre l’ordinateur en attendant.</p>
+    <div class="tuiles-decks">${v.map(dk => {
+      const f = pantheonsDeck(dk);
+      return `<button type="button" class="tuile-deck ${d && dk.id===d.id ? "choisi" : ""}" data-act="deck-jouer-choisir" data-id="${dk.id}" aria-pressed="${d && dk.id===d.id}">
+        <b>${esc(dk.nom)}</b><span class="tuile-deck-pantheons">${pastillesDeck(dk)} ${f.map(x => `<span>${esc(FACTIONS[x].nom)}</span>`).join(`<span aria-hidden="true">·</span>`)}</span>
+        <small>${(dk.cartes || []).length} cartes${d && dk.id===d.id ? " · ✓ choisi" : ""}</small></button>`;
+    }).join("")}</div>
+    <div class="actions"><button type="button" class="btn second" data-act="deck-jouer-fermer">Fermer</button></div></div>`;
 }
 function htmlPastilleRecherche(){
   const n = rechercheActive() ? PROG.etatLigne.en_recherche : 0;
