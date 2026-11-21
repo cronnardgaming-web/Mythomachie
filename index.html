@@ -1090,6 +1090,23 @@ button.ligne-deck{cursor:pointer} button.ligne-deck:hover{filter:brightness(1.08
 .bonus-ligne{display:block;width:max-content;margin:8px auto 0}
 .pastille-recherche{cursor:pointer;margin-left:6px;font:inherit;font-size:12.5px}
 .pastille-recherche i{background:#f0b340;box-shadow:0 0 6px #f0b340}
+.bandeau-retour{position:relative;display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:0 0 16px;padding:16px 46px 16px 18px;border-radius:14px;color:#fff;
+  background:linear-gradient(110deg,#7a1408,#c4361c 35%,#e8892a 65%,#a8200f);background-size:220% 100%;border:2px solid #ffd27a;
+  box-shadow:0 0 0 0 rgba(255,190,90,.7),0 8px 24px rgba(0,0,0,.35);animation:retourFond 6s ease-in-out infinite,retourPulse 1.8s ease-out infinite}
+.bandeau-retour .retour-icone{font-size:40px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));animation:retourEpees 1.8s ease-in-out infinite}
+.retour-texte{display:flex;flex-direction:column;gap:3px;flex:1 1 260px;min-width:0}
+.retour-texte b{font-family:Cinzel,"Times New Roman",serif;font-size:22px;letter-spacing:.02em;text-shadow:0 2px 3px rgba(0,0,0,.45)}
+.retour-texte span{font-size:15px}.retour-texte strong{color:#ffe7a8}
+.retour-texte small{font-size:13px;opacity:.9}
+.bandeau-retour .retour-btn{font-size:17px;padding:12px 22px;background:#ffe08a;color:#4a1a05;border:none;font-weight:800;box-shadow:0 3px 0 #b8741a,0 6px 14px rgba(0,0,0,.3)}
+.bandeau-retour .retour-btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.retour-fermer{position:absolute;top:6px;right:8px;background:none;border:none;color:#fff;font-size:22px;line-height:1;cursor:pointer;opacity:.75;padding:4px 8px}
+.retour-fermer:hover{opacity:1}
+@keyframes retourFond{0%,100%{background-position:0% 0}50%{background-position:100% 0}}
+@keyframes retourPulse{0%{box-shadow:0 0 0 0 rgba(255,190,90,.7),0 8px 24px rgba(0,0,0,.35)}100%{box-shadow:0 0 0 16px rgba(255,190,90,0),0 8px 24px rgba(0,0,0,.35)}}
+@keyframes retourEpees{0%,100%{transform:rotate(-8deg) scale(1)}50%{transform:rotate(8deg) scale(1.12)}}
+@media (prefers-reduced-motion: reduce){.bandeau-retour,.bandeau-retour .retour-icone{animation:none}}
+@media (max-width:600px){.bandeau-retour{padding:14px 40px 14px 14px}.bandeau-retour .retour-btn{width:100%}.retour-texte b{font-size:19px}}
 .bandeau-pause{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 16px;border-radius:12px;border:1px solid var(--or);background:color-mix(in srgb, var(--zone) 85%, transparent);margin:0 0 14px}
 .bandeau-pause span{flex:1;min-width:200px}
 .encart-ordi{margin:14px 0 4px;padding:12px 14px;border:1px solid var(--or);border-radius:10px;background:color-mix(in srgb, var(--or) 10%, transparent)}
@@ -2888,7 +2905,7 @@ ajouterTraductions("en", {
   "Ticket de partie inconnu.":"Unknown game ticket.", "Ticket introuvable.":"Ticket not found.", "Trop de demandes en attente.":"Too many pending requests.",
   "Trop de parties commencées en une heure : patientez un peu.":"Too many games started in an hour: please wait a little.", "Trophée inconnu.":"Unknown trophy.",
   "Valeurs invalides : l’or et l’encre doivent être des nombres entiers positifs.":"Invalid values: gold and ink must be positive whole numbers.", "Version du jeu obsolète : rechargez la page.":"Outdated game version: reload the page.",
-  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Changer ▾":"Change ▾", "Changer de deck":"Change deck", "Aucun deck complet :":"No complete deck:", "construire un deck":"build a deck", "Choisir votre deck":"Choose your deck", "Ce deck sert pour « Jouer », contre un joueur comme contre l’ordinateur en attendant.":"This deck is used for “Play”, against a player and against the computer while you wait.", "Avec :":"With:", "Affichée":"Displayed", "Pas encore obtenue.":"Not obtained yet.", "À trouver dans :":"Found in:", "Afficher cette illustration":"Display this artwork", "Illustration d’origine.":"Original artwork.", "Comment l’obtenir :":"How to get it:", "1 contre 1":"1 vs 1", "victoires contre l’ordinateur":"wins against the computer", "victoires contre un joueur":"wins against a player", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
+  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Changer ▾":"Change ▾", "Changer de deck":"Change deck", "Aucun deck complet :":"No complete deck:", "construire un deck":"build a deck", "Choisir votre deck":"Choose your deck", "Ce deck sert pour « Jouer », contre un joueur comme contre l’ordinateur en attendant.":"This deck is used for “Play”, against a player and against the computer while you wait.", "Avec :":"With:", "Votre partie vous attend !":"Your game is waiting for you!", "C’est à vous de jouer.":"It’s your turn.", "Revenir dans la partie":"Back to the game", "Connexion…":"Connecting…", "Votre adversaire doit aussi être connecté pour reprendre.":"Your opponent must also be online to resume.", "Vous êtes l’hôte : la partie reprend dès que vous revenez.":"You are the host: the game resumes as soon as you return.", "Cette partie n’est plus disponible.":"This game is no longer available.", "Cette partie est terminée ou n’est plus disponible.":"This game is over or no longer available.", "Contre":"Against", "Affichée":"Displayed", "Pas encore obtenue.":"Not obtained yet.", "À trouver dans :":"Found in:", "Afficher cette illustration":"Display this artwork", "Illustration d’origine.":"Original artwork.", "Comment l’obtenir :":"How to get it:", "1 contre 1":"1 vs 1", "victoires contre l’ordinateur":"wins against the computer", "victoires contre un joueur":"wins against a player", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
   "Vous avez déjà le nombre maximum d’exemplaires.":"You already have the maximum number of copies.", "Vous avez déjà remplacé une quête aujourd’hui.":"You have already replaced a quest today.",
   "Vous ne pouvez défier que vos amis.":"You can only challenge your friends.", "Vous ne pouvez inviter que vos amis.":"You can only invite your friends.",
   "Vous n’avez pas de paquet offert de ce type.":"You have no free pack of this type.", "Vous n’êtes pas dans ce salon.":"You are not in this lobby.",
@@ -2909,14 +2926,32 @@ function traduireEffetFR(s){
     [/^\+(\d+) or$/i, n => `+${n} gold`], [/^\+(\d+) puissance$/i, n => `+${n} power`], [/^\+(\d+) soin$/i, n => `+${n} healing`],
     [/^piochez (\d+) cartes?$/i, n => `draw ${n} card${n>1 ? "s" : ""}`], [/^bannissez (\d+) cartes? de votre main ou défausse$/i, n => `banish ${n} card${n>1 ? "s" : ""} from your hand or discard pile`],
     [/^(\d+) dégâts à chaque créature adverse$/i, n => `${n} damage to each enemy creature`], [/^(\d+) dégâts à une créature adverse au hasard$/i, n => `${n} damage to a random enemy creature`],
-    [/^vos créatures gagnent \+(\d+)\/\+(\d+)$/i, (a, v) => `your creatures get +${a}/+${v}`], [/^invoque (\d+) (.+)$/i, (n, c) => `summon ${n} ${traduireNom(c)}`]
+    [/^vos créatures gagnent \+(\d+)\/\+(\d+)$/i, (a, v) => `your creatures get +${a}/+${v}`], [/^invoque (\d+) (.+)$/i, (n, c) => `summon ${n} ${traduireNom(c)}`],
+    [/^l’adversaire défausse (\d+) cartes? de son choix$/i, n => `your opponent discards ${n} card${n>1 ? "s" : ""} of their choice`],
+    [/^recyclage : piochez (\d+) cartes? puis défaussez-en (\d+)$/i, (n, m) => `Recycle: draw ${n} card${n>1 ? "s" : ""}, then discard ${m}`],
+    [/^prophétie : votre prochain achat de ce tour va sur le dessus de votre deck$/i, () => `Prophecy: your next purchase this turn goes on top of your deck`],
+    [/^prophétie : vos (\d+) prochains achats de ce tour vont sur le dessus de votre deck$/i, n => `Prophecy: your next ${n} purchases this turn go on top of your deck`],
+    [/^résurgence : remettez (\d+) cartes? de votre défausse sur le dessus de votre deck$/i, n => `Resurgence: put ${n} card${n>1 ? "s" : ""} from your discard pile on top of your deck`]
   ];
   const morceaux = t.split(", ").map(m => { for(const [re, f] of P){ const x = m.match(re); if(x) return f(...x.slice(1)); } return null; });
   if(!morceaux.length || morceaux.includes(null)) return null;
   const r = morceaux.join(", ");
   return r.charAt(0).toUpperCase() + r.slice(1) + (point ? "." : "");
 }
-ajouterTraductions("en", {}, [
+ajouterTraductions("en", {
+  "Recyclage":"Recycle", "Défausse":"Discard", "Choisissez d’abord la carte à défausser.":"First choose the card to discard.", "Choisissez d’abord la carte à défausser (Recyclage).":"First choose the card to discard (Recycle).", "Résurgence":"Resurgence", "Ne rien remettre":"Put nothing back",
+  "Choisissez une carte de votre main à défausser.":"Choose a card from your hand to discard.",
+  "Choisissez une carte de votre défausse : elle revient sur le dessus de votre deck et sera dans votre prochaine main.":"Choose a card from your discard pile: it goes back on top of your deck and will be in your next hand."
+}, [
+  [/^· tour (\d+)( ·)?$/, (n, f) => `· turn ${n}${f || ""}`],
+  [/^Elle expire dans (?:(\d+) h )?(\d+) min\.(.*)$/, (h, m, r) => `It expires in ${h ? `${h} h ` : ""}${m} min.${r ? " " + traduire(r.trim()) : ""}`],
+  [/^Choisissez une carte de votre main à défausser \(encore (\d+)\)\.$/, n => `Choose a card from your hand to discard (${n} left).`],
+  [/^(.+) défausse (.+)\.$/, (a, c) => a.includes(" : ") || /^l’adversaire$/i.test(a) || /de son choix$/.test(c) ? null : `${traduire(a)} discards ${traduireNom(c)}.`],
+  [/^(.+) doit défausser (\d+) cartes?\.$/, (a, n) => `${traduire(a)} must discard ${n} card${n>1 ? "s" : ""}.`],
+  [/^Votre adversaire vous force à défausser : choisissez (une carte|\d+ cartes) de votre main\.$/, x => `Your opponent forces you to discard: choose ${x==="une carte" ? "a card" : x.replace("cartes", "cards")} from your hand.`],
+  [/^Avant de jouer, choisissez (une carte|\d+ cartes) de votre main\.$/, x => `Before playing, choose ${x==="une carte" ? "a card" : x.replace("cartes", "cards")} to discard from your hand.`],
+  [/^(.+) remet (.+) sur son deck\.$/, (a, c) => `${traduire(a)} puts ${traduireNom(c)} back on top of their deck.`],
+  [/^Prophétie : (.+) va sur le dessus du deck de (.+)\.$/, (c, a) => `Prophecy: ${traduireNom(c)} goes on top of ${traduire(a)}’s deck.`],
   [/^(.+\.) Se charge quand (\d+) créatures ennemies sont mortes\.$/, (e, n) => `${traduireEffetFR(e) || traduire(e)} Charges when ${n} enemy creatures have died.`],
   [/^(.+\.) Se charge quand (\d+) créatures ennemies sont détruites : la jauge est commune à l’équipe\.$/, (e, n) => `${traduireEffetFR(e) || traduire(e)} Charges when ${n} enemy creatures are destroyed: the gauge is shared by the team.`],
   [/^\((.+)\)$/, e => { const t = traduireEffetFR(e); return t ? `(${t})` : null; }],
@@ -3219,6 +3254,15 @@ function appliquerConfig(cfg){
 function decrire(e){
   return LANGUE==="en" ? decrireEN(e) : decrireFR(e);
 }
+// Défausse, Recyclage, Prophétie, Résurgence
+function textesNouveauxEffets(e, html){
+  const t = [], gras = m => m, pl = n => n>1 ? "s" : "";
+  if(e.defausse) t.push(`l’adversaire défausse ${e.defausse} carte${pl(e.defausse)} de son choix`);
+  if(e.recyclage) t.push(`${gras("Recyclage")} : piochez ${e.recyclage} carte${pl(e.recyclage)} puis défaussez-en ${e.recyclage}`);
+  if(e.prophetie) t.push(`${gras("Prophétie")} : ${e.prophetie>1 ? `vos ${e.prophetie} prochains achats de ce tour vont` : "votre prochain achat de ce tour va"} sur le dessus de votre deck`);
+  if(e.resurgence) t.push(`${gras("Résurgence")} : remettez ${e.resurgence} carte${pl(e.resurgence)} de votre défausse sur le dessus de votre deck`);
+  return t;
+}
 // Toujours en français : le journal est partagé entre joueurs de langues différentes, chacun le traduit à l’affichage
 function decrireFR(e){
   const p = [];
@@ -3231,6 +3275,7 @@ function decrireFR(e){
   if(e.degatsHasard) p.push(`${e.degatsHasard} dégâts à une créature adverse au hasard`);
   if(e.renfort) p.push(`vos créatures gagnent +${e.renfort.atk}/+${e.renfort.vie}`);
   if(e.invoque && e.invoque.id && e.invoque.n) p.push(`invoque ${e.invoque.n} ${CARTES[e.invoque.id] ? CARTES[e.invoque.id].nom : "?"}`);
+  p.push(...textesNouveauxEffets(e, false));
   const s = p.join(", ");
   if(!s) return "Aucun effet.";
   return s.charAt(0).toUpperCase() + s.slice(1) + ".";
@@ -3477,8 +3522,81 @@ function appliquer(i, e, src){
     if(CARTES[e.invoque.id]) for(let k=0;k<e.invoque.n && j.plateau.length<REGLES.plateauMax;k++) j.plateau.push(creature(inst(e.invoque.id)));
   }
   if(e.bannir && i===S.courant) S.bannirEnAttente += e.bannir;
+  // Défausse : l’adversaire choisit des cartes de sa main (déjà piochée pour son prochain tour) et les défausse
+  if(e.defausse){
+    const victimes = (deux ? ennemisVivants(i) : [opp]).filter(v => v && v.main.length);
+    if(victimes.length){
+      const v = victimes.length>1 ? [...victimes].sort((a, b) => b.main.length - a.main.length)[0] : victimes[0];
+      const idx = S.joueurs.indexOf(v);
+      const n = Math.min(e.defausse + (S.defausseAdverse && S.defausseAdverse.j===idx ? S.defausseAdverse.n : 0), v.main.length);
+      S.defausseAdverse = {j:idx, n};
+      log(`${v.nom} doit défausser ${n} carte${n>1 ? "s" : ""}.`);
+      if(joueurIA(idx)) iaDefausseAdverse();
+    }
+  }
+  // Recyclage : piocher, puis choisir autant de cartes de sa main à défausser
+  if(e.recyclage && i===S.courant){
+    piocher(j, e.recyclage);
+    S.defausserEnAttente = Math.min((S.defausserEnAttente || 0) + e.recyclage, j.main.length);
+  }
+  // Prophétie : les prochaines cartes achetées ce tour vont sur le dessus du deck
+  if(e.prophetie) j.prophetie = (j.prophetie || 0) + e.prophetie;
+  // Résurgence : remettre des cartes de la défausse sur le dessus du deck
+  if(e.resurgence && i===S.courant) S.resurgenceEnAttente = Math.min((S.resurgenceEnAttente || 0) + e.resurgence, j.defausse.length);
   nettoyer();
 }
+// Joueur tenu par l’ordinateur
+function joueurIA(idx){
+  const j = S.joueurs[idx];
+  if(!j) return false;
+  if(j.estIA) return true;
+  if(est2v2()) return !j.humain;
+  return S.mode==="ia" && idx===1;
+}
+// Ce joueur est-il joué sur cet écran ?
+function controleLocal(idx){
+  if(!S) return false;
+  if(S.mode==="duo") return true;
+  if(est2v2() && !S.enLigne2v2) return !!S.joueurs[idx].humain;
+  return idx===vue();
+}
+// Défausse imposée par l’adversaire : la carte choisie quitte la main
+function defausserAdverse(id){
+  const d = S && S.defausseAdverse;
+  if(!d) return false;
+  const v = S.joueurs[d.j], k = v.main.findIndex(c => c.uid===id);
+  if(k<0) return false;
+  const [c] = v.main.splice(k, 1); v.defausse.push(c);
+  fxEvt({t:"defausse", j:d.j, uids:[c.uid]});
+  log(`${v.nom} défausse ${def(c).nom}.`);
+  d.n--;
+  if(d.n<=0 || !v.main.length) S.defausseAdverse = null;
+  return true;
+}
+function iaDefausseAdverse(){
+  let garde = 20;
+  while(S.defausseAdverse && joueurIA(S.defausseAdverse.j) && garde-->0){
+    const v = S.joueurs[S.defausseAdverse.j];
+    if(!v.main.length){ S.defausseAdverse = null; break; }
+    defausserAdverse([...v.main].sort((a, b) => valeurIA(a) - valeurIA(b))[0].uid);
+  }
+}
+// Choix en cours pour le joueur actif, par ordre de priorité
+const choixEnAttente = () => !!S && ((S.defausserEnAttente || 0)>0 || (S.resurgenceEnAttente || 0)>0 || S.bannirEnAttente>0);
+function typeChoix(){
+  if(!S) return null;
+  if((S.defausserEnAttente || 0)>0) return "defausser";
+  if((S.resurgenceEnAttente || 0)>0) return "resurgence";
+  return S.bannirEnAttente>0 ? "bannir" : null;
+}
+function arreterChoix(){
+  if(!S) return;
+  if((S.defausserEnAttente || 0)>0) return;            // la défausse du Recyclage est obligatoire
+  if((S.resurgenceEnAttente || 0)>0){ S.resurgenceEnAttente = 0; return; }
+  S.bannirEnAttente = 0;
+}
+// Carte mise sur le dessus du deck (piochée en premier)
+function surLeDeck(j, c){ j.deck.push(c); }
 
 // Retire les créatures mortes, les envoie à la défausse et déclenche leur Echo
 function nettoyer(){
@@ -3534,6 +3652,8 @@ function verifierAllies(i){
 
 function jouer(id, opts={}){
   const i = S.courant, j = S.joueurs[i];
+  if((S.defausserEnAttente || 0)>0) return choixBloquant();
+  if(S.defausseAdverse && S.defausseAdverse.j===i) return erreur("Choisissez d’abord la carte à défausser.");
   const k = j.main.findIndex(c => c.uid===id);
   if(k<0) return false;
   const c = j.main[k], d = def(c);
@@ -3599,8 +3719,28 @@ function sacrifier(id){
   verifierVictoire();
 }
 
+function choixBloquant(){ return S && (S.defausserEnAttente || 0)>0 ? erreur("Choisissez d’abord la carte à défausser (Recyclage).") : false; }
 function bannir(id){
   const j = S.joueurs[S.courant];
+  // Le même ordre sert aux choix du Recyclage et de la Résurgence
+  if((S.defausserEnAttente || 0)>0){
+    const k = j.main.findIndex(c => c.uid===id);
+    if(k<0) return;
+    const [c] = j.main.splice(k, 1); j.defausse.push(c);
+    fxEvt({t:"defausse", j:S.courant, uids:[c.uid]});
+    log(`${j.nom} défausse ${def(c).nom}.`);
+    S.defausserEnAttente = j.main.length ? S.defausserEnAttente - 1 : 0;
+    return;
+  }
+  if((S.resurgenceEnAttente || 0)>0){
+    const k = j.defausse.findIndex(c => c.uid===id);
+    if(k<0) return;
+    const [c] = j.defausse.splice(k, 1); surLeDeck(j, c);
+    fxEvt({t:"resurgence", j:S.courant, uid:c.uid});
+    log(`${j.nom} remet ${def(c).nom} sur son deck.`);
+    S.resurgenceEnAttente = j.defausse.length ? S.resurgenceEnAttente - 1 : 0;
+    return;
+  }
   for(const zone of ["main","defausse"]){
     const k = j[zone].findIndex(c => c.uid===id);
     if(k>=0){
@@ -3621,7 +3761,7 @@ function acheter(k){
     const b = CARTES[REGLES.carteBase];
     if(!b) return false;
     if(j.or<(b.prix||0)) return erreur(`Il vous faut ${b.prix} or pour ${b.nom}.`);
-    j.or -= (b.prix||0); j.defausse.push(inst(REGLES.carteBase));
+    j.or -= (b.prix||0); { const nb = inst(REGLES.carteBase); if(j.prophetie>0){ j.prophetie--; surLeDeck(j, nb); log(`Prophétie : ${b.nom} va sur le dessus du deck de ${j.nom}.`); } else j.defausse.push(nb); }
     fxEvt({t:"achat", j:S.courant, src:"base"});
     if(S.stats && S.stats[S.courant]){ const st = S.stats[S.courant]; st.achats++; if(st.achetees) st.achetees[REGLES.carteBase] = (st.achetees[REGLES.carteBase] || 0) + 1; }
     log(`${j.nom} achète ${b.nom}.`);
@@ -3631,7 +3771,8 @@ function acheter(k){
   if(!c) return false;
   const d = def(c);
   if(j.or<d.prix) return erreur(`Il vous faut ${d.prix} or pour acheter ${d.nom}.`);
-  j.or -= d.prix; j.defausse.push(c);
+  j.or -= d.prix;
+  if(j.prophetie>0){ j.prophetie--; surLeDeck(j, c); log(`Prophétie : ${d.nom} va sur le dessus du deck de ${j.nom}.`); } else j.defausse.push(c);
   fxEvt({t:"achat", j:S.courant, src:c.uid});
   if(S.stats && S.stats[S.courant]){ const st = S.stats[S.courant]; st.achats++; if(st.achetees) st.achetees[c.id] = (st.achetees[c.id] || 0) + 1; }
   S.marche.splice(k, 1, ...(S.marcheDeck.length ? [S.marcheDeck.pop()] : []));
@@ -3707,8 +3848,8 @@ function finTour(){
   const aDefausser = [...j.main, ...j.joues].map(c => c.uid);
   if(aDefausser.length) fxEvt({t:"defausse", j:S.courant, uids:aDefausser});
   j.defausse.push(...j.main, ...j.joues);
-  j.main = []; j.joues = []; j.tour = []; j.or = 0; j.combat = 0;
-  S.bannirEnAttente = 0;
+  j.main = []; j.joues = []; j.tour = []; j.or = 0; j.combat = 0; j.prophetie = 0;
+  S.bannirEnAttente = 0; S.defausserEnAttente = 0; S.resurgenceEnAttente = 0;
   piocher(j, REGLES.piocheParTour);
   S.courant = 1 - S.courant; S.tour++;
   const n = S.joueurs[S.courant];
@@ -3720,7 +3861,18 @@ function finTour(){
    ADVERSAIRE ORDINATEUR (très simple)
    ============================================================ */
 const pause = ms => new Promise(r => setTimeout(r, ms));
+// Valeur d’une carte pour l’ordinateur : on défausse la plus faible, on remet la meilleure sur le deck
+const valeurIA = c => { const d = def(c); return (d.prix || 0) + (d.depart ? -2 : 0) + (d.base ? -1 : 0); };
 function iaBannir(j){
+  let garde = 20;
+  while((S.defausserEnAttente || 0)>0 && garde-->0){
+    if(!j.main.length){ S.defausserEnAttente = 0; break; }
+    bannir([...j.main].sort((a, b) => valeurIA(a) - valeurIA(b))[0].uid);
+  }
+  while((S.resurgenceEnAttente || 0)>0 && garde-->0){
+    if(!j.defausse.length){ S.resurgenceEnAttente = 0; break; }
+    bannir([...j.defausse].sort((a, b) => valeurIA(b) - valeurIA(a))[0].uid);
+  }
   while(S.bannirEnAttente>0){
     const c = j.defausse.find(x => def(x).depart) || j.main.find(x => def(x).depart);
     if(!c){ S.bannirEnAttente = 0; break; }
@@ -3748,7 +3900,7 @@ async function tourIAInterne(partie){
     if(S.vainqueur===null) finTour();
     return;
   }
-  if(pouvoirPret(j)){ activerPouvoir(); if(S.bannirEnAttente>0) iaBannir(j); render(); await pauseIA(600); }
+  if(pouvoirPret(j)){ activerPouvoir(); if(choixEnAttente()) iaBannir(j); render(); await pauseIA(600); }
   let progres = true;
   while(progres && S.vainqueur===null){
     progres = false;
@@ -3762,7 +3914,7 @@ async function tourIAInterne(partie){
         jouer(c.uid, {cible:cible.uid}); progres = true; break;
       }
     }
-    if(S.bannirEnAttente>0) iaBannir(j);
+    if(choixEnAttente()) iaBannir(j);
     if(progres){ render(); await pauseIA(420); }
   }
   while(S.vainqueur===null){
@@ -3889,6 +4041,7 @@ function decrireHTML(e){
   if(e.degatsHasard) mots.push(`${e.degatsHasard} dégâts à une créature adverse au hasard`);
   if(e.renfort) mots.push(`vos créatures gagnent +${e.renfort.atk}/+${e.renfort.vie}`);
   if(e.invoque && e.invoque.id && e.invoque.n) mots.push(`invoque ${e.invoque.n} ${esc(CARTES[e.invoque.id] ? CARTES[e.invoque.id].nom : "?")}`);
+  mots.push(...textesNouveauxEffets(e, true));
   const icones = p.map(x => `<span class="effet-part">${x}</span>`).join(" ");
   const texte = mots.join(", ");
   if(!icones && !texte) return "Aucun effet.";
@@ -4026,6 +4179,7 @@ function htmlMedaillon(j, estMoi, inter, cible){
 }
 function render(){
   const app = document.getElementById("app");
+  if(typeof memoriserPartieLigne==="function") memoriserPartieLigne();
   document.body.classList.toggle("en-partie", !!S && ui.ecran==="jeu");
   if(typeof majBanniereDefi==="function" && S && ui.ecran==="jeu") majBanniereDefi();
   if(typeof majCompact==="function") majCompact();
@@ -4226,6 +4380,22 @@ function renderCouche(){
         <button type="button" class="btn second" data-act="pierre-sac">${TERMES.sacrifice} : ${decrire(dp.choixSacrifice || {})}</button>
         <button type="button" class="btn second" data-act="annuler">Annuler</button>
       </div></div>`;
+  } else if(S && S.vainqueur===null && S.defausseAdverse && controleLocal(S.defausseAdverse.j) && !(enLigne() && EN.enAttente)){
+    const d = S.defausseAdverse, v = S.joueurs[d.j];
+    h = `<div class="boite" role="dialog" aria-label="Défausse">
+      <h2>Défausse</h2><p>${S.mode==="duo" ? `<span data-sans-trad>${esc(v.nom)}</span> : ` : ""}${S.courant===d.j ? "Avant de jouer, choisissez" : "Votre adversaire vous force à défausser : choisissez"} ${d.n>1 ? `${d.n} cartes` : "une carte"} de votre main.</p>
+      <div class="choix-cartes">${v.main.filter(Boolean).map(c => htmlCarte(c, {act:"defausse-adv", classes:"jouable"})).join("")}</div></div>`;
+  } else if(typeChoix()==="defausser" && interactif()){
+    const j = S.joueurs[S.courant];
+    h = `<div class="boite" role="dialog" aria-label="Recyclage : défausser une carte">
+      <h2>Recyclage</h2><p>Choisissez une carte de votre main à défausser${S.defausserEnAttente>1 ? ` (encore ${S.defausserEnAttente})` : ""}.</p>
+      <div class="choix-cartes">${j.main.map(c => htmlCarte(c, {act:"ban", classes:"jouable"})).join("")}</div></div>`;
+  } else if(typeChoix()==="resurgence" && interactif()){
+    const j = S.joueurs[S.courant];
+    h = `<div class="boite" role="dialog" aria-label="Résurgence">
+      <h2>Résurgence</h2><p>Choisissez une carte de votre défausse : elle revient sur le dessus de votre deck et sera dans votre prochaine main.</p>
+      <div class="choix-cartes">${j.defausse.map(c => htmlCarte(c, {act:"ban", classes:"jouable"})).join("")}</div>
+      <div class="actions"><button type="button" class="btn second" data-act="ban-stop">Ne rien remettre</button></div></div>`;
   } else if(S.bannirEnAttente>0 && interactif()){
     const j = S.joueurs[S.courant];
     const liste = (titre, zone) => zone.length ? `<span class="groupe-titre">${titre}</span>` + zone.map(c => htmlCarte(c, {act:"ban", classes:"jouable"})).join("") : "";
@@ -4294,7 +4464,9 @@ function listeCartes(ids){
 }
 const RARETES = [["commune","Commune"],["rare","Rare"],["epique","Épique"],["legendaire","Légendaire"]];
 const EFFETS = [["or","Or"],["combat","Puissance"],["soin","Soin"],["pioche","Cartes piochées"],["bannir","Cartes à bannir"],
-                ["degatsTous","Dégâts à chaque créature adverse"],["degatsHasard","Dégâts à une créature adverse au hasard"]];
+                ["degatsTous","Dégâts à chaque créature adverse"],["degatsHasard","Dégâts à une créature adverse au hasard"],
+                ["defausse","Défausse : cartes que l’adversaire défausse"],["recyclage","Recyclage : piocher puis défausser"],
+                ["prophetie","Prophétie : achats mis sur le deck"],["resurgence","Résurgence : défausse → dessus du deck"]];
 const BLOCS = {
   effet:"Effet quand on la joue",
   conjuration:"Conjuration : quand elle arrive en jeu",
@@ -5271,6 +5443,7 @@ function ecouterOrdres(){
 }
 function executerOrdre(o){
   const c = o.cmd || {};
+  if(c.type==="defausseAdv" && S.vainqueur===null && S.defausseAdverse && S.defausseAdverse.j===1){ defausserAdverse(c.id); return; }
   if(S.vainqueur!==null || S.courant!==1){ S.refus = {seq:o.seq, msg:"Ce n’est pas votre tour."}; return; }
   EN.capture = true; EN.refusCapture = null;
   try {
@@ -5281,7 +5454,7 @@ function executerOrdre(o){
       case "acheter": acheter(c.k); break;
       case "sacrifier": sacrifier(c.id); break;
       case "bannir": bannir(c.id); break;
-      case "bannirStop": S.bannirEnAttente = 0; break;
+      case "bannirStop": arreterChoix(); break;
       case "fin": finTour(); break;
       case "pouvoir": activerPouvoir(); break;
     }
@@ -5351,7 +5524,7 @@ function envoyer(cmd){
 }
 
 // Les actions passent par le moteur local, ou partent chez l’hôte pour l’invité
-const MOTEUR_LOCAL = {jouer, attaquer, utiliserCombat, acheter, sacrifier, bannir, finTour, activerPouvoir, bannirStop:() => { S.bannirEnAttente = 0; }};
+const MOTEUR_LOCAL = {jouer, attaquer, utiliserCombat, acheter, sacrifier, bannir, finTour, activerPouvoir, defausserAdverse, bannirStop:() => { arreterChoix(); }};
 const MOTEUR_DISTANT = {
   jouer:(id, opts={}) => envoyer({type:"jouer", id, opts}),
   attaquer:(att, cible) => envoyer({type:"attaquer", att, cible}),
@@ -5360,6 +5533,7 @@ const MOTEUR_DISTANT = {
   sacrifier:id => envoyer({type:"sacrifier", id}),
   bannir:id => envoyer({type:"bannir", id}),
   bannirStop:() => envoyer({type:"bannirStop"}),
+  defausserAdverse:id => envoyer({type:"defausseAdv", id}),
   finTour:() => envoyer({type:"fin"}),
   activerPouvoir:() => envoyer({type:"pouvoir"})
 };
@@ -5518,7 +5692,8 @@ document.addEventListener("click", e => {
   // 2 contre 2 : bénéficiaire choisi des soins et renforts
   if(est2v2()) S.choixBenef = ui.benef==="moi" ? siege2() : ui.benef==="allie" ? allieDe(siege2()) : null;
   if(act==="ban"){ M().bannir(id); return apresAction(); }
-  if(act==="ban-stop"){ if(enLigne() && EN.role==="invite") S.bannirEnAttente = 0; M().bannirStop(); return apresAction(); }
+  if(act==="defausse-adv"){ M().defausserAdverse(id); return apresAction(); }
+  if(act==="ban-stop"){ if(enLigne() && EN.role==="invite") arreterChoix(); M().bannirStop(); return apresAction(); }
   if(act==="annuler"){ ui.attaquant = null; ui.armeEnAttente = null; ui.choixPierre = null; return render(); }
   if(act==="pierre-or" || act==="pierre-sac"){
     M().jouer(ui.choixPierre, {sacrifierDirect: act==="pierre-sac"}); ui.choixPierre = null; return apresAction();
@@ -6293,6 +6468,8 @@ function actionProg(act, id){
     case "deck-jouer-fermer": PROG.choixDeckJouer = false; break;
     case "deck-jouer-choisir": if(id) choisirDeckJouer(id); PROG.choixDeckJouer = false; break;
     case "pause-reprendre": reprendrePause(); return true;
+    case "retour-partie": revenirDansPartie(); return true;
+    case "retour-masquer": { const r = retourAAfficher(); if(r){ try { localStorage.setItem(CLE_RETOUR_MASQUE, r.code); } catch(e) {} } break; }
     case "pause-abandonner": if(confirm("Abandonner la partie en pause ? Elle ne sera pas comptée.")){ oublierPause(); } break;
     case "jouer-2v2": ui.ecran = "mode2v2"; PROG.quetes2v2 = undefined; if(PROG.actif && PROG.pret) chargerBonus2v2().then(() => { if(ui.ecran==="mode2v2") renderProg(); });
       // Première visite : le tutoriel s’ouvre de lui-même
@@ -8330,6 +8507,7 @@ function htmlHall(){
       </div>
     </header>
     ${compteIncomplet ? htmlCompte() : ""}
+    ${htmlBandeauRetour()}
     ${htmlBandeauBeta()}
     ${htmlBandeauPause()}
     <div class="hall-grille ${PROG.saison ? "avec-saison" : ""}">
@@ -8374,6 +8552,10 @@ function decrireEN(e){
   if(e.degatsHasard) p.push(`${e.degatsHasard} damage to a random enemy creature`);
   if(e.renfort) p.push(`your creatures get +${e.renfort.atk}/+${e.renfort.vie}`);
   if(e.invoque && e.invoque.id && e.invoque.n) p.push(`summon ${e.invoque.n} ${CARTES[e.invoque.id] ? traduireNom(CARTES[e.invoque.id].nom) : "?"}`);
+  if(e.defausse) p.push(`your opponent discards ${pl(e.defausse, "card")} of their choice`);
+  if(e.recyclage) p.push(`Recycle: draw ${pl(e.recyclage, "card")}, then discard ${e.recyclage}`);
+  if(e.prophetie) p.push(`Prophecy: ${e.prophetie>1 ? `your next ${e.prophetie} purchases this turn go` : "your next purchase this turn goes"} on top of your deck`);
+  if(e.resurgence) p.push(`Resurgence: put ${pl(e.resurgence, "card")} from your discard pile on top of your deck`);
   const s = p.join(", ");
   if(!s) return "No effect.";
   return s.charAt(0).toUpperCase() + s.slice(1) + ".";
@@ -8766,8 +8948,8 @@ function finTour2v2(){
   const aDefausser = [...j.main, ...j.joues].map(c => c.uid);
   if(aDefausser.length) fxEvt({t:"defausse", j:S.courant, uids:aDefausser});
   j.defausse.push(...j.main, ...j.joues);
-  j.main = []; j.joues = []; j.tour = []; j.or = 0; j.combat = 0;
-  S.bannirEnAttente = 0; S.choixBenef = null;
+  j.main = []; j.joues = []; j.tour = []; j.or = 0; j.combat = 0; j.prophetie = 0;
+  S.bannirEnAttente = 0; S.defausserEnAttente = 0; S.resurgenceEnAttente = 0; S.choixBenef = null;
   if(j.esprit) j.tEsprit++;
   piocher(j, REGLES.piocheParTour);
   S.courant = (S.courant + 1) % 4; S.tour++;
@@ -8779,6 +8961,7 @@ function finTour2v2(){
 // ----- Ordinateur (allié ou adversaire) : un tour complet
 function bannirAuto(){
   const j = S.joueurs[S.courant];
+  if((S.defausserEnAttente || 0)>0 || (S.resurgenceEnAttente || 0)>0) iaBannir(j);
   let garde = 10;
   while(S.bannirEnAttente>0 && garde-->0){
     const c = j.defausse.find(x => def(x).depart) || j.main.find(x => def(x).depart);
@@ -9685,7 +9868,7 @@ function scoreAchat(d, j){
 }
 function prochaineActionExpert(i){
   const j = S.joueurs[i], opp = adversaire(i);
-  if(S.bannirEnAttente>0) return {type:"bannir"};
+  if(choixEnAttente()) return {type:"bannir"};
   if(pouvoirPret(j)) return {type:"pouvoir"};
   // 1. Jouer ses cartes : créatures, puis sorts, puis équipements
   const main = [...j.main].map(c => [c, def(c)]);
@@ -9751,14 +9934,14 @@ function prochaineActionExpert(i){
 }
 // Exécute une action ; renvoie faux si rien n’a changé (pour éviter les boucles)
 function executerActionExpert(i, a){
-  const j = S.joueurs[i], avant = JSON.stringify([j.main.length, j.or, j.combat, j.plateau.map(c => c.uid + c.aAttaque + c.deg), adversaire(i).pv, adversaire(i).plateau.length, S.bannirEnAttente]);
+  const j = S.joueurs[i], avant = JSON.stringify([j.main.length, j.or, j.combat, j.plateau.map(c => c.uid + c.aAttaque + c.deg), adversaire(i).pv, adversaire(i).plateau.length, S.bannirEnAttente, S.defausserEnAttente, S.resurgenceEnAttente, j.deck.length]);
   if(a.type==="bannir") iaBannir(j);
   else if(a.type==="pouvoir") activerPouvoir();
   else if(a.type==="jouer") jouer(a.uid, a.opts);
   else if(a.type==="acheter") acheter(a.k);
   else if(a.type==="attaquer") attaquer(a.att, a.cible);
   else if(a.type==="combat") utiliserCombat(a.cible);
-  return JSON.stringify([j.main.length, j.or, j.combat, j.plateau.map(c => c.uid + c.aAttaque + c.deg), adversaire(i).pv, adversaire(i).plateau.length, S.bannirEnAttente])!==avant;
+  return JSON.stringify([j.main.length, j.or, j.combat, j.plateau.map(c => c.uid + c.aAttaque + c.deg), adversaire(i).pv, adversaire(i).plateau.length, S.bannirEnAttente, S.defausserEnAttente, S.resurgenceEnAttente, j.deck.length])!==avant;
 }
 
 /* ----- Administration : fiche complète d’un joueur ----- */
@@ -10164,9 +10347,12 @@ function valeurEffet(e, notes){
   let v = 0;
   v += (e.or || 0) * 1 + (e.combat || 0) * 1 + (e.soin || 0) * 0.6 + (e.pioche || 0) * 2 + (e.bannir || 0) * 1.5;
   v += (e.degatsHasard || 0) * 0.7 + (e.degatsTous || 0) * 1.2;
+  // Défausse : une carte de moins dans la main adverse ; Recyclage : tri de la main ;
+  // Prophétie : la carte achetée sert dès le tour suivant ; Résurgence : une bonne carte garantie dans la prochaine main
+  v += (e.defausse || 0) * 1.5 + (e.recyclage || 0) * 0.8 + (e.prophetie || 0) * 1 + (e.resurgence || 0) * 1.2;
   if(e.renfort) v += (e.renfort.atk || 0) * 0.6 + (e.renfort.vie || 0) * 0.25;       // environ une autre créature
-  if(e.invoque){ const t = CARTES[e.invoque] || {}; v += (t.attaque || 0) * 0.6 + (t.vie || 0) * 0.25 + (t.mots || []).length * 0.5; }
-  const connus = new Set(["or","combat","soin","pioche","bannir","degatsHasard","degatsTous","renfort","invoque"]);
+  if(e.invoque && e.invoque.id){ const t = CARTES[e.invoque.id] || {}; v += ((t.attaque || 0) * 0.6 + (t.vie || 0) * 0.25 + (t.mots || []).length * 0.5) * Math.max(1, e.invoque.n || 1); }
+  const connus = new Set(["or","combat","soin","pioche","bannir","degatsHasard","degatsTous","renfort","invoque","defausse","recyclage","prophetie","resurgence"]);
   Object.keys(e).filter(k => !connus.has(k) && e[k]).forEach(k => notes.add(k));
   return v;
 }
@@ -11206,6 +11392,7 @@ function publier2v2(){
 }
 function executerOrdre2v2(o, siege){
   const c = o.cmd || {};
+  if(c.type==="defausseAdv" && S.vainqueur===null && S.defausseAdverse && S.defausseAdverse.j===siege){ defausserAdverse(c.id); return; }
   if(S.vainqueur!==null || S.courant!==siege) return;
   S.choixBenef = c.benef ?? null;
   EN.capture = true; EN.refusCapture = null;
@@ -11217,7 +11404,7 @@ function executerOrdre2v2(o, siege){
       case "acheter": acheter(c.k); break;
       case "sacrifier": sacrifier(c.id); break;
       case "bannir": bannir(c.id); break;
-      case "bannirStop": S.bannirEnAttente = 0; break;
+      case "bannirStop": arreterChoix(); break;
       case "fin": finTour(); break;
       case "pouvoir": activerPouvoir(); break;
     }
@@ -11309,7 +11496,7 @@ function envoyer2v2(cmd){
 }
 const MOTEUR_2V2_DISTANT = {
   jouer:(id, opts={}) => envoyer2v2({type:"jouer", id, opts}), acheter:k => envoyer2v2({type:"acheter", k}),
-  sacrifier:id => envoyer2v2({type:"sacrifier", id}), bannir:id => envoyer2v2({type:"bannir", id}), bannirStop:() => envoyer2v2({type:"bannirStop"}),
+  sacrifier:id => envoyer2v2({type:"sacrifier", id}), bannir:id => envoyer2v2({type:"bannir", id}), bannirStop:() => envoyer2v2({type:"bannirStop"}), defausserAdverse:id => envoyer2v2({type:"defausseAdv", id}),
   finTour:() => envoyer2v2({type:"fin"}), activerPouvoir:() => envoyer2v2({type:"pouvoir"}),
   attaquer2v2:(att, cible, k) => envoyer2v2({type:"attaquer", att, cible, k}), utiliserCombat2v2:(cible, k) => envoyer2v2({type:"combat", cible, k})
 };
@@ -11446,6 +11633,7 @@ document.addEventListener("mouseout", e => { if(SURVOL.cible && !(e.relatedTarge
 setInterval(() => { if(SURVOL.cible && !SURVOL.cible.isConnected) cacherSurvol(); }, 400);
 // ----- Joueurs en ligne (accueil)
 async function chargerEnLigne(){
+  chargerRetourPartie();
   try { PROG.etatLigne = await rpc("etat_en_ligne"); PROG.enLigneNb = PROG.etatLigne ? PROG.etatLigne.en_ligne : null; }
   catch(e) { PROG.etatLigne = null; try { PROG.enLigneNb = await rpc("joueurs_en_ligne"); } catch(e2) { PROG.enLigneNb = null; } }
 }
@@ -11502,7 +11690,7 @@ function expirerTour(){
     return declarerAbandon(k, "inactif");
   }
   log(`Temps écoulé : fin du tour de ${j.nom}.`);
-  S.bannirEnAttente = 0; ui.attaquant = null; ui.armeEnAttente = null; ui.choixPierre = null;
+  S.bannirEnAttente = 0; S.defausserEnAttente = 0; S.resurgenceEnAttente = 0; ui.attaquant = null; ui.armeEnAttente = null; ui.choixPierre = null;
   EN.capture = true;
   try { finTour(); } finally { EN.capture = false; }
   apresAction(); publierPartie(); render();
@@ -12127,6 +12315,82 @@ function partieEnPause(){
   return p;
 }
 function oublierPause(){ PROG.partiePause = null; try { localStorage.removeItem(CLE_PAUSE); } catch(e) {} }
+/* ----- Retour dans une partie en ligne après une déconnexion ----- */
+const CLE_RETOUR_MASQUE = "retour-partie-masquee";
+const CLE_PARTIE_LIGNE = "partie-en-ligne-en-cours", DUREE_RETOUR = 6 * 3600000;
+// Mémoire sur l’appareil : la partie en ligne en cours, mise à jour à chaque affichage
+function memoriserPartieLigne(){
+  if(!S || S.mode!=="enligne" || !EN.code || !EN.role) return;
+  try {
+    if(S.vainqueur!==null){ if(localStorage.getItem(CLE_PARTIE_LIGNE)) localStorage.removeItem(CLE_PARTIE_LIGNE); return; }
+    const moi = EN.role==="hote" ? 0 : 1, a = S.joueurs[1 - moi] || {};
+    const cle = `${EN.code}|${S.tour}|${S.courant}`;
+    if(memoriserPartieLigne.derniere===cle) return;
+    memoriserPartieLigne.derniere = cle;
+    localStorage.setItem(CLE_PARTIE_LIGNE, JSON.stringify({code:EN.code, role:EN.role, adversaire:a.pseudo || a.nom || "", tour:S.tour, a_vous:S.courant===moi, maj:Date.now()}));
+  } catch(e) {}
+}
+function partieLigneLocale(){
+  try {
+    const r = JSON.parse(localStorage.getItem(CLE_PARTIE_LIGNE) || "null");
+    if(!r || !r.code || Date.now() - r.maj > DUREE_RETOUR) return null;
+    return {...r, expire:new Date(r.maj + DUREE_RETOUR).toISOString()};
+  } catch(e) { return null; }
+}
+function oublierPartieLigne(){ try { localStorage.removeItem(CLE_PARTIE_LIGNE); } catch(e) {} }
+// Le serveur fait foi quand il répond ; sinon, la mémoire de l’appareil prend le relais
+async function chargerRetourPartie(){
+  if(!PROG.actif || !PROG.pret) return;
+  try {
+    const r = await rpc("ma_partie_en_cours");
+    PROG.retourServeur = true;
+    PROG.retourPartie = r || null;
+    const loc = partieLigneLocale();
+    if(!r && loc) oublierPartieLigne();                        // terminée (abandon, victoire) ou expirée
+  } catch(e) { PROG.retourServeur = false; }
+}
+function retourAAfficher(){
+  if(PROG.retourServeur) return PROG.retourPartie;
+  return partieLigneLocale();
+}
+function htmlBandeauRetour(){
+  const r = PROG.actif && retourAAfficher();
+  if(!r || !r.code || (S && enLigne())) return "";
+  try { if(localStorage.getItem(CLE_RETOUR_MASQUE)===r.code) return ""; } catch(e) {}
+  const reste = r.expire ? Math.max(0, Date.parse(r.expire) - Date.now()) : 0;
+  const h = Math.floor(reste / 3600000), m = Math.floor(reste % 3600000 / 60000);
+  const adv = r.adversaire ? esc(r.adversaire) : "votre adversaire";
+  return `<section class="bandeau-retour" role="alert" aria-label="Partie en cours">
+    <span class="retour-icone" aria-hidden="true">⚔</span>
+    <span class="retour-texte"><b>Votre partie vous attend !</b>
+      <span>Contre <span data-sans-trad>${adv}</span>${r.tour ? ` · tour ${r.tour}` : ""}${r.a_vous ? " · <strong>C’est à vous de jouer.</strong>" : ""}</span>
+      <small>${reste>0 ? `Elle expire dans ${h ? `${h} h ` : ""}${String(m).padStart(h ? 2 : 1, "0")} min.` : ""} ${r.role==="invite" ? "Votre adversaire doit aussi être connecté pour reprendre." : "Vous êtes l’hôte : la partie reprend dès que vous revenez."}</small></span>
+    <button type="button" class="btn retour-btn" data-act="retour-partie" ${PROG.retourEnCours ? "disabled" : ""}>${PROG.retourEnCours ? "Connexion…" : "Revenir dans la partie"}</button>
+    <button type="button" class="retour-fermer" data-act="retour-masquer" aria-label="Masquer ce message" title="Masquer ce message">×</button>
+  </section>`;
+}
+async function revenirDansPartie(){
+  const r = retourAAfficher();
+  if(!r || PROG.retourEnCours) return;
+  if(S && S.vainqueur===null && !enLigne()){
+    if(!confirm("Une partie contre l’ordinateur est en cours. La mettre en pause pour revenir dans votre partie en ligne ?")) return;
+    if(typeof mettreEnPause==="function") mettreEnPause();
+    S = null;
+  }
+  PROG.retourEnCours = true; render();
+  try {
+    actionEnLigne("en-ligne");
+    if(window.__supa) await window.__supa.init();
+    for(let k=0; k<40 && !EN.db; k++) await pause(250);
+    if(!EN.db) throw new Error("Connexion au serveur de jeu impossible pour le moment. Réessayez dans un instant.");
+    if(r.role==="hote"){
+      await chargerReprises();
+      if(!EN.reprises.some(x => x.code===r.code)){ oublierPartieLigne(); PROG.retourPartie = null; throw new Error("Cette partie est terminée ou n’est plus disponible."); }
+      await reprendre(r.code);
+    } else await rejoindre(r.code);
+  } catch(e) { erreur(e.message); }
+  finally { PROG.retourEnCours = false; if(!S) render(); }
+}
 function htmlBandeauPause(){
   const p = PROG.actif && partieEnPause(); if(!p || !p.S) return "";
   return `<aside class="bandeau-pause" role="note"><span>⏸ Votre partie contre l’ordinateur est en pause (tour ${p.S.tour}).</span>
