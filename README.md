@@ -299,3 +299,15 @@ Exécuter `supabase-cartes-a-venir.sql` une fois (SQL Editor, puis Run), après 
 ## Statistiques 1 contre 1 du profil
 Exécuter `supabase-stats-1v1.sql` une fois (SQL Editor, puis Run), après `supabase-stats.sql`. Il peut être relancé sans risque.
 Le profil affiche une section « 1 contre 1 » entre « Statistiques » et « 2 contre 2 » : parties, victoires, victoires contre l’ordinateur et contre un joueur, meilleure série, et résultats par héros.
+
+## Retour dans une partie en ligne
+Exécuter `supabase-retour-partie.sql` une fois (SQL Editor, puis Run), après `supabase.sql`. Il peut être relancé sans risque.
+Après une déconnexion, tant que la partie en ligne est en cours et a été jouée il y a moins de 6 heures, l’accueil affiche un grand bandeau « Votre partie vous attend ! » avec un bouton pour y revenir (l’hôte reprend la partie, l’invité la rejoint).
+
+## Nouveaux effets de cartes
+Dans la fiche d’une carte, 4 nouveaux effets sont disponibles dans chaque bloc d’effet : Défausse, Recyclage, Prophétie et Résurgence. Ils sont pris en compte dans le calcul du budget. Rien à faire dans Supabase.
+
+## Fin de partie par abandon
+Exécuter `supabase-fin-partie-abandon.sql` une fois (SQL Editor, puis Run), après `supabase-abandons.sql` et `supabase-retour-partie.sql`. Il peut être relancé sans risque.
+- Dès qu’un résultat est enregistré (victoire réclamée après un départ, abandon, fin normale), la partie en ligne est close : plus de bouton « Revenir dans la partie », ni pour le gagnant ni pour le perdant, et l’hôte ne peut plus la reprendre.
+- Le joueur déclaré perdant pendant son absence voit à son retour un avis « Partie perdue pendant votre absence », avec la cote perdue. S’il est encore sur l’écran de jeu, la partie s’arrête avec le message de défaite.

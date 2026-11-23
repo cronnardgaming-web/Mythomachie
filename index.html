@@ -1090,6 +1090,12 @@ button.ligne-deck{cursor:pointer} button.ligne-deck:hover{filter:brightness(1.08
 .bonus-ligne{display:block;width:max-content;margin:8px auto 0}
 .pastille-recherche{cursor:pointer;margin-left:6px;font:inherit;font-size:12.5px}
 .pastille-recherche i{background:#f0b340;box-shadow:0 0 6px #f0b340}
+.bandeau-defaite{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:0 0 16px;padding:16px 18px;border-radius:14px;color:#fff;background:linear-gradient(110deg,#3a1414,#5e1d1d);border:2px solid #e05a4a;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.defaite-icone{font-size:36px;line-height:1;color:#ffb3a8}
+.defaite-texte{display:flex;flex-direction:column;gap:4px;flex:1 1 280px;min-width:0;font-size:15px}
+.defaite-texte > b{font-family:Cinzel,"Times New Roman",serif;font-size:20px}
+.defaite-cote{color:#ff9d8f}
+.bandeau-defaite .defaite-btn{background:#f1e8d4;color:#3a1414;border:none;font-weight:800}
 .bandeau-retour{position:relative;display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:0 0 16px;padding:16px 46px 16px 18px;border-radius:14px;color:#fff;
   background:linear-gradient(110deg,#7a1408,#c4361c 35%,#e8892a 65%,#a8200f);background-size:220% 100%;border:2px solid #ffd27a;
   box-shadow:0 0 0 0 rgba(255,190,90,.7),0 8px 24px rgba(0,0,0,.35);animation:retourFond 6s ease-in-out infinite,retourPulse 1.8s ease-out infinite}
@@ -1258,6 +1264,17 @@ button.ligne-deck{cursor:pointer} button.ligne-deck:hover{filter:brightness(1.08
 .apercu-survol{position:fixed;z-index:95;pointer-events:none;filter:drop-shadow(0 18px 30px rgba(0,0,0,.7));animation:apparition-survol .12s ease-out}
 .apercu-survol:not(.apercu-crea) > *{position:absolute;left:0;top:0}
 .apercu-crea{display:flex;flex-direction:column;align-items:center;gap:6px}
+.apercu-complet{display:flex;align-items:flex-start;gap:12px;max-width:calc(100vw - 16px)}
+.apercu-survol.apercu-complet > *{position:static}
+.apercu-col{display:flex;flex-direction:column;align-items:center;gap:6px}
+.apercu-col .carte{--w:inherit;width:var(--w);cursor:default}
+.texte-apercu{width:250px;max-width:40vw;background:rgba(14,12,10,.95);color:#f1e8d4;border:1px solid rgba(242,212,138,.45);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.4;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.texte-apercu h3{margin:0 0 2px;font-family:Cinzel,"Times New Roman",serif;font-size:17px;color:#f2d48a}
+.texte-apercu p{margin:0 0 6px}
+.texte-apercu .type-apercu{color:#c9bca2;font-size:12.5px;margin-bottom:8px}
+.glossaire-apercu{margin:8px 0 0;padding:8px 0 0 16px;border-top:1px solid rgba(242,212,138,.25);font-size:12.5px;color:#d9cdb4}
+.glossaire-apercu li{margin:0 0 4px}
+.glossaire-apercu b{color:#f2d48a;margin-right:4px}
 .apercu-crea .carte{--w:inherit;width:var(--w);cursor:default}
 .etat-apercu{margin:0;padding:4px 10px;border-radius:99px;font-size:13px;background:rgba(10,10,14,.9);color:#f1e8d4;border:1px solid var(--line)}
 @keyframes apparition-survol{from{opacity:0}to{opacity:1}}
@@ -2905,7 +2922,7 @@ ajouterTraductions("en", {
   "Ticket de partie inconnu.":"Unknown game ticket.", "Ticket introuvable.":"Ticket not found.", "Trop de demandes en attente.":"Too many pending requests.",
   "Trop de parties commencées en une heure : patientez un peu.":"Too many games started in an hour: please wait a little.", "Trophée inconnu.":"Unknown trophy.",
   "Valeurs invalides : l’or et l’encre doivent être des nombres entiers positifs.":"Invalid values: gold and ink must be positive whole numbers.", "Version du jeu obsolète : rechargez la page.":"Outdated game version: reload the page.",
-  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Changer ▾":"Change ▾", "Changer de deck":"Change deck", "Aucun deck complet :":"No complete deck:", "construire un deck":"build a deck", "Choisir votre deck":"Choose your deck", "Ce deck sert pour « Jouer », contre un joueur comme contre l’ordinateur en attendant.":"This deck is used for “Play”, against a player and against the computer while you wait.", "Avec :":"With:", "Votre partie vous attend !":"Your game is waiting for you!", "C’est à vous de jouer.":"It’s your turn.", "Revenir dans la partie":"Back to the game", "Connexion…":"Connecting…", "Votre adversaire doit aussi être connecté pour reprendre.":"Your opponent must also be online to resume.", "Vous êtes l’hôte : la partie reprend dès que vous revenez.":"You are the host: the game resumes as soon as you return.", "Cette partie n’est plus disponible.":"This game is no longer available.", "Cette partie est terminée ou n’est plus disponible.":"This game is over or no longer available.", "Contre":"Against", "Affichée":"Displayed", "Pas encore obtenue.":"Not obtained yet.", "À trouver dans :":"Found in:", "Afficher cette illustration":"Display this artwork", "Illustration d’origine.":"Original artwork.", "Comment l’obtenir :":"How to get it:", "1 contre 1":"1 vs 1", "victoires contre l’ordinateur":"wins against the computer", "victoires contre un joueur":"wins against a player", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
+  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Changer ▾":"Change ▾", "Changer de deck":"Change deck", "Aucun deck complet :":"No complete deck:", "construire un deck":"build a deck", "Choisir votre deck":"Choose your deck", "Ce deck sert pour « Jouer », contre un joueur comme contre l’ordinateur en attendant.":"This deck is used for “Play”, against a player and against the computer while you wait.", "Avec :":"With:", "Actuellement :":"Currently:", "J’ai compris":"Got it", "Partie perdue pendant votre absence":"Game lost while you were away", "Cote :":"Rating:", "Vous n’êtes pas revenu à temps dans votre partie contre":"You did not come back in time to your game against", "Vous n’avez plus joué pendant plusieurs tours dans votre partie contre":"You stopped playing for several turns in your game against", "Défaite : vous n’êtes pas revenu à temps et votre adversaire a été déclaré vainqueur.":"Defeat: you did not come back in time and your opponent was declared the winner.", "Votre partie vous attend !":"Your game is waiting for you!", "C’est à vous de jouer.":"It’s your turn.", "Revenir dans la partie":"Back to the game", "Connexion…":"Connecting…", "Votre adversaire doit aussi être connecté pour reprendre.":"Your opponent must also be online to resume.", "Vous êtes l’hôte : la partie reprend dès que vous revenez.":"You are the host: the game resumes as soon as you return.", "Cette partie n’est plus disponible.":"This game is no longer available.", "Cette partie est terminée ou n’est plus disponible.":"This game is over or no longer available.", "Contre":"Against", "Affichée":"Displayed", "Pas encore obtenue.":"Not obtained yet.", "À trouver dans :":"Found in:", "Afficher cette illustration":"Display this artwork", "Illustration d’origine.":"Original artwork.", "Comment l’obtenir :":"How to get it:", "1 contre 1":"1 vs 1", "victoires contre l’ordinateur":"wins against the computer", "victoires contre un joueur":"wins against a player", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
   "Vous avez déjà le nombre maximum d’exemplaires.":"You already have the maximum number of copies.", "Vous avez déjà remplacé une quête aujourd’hui.":"You have already replaced a quest today.",
   "Vous ne pouvez défier que vos amis.":"You can only challenge your friends.", "Vous ne pouvez inviter que vos amis.":"You can only invite your friends.",
   "Vous n’avez pas de paquet offert de ce type.":"You have no free pack of this type.", "Vous n’êtes pas dans ce salon.":"You are not in this lobby.",
@@ -2939,10 +2956,12 @@ function traduireEffetFR(s){
   return r.charAt(0).toUpperCase() + r.slice(1) + (point ? "." : "");
 }
 ajouterTraductions("en", {
-  "Recyclage":"Recycle", "Défausse":"Discard", "Choisissez d’abord la carte à défausser.":"First choose the card to discard.", "Choisissez d’abord la carte à défausser (Recyclage).":"First choose the card to discard (Recycle).", "Résurgence":"Resurgence", "Ne rien remettre":"Put nothing back",
+  "Recyclage":"Recycle", "Prophétie":"Prophecy", "Aucun effet.":"No effect.", "Piochez, puis choisissez autant de cartes de votre main à défausser.":"Draw, then choose as many cards from your hand to discard.", "La prochaine carte que vous achetez ce tour va sur le dessus de votre deck : elle sera dans votre prochaine main.":"The next card you buy this turn goes on top of your deck: it will be in your next hand.", "Choisissez une carte de votre défausse et remettez-la sur le dessus de votre deck.":"Choose a card from your discard pile and put it back on top of your deck.", "Défausse":"Discard", "Choisissez d’abord la carte à défausser.":"First choose the card to discard.", "Choisissez d’abord la carte à défausser (Recyclage).":"First choose the card to discard (Recycle).", "Résurgence":"Resurgence", "Ne rien remettre":"Put nothing back",
   "Choisissez une carte de votre main à défausser.":"Choose a card from your hand to discard.",
   "Choisissez une carte de votre défausse : elle revient sur le dessus de votre deck et sera dans votre prochaine main.":"Choose a card from your discard pile: it goes back on top of your deck and will be in your next hand."
 }, [
+  [/^(\d+) parties perdues pendant votre absence$/, n => `${n} games lost while you were away`],
+  [/^\((à l’instant|il y a (\d+) (min|h|j))\) : votre adversaire a été déclaré vainqueur\.$/, (q, n, u) => `(${q==="à l’instant" ? "just now" : `${n} ${u==="j" ? "d" : u} ago`}): your opponent was declared the winner.`],
   [/^· tour (\d+)( ·)?$/, (n, f) => `· turn ${n}${f || ""}`],
   [/^Elle expire dans (?:(\d+) h )?(\d+) min\.(.*)$/, (h, m, r) => `It expires in ${h ? `${h} h ` : ""}${m} min.${r ? " " + traduire(r.trim()) : ""}`],
   [/^Choisissez une carte de votre main à défausser \(encore (\d+)\)\.$/, n => `Choose a card from your hand to discard (${n} left).`],
@@ -3982,6 +4001,9 @@ function nomAffiche(j){
 
 const NOMS_RARETE = {commune:"Commune", rare:"Rare", epique:"Épique", legendaire:"Légendaire"};
 const TEXTES_AIDE = {
+  recyclage:"Piochez, puis choisissez autant de cartes de votre main à défausser.",
+  prophetie:"La prochaine carte que vous achetez ce tour va sur le dessus de votre deck : elle sera dans votre prochaine main.",
+  resurgence:"Choisissez une carte de votre défausse et remettez-la sur le dessus de votre deck.",
   provocation:"Les créatures et le héros adverses doivent viser cette créature avant les autres.",
   or:"Sert à acheter des cartes au marché pendant ce tour.",
   soin:"Rend des points de vie à votre héros.",
@@ -4364,7 +4386,7 @@ function renderCouche(){
       : `<div class="actions"><button type="button" class="btn" data-act="rejouer">${enLigne() ? "Proposer une revanche" : "Rejouer"}</button>
          <button type="button" class="btn second" data-act="nouvelle">${enLigne() ? "Quitter" : "Changer de mode"}</button></div>`;
     h = `<div class="boite" role="dialog" aria-label="Fin de partie">
-      <h2>${titre}</h2><p>${S.abandon ? (S.abandon.joueur===vue() ? (S.abandon.raison==="inactif" ? "Défaite par inactivité : vous n’avez pas joué pendant plusieurs tours." : "Vous avez abandonné la partie.") : `${esc(S.joueurs[S.abandon.joueur].nom)} ${S.abandon.raison==="inactif" ? "n’a plus joué : victoire par inactivité de l’adversaire." : "a quitté la partie : victoire par abandon."}`) + " " : ""}Partie terminée au tour ${S.tour}.</p>${htmlGainFin()}${actions}</div>`;
+      <h2>${titre}</h2><p>${S.abandon ? (S.abandon.joueur===vue() ? (S.abandon.raison==="inactif" ? "Défaite par inactivité : vous n’avez pas joué pendant plusieurs tours." : S.abandon.raison==="absence" ? "Défaite : vous n’êtes pas revenu à temps et votre adversaire a été déclaré vainqueur." : "Vous avez abandonné la partie.") : `${esc(S.joueurs[S.abandon.joueur].nom)} ${S.abandon.raison==="inactif" ? "n’a plus joué : victoire par inactivité de l’adversaire." : "a quitté la partie : victoire par abandon."}`) + " " : ""}Partie terminée au tour ${S.tour}.</p>${htmlGainFin()}${actions}</div>`;
   } else if(ui.couvert){
     const n = S.joueurs[S.courant].nom;
     h = `<div class="boite" role="dialog" aria-label="Changement de joueur">
@@ -6469,6 +6491,7 @@ function actionProg(act, id){
     case "deck-jouer-choisir": if(id) choisirDeckJouer(id); PROG.choixDeckJouer = false; break;
     case "pause-reprendre": reprendrePause(); return true;
     case "retour-partie": revenirDansPartie(); return true;
+    case "defaites-vues": { const ids = (PROG.defaitesAbandon || []).map(d => d.id); PROG.defaitesAbandon = []; rpc("vu_defaites_par_abandon", {p_ids:ids}).catch(() => {}); break; }
     case "retour-masquer": { const r = retourAAfficher(); if(r){ try { localStorage.setItem(CLE_RETOUR_MASQUE, r.code); } catch(e) {} } break; }
     case "pause-abandonner": if(confirm("Abandonner la partie en pause ? Elle ne sera pas comptée.")){ oublierPause(); } break;
     case "jouer-2v2": ui.ecran = "mode2v2"; PROG.quetes2v2 = undefined; if(PROG.actif && PROG.pret) chargerBonus2v2().then(() => { if(ui.ecran==="mode2v2") renderProg(); });
@@ -8507,6 +8530,7 @@ function htmlHall(){
       </div>
     </header>
     ${compteIncomplet ? htmlCompte() : ""}
+    ${htmlBandeauDefaites()}
     ${htmlBandeauRetour()}
     ${htmlBandeauBeta()}
     ${htmlBandeauPause()}
@@ -11586,38 +11610,54 @@ async function reprendreHote2v2(){
 const SURVOL = {el:null, cible:null, minuteur:null};
 const sourisPrecise = () => window.matchMedia && matchMedia("(hover: hover) and (pointer: fine)").matches;
 function cacherSurvol(){ clearTimeout(SURVOL.minuteur); SURVOL.cible = null; if(SURVOL.el){ SURVOL.el.remove(); SURVOL.el = null; } }
+// Objet carte (avec son illustration alternative) derrière un élément affiché
+function objetCarteDe(el){
+  const uid = el.dataset.uid || (el.classList.contains("crea") ? el.dataset.id : null);
+  if(uid && S){
+    if(uid==="base") return {id:REGLES.carteBase, uid:"base"};
+    const zones = [S.marche, ...S.joueurs.flatMap(j => [j.main, j.plateau, j.joues, j.defausse, j.bannies])];
+    for(const z of zones){ const c = (z || []).find(x => x && x.uid===uid); if(c) return c; }
+  }
+  const id = idCarteDe(el);
+  return id ? {id} : null;
+}
+// Texte complet de la carte, en toutes lettres, avec l’explication des mots-clés
+function htmlTexteApercu(d){
+  const lignes = texteCarte(d);
+  const cles = new Set();
+  if(d.type==="creature") (d.mots || []).forEach(m => cles.add(m));
+  ["conjuration", "echo", "allie", "sacrifice"].forEach(k => { if(d[k]) cles.add(k); });
+  [d.effet, d.conjuration, d.echo, d.allie, d.sacrifice, d.choixSacrifice].forEach(e => { if(e) ["bannir", "recyclage", "prophetie", "resurgence"].forEach(k => { if(e[k]) cles.add(k); }); });
+  const nomTerme = k => (MOTS && MOTS[k]) || (TERMES && TERMES[k]) || ({bannir:"Bannir", recyclage:"Recyclage", prophetie:"Prophétie", resurgence:"Résurgence"})[k] || k;
+  const glossaire = [...cles].filter(k => TEXTES_AIDE[k]).map(k => `<li><b>${esc(nomTerme(k))}</b> <span>${esc(TEXTES_AIDE[k])}</span></li>`).join("");
+  return `<div class="texte-apercu">
+    <h3>${esc(d.nom)}</h3><p class="type-apercu"><span>${esc(typeLigne(d))}</span>${d.prix!=null && !d.depart ? ` · <span>${d.prix} or</span>` : ""}</p>
+    ${lignes.length ? lignes.map((l, i) => i===0 && d.type==="creature" && (d.mots || []).length
+        ? `<p>${d.mots.map(m => `<span>${esc(MOTS[m] || m)}</span>`).join(", ")}</p>` : `<p>${esc(l)}</p>`).join("") : `<p class="aide">Aucun effet.</p>`}
+    ${glossaire ? `<ul class="glossaire-apercu">${glossaire}</ul>` : ""}
+  </div>`;
+}
 function montrerSurvol(cible){
   cacherSurvol();
   if(!cible.isConnected) return;
   const r = cible.getBoundingClientRect(); if(r.width<8) return;
-  // Agrandissement : environ ×2,5, sans dépasser 85 % de la hauteur de l’écran
-  const f = Math.min(Math.max(2, 320 / r.width), innerHeight * 0.85 / r.height, 4);
-  const L = r.width * f, H = r.height * f;
-  const el = document.createElement("div"); el.className = "apercu-survol"; el.setAttribute("aria-hidden", "true");
-  // Créature en jeu : la carte complète (texte et effets), avec son attaque et ses PV actuels
-  if(cible.classList.contains("crea") && S){
-    const c = S.joueurs.flatMap(j => j.plateau || []).find(x => x.uid===cible.dataset.id);
-    if(c){
-      const Lc = Math.min(300, innerHeight * 0.6);
-      el.classList.add("apercu-crea");
-      el.innerHTML = `<div style="--w:${Lc}px">${htmlCarte(c, {uid:"apercu-" + c.uid})}</div><p class="etat-apercu">Actuellement : <b>${atkTotal(c)}</b> attaque · <b>${vieRestante(c)}</b> / ${c.vieMax} PV${c.bouclier ? " · Résistance" : ""}</p>`;
-      el.querySelectorAll("[data-act]").forEach(x => x.removeAttribute("data-act"));
-      document.body.appendChild(el);
-      const re = el.getBoundingClientRect();
-      let x = r.right + 14; if(x + re.width > innerWidth - 8) x = r.left - re.width - 14; if(x < 8) x = Math.max(8, (innerWidth - re.width) / 2);
-      el.style.left = x + "px"; el.style.top = Math.min(Math.max(8, r.top + r.height/2 - re.height/2), innerHeight - re.height - 8) + "px";
-      SURVOL.el = el; SURVOL.cible = cible; if(typeof cacherBulle==="function") cacherBulle();
-      return;
-    }
-  }
-  const clone = cible.cloneNode(true); clone.removeAttribute("data-act"); clone.querySelectorAll("[data-act]").forEach(x => x.removeAttribute("data-act"));
-  clone.classList.remove("cible", "peut", "choisie", "attaque", "survol"); clone.style.cssText = `width:${r.width}px;height:${r.height}px;margin:0;transform:scale(${f});transform-origin:0 0;--w:${r.width}px`;
-  el.appendChild(clone);
-  let x = r.right + 14; if(x + L > innerWidth - 8) x = r.left - L - 14; if(x < 8) x = Math.max(8, (innerWidth - L) / 2);
-  const y = Math.min(Math.max(8, r.top + r.height/2 - H/2), innerHeight - H - 8);
-  el.style.cssText = `left:${x}px;top:${y}px;width:${L}px;height:${H}px`;
-  document.body.appendChild(el); SURVOL.el = el; SURVOL.cible = cible;
-  if(typeof cacherBulle==="function") cacherBulle();   // l’aperçu montre déjà toute la carte : pas de bulle par-dessus
+  const c = objetCarteDe(cible); if(!c || !CARTES[c.id]) return;
+  const d = CARTES[c.id];
+  // Carte agrandie (environ ×2,5, sans dépasser 80 % de la hauteur) et, à côté, son texte en toutes lettres
+  const Lc = Math.round(Math.min(Math.max(170, r.width * 2.4), 300, innerHeight * 0.8 * 63 / 88));
+  const el = document.createElement("div"); el.className = "apercu-survol apercu-complet"; el.setAttribute("aria-hidden", "true");
+  const estCrea = cible.classList.contains("crea") && c.vieMax!=null;
+  el.innerHTML = `<div class="apercu-col"><div style="--w:${Lc}px">${htmlCarte(c, {uid:"apercu-" + (c.uid || c.id)})}</div>
+      ${estCrea ? `<p class="etat-apercu"><span>Actuellement :</span> <b>${atkTotal(c)}</b> <span>attaque</span> · <b>${vieRestante(c)}</b> / ${c.vieMax} <span>PV</span>${c.bouclier ? ` · <span>${esc(MOTS.resistance || "Résistance")}</span>` : ""}</p>` : ""}</div>
+    ${htmlTexteApercu(d)}`;
+  el.querySelectorAll("[data-act]").forEach(x => x.removeAttribute("data-act"));
+  el.querySelectorAll("[data-aide]").forEach(x => x.removeAttribute("data-aide"));
+  document.body.appendChild(el);
+  const re = el.getBoundingClientRect();
+  let x = r.right + 14; if(x + re.width > innerWidth - 8) x = r.left - re.width - 14; if(x < 8) x = Math.max(8, (innerWidth - re.width) / 2);
+  el.style.left = x + "px"; el.style.top = Math.min(Math.max(8, r.top + r.height/2 - re.height/2), innerHeight - re.height - 8) + "px";
+  SURVOL.el = el; SURVOL.cible = cible;
+  if(typeof cacherBulle==="function") cacherBulle();   // le texte complet est dans l’aperçu : pas de bulle par-dessus
 }
 document.addEventListener("mouseover", e => {
   if(!sourisPrecise() || ui.ecran!=="jeu" || !S) return;
@@ -11633,7 +11673,7 @@ document.addEventListener("mouseout", e => { if(SURVOL.cible && !(e.relatedTarge
 setInterval(() => { if(SURVOL.cible && !SURVOL.cible.isConnected) cacherSurvol(); }, 400);
 // ----- Joueurs en ligne (accueil)
 async function chargerEnLigne(){
-  chargerRetourPartie();
+  chargerRetourPartie(); chargerDefaitesAbandon();
   try { PROG.etatLigne = await rpc("etat_en_ligne"); PROG.enLigneNb = PROG.etatLigne ? PROG.etatLigne.en_ligne : null; }
   catch(e) { PROG.etatLigne = null; try { PROG.enLigneNb = await rpc("joueurs_en_ligne"); } catch(e2) { PROG.enLigneNb = null; } }
 }
@@ -12349,6 +12389,41 @@ async function chargerRetourPartie(){
     if(!r && loc) oublierPartieLigne();                        // terminée (abandon, victoire) ou expirée
   } catch(e) { PROG.retourServeur = false; }
 }
+// Défaites déclarées pendant l’absence du joueur (il n’est pas revenu à temps, ou n’a plus joué)
+async function chargerDefaitesAbandon(){
+  if(!PROG.actif || !PROG.pret) return;
+  try { PROG.defaitesAbandon = (await rpc("mes_defaites_par_abandon")) || []; } catch(e) { PROG.defaitesAbandon = []; }
+  if(PROG.defaitesAbandon.length) oublierPartieLigne();
+}
+function ilYA(iso){
+  const m = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
+  return m<1 ? "à l’instant" : m<60 ? `il y a ${m} min` : m<1440 ? `il y a ${Math.round(m/60)} h` : `il y a ${Math.round(m/1440)} j`;
+}
+function htmlBandeauDefaites(){
+  const l = PROG.actif && PROG.defaitesAbandon;
+  if(!l || !l.length) return "";
+  return `<section class="bandeau-defaite" role="alert" aria-label="Partie perdue">
+    <span class="defaite-icone" aria-hidden="true">⚠</span>
+    <span class="defaite-texte"><b>${l.length>1 ? `${l.length} parties perdues pendant votre absence` : "Partie perdue pendant votre absence"}</b>
+      ${l.map(d => `<span class="defaite-ligne"><span>${d.raison==="inactif" ? "Vous n’avez plus joué pendant plusieurs tours dans votre partie contre" : "Vous n’êtes pas revenu à temps dans votre partie contre"}</span> <b data-sans-trad>${esc(d.adversaire || "?")}</b> <span>(${ilYA(d.quand)}) : votre adversaire a été déclaré vainqueur.</span>${d.cote!=null ? ` <span>Cote :</span> <b class="defaite-cote">${d.cote>0 ? "+" : ""}${d.cote}</b>` : ""}</span>`).join("")}</span>
+    <button type="button" class="btn defaite-btn" data-act="defaites-vues">J’ai compris</button>
+  </section>`;
+}
+// En pleine partie : l’adversaire a réclamé la victoire pendant une coupure → la partie s’arrête ici
+async function verifierDefaiteEnCours(){
+  if(!S || !enLigne1v1() || S.vainqueur!==null || !S.ticket || !PROG.actif) return;
+  let l; try { l = await rpc("mes_defaites_par_abandon"); } catch(e) { return; }
+  const d = (l || []).find(x => x.ticket===S.ticket);
+  if(!d || !S || S.vainqueur!==null) return;
+  const moi = vue();
+  S.abandon = {joueur:moi, raison:d.raison==="inactif" ? "inactif" : "absence"};
+  S.vainqueur = S.joueurs[1 - moi].nom; delete S.chrono;
+  oublierPartieLigne();
+  rpc("vu_defaites_par_abandon", {p_ids:[d.id]}).catch(() => {});
+  render();
+}
+setInterval(() => { if(!document.hidden) verifierDefaiteEnCours(); }, 15000);
+document.addEventListener("visibilitychange", () => { if(!document.hidden) verifierDefaiteEnCours(); });
 function retourAAfficher(){
   if(PROG.retourServeur) return PROG.retourPartie;
   return partieLigneLocale();
