@@ -311,3 +311,14 @@ Dans la fiche d’une carte, 4 nouveaux effets sont disponibles dans chaque bloc
 Exécuter `supabase-fin-partie-abandon.sql` une fois (SQL Editor, puis Run), après `supabase-abandons.sql` et `supabase-retour-partie.sql`. Il peut être relancé sans risque.
 - Dès qu’un résultat est enregistré (victoire réclamée après un départ, abandon, fin normale), la partie en ligne est close : plus de bouton « Revenir dans la partie », ni pour le gagnant ni pour le perdant, et l’hôte ne peut plus la reprendre.
 - Le joueur déclaré perdant pendant son absence voit à son retour un avis « Partie perdue pendant votre absence », avec la cote perdue. S’il est encore sur l’écran de jeu, la partie s’arrête avec le message de défaite.
+
+## Délai de retour à 45 secondes et tours comptés par manche
+Exécuter `supabase-delai-et-tours.sql` une fois (SQL Editor, puis Run), après `supabase-fin-partie-abandon.sql`. Il peut être relancé sans risque.
+- Le serveur accorde 45 secondes pour revenir dans une partie classée. Dans l’admin (Règles › minuteur), le champ « Délai pour revenir après une déconnexion » doit indiquer la même valeur : 45.
+- En 1 contre 1, un tour = les deux joueurs ont joué le leur (comme en 2 contre 2). Les nouvelles parties sont enregistrées avec ce décompte. Pensez à diviser par 2 le nombre de tours des quêtes « Gagner en moins de N tours ».
+
+## Classement par saison
+Exécuter `supabase-classement-saison.sql` une fois (SQL Editor, puis Run), après `supabase-classement.sql` et `supabase-saisons.sql`. Il peut être relancé sans risque.
+- À la fin de chaque saison, les joueurs classés en 1 contre 1 qui ont terminé au moins une partie classée pendant la saison reçoivent de l’or par la boîte aux lettres : 1er 200, 2e 100, 3e 50, 4e à 10e 25, 11e à 100e 10. Puis toutes les cotes (1 contre 1 et 2 contre 2) repartent à 1200.
+- La clôture se fait toute seule à la première visite d’un joueur après la fin de la saison. Les saisons déjà terminées avant l’installation sont closes sans récompense.
+- Pour changer les gains : voir la ligne d’exemple en bas du script (réglage « gains_classement »).

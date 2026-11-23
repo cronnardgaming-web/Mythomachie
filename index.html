@@ -1090,6 +1090,86 @@ button.ligne-deck{cursor:pointer} button.ligne-deck:hover{filter:brightness(1.08
 .bonus-ligne{display:block;width:max-content;margin:8px auto 0}
 .pastille-recherche{cursor:pointer;margin-left:6px;font:inherit;font-size:12.5px}
 .pastille-recherche i{background:#f0b340;box-shadow:0 0 6px #f0b340}
+/* ===== Classement : saison, podium, tableau ===== */
+.saison-classement{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center;justify-content:space-between;margin:14px 0;padding:16px 20px;border-radius:16px;color:#f4e9cf;
+  background:linear-gradient(120deg,#1c1626,#2b2036 55%,#1d1a2c);border:1px solid rgba(242,212,138,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 26px rgba(0,0,0,.25)}
+.saison-titre{display:flex;flex-direction:column;gap:2px}
+.saison-titre small{text-transform:uppercase;letter-spacing:.18em;font-size:11px;color:#c9b98f}
+.saison-titre b{font-family:Cinzel,"Times New Roman",serif;font-size:24px;color:#f6dc8a;text-shadow:0 2px 8px rgba(246,220,138,.35)}
+.saison-fin{font-size:13px;color:#e9dcbb}
+.recompenses-classement{display:flex;flex-direction:column;gap:6px;max-width:560px}
+.recompenses-titre{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:#c9b98f}
+.recompenses-paliers{display:flex;flex-wrap:wrap;gap:6px}
+.recompense-palier{display:flex;gap:6px;align-items:baseline;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);font-size:13px}
+.recompense-palier b{font-family:Cinzel,"Times New Roman",serif}
+.recompense-palier.or{background:linear-gradient(135deg,#7a5410,#e9bf4d);border-color:#ffe08a;color:#2b1a02}
+.recompense-palier.argent{background:linear-gradient(135deg,#6f7682,#dfe5ee);border-color:#f4f7fb;color:#1f2530}
+.recompense-palier.bronze{background:linear-gradient(135deg,#6b3d1c,#d59055);border-color:#f2b88a;color:#2a1405}
+.saison-classement .aide{color:#bfb39a;margin:0;font-size:12px}
+
+.podium{position:relative;overflow:hidden;margin:6px 0 18px;padding:62px 12px 0;border-radius:20px;isolation:isolate;
+  background:radial-gradient(ellipse at 50% 18%,#3a2c58 0%,#1b1530 45%,#0c0a16 100%);border:1px solid rgba(242,212,138,.35);box-shadow:0 18px 40px rgba(0,0,0,.35),inset 0 0 80px rgba(0,0,0,.5)}
+.podium::after{content:"";position:absolute;left:0;right:0;bottom:0;height:46px;z-index:-1;background:linear-gradient(transparent,rgba(0,0,0,.55))}
+.podium-rayons{position:absolute;left:50%;top:-40%;width:160%;aspect-ratio:1;transform:translateX(-50%);z-index:-1;opacity:.55;
+  background:repeating-conic-gradient(from 0deg,rgba(255,220,130,.0) 0deg 9deg,rgba(255,220,130,.16) 11deg 14deg,rgba(255,220,130,0) 16deg 22.5deg);
+  -webkit-mask-image:radial-gradient(closest-side,#000 10%,transparent 70%);mask-image:radial-gradient(closest-side,#000 10%,transparent 70%);animation:rayons 40s linear infinite}
+.podium-etincelles i{position:absolute;bottom:-10px;left:var(--x);width:6px;height:6px;border-radius:50%;background:radial-gradient(#fff8d2,rgba(255,214,110,0) 70%);
+  transform:scale(var(--s));opacity:0;animation:etincelle 5.5s linear infinite;animation-delay:var(--d);z-index:-1}
+@keyframes etincelle{0%{transform:translateY(0) scale(var(--s));opacity:0}15%{opacity:1}100%{transform:translateY(-360px) scale(var(--s));opacity:0}}
+.podium-places{display:flex;justify-content:center;align-items:flex-end;gap:clamp(8px,2.4vw,26px)}
+.podium-place{display:flex;flex-direction:column;align-items:center;width:clamp(104px,26vw,210px);animation:monterPodium .7s cubic-bezier(.2,.9,.25,1.2) both}
+.podium-or{animation-delay:.25s}.podium-argent{animation-delay:.05s}.podium-bronze{animation-delay:.12s}
+@keyframes monterPodium{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
+.podium-joueur{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;padding:0 4px 12px;color:#f6efdc}
+.couronne{position:absolute;top:-38px;width:64px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.6));animation:flotteCouronne 3s ease-in-out infinite}
+@keyframes flotteCouronne{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-5px) rotate(3deg)}}
+.podium-medaillon{position:relative;display:grid;place-items:center;margin-bottom:6px}
+.blason{display:grid;place-items:center;width:var(--t);height:var(--t);border-radius:50%;overflow:hidden;background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--fc,#8a6a3a) 75%,white),var(--fc,#5a4024) 70%)}
+.blason img{width:100%;height:100%;object-fit:cover}
+.blason-sym{font-size:calc(var(--t) * .45);color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.5)}
+.podium-or .podium-medaillon .blason{width:clamp(72px,15vw,116px);height:clamp(72px,15vw,116px)}
+.podium-argent .podium-medaillon .blason,.podium-bronze .podium-medaillon .blason{width:clamp(56px,11vw,92px);height:clamp(56px,11vw,92px)}
+.podium-medaillon .blason{border:5px solid transparent;background-clip:padding-box;box-shadow:0 0 0 3px #0c0a16,0 10px 24px rgba(0,0,0,.6)}
+.podium-or .podium-medaillon .blason{box-shadow:0 0 0 4px #ffe08a,0 0 0 8px #8a5d12,0 0 34px rgba(255,214,110,.85),0 12px 26px rgba(0,0,0,.6);animation:haloOr 2.6s ease-in-out infinite}
+.podium-argent .podium-medaillon .blason{box-shadow:0 0 0 4px #f4f7fb,0 0 0 7px #6f7682,0 0 24px rgba(220,230,245,.6),0 10px 22px rgba(0,0,0,.6)}
+.podium-bronze .podium-medaillon .blason{box-shadow:0 0 0 4px #f2b88a,0 0 0 7px #6b3d1c,0 0 22px rgba(230,150,90,.55),0 10px 22px rgba(0,0,0,.6)}
+@keyframes haloOr{0%,100%{filter:brightness(1)}50%{filter:brightness(1.12)}}
+.podium-num{position:absolute;bottom:-8px;right:-4px;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;font:800 17px Cinzel,"Times New Roman",serif;box-shadow:0 3px 8px rgba(0,0,0,.6)}
+.podium-or .podium-num{background:linear-gradient(#fff3b0,#e0a92a);color:#4a2c02}
+.podium-argent .podium-num{background:linear-gradient(#ffffff,#a9b2bf);color:#232a35}
+.podium-bronze .podium-num{background:linear-gradient(#ffd2ad,#b46a32);color:#341803}
+.podium-pseudo{font:700 clamp(14px,2.2vw,19px) Cinzel,"Times New Roman",serif;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 2px 6px rgba(0,0,0,.7)}
+.podium-or .podium-pseudo{color:#ffe7a0;font-size:clamp(16px,2.6vw,23px)}
+.podium-titre{font-size:12px;color:#cbbfa3;font-style:italic}
+.podium-elo{display:flex;align-items:baseline;gap:5px}
+.podium-elo b{font:800 clamp(20px,3.2vw,30px) Cinzel,"Times New Roman",serif;background:linear-gradient(#fff,#f2d48a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+.podium-elo small{font-size:11px;color:#bfb39a;text-transform:uppercase;letter-spacing:.1em}
+.podium-parties{font-size:12px;color:#b9ad93}
+.podium-vous{font-family:system-ui,sans-serif;font-size:12px;color:#9fe6c8}
+.podium-socle{position:relative;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;padding-top:12px;border-radius:10px 10px 0 0;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.55),inset 0 -20px 30px rgba(0,0,0,.35),0 -6px 20px rgba(0,0,0,.35)}
+.podium-or .podium-socle{height:clamp(140px,19vw,178px);background:linear-gradient(180deg,#ffe9a3,#e6b23a 30%,#a87412 75%,#6e4a08)}
+.podium-argent .podium-socle{height:clamp(112px,15vw,140px);background:linear-gradient(180deg,#ffffff,#cfd6df 30%,#8a94a3 75%,#555d6a)}
+.podium-bronze .podium-socle{height:clamp(96px,12vw,116px);background:linear-gradient(180deg,#ffd8b5,#d08a4e 30%,#8d4f22 75%,#5a2e10)}
+.podium-socle::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.45) 50%,transparent 65%);background-size:300% 100%;animation:refletSocle 5s ease-in-out infinite;pointer-events:none}
+@keyframes refletSocle{0%,60%{background-position:130% 0}100%{background-position:-30% 0}}
+.podium-rang{font:800 clamp(30px,5vw,54px)/1 Cinzel,"Times New Roman",serif;color:rgba(0,0,0,.28);text-shadow:0 1px 0 rgba(255,255,255,.55)}
+.podium-gain{padding:3px 10px;border-radius:99px;background:rgba(0,0,0,.45);color:#ffe7a0;font-weight:800;font-size:13px;border:1px solid rgba(255,231,160,.5)}
+.podium-place.vide{opacity:.5}
+.blason-vide{display:grid;place-items:center;width:80px;height:80px;border-radius:50%;border:3px dashed rgba(255,255,255,.35);color:#cbbfa3;font:700 30px Cinzel,serif;margin-bottom:6px}
+.podium-vide{text-align:center;padding:20px}
+.ma-cote-v2 .rang-moi b{font:800 26px Cinzel,"Times New Roman",serif}
+.tableau-classement-v2 .col-rang{font:700 16px Cinzel,"Times New Roman",serif;width:56px;text-align:center}
+.tableau-classement-v2 tr.moi td{background:rgba(242,212,138,.25)}
+.puce-gain{display:inline-block;padding:2px 9px;border-radius:99px;background:linear-gradient(135deg,#f6dc8a,#d8a63c);color:#3b2a06;font-weight:700;font-size:13px}
+.champions-precedents h2{font-size:18px}
+.champions-liste{display:flex;flex-wrap:wrap;gap:12px}
+.champion{display:flex;align-items:center;gap:10px;padding:8px 14px 8px 8px;border-radius:99px;background:var(--zone);border:1px solid var(--line)}
+.champion.rang-1{border-color:#d8a63c;box-shadow:0 0 0 1px #f6dc8a inset}
+.champion-rang{font:700 15px Cinzel,serif}
+.champion small{color:var(--ink-2)}
+@media (prefers-reduced-motion: reduce){.podium-rayons,.podium-etincelles i,.couronne,.podium-socle::before,.podium-or .podium-medaillon .blason,.podium-place{animation:none}.podium-etincelles{display:none}}
+@media (max-width:560px){.podium{padding-top:40px}.podium-places{gap:6px}.podium-titre,.podium-parties{display:none}.couronne{width:48px;top:-30px}}
 .bandeau-defaite{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:0 0 16px;padding:16px 18px;border-radius:14px;color:#fff;background:linear-gradient(110deg,#3a1414,#5e1d1d);border:2px solid #e05a4a;box-shadow:0 8px 24px rgba(0,0,0,.35)}
 .defaite-icone{font-size:36px;line-height:1;color:#ffb3a8}
 .defaite-texte{display:flex;flex-direction:column;gap:4px;flex:1 1 280px;min-width:0;font-size:15px}
@@ -1820,7 +1900,7 @@ body:not(.en-partie){
 }
 /* Tablettes de pierre : angles presque vifs, double filet de bronze gravé */
 body:not(.en-partie) :is(.hall-jouer,.hall-quete,.tuile-hall,.bloc-profil,.deck-ligne,.offre,.tete-saison,.frise-saison,.travail,
-  .page-amis section,.message,.note-maj,.ma-cote,.info-palier,.trophee,.page-classement > section:not(.ma-cote)){
+  .page-amis section,.message,.note-maj,.ma-cote,.info-palier,.trophee,.page-classement > section:not(.ma-cote):not(.podium):not(.saison-classement)){
   background:linear-gradient(180deg, color-mix(in srgb, var(--pierre) 100%, #fff 3%), var(--pierre));
   border:1px solid var(--filet);
   border-radius:5px;
@@ -1878,7 +1958,7 @@ body:not(.en-partie) #app .btn.second{background:linear-gradient(180deg, color-m
 body:not(.en-partie) #app .btn.second:hover{border-color:var(--bronze)}
 body:not(.en-partie) #app :is(input[type=text],input[type=search],input[type=number],input[type=email],select):not(.adm-contenu *){
   background:color-mix(in srgb, var(--table) 80%, #000 12%);border:1px solid var(--filet);border-radius:4px}
-body:not(.en-partie) .page-classement > section:not(.ma-cote){padding:12px 16px}
+body:not(.en-partie) .page-classement > section:not(.ma-cote):not(.podium):not(.saison-classement){padding:12px 16px}
 /* Tableaux : en-têtes gravés, ligne du joueur dorée */
 body:not(.en-partie) #app .tableau th{font-family:Cinzel,serif;font-weight:700;color:var(--ink-2);border-bottom:1px solid var(--filet)}
 body:not(.en-partie) #app .tableau tr:hover td{background:color-mix(in srgb, var(--bronze) 7%, transparent)}
@@ -2922,7 +3002,7 @@ ajouterTraductions("en", {
   "Ticket de partie inconnu.":"Unknown game ticket.", "Ticket introuvable.":"Ticket not found.", "Trop de demandes en attente.":"Too many pending requests.",
   "Trop de parties commencées en une heure : patientez un peu.":"Too many games started in an hour: please wait a little.", "Trophée inconnu.":"Unknown trophy.",
   "Valeurs invalides : l’or et l’encre doivent être des nombres entiers positifs.":"Invalid values: gold and ink must be positive whole numbers.", "Version du jeu obsolète : rechargez la page.":"Outdated game version: reload the page.",
-  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Changer ▾":"Change ▾", "Changer de deck":"Change deck", "Aucun deck complet :":"No complete deck:", "construire un deck":"build a deck", "Choisir votre deck":"Choose your deck", "Ce deck sert pour « Jouer », contre un joueur comme contre l’ordinateur en attendant.":"This deck is used for “Play”, against a player and against the computer while you wait.", "Avec :":"With:", "Actuellement :":"Currently:", "J’ai compris":"Got it", "Partie perdue pendant votre absence":"Game lost while you were away", "Cote :":"Rating:", "Vous n’êtes pas revenu à temps dans votre partie contre":"You did not come back in time to your game against", "Vous n’avez plus joué pendant plusieurs tours dans votre partie contre":"You stopped playing for several turns in your game against", "Défaite : vous n’êtes pas revenu à temps et votre adversaire a été déclaré vainqueur.":"Defeat: you did not come back in time and your opponent was declared the winner.", "Votre partie vous attend !":"Your game is waiting for you!", "C’est à vous de jouer.":"It’s your turn.", "Revenir dans la partie":"Back to the game", "Connexion…":"Connecting…", "Votre adversaire doit aussi être connecté pour reprendre.":"Your opponent must also be online to resume.", "Vous êtes l’hôte : la partie reprend dès que vous revenez.":"You are the host: the game resumes as soon as you return.", "Cette partie n’est plus disponible.":"This game is no longer available.", "Cette partie est terminée ou n’est plus disponible.":"This game is over or no longer available.", "Contre":"Against", "Affichée":"Displayed", "Pas encore obtenue.":"Not obtained yet.", "À trouver dans :":"Found in:", "Afficher cette illustration":"Display this artwork", "Illustration d’origine.":"Original artwork.", "Comment l’obtenir :":"How to get it:", "1 contre 1":"1 vs 1", "victoires contre l’ordinateur":"wins against the computer", "victoires contre un joueur":"wins against a player", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
+  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Changer ▾":"Change ▾", "Changer de deck":"Change deck", "Aucun deck complet :":"No complete deck:", "construire un deck":"build a deck", "Choisir votre deck":"Choose your deck", "Ce deck sert pour « Jouer », contre un joueur comme contre l’ordinateur en attendant.":"This deck is used for “Play”, against a player and against the computer while you wait.", "Avec :":"With:", "Cote":"Rating", "Rang":"Rank", "Joueur":"Player", "Classement de la saison":"Season ranking", "Récompenses de fin de saison":"End-of-season rewards", "Pour les joueurs ayant terminé au moins une partie classée pendant la saison. À la fin de la saison, toutes les cotes repartent à 1200.":"For players who finished at least one ranked game during the season. At the end of the season, all ratings go back to 1200.", "Place libre":"Free spot", "(vous)":"(you)", "La suite du classement":"The rest of the ranking", "Récompense":"Reward", "Fin de saison aujourd’hui":"Season ends today", "Fin de saison demain":"Season ends tomorrow", "Pas encore classé cette saison : jouez une partie en ligne.":"Not ranked yet this season: play an online game.", "Personne n’est encore classé cette saison. Soyez le premier sur le podium !":"Nobody is ranked yet this season. Be the first on the podium!", "Personne n’est encore classé en 2 contre 2 : soyez le premier sur le podium !":"Nobody is ranked in 2 vs 2 yet: be the first on the podium!", "Terminez au moins une partie classée cette saison pour recevoir une récompense.":"Finish at least one ranked game this season to earn a reward.", "Champions de la saison":"Champions of the season", "Actuellement :":"Currently:", "J’ai compris":"Got it", "Partie perdue pendant votre absence":"Game lost while you were away", "Cote :":"Rating:", "Vous n’êtes pas revenu à temps dans votre partie contre":"You did not come back in time to your game against", "Vous n’avez plus joué pendant plusieurs tours dans votre partie contre":"You stopped playing for several turns in your game against", "Défaite : vous n’êtes pas revenu à temps et votre adversaire a été déclaré vainqueur.":"Defeat: you did not come back in time and your opponent was declared the winner.", "Votre partie vous attend !":"Your game is waiting for you!", "C’est à vous de jouer.":"It’s your turn.", "Revenir dans la partie":"Back to the game", "Connexion…":"Connecting…", "Votre adversaire doit aussi être connecté pour reprendre.":"Your opponent must also be online to resume.", "Vous êtes l’hôte : la partie reprend dès que vous revenez.":"You are the host: the game resumes as soon as you return.", "Cette partie n’est plus disponible.":"This game is no longer available.", "Cette partie est terminée ou n’est plus disponible.":"This game is over or no longer available.", "Contre":"Against", "Affichée":"Displayed", "Pas encore obtenue.":"Not obtained yet.", "À trouver dans :":"Found in:", "Afficher cette illustration":"Display this artwork", "Illustration d’origine.":"Original artwork.", "Comment l’obtenir :":"How to get it:", "1 contre 1":"1 vs 1", "victoires contre l’ordinateur":"wins against the computer", "victoires contre un joueur":"wins against a player", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
   "Vous avez déjà le nombre maximum d’exemplaires.":"You already have the maximum number of copies.", "Vous avez déjà remplacé une quête aujourd’hui.":"You have already replaced a quest today.",
   "Vous ne pouvez défier que vos amis.":"You can only challenge your friends.", "Vous ne pouvez inviter que vos amis.":"You can only invite your friends.",
   "Vous n’avez pas de paquet offert de ce type.":"You have no free pack of this type.", "Vous n’êtes pas dans ce salon.":"You are not in this lobby.",
@@ -2962,6 +3042,9 @@ ajouterTraductions("en", {
 }, [
   [/^(\d+) parties perdues pendant votre absence$/, n => `${n} games lost while you were away`],
   [/^\((à l’instant|il y a (\d+) (min|h|j))\) : votre adversaire a été déclaré vainqueur\.$/, (q, n, u) => `(${q==="à l’instant" ? "just now" : `${n} ${u==="j" ? "d" : u} ago`}): your opponent was declared the winner.`],
+  [/^Fin de saison dans (\d+) jours$/, n => `Season ends in ${n} days`],
+  [/^(\d+) parties?$/, n => `${n} game${n>1 ? "s" : ""}`],
+  [/^(\d+) or$/, n => `${n} gold`], [/^\+(\d+) or$/, n => `+${n} gold`],
   [/^· tour (\d+)( ·)?$/, (n, f) => `· turn ${n}${f || ""}`],
   [/^Elle expire dans (?:(\d+) h )?(\d+) min\.(.*)$/, (h, m, r) => `It expires in ${h ? `${h} h ` : ""}${m} min.${r ? " " + traduire(r.trim()) : ""}`],
   [/^Choisissez une carte de votre main à défausser \(encore (\d+)\)\.$/, n => `Choose a card from your hand to discard (${n} left).`],
@@ -3986,6 +4069,11 @@ function erreur(msg){
   minuteToast = setTimeout(() => t.classList.remove("visible"), 2600);
   return false;
 }
+// Numéro de tour affiché et enregistré : un tour = chaque joueur a joué le sien (comme en 2 contre 2)
+function tourAffiche(){
+  if(!S) return 1;
+  return Math.max(1, Math.ceil(S.tour / (est2v2() ? 4 : 2)));
+}
 function interactif(){
   return S && S.vainqueur===null && !ui.couvert && !ui.aiEnCours && (S.mode==="duo" || S.courant===vue()) && !(enLigne() && EN.enAttente);
 }
@@ -4235,7 +4323,7 @@ function render(){
   <header class="barre-jeu">
     <span class="logo-mini">${NOM_JEU}</span>
     <span class="mode">${S.mode==="ia" ? "Contre l’ordinateur" : enLigne() ? `En ligne, partie ${EN.code}` : "Deux joueurs sur cet écran"}</span>
-    <span class="tour-info">Tour ${S.tour}</span><span class="pastille-tour ${S.vainqueur!==null ? "" : S.courant===me || S.mode==="duo" ? "a-moi" : "adverse"}">${S.vainqueur!==null ? "Partie terminée" : S.mode==="duo" ? `Au tour de ${esc(S.joueurs[S.courant].nom)}` : S.courant===me ? "À vous de jouer" : S.mode==="ia" ? "Tour de l’ordinateur" : "Tour de l’adversaire"}</span>
+    <span class="tour-info">Tour ${tourAffiche()}</span><span class="pastille-tour ${S.vainqueur!==null ? "" : S.courant===me || S.mode==="duo" ? "a-moi" : "adverse"}">${S.vainqueur!==null ? "Partie terminée" : S.mode==="duo" ? `Au tour de ${esc(S.joueurs[S.courant].nom)}` : S.courant===me ? "À vous de jouer" : S.mode==="ia" ? "Tour de l’ordinateur" : "Tour de l’adversaire"}</span>
     ${htmlSon(false)}
     <button type="button" class="btn-discret" data-act="nouvelle">${enLigne() ? "Quitter la partie" : "Nouvelle partie"}</button>
   </header>
@@ -4386,7 +4474,7 @@ function renderCouche(){
       : `<div class="actions"><button type="button" class="btn" data-act="rejouer">${enLigne() ? "Proposer une revanche" : "Rejouer"}</button>
          <button type="button" class="btn second" data-act="nouvelle">${enLigne() ? "Quitter" : "Changer de mode"}</button></div>`;
     h = `<div class="boite" role="dialog" aria-label="Fin de partie">
-      <h2>${titre}</h2><p>${S.abandon ? (S.abandon.joueur===vue() ? (S.abandon.raison==="inactif" ? "Défaite par inactivité : vous n’avez pas joué pendant plusieurs tours." : S.abandon.raison==="absence" ? "Défaite : vous n’êtes pas revenu à temps et votre adversaire a été déclaré vainqueur." : "Vous avez abandonné la partie.") : `${esc(S.joueurs[S.abandon.joueur].nom)} ${S.abandon.raison==="inactif" ? "n’a plus joué : victoire par inactivité de l’adversaire." : "a quitté la partie : victoire par abandon."}`) + " " : ""}Partie terminée au tour ${S.tour}.</p>${htmlGainFin()}${actions}</div>`;
+      <h2>${titre}</h2><p>${S.abandon ? (S.abandon.joueur===vue() ? (S.abandon.raison==="inactif" ? "Défaite par inactivité : vous n’avez pas joué pendant plusieurs tours." : S.abandon.raison==="absence" ? "Défaite : vous n’êtes pas revenu à temps et votre adversaire a été déclaré vainqueur." : "Vous avez abandonné la partie.") : `${esc(S.joueurs[S.abandon.joueur].nom)} ${S.abandon.raison==="inactif" ? "n’a plus joué : victoire par inactivité de l’adversaire." : "a quitté la partie : victoire par abandon."}`) + " " : ""}Partie terminée au tour ${tourAffiche()}.</p>${htmlGainFin()}${actions}</div>`;
   } else if(ui.couvert){
     const n = S.joueurs[S.courant].nom;
     h = `<div class="boite" role="dialog" aria-label="Changement de joueur">
@@ -4685,9 +4773,9 @@ function admRegles(){
       ${champNombre("Durée d’un tour (secondes)", p+".chronoTour", r.chronoTour ?? 90)}
       ${champNombre("Alerte de fin de tour (dernières secondes)", p+".chronoAlerte", r.chronoAlerte ?? 20)}
       ${champNombre("Tours expirés de suite avant défaite", p+".chronoExpires", r.chronoExpires ?? 2)}
-      ${champNombre("Délai pour revenir après une déconnexion (secondes)", p+".delaiRetour", r.delaiRetour ?? 60)}
+      ${champNombre("Délai pour revenir après une déconnexion (secondes)", p+".delaiRetour", r.delaiRetour ?? 45)}
     </div>
-    <p class="aide">Pas de minuteur contre l’ordinateur ni à deux sur le même écran. Le délai de retour vérifié par le serveur est de 60 secondes (réglage « delai_retour » de l’économie), et la perte de cote d’un abandon d’au moins 15 points (« penalite_abandon »).</p>
+    <p class="aide">Pas de minuteur contre l’ordinateur ni à deux sur le même écran. Le serveur vérifie aussi le délai de retour : 45 secondes (réglage « delai_retour » de l’économie, mis par supabase-delai-et-tours.sql). Gardez la même valeur ici, et la perte de cote d’un abandon d’au moins 15 points (« penalite_abandon »).</p>
     <h2>Marché et decks</h2>
     <div class="champs">
       ${champNombre("Cartes visibles au marché", p+".tailleMarche", r.tailleMarche)}
@@ -6953,7 +7041,7 @@ async function enregistrerDuel(){
             combos:st.combos || 0, equipements:st.equipements || 0, bannis:st.bannis || 0, palier:S.joueurs[i].palier || 0, pv_fin:S.joueurs[i].pv};
   };
   const nomV = S.vainqueur, v = nomV===S.joueurs[0].nom ? 0 : nomV===S.joueurs[1].nom ? 1 : null;
-  const d = {id_partie:S.ticket, mode:S.mode, vainqueur:v, tours:S.tour, cotes:[camp(0), camp(1)]};
+  const d = {id_partie:S.ticket, mode:S.mode, vainqueur:v, tours:tourAffiche(), cotes:[camp(0), camp(1)]};
   for(let essai=0; ; essai++){
     try { const refus = await rpc("enregistrer_duel", {d}); if(refus) throw new Error(refus);
       if(S.abandon && S.mode==="enligne") await rpc("marquer_abandon_duel", {p_ticket:S.ticket, p_place:S.abandon.joueur, p_raison:S.abandon.raison}).catch(() => {});
@@ -10051,8 +10139,80 @@ function actionFiche(act, id){
    CLASSEMENT ELO : page, file d’attente, confirmation du résultat
    ============================================================ */
 async function chargerClassement(){
+  try { await rpc("cloturer_classement"); } catch(e) {}   // fin de saison : récompenses et remise à 1200 (une seule fois)
   try { PROG.classement = await rpc("classement", {p_limite:100}); } catch(e) { PROG.classement = {erreur:true}; }
   if(ui.ecran==="classement") renderProg();
+}
+const rangTexte = r => LANGUE==='en' ? `${r}<sup>${["th","st","nd","rd"][(r%100>10 && r%100<14) ? 0 : (r%10<4 ? r%10 : 0)]}</sup>` : `${r}<sup>${r===1 ? "er" : "e"}</sup>`;
+function gainPourRang(gains, r){ for(const [max, g] of (gains || [])) if(r<=max) return g; return 0; }
+// Portrait du héros favori d’un joueur (ou symbole de son panthéon)
+function htmlBlason(heros, taille){
+  const f = heros && FACTIONS[heros] ? heros : null, h = f ? heroDe({heros:f}) : null;
+  return `<span class="blason ${f ? `f-${f}` : ""}" style="--t:${taille}px">${h && h.image ? `<img src="${h.image}" alt="">` : `<span class="blason-sym">${f ? FACTIONS[f].sym : "⚔"}</span>`}</span>`;
+}
+// Podium des 3 premiers
+function htmlPodium(joueurs, gains){
+  const top = [1, 2, 3].map(r => (joueurs || []).find(j => j.rang===r) || null);
+  if(!top[0]) return "";
+  const place = (j, r) => {
+    const met = ["or", "argent", "bronze"][r - 1];
+    if(!j) return `<div class="podium-place podium-${met} vide"><div class="podium-joueur"><span class="blason-vide">?</span><span class="podium-pseudo">Place libre</span></div><div class="podium-socle"><span class="podium-rang">${r}</span></div></div>`;
+    const g = gainPourRang(gains, r);
+    return `<div class="podium-place podium-${met} ${j.moi ? "moi" : ""}">
+      <div class="podium-joueur">
+        ${r===1 ? `<span class="couronne" aria-hidden="true"><svg viewBox="0 0 64 40"><path d="M4 34 8 8l14 14L32 2l10 20L56 8l4 26z" fill="url(#grad-couronne)" stroke="#7a4f0a" stroke-width="2" stroke-linejoin="round"/><circle cx="32" cy="4" r="3.4" fill="#ff5a5a"/><circle cx="8" cy="8" r="3" fill="#5ab4ff"/><circle cx="56" cy="8" r="3" fill="#5ab4ff"/><defs><linearGradient id="grad-couronne" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3b0"/><stop offset=".5" stop-color="#f2c043"/><stop offset="1" stop-color="#b07a12"/></linearGradient></defs></svg></span>` : ""}
+        <span class="podium-medaillon">${htmlBlason(j.heros, r===1 ? 116 : 92)}<span class="podium-num">${r}</span></span>
+        <span class="podium-pseudo"><span data-sans-trad>${esc(j.pseudo)}</span>${j.moi ? ` <span class="podium-vous">(vous)</span>` : ""}</span>
+        ${j.titre ? `<span class="podium-titre">${esc(j.titre)}</span>` : ""}
+        <span class="podium-elo"><b>${nf(j.elo)}</b><small>Cote</small></span>
+        <span class="podium-parties">${nf(j.parties)} partie${j.parties>1 ? "s" : ""}</span>
+      </div>
+      <div class="podium-socle"><span class="podium-rang">${r}</span>${g ? `<span class="podium-gain">+${g} or</span>` : ""}</div>
+    </div>`;
+  };
+  return `<section class="podium" aria-label="Podium">
+    <div class="podium-rayons" aria-hidden="true"></div>
+    <div class="podium-etincelles" aria-hidden="true">${Array.from({length:14}, (_, k) => `<i style="--x:${(k*37)%100}%;--d:${(k*0.53)%4}s;--s:${0.6 + (k%4)*0.25}"></i>`).join("")}</div>
+    <div class="podium-places">${place(top[1], 2)}${place(top[0], 1)}${place(top[2], 3)}</div>
+  </section>`;
+}
+function htmlBandeauSaisonClassement(C){
+  const sa = C.saison, g = C.gains || [];
+  let fin = "";
+  if(sa && sa.fin){
+    const jours = Math.max(0, Math.ceil((Date.parse(sa.fin + "T00:00:00Z") - Date.now()) / 86400000));
+    fin = jours<=0 ? "Fin de saison aujourd’hui" : jours===1 ? "Fin de saison demain" : `Fin de saison dans ${jours} jours`;
+  }
+  const paliers = []; let deb = 1;
+  for(const [max, or] of g){ paliers.push(`<span class="recompense-palier ${deb===1 ? "or" : deb===2 ? "argent" : deb===3 ? "bronze" : ""}"><b>${deb===max ? rangTexte(deb) : `${rangTexte(deb)}–${rangTexte(max)}`}</b><span>${or} or</span></span>`); deb = max + 1; }
+  return `<section class="saison-classement">
+    <div class="saison-titre"><small>Classement de la saison</small><b data-sans-trad>${sa ? esc(sa.nom) : "—"}</b>${fin ? `<span class="saison-fin">⏳ <span>${fin}</span></span>` : ""}</div>
+    ${paliers.length ? `<div class="recompenses-classement"><span class="recompenses-titre">Récompenses de fin de saison</span><div class="recompenses-paliers">${paliers.join("")}</div>
+      <p class="aide">Pour les joueurs ayant terminé au moins une partie classée pendant la saison. À la fin de la saison, toutes les cotes repartent à 1200.</p></div>` : ""}
+  </section>`;
+}
+function htmlChampionsPrecedents(pr){
+  if(!pr || !(pr.podium || []).length) return "";
+  return `<section class="champions-precedents"><h2>Champions de la saison <span data-sans-trad>« ${esc(pr.saison || "")} »</span></h2>
+    <div class="champions-liste">${pr.podium.map(j => `<div class="champion rang-${j.rang}">${htmlBlason(j.heros, 46)}<span class="champion-rang">${rangTexte(j.rang)}</span><b data-sans-trad>${esc(j.pseudo)}</b><small>${nf(j.elo)}</small></div>`).join("")}</div></section>`;
+}
+function htmlMaCote(m, total, texteVide, aide, bouton){
+  return `<section class="ma-cote ma-cote-v2">
+    <div class="cote-grande"><b>${nf(m.elo ?? 1200)}</b><span>votre cote</span></div>
+    <div class="infos-cote">
+      <p class="rang-moi">${m.rang ? `<b>${rangTexte(m.rang)}</b> <span>sur ${nf(total)} joueurs classés</span>` : texteVide}</p>
+      <p class="aide">${nf(m.parties || 0)} partie${(m.parties || 0)>1 ? "s" : ""} classée${(m.parties || 0)>1 ? "s" : ""} · meilleure cote : ${nf(m.max ?? 1200)}</p>
+      <p class="aide">${aide}</p>
+    </div>
+    ${bouton}
+  </section>`;
+}
+function htmlTableClassement(joueurs, gains){
+  const reste = (joueurs || []).filter(j => j.rang>3);
+  if(!reste.length) return "";
+  return `<div class="defile-tableau"><table class="tableau tableau-classement tableau-classement-v2"><thead><tr><th>Rang</th><th>Joueur</th><th>Cote</th><th>Parties</th>${gains ? "<th>Récompense</th>" : ""}</tr></thead><tbody>
+    ${reste.map(j => { const g = gains ? gainPourRang(gains, j.rang) : 0; return `<tr class="${j.moi ? "moi" : ""}"><td class="col-rang">${j.rang}</td><td><b data-sans-trad>${esc(j.pseudo)}</b>${j.titre ? ` <span class="aide">${esc(j.titre)}</span>` : ""}</td><td><b>${nf(j.elo)}</b></td><td>${nf(j.parties)}</td>${gains ? `<td>${g ? `<span class="puce-gain">${g} or</span>` : "–"}</td>` : ""}</tr>`; }).join("")}
+  </tbody></table></div>`;
 }
 function pageClassement(){
   const ongl = `<div class="onglets-classement" role="tablist">${[["1v1", "1 contre 1"], ["2v2", "2 contre 2"]].map(([k, l]) => `<button type="button" role="tab" class="pastille-choix ${(PROG.ongletClassement || "1v1")===k ? "choisie" : ""}" aria-selected="${(PROG.ongletClassement || "1v1")===k}" data-act="classement-onglet" data-id="${k}">${l}</button>`).join("")}</div>`;
@@ -10061,25 +10221,15 @@ function pageClassement(){
   if(!C) { chargerClassement(); return `${entete("Classement")}<p class="attente">Chargement…</p>`; }
   if(C.erreur) return `${entete("Classement")}<p class="aide">Le classement n’est pas encore disponible.</p>`;
   const m = C.moi || {};
-  const calibrage = (m.parties || 0) < 10;
   return `${entete("Classement")}
     <div class="page-classement">${ongl}
-      <section class="ma-cote">
-        <div class="cote-grande"><b>${nf(m.elo ?? 1200)}</b><span>votre cote</span></div>
-        <div class="infos-cote">
-          <p>${m.rang ? `<b>${m.rang}<sup>${m.rang===1 ? "er" : "e"}</sup></b> sur ${nf(C.total)} joueurs classés` : "Pas encore classé : jouez une partie en ligne."}</p>
-          <p class="aide">${nf(m.parties || 0)} partie${(m.parties || 0)>1 ? "s" : ""} classée${(m.parties || 0)>1 ? "s" : ""} · meilleure cote : ${nf(m.max ?? 1200)}${calibrage && m.parties ? ` · cote en calibrage (les ${20 - Math.min(20, m.parties)} prochaines parties comptent double)` : ""}</p>
-          <p class="aide">Toutes les parties en ligne comptent, avec un code ou en partie classée. Battre un joueur mieux classé rapporte davantage.</p>
-        </div>
-        <button type="button" class="btn" data-act="en-ligne">Jouer en ligne</button>
-      </section>
-      ${(m.historique || []).length ? `<section><h2>Vos dernières parties classées</h2><div class="historique-elo">${m.historique.map(h =>
-        `<span class="pastille-elo ${h.annule ? "annule" : h.delta>0 ? "elo-gain" : h.delta<0 ? "elo-perte" : ""}" title="${h.annule ? "Résultat contesté : points annulés" : `${h.resultat>0.5 ? "Victoire" : h.resultat<0.5 ? "Défaite" : "Égalité"} contre ${esc(h.adversaire || "un joueur")}`}">${h.annule ? "annulé" : (h.delta>0 ? "+" : "") + h.delta}</span>`).join("")}</div></section>` : ""}
-      <section><h2>Les meilleurs joueurs</h2>
-        ${(C.joueurs || []).length ? `<div class="defile-tableau"><table class="tableau tableau-classement"><thead><tr><th>Rang</th><th>Joueur</th><th>Cote</th><th>Parties</th></tr></thead><tbody>
-          ${C.joueurs.map(j => `<tr class="${j.moi ? "moi" : ""}"><td>${j.rang<=3 ? ["🥇","🥈","🥉"][j.rang-1] : j.rang}</td><td><b>${esc(j.pseudo)}</b>${j.titre ? ` <span class="aide">${esc(j.titre)}</span>` : ""}</td><td><b>${nf(j.elo)}</b></td><td>${nf(j.parties)}</td></tr>`).join("")}
-        </tbody></table></div>` : `<p class="aide">Personne n’est encore classé. Soyez le premier !</p>`}
-      </section>
+      ${htmlBandeauSaisonClassement(C)}
+      ${(C.joueurs || []).length ? htmlPodium(C.joueurs, C.gains) : `<p class="aide podium-vide">Personne n’est encore classé cette saison. Soyez le premier sur le podium !</p>`}
+      ${htmlMaCote(m, C.total, "Pas encore classé cette saison : jouez une partie en ligne.",
+          `<span>Toutes les parties en ligne comptent, avec un code ou en partie classée. Battre un joueur mieux classé rapporte davantage.</span>${m.rang && !m.eligible ? ` <span>Terminez au moins une partie classée cette saison pour recevoir une récompense.</span>` : ""}`,
+          `<button type="button" class="btn" data-act="en-ligne">Jouer en ligne</button>`)}
+      ${(C.joueurs || []).length>3 ? `<section><h2>La suite du classement</h2>${htmlTableClassement(C.joueurs, C.gains)}</section>` : ""}
+      ${htmlChampionsPrecedents(C.precedent)}
     </div>`;
 }
 // ----- File d’attente « Partie classée »
@@ -11539,20 +11689,11 @@ function htmlClassement2v2(){
   if(!C){ chargerClassement2v2(); return `<p class="attente">Chargement…</p>`; }
   if(C.erreur) return `<p class="aide">Le classement du 2 contre 2 n’est pas encore disponible.</p>`;
   const m = C.moi || {};
-  return `<section class="ma-cote">
-      <div class="cote-grande"><b>${nf(m.elo ?? 1200)}</b><span>votre cote en 2 contre 2</span></div>
-      <div class="infos-cote">
-        <p>${m.rang ? `<b>${m.rang}<sup>${m.rang===1 ? "er" : "e"}</sup></b> sur ${nf(C.total)} joueurs classés` : "Pas encore classé : jouez une partie de 2 contre 2 en ligne face à des joueurs."}</p>
-        <p class="aide">${nf(m.parties || 0)} partie${(m.parties || 0)>1 ? "s" : ""} classée${(m.parties || 0)>1 ? "s" : ""} · meilleure cote : ${nf(m.max ?? 1200)}</p>
-        <p class="aide">Seules les parties en ligne face à au moins un joueur adverse comptent : contre deux ordinateurs, la cote ne change pas. Chaque équipe vaut la moyenne de ses deux cotes.</p>
-      </div>
-      <button type="button" class="btn" data-act="jouer-2v2">Jouer en 2 contre 2</button>
-    </section>
-    <section><h2>Les 100 meilleurs en 2 contre 2</h2>
-      ${(C.joueurs || []).length ? `<div class="tableau-defile"><table class="tableau"><thead><tr><th>Rang</th><th>Joueur</th><th>Cote</th><th>Parties</th></tr></thead><tbody>
-        ${C.joueurs.map(j => `<tr class="${j.moi ? "ligne-moi" : ""}"><td>${j.rang}</td><td>${esc(j.pseudo)}${j.titre ? ` <small class="aide">${esc(j.titre)}</small>` : ""}</td><td><b>${nf(j.elo)}</b></td><td>${nf(j.parties)}</td></tr>`).join("")}</tbody></table></div>`
-        : `<p class="aide">Personne n’est encore classé : soyez le premier !</p>`}
-    </section>`;
+  return `${(C.joueurs || []).length ? htmlPodium(C.joueurs, null) : `<p class="aide podium-vide">Personne n’est encore classé en 2 contre 2 : soyez le premier sur le podium !</p>`}
+    ${htmlMaCote(m, C.total, "Pas encore classé : jouez une partie de 2 contre 2 en ligne face à des joueurs.",
+       "Seules les parties en ligne face à au moins un joueur adverse comptent : contre deux ordinateurs, la cote ne change pas. Chaque équipe vaut la moyenne de ses deux cotes.",
+       `<button type="button" class="btn" data-act="jouer-2v2">Jouer en 2 contre 2</button>`)}
+    ${(C.joueurs || []).length>3 ? `<section><h2>La suite du classement</h2>${htmlTableClassement(C.joueurs, null)}</section>` : ""}`;
 }
 // ----- Invitations dans un salon
 async function chargerInvitations2v2(){ try { SOC.invit2v2 = (await rpc("mes_invitations_2v2")) || []; } catch(e) { SOC.invit2v2 = []; } majBanniereInvit2v2(); }
@@ -11688,7 +11829,7 @@ const CHR = {partie:null, vuAdv:0, dernierHote:0, horlogeVue:null, arrivee:0, al
 const ACTIONS_CHRONO = new Set(["carte", "achat", "attaque", "frappe", "pouvoir", "bannir", "sacrifice", "arme"]);
 const regleChrono = (cle, def) => { const v = Number(REGLES && REGLES[cle]); return v>0 ? v : def; };
 const dureeTour = () => regleChrono("chronoTour", 90), alerteTour = () => regleChrono("chronoAlerte", 20);
-const toursExpiresMax = () => regleChrono("chronoExpires", 2), delaiRetour = () => regleChrono("delaiRetour", 60);
+const toursExpiresMax = () => regleChrono("chronoExpires", 2), delaiRetour = () => regleChrono("delaiRetour", 45);
 const enLigne1v1 = () => !!S && !est2v2() && S.mode==="enligne";
 function humainsPartie(){
   if(!S) return 0;
@@ -11802,7 +11943,7 @@ async function reclamerVictoire(){
   try {
     if(enLigne1v1() && EN.role==="hote"){ declarerAbandon(1, "deconnexion"); return; }
     if(enLigne1v1()){
-      const r = await rpc("reclamer_victoire_abandon", {p_ticket:S.ticket, d:{camp:statsCamp(1), tours:S.tour, heros_adverse:S.joueurs[0].heros}});
+      const r = await rpc("reclamer_victoire_abandon", {p_ticket:S.ticket, d:{camp:statsCamp(1), tours:tourAffiche(), heros_adverse:S.joueurs[0].heros}});
       if(r && r.annulee){ erreur(r.erreur); quitterEnLigne(); S = null; return render(); }
       if(r && r.erreur) return erreur(r.erreur);
       S.abandon = {joueur:0, raison:"deconnexion"}; S.vainqueur = S.joueurs[1].nom;
@@ -12367,7 +12508,7 @@ function memoriserPartieLigne(){
     const cle = `${EN.code}|${S.tour}|${S.courant}`;
     if(memoriserPartieLigne.derniere===cle) return;
     memoriserPartieLigne.derniere = cle;
-    localStorage.setItem(CLE_PARTIE_LIGNE, JSON.stringify({code:EN.code, role:EN.role, adversaire:a.pseudo || a.nom || "", tour:S.tour, a_vous:S.courant===moi, maj:Date.now()}));
+    localStorage.setItem(CLE_PARTIE_LIGNE, JSON.stringify({code:EN.code, role:EN.role, adversaire:a.pseudo || a.nom || "", tour:tourAffiche(), a_vous:S.courant===moi, maj:Date.now()}));
   } catch(e) {}
 }
 function partieLigneLocale(){
@@ -12468,7 +12609,7 @@ async function revenirDansPartie(){
 }
 function htmlBandeauPause(){
   const p = PROG.actif && partieEnPause(); if(!p || !p.S) return "";
-  return `<aside class="bandeau-pause" role="note"><span>⏸ Votre partie contre l’ordinateur est en pause (tour ${p.S.tour}).</span>
+  return `<aside class="bandeau-pause" role="note"><span>⏸ Votre partie contre l’ordinateur est en pause (tour ${Math.max(1, Math.ceil(p.S.tour / 2))}).</span>
     <button type="button" class="btn" data-act="pause-reprendre">Reprendre</button><button type="button" class="btn-discret" data-act="pause-abandonner">Abandonner</button></aside>`;
 }
 function reprendrePause(){
