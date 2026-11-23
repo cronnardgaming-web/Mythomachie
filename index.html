@@ -1170,6 +1170,47 @@ button.ligne-deck{cursor:pointer} button.ligne-deck:hover{filter:brightness(1.08
 .champion small{color:var(--ink-2)}
 @media (prefers-reduced-motion: reduce){.podium-rayons,.podium-etincelles i,.couronne,.podium-socle::before,.podium-or .podium-medaillon .blason,.podium-place{animation:none}.podium-etincelles{display:none}}
 @media (max-width:560px){.podium{padding-top:40px}.podium-places{gap:6px}.podium-titre,.podium-parties{display:none}.couronne{width:48px;top:-30px}}
+/* Classement sur ordinateur : deux colonnes qui tiennent dans l’écran */
+.classement-grille{display:flex;flex-direction:column;gap:16px}
+.classement-gauche{display:flex;flex-direction:column;gap:16px;min-width:0}
+.classement-droite{display:flex;flex-direction:column;gap:10px;min-width:0;padding:12px 16px}
+.classement-droite h2{margin:0}
+.classement-grille.ajustee{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(330px,1fr);gap:14px;min-height:0}
+.classement-grille.ajustee .classement-gauche{gap:10px;min-height:0}
+.classement-grille.ajustee .classement-droite{min-height:0;overflow:hidden}
+.classement-grille.ajustee .classement-droite .defile-tableau{flex:1 1 auto;min-height:0;overflow:auto}
+.classement-grille.ajustee .classement-droite thead th{position:sticky;top:0;z-index:1;background:var(--pierre,#e8e2d2)}
+.classement-grille.ajustee .champions-precedents{flex:none}
+.classement-grille.ajustee .champions-precedents h2{font-size:15px;margin:4px 0 6px}
+.classement-grille.ajustee .champion{padding:4px 10px 4px 4px;font-size:13px}
+.classement-grille.ajustee .champion .blason{width:30px !important;height:30px !important}
+.classement-grille.ajustee .saison-classement{margin:0;padding:10px 16px;gap:8px 18px}
+.classement-grille.ajustee .saison-titre b{font-size:19px}
+.classement-grille.ajustee .saison-classement .aide{display:none}
+.classement-grille.ajustee .recompense-palier{padding:2px 8px;font-size:12px}
+.classement-grille.ajustee .podium{flex:1 1 auto;min-height:0;margin:0;padding:34px 10px 0;display:flex;flex-direction:column;justify-content:flex-end}
+.classement-grille.ajustee .podium-places{gap:12px}
+.classement-grille.ajustee .podium-place{width:clamp(96px,13vw,170px)}
+.classement-grille.ajustee .podium-or .podium-medaillon .blason{width:clamp(58px,10vh,92px);height:clamp(58px,10vh,92px)}
+.classement-grille.ajustee :is(.podium-argent,.podium-bronze) .podium-medaillon .blason{width:clamp(46px,8vh,72px);height:clamp(46px,8vh,72px)}
+.classement-grille.ajustee .couronne{width:46px;top:-28px}
+.classement-grille.ajustee .podium-num{width:26px;height:26px;font-size:13px;bottom:-6px}
+.classement-grille.ajustee .podium-joueur{gap:1px;padding-bottom:8px}
+.classement-grille.ajustee .podium-pseudo{font-size:15px}
+.classement-grille.ajustee .podium-or .podium-pseudo{font-size:17px}
+.classement-grille.ajustee .podium-elo b{font-size:21px}
+.classement-grille.ajustee .podium-titre,.classement-grille.ajustee .podium-parties{font-size:11px}
+.classement-grille.ajustee .podium-or .podium-socle{height:clamp(80px,13vh,120px)}
+.classement-grille.ajustee .podium-argent .podium-socle{height:clamp(62px,10vh,94px)}
+.classement-grille.ajustee .podium-bronze .podium-socle{height:clamp(50px,8vh,76px)}
+.classement-grille.ajustee .podium-rang{font-size:clamp(24px,4vh,40px)}
+.classement-grille.ajustee .podium-socle{gap:3px;padding-top:6px}
+.classement-grille.ajustee .podium-gain{font-size:12px;padding:2px 8px}
+.classement-grille.ajustee .ma-cote{flex:none;padding:10px 16px;gap:14px}
+.classement-grille.ajustee .ma-cote .cote-grande b{font-size:34px}
+.classement-grille.ajustee .ma-cote .infos-cote p{margin:0}
+.classement-grille.ajustee .ma-cote .rang-moi b{font-size:20px}
+.classement-grille.ajustee .ma-cote .aide{font-size:12.5px}
 .bandeau-defaite{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:0 0 16px;padding:16px 18px;border-radius:14px;color:#fff;background:linear-gradient(110deg,#3a1414,#5e1d1d);border:2px solid #e05a4a;box-shadow:0 8px 24px rgba(0,0,0,.35)}
 .defaite-icone{font-size:36px;line-height:1;color:#ffb3a8}
 .defaite-texte{display:flex;flex-direction:column;gap:4px;flex:1 1 280px;min-width:0;font-size:15px}
@@ -1899,7 +1940,7 @@ body:not(.en-partie){
     var(--table) fixed;
 }
 /* Tablettes de pierre : angles presque vifs, double filet de bronze gravé */
-body:not(.en-partie) :is(.hall-jouer,.hall-quete,.tuile-hall,.bloc-profil,.deck-ligne,.offre,.tete-saison,.frise-saison,.travail,
+body:not(.en-partie) :is(.classement-droite,.hall-jouer,.hall-quete,.tuile-hall,.bloc-profil,.deck-ligne,.offre,.tete-saison,.frise-saison,.travail,
   .page-amis section,.message,.note-maj,.ma-cote,.info-palier,.trophee,.page-classement > section:not(.ma-cote):not(.podium):not(.saison-classement)){
   background:linear-gradient(180deg, color-mix(in srgb, var(--pierre) 100%, #fff 3%), var(--pierre));
   border:1px solid var(--filet);
@@ -8450,6 +8491,7 @@ function ajusterBureau(){
     // Menus (hors admin et hors téléphone) : agrandissement par « zoom », qui garde le défilement et les positions justes
     const z = compact || ui.ecran==="admin" ? 1 : echelleMenus();
     zoomer(app, z); zoomer(couche, compact ? 1 : z);
+    ajusterClassement();
     return;
   }
   zoomer(app, 1);
@@ -8463,6 +8505,21 @@ function ajusterBureau(){
   app.style.transform = `scale(${s.toFixed(4)})`;
   app.style.marginBottom = `${-(r.height * (1 - s)).toFixed(1)}px`;
   app.dataset.ajuste = "1";
+}
+// Classement sur ordinateur : la page tient dans l’écran, la suite du classement défile dans sa boîte
+function ajusterClassement(){
+  const g = document.querySelector(".classement-grille");
+  if(!g) return;
+  g.style.height = "";
+  if(innerWidth < 900 || innerHeight < 560){ g.classList.remove("ajustee"); return; }
+  g.classList.add("ajustee");
+  const r = g.getBoundingClientRect(), f = g.offsetHeight ? r.height / g.offsetHeight : 1;
+  const dispo = (innerHeight - Math.max(0, r.top) - 14) / (f || 1);
+  let h = Math.max(420, Math.floor(dispo));
+  g.style.height = h + "px";
+  // Marges du bas de la page : on retire ce qui dépasse encore
+  const trop = document.documentElement.scrollHeight - innerHeight;
+  if(trop>0 && h>420){ h = Math.max(420, Math.floor(h - trop / (f || 1)) - 1); g.style.height = h + "px"; }
 }
 let ajustementPrevu = false;
 function prevoirAjustement(){ if(ajustementPrevu) return; ajustementPrevu = true; requestAnimationFrame(() => { ajustementPrevu = false; ajusterBureau(); }); }
@@ -10147,7 +10204,9 @@ const rangTexte = r => LANGUE==='en' ? `${r}<sup>${["th","st","nd","rd"][(r%100>
 function gainPourRang(gains, r){ for(const [max, g] of (gains || [])) if(r<=max) return g; return 0; }
 // Portrait du héros favori d’un joueur (ou symbole de son panthéon)
 function htmlBlason(heros, taille){
-  const f = heros && FACTIONS[heros] ? heros : null, h = f ? heroDe({heros:f}) : null;
+  // « gre-1 » = Zeus (panthéon grec, palier 1 de dévotion) ; « gre » seul = dieu du palier le plus haut
+  const cle = String(heros || ""), f0 = cle.split("-")[0];
+  const f = FACTIONS[f0] ? f0 : null, h = f ? (HEROS[cle] || heroDe({heros:f})) : null;
   return `<span class="blason ${f ? `f-${f}` : ""}" style="--t:${taille}px">${h && h.image ? `<img src="${h.image}" alt="">` : `<span class="blason-sym">${f ? FACTIONS[f].sym : "⚔"}</span>`}</span>`;
 }
 // Podium des 3 premiers
@@ -10214,6 +10273,12 @@ function htmlTableClassement(joueurs, gains){
     ${reste.map(j => { const g = gains ? gainPourRang(gains, j.rang) : 0; return `<tr class="${j.moi ? "moi" : ""}"><td class="col-rang">${j.rang}</td><td><b data-sans-trad>${esc(j.pseudo)}</b>${j.titre ? ` <span class="aide">${esc(j.titre)}</span>` : ""}</td><td><b>${nf(j.elo)}</b></td><td>${nf(j.parties)}</td>${gains ? `<td>${g ? `<span class="puce-gain">${g} or</span>` : "–"}</td>` : ""}</tr>`; }).join("")}
   </tbody></table></div>`;
 }
+// Colonne de droite : la suite du classement, qui défile dans sa boîte
+function htmlColonneClassement(joueurs, gains, apres){
+  return `<section class="classement-droite"><h2>La suite du classement</h2>
+    ${(joueurs || []).length>3 ? htmlTableClassement(joueurs, gains) : `<p class="aide">Les joueurs classés après le podium apparaîtront ici.</p>`}
+    ${apres || ""}</section>`;
+}
 function pageClassement(){
   const ongl = `<div class="onglets-classement" role="tablist">${[["1v1", "1 contre 1"], ["2v2", "2 contre 2"]].map(([k, l]) => `<button type="button" role="tab" class="pastille-choix ${(PROG.ongletClassement || "1v1")===k ? "choisie" : ""}" aria-selected="${(PROG.ongletClassement || "1v1")===k}" data-act="classement-onglet" data-id="${k}">${l}</button>`).join("")}</div>`;
   if(PROG.ongletClassement==="2v2") return `${entete("Classement")}<div class="page-classement">${ongl}${htmlClassement2v2()}</div>`;
@@ -10223,13 +10288,16 @@ function pageClassement(){
   const m = C.moi || {};
   return `${entete("Classement")}
     <div class="page-classement">${ongl}
-      ${htmlBandeauSaisonClassement(C)}
-      ${(C.joueurs || []).length ? htmlPodium(C.joueurs, C.gains) : `<p class="aide podium-vide">Personne n’est encore classé cette saison. Soyez le premier sur le podium !</p>`}
-      ${htmlMaCote(m, C.total, "Pas encore classé cette saison : jouez une partie en ligne.",
-          `<span>Toutes les parties en ligne comptent, avec un code ou en partie classée. Battre un joueur mieux classé rapporte davantage.</span>${m.rang && !m.eligible ? ` <span>Terminez au moins une partie classée cette saison pour recevoir une récompense.</span>` : ""}`,
-          `<button type="button" class="btn" data-act="en-ligne">Jouer en ligne</button>`)}
-      ${(C.joueurs || []).length>3 ? `<section><h2>La suite du classement</h2>${htmlTableClassement(C.joueurs, C.gains)}</section>` : ""}
-      ${htmlChampionsPrecedents(C.precedent)}
+      <div class="classement-grille">
+        <div class="classement-gauche">
+          ${htmlBandeauSaisonClassement(C)}
+          ${(C.joueurs || []).length ? htmlPodium(C.joueurs, C.gains) : `<p class="aide podium-vide">Personne n’est encore classé cette saison. Soyez le premier sur le podium !</p>`}
+          ${htmlMaCote(m, C.total, "Pas encore classé cette saison : jouez une partie en ligne.",
+              `<span>Toutes les parties en ligne comptent, avec un code ou en partie classée. Battre un joueur mieux classé rapporte davantage.</span>${m.rang && !m.eligible ? ` <span>Terminez au moins une partie classée cette saison pour recevoir une récompense.</span>` : ""}`,
+              `<button type="button" class="btn" data-act="en-ligne">Jouer en ligne</button>`)}
+        </div>
+        ${htmlColonneClassement(C.joueurs, C.gains, htmlChampionsPrecedents(C.precedent))}
+      </div>
     </div>`;
 }
 // ----- File d’attente « Partie classée »
@@ -11689,11 +11757,12 @@ function htmlClassement2v2(){
   if(!C){ chargerClassement2v2(); return `<p class="attente">Chargement…</p>`; }
   if(C.erreur) return `<p class="aide">Le classement du 2 contre 2 n’est pas encore disponible.</p>`;
   const m = C.moi || {};
-  return `${(C.joueurs || []).length ? htmlPodium(C.joueurs, null) : `<p class="aide podium-vide">Personne n’est encore classé en 2 contre 2 : soyez le premier sur le podium !</p>`}
+  return `<div class="classement-grille"><div class="classement-gauche">
+    ${(C.joueurs || []).length ? htmlPodium(C.joueurs, null) : `<p class="aide podium-vide">Personne n’est encore classé en 2 contre 2 : soyez le premier sur le podium !</p>`}
     ${htmlMaCote(m, C.total, "Pas encore classé : jouez une partie de 2 contre 2 en ligne face à des joueurs.",
        "Seules les parties en ligne face à au moins un joueur adverse comptent : contre deux ordinateurs, la cote ne change pas. Chaque équipe vaut la moyenne de ses deux cotes.",
        `<button type="button" class="btn" data-act="jouer-2v2">Jouer en 2 contre 2</button>`)}
-    ${(C.joueurs || []).length>3 ? `<section><h2>La suite du classement</h2>${htmlTableClassement(C.joueurs, null)}</section>` : ""}`;
+    </div>${htmlColonneClassement(C.joueurs, null, "")}</div>`;
 }
 // ----- Invitations dans un salon
 async function chargerInvitations2v2(){ try { SOC.invit2v2 = (await rpc("mes_invitations_2v2")) || []; } catch(e) { SOC.invit2v2 = []; } majBanniereInvit2v2(); }
