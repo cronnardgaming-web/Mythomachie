@@ -1211,6 +1211,8 @@ button.ligne-deck{cursor:pointer} button.ligne-deck:hover{filter:brightness(1.08
 .classement-grille.ajustee .ma-cote .infos-cote p{margin:0}
 .classement-grille.ajustee .ma-cote .rang-moi b{font-size:20px}
 .classement-grille.ajustee .ma-cote .aide{font-size:12.5px}
+.tuiles-saison{margin-bottom:10px}
+.tuile-cote b{color:#a8741a;font-family:Cinzel,"Times New Roman",serif}
 .bandeau-defaite{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:0 0 16px;padding:16px 18px;border-radius:14px;color:#fff;background:linear-gradient(110deg,#3a1414,#5e1d1d);border:2px solid #e05a4a;box-shadow:0 8px 24px rgba(0,0,0,.35)}
 .defaite-icone{font-size:36px;line-height:1;color:#ffb3a8}
 .defaite-texte{display:flex;flex-direction:column;gap:4px;flex:1 1 280px;min-width:0;font-size:15px}
@@ -3043,7 +3045,7 @@ ajouterTraductions("en", {
   "Ticket de partie inconnu.":"Unknown game ticket.", "Ticket introuvable.":"Ticket not found.", "Trop de demandes en attente.":"Too many pending requests.",
   "Trop de parties commencées en une heure : patientez un peu.":"Too many games started in an hour: please wait a little.", "Trophée inconnu.":"Unknown trophy.",
   "Valeurs invalides : l’or et l’encre doivent être des nombres entiers positifs.":"Invalid values: gold and ink must be positive whole numbers.", "Version du jeu obsolète : rechargez la page.":"Outdated game version: reload the page.",
-  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Changer ▾":"Change ▾", "Changer de deck":"Change deck", "Aucun deck complet :":"No complete deck:", "construire un deck":"build a deck", "Choisir votre deck":"Choose your deck", "Ce deck sert pour « Jouer », contre un joueur comme contre l’ordinateur en attendant.":"This deck is used for “Play”, against a player and against the computer while you wait.", "Avec :":"With:", "Cote":"Rating", "Rang":"Rank", "Joueur":"Player", "Classement de la saison":"Season ranking", "Récompenses de fin de saison":"End-of-season rewards", "Pour les joueurs ayant terminé au moins une partie classée pendant la saison. À la fin de la saison, toutes les cotes repartent à 1200.":"For players who finished at least one ranked game during the season. At the end of the season, all ratings go back to 1200.", "Place libre":"Free spot", "(vous)":"(you)", "La suite du classement":"The rest of the ranking", "Récompense":"Reward", "Fin de saison aujourd’hui":"Season ends today", "Fin de saison demain":"Season ends tomorrow", "Pas encore classé cette saison : jouez une partie en ligne.":"Not ranked yet this season: play an online game.", "Personne n’est encore classé cette saison. Soyez le premier sur le podium !":"Nobody is ranked yet this season. Be the first on the podium!", "Personne n’est encore classé en 2 contre 2 : soyez le premier sur le podium !":"Nobody is ranked in 2 vs 2 yet: be the first on the podium!", "Terminez au moins une partie classée cette saison pour recevoir une récompense.":"Finish at least one ranked game this season to earn a reward.", "Champions de la saison":"Champions of the season", "Actuellement :":"Currently:", "J’ai compris":"Got it", "Partie perdue pendant votre absence":"Game lost while you were away", "Cote :":"Rating:", "Vous n’êtes pas revenu à temps dans votre partie contre":"You did not come back in time to your game against", "Vous n’avez plus joué pendant plusieurs tours dans votre partie contre":"You stopped playing for several turns in your game against", "Défaite : vous n’êtes pas revenu à temps et votre adversaire a été déclaré vainqueur.":"Defeat: you did not come back in time and your opponent was declared the winner.", "Votre partie vous attend !":"Your game is waiting for you!", "C’est à vous de jouer.":"It’s your turn.", "Revenir dans la partie":"Back to the game", "Connexion…":"Connecting…", "Votre adversaire doit aussi être connecté pour reprendre.":"Your opponent must also be online to resume.", "Vous êtes l’hôte : la partie reprend dès que vous revenez.":"You are the host: the game resumes as soon as you return.", "Cette partie n’est plus disponible.":"This game is no longer available.", "Cette partie est terminée ou n’est plus disponible.":"This game is over or no longer available.", "Contre":"Against", "Affichée":"Displayed", "Pas encore obtenue.":"Not obtained yet.", "À trouver dans :":"Found in:", "Afficher cette illustration":"Display this artwork", "Illustration d’origine.":"Original artwork.", "Comment l’obtenir :":"How to get it:", "1 contre 1":"1 vs 1", "victoires contre l’ordinateur":"wins against the computer", "victoires contre un joueur":"wins against a player", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
+  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Changer ▾":"Change ▾", "Changer de deck":"Change deck", "Aucun deck complet :":"No complete deck:", "construire un deck":"build a deck", "Choisir votre deck":"Choose your deck", "Ce deck sert pour « Jouer », contre un joueur comme contre l’ordinateur en attendant.":"This deck is used for “Play”, against a player and against the computer while you wait.", "Avec :":"With:", "1 contre 1 · saison":"1 vs 1 · season", "1 contre 1 · depuis toujours":"1 vs 1 · all time", "cote de la saison":"season rating", "au classement":"in the ranking", "pas encore classé":"not ranked yet", "jours avant la fin de la saison":"days until the season ends", "Aucune saison en cours.":"No season in progress.", "Jouer une partie classée":"Play a ranked game", "Jouer !":"Play!", "Cote":"Rating", "Rang":"Rank", "Joueur":"Player", "Classement de la saison":"Season ranking", "Récompenses de fin de saison":"End-of-season rewards", "Pour les joueurs ayant terminé au moins une partie classée pendant la saison. À la fin de la saison, toutes les cotes repartent à 1200.":"For players who finished at least one ranked game during the season. At the end of the season, all ratings go back to 1200.", "Place libre":"Free spot", "(vous)":"(you)", "La suite du classement":"The rest of the ranking", "Récompense":"Reward", "Fin de saison aujourd’hui":"Season ends today", "Fin de saison demain":"Season ends tomorrow", "Pas encore classé cette saison : jouez une partie en ligne.":"Not ranked yet this season: play an online game.", "Personne n’est encore classé cette saison. Soyez le premier sur le podium !":"Nobody is ranked yet this season. Be the first on the podium!", "Personne n’est encore classé en 2 contre 2 : soyez le premier sur le podium !":"Nobody is ranked in 2 vs 2 yet: be the first on the podium!", "Terminez au moins une partie classée cette saison pour recevoir une récompense.":"Finish at least one ranked game this season to earn a reward.", "Champions de la saison":"Champions of the season", "Actuellement :":"Currently:", "J’ai compris":"Got it", "Partie perdue pendant votre absence":"Game lost while you were away", "Cote :":"Rating:", "Vous n’êtes pas revenu à temps dans votre partie contre":"You did not come back in time to your game against", "Vous n’avez plus joué pendant plusieurs tours dans votre partie contre":"You stopped playing for several turns in your game against", "Défaite : vous n’êtes pas revenu à temps et votre adversaire a été déclaré vainqueur.":"Defeat: you did not come back in time and your opponent was declared the winner.", "Votre partie vous attend !":"Your game is waiting for you!", "C’est à vous de jouer.":"It’s your turn.", "Revenir dans la partie":"Back to the game", "Connexion…":"Connecting…", "Votre adversaire doit aussi être connecté pour reprendre.":"Your opponent must also be online to resume.", "Vous êtes l’hôte : la partie reprend dès que vous revenez.":"You are the host: the game resumes as soon as you return.", "Cette partie n’est plus disponible.":"This game is no longer available.", "Cette partie est terminée ou n’est plus disponible.":"This game is over or no longer available.", "Contre":"Against", "Affichée":"Displayed", "Pas encore obtenue.":"Not obtained yet.", "À trouver dans :":"Found in:", "Afficher cette illustration":"Display this artwork", "Illustration d’origine.":"Original artwork.", "Comment l’obtenir :":"How to get it:", "1 contre 1":"1 vs 1", "victoires contre l’ordinateur":"wins against the computer", "victoires contre un joueur":"wins against a player", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
   "Vous avez déjà le nombre maximum d’exemplaires.":"You already have the maximum number of copies.", "Vous avez déjà remplacé une quête aujourd’hui.":"You have already replaced a quest today.",
   "Vous ne pouvez défier que vos amis.":"You can only challenge your friends.", "Vous ne pouvez inviter que vos amis.":"You can only invite your friends.",
   "Vous n’avez pas de paquet offert de ce type.":"You have no free pack of this type.", "Vous n’êtes pas dans ce salon.":"You are not in this lobby.",
@@ -6620,6 +6622,7 @@ function actionProg(act, id){
     case "deck-jouer-choisir": if(id) choisirDeckJouer(id); PROG.choixDeckJouer = false; break;
     case "pause-reprendre": reprendrePause(); return true;
     case "retour-partie": revenirDansPartie(); return true;
+    case "classement-jouer": ui.ecran = "jeu"; S = null; render(); if(rechercheActive()) lancerRecherche(); else actionEnLigne("en-ligne"); return true;
     case "defaites-vues": { const ids = (PROG.defaitesAbandon || []).map(d => d.id); PROG.defaitesAbandon = []; rpc("vu_defaites_par_abandon", {p_ids:ids}).catch(() => {}); break; }
     case "retour-masquer": { const r = retourAAfficher(); if(r){ try { localStorage.setItem(CLE_RETOUR_MASQUE, r.code); } catch(e) {} } break; }
     case "pause-abandonner": if(confirm("Abandonner la partie en pause ? Elle ne sera pas comptée.")){ oublierPause(); } break;
@@ -7176,7 +7179,11 @@ function pageProfil(){
         <p class="aide">Les parties à deux sur le même écran ne sont pas comptées.</p>
       </section>
       <section class="bloc-profil">
-        <h2>1 contre 1</h2>
+        <h2>1 contre 1 · saison <span data-sans-trad>${PROG.stats1v1Saison && PROG.stats1v1Saison.saison ? `« ${esc(PROG.stats1v1Saison.saison)} »` : ""}</span></h2>
+        ${PROG.stats1v1Saison ? htmlStats1v1(PROG.stats1v1Saison, true) : `<p class="aide">Aucune saison en cours.</p>`}
+      </section>
+      <section class="bloc-profil">
+        <h2>1 contre 1 · depuis toujours</h2>
         ${htmlStats1v1(PROG.stats1v1)}
       </section>
       <section class="bloc-profil">
@@ -10294,7 +10301,7 @@ function pageClassement(){
           ${(C.joueurs || []).length ? htmlPodium(C.joueurs, C.gains) : `<p class="aide podium-vide">Personne n’est encore classé cette saison. Soyez le premier sur le podium !</p>`}
           ${htmlMaCote(m, C.total, "Pas encore classé cette saison : jouez une partie en ligne.",
               `<span>Toutes les parties en ligne comptent, avec un code ou en partie classée. Battre un joueur mieux classé rapporte davantage.</span>${m.rang && !m.eligible ? ` <span>Terminez au moins une partie classée cette saison pour recevoir une récompense.</span>` : ""}`,
-              `<button type="button" class="btn" data-act="en-ligne">Jouer en ligne</button>`)}
+              `<button type="button" class="btn" data-act="classement-jouer">Jouer une partie classée</button>`)}
         </div>
         ${htmlColonneClassement(C.joueurs, C.gains, htmlChampionsPrecedents(C.precedent))}
       </div>
@@ -11362,13 +11369,20 @@ function deckDuPantheon(f){
 }
 const choixPantheon = v => v==="hasard" ? Object.keys(FACTIONS)[Math.floor(Math.random() * Object.keys(FACTIONS).length)] : v;
 async function chargerQuetes2v2(){ try { PROG.quetes2v2 = await rpc("mes_quetes_2v2"); } catch(e) { PROG.quetes2v2 = {indisponible:true}; } }
-async function chargerStats1v1(){ try { PROG.stats1v1 = await rpc("mes_stats_1v1"); } catch(e) { PROG.stats1v1 = PROG.stats1v1 || null; } }
-function htmlStats1v1(s){
+async function chargerStats1v1(){
+  const [g, sa] = await Promise.all([rpc("mes_stats_1v1").catch(() => undefined), rpc("mes_stats_1v1_saison").catch(() => undefined)]);
+  if(g!==undefined) PROG.stats1v1 = g;
+  if(sa!==undefined) PROG.stats1v1Saison = sa;
+}
+function htmlStats1v1(s, saison){
   if(!s) return `<p class="aide">Aucune statistique pour le moment.</p>`;
+  const entete = saison ? `<div class="tuiles tuiles-saison"><div class="tuile tuile-cote"><b>${nf(s.cote ?? 1200)}</b><span>cote de la saison</span></div>
+      <div class="tuile tuile-cote"><b>${s.rang ? rangTexte(s.rang) : "–"}</b><span>${s.rang ? "au classement" : "pas encore classé"}</span></div>
+      ${s.fin ? `<div class="tuile"><b>${Math.max(0, Math.ceil((Date.parse(s.fin + "T00:00:00Z") - Date.now()) / 86400000))}</b><span>jours avant la fin de la saison</span></div>` : ""}</div>` : "";
   const tuile = (v, l) => `<div class="tuile"><b>${v}</b><span>${l}</span></div>`;
   const p2 = (a, b) => b ? `${Math.round(100*a/b)} %` : "–";
   const o = s.ordi || {parties:0, victoires:0}, j = s.joueurs || {parties:0, victoires:0};
-  return `<div class="tuiles">${tuile(nf(s.parties), "parties")}${tuile(`${nf(s.victoires)} <small>(${p2(s.victoires, s.parties)})</small>`, "victoires")}
+  return `${entete}<div class="tuiles">${tuile(nf(s.parties), "parties")}${tuile(`${nf(s.victoires)} <small>(${p2(s.victoires, s.parties)})</small>`, "victoires")}
       ${tuile(`${nf(o.victoires)} / ${nf(o.parties)} <small>(${p2(o.victoires, o.parties)})</small>`, "victoires contre l’ordinateur")}
       ${tuile(`${nf(j.victoires)} / ${nf(j.parties)} <small>(${p2(j.victoires, j.parties)})</small>`, "victoires contre un joueur")}
       ${tuile(nf(s.serie_max), "meilleure série de victoires")}${tuile(nf(s.degats), "dégâts infligés")}${tuile(nf(s.soins), "PV soignés")}
@@ -12500,23 +12514,32 @@ function jouerOrdiEnAttendant(){
   apresAction();
   demarrerFond();
 }
-// ----- Recherche en arrière-plan pendant la partie contre l’ordinateur
-const FOND = {actif:false, prop:null, idPartie:null, reponse:false};
-function demarrerFond(){
-  FOND.actif = true; FOND.prop = null; FOND.idPartie = S && S.idPartie;
-  (async () => {
-    while(FOND.actif){
-      if(!S || S.idPartie!==FOND.idPartie || S.vainqueur!==null){ arreterFond(); break; }
-      let r; try { r = await rpc("chercher_adversaire", {p_occupe:true}); } catch(e) { arreterFond(); break; }
-      if(!FOND.actif) break;
-      const avant = FOND.prop;
-      FOND.prop = r && r.proposition ? {pseudo:r.proposition, fin:Date.now() + Math.max(5, 30 - (r.proposition_s || 0)) * 1000} : null;
-      if(FOND.prop && !avant) jouerSon("notification");
-      majBanniereFond();
-      await pause(2500);
-    }
-  })();
+// ----- Disponibilité : un joueur connecté qui n’est pas en partie en ligne peut recevoir une invitation
+// (sur l’accueil et dans les menus, ou pendant une partie contre l’ordinateur, qu’il met alors en pause)
+const FOND = {actif:false, prop:null, reponse:false, enCours:false};
+function disponiblePourInvitation(){
+  if(!PROG.actif || !PROG.pret || !rechercheActive() || document.hidden) return false;
+  if(EN.ecran || EN.code || (typeof L2!=="undefined" && L2 && L2.code)) return false;   // déjà dans le jeu en ligne
+  if(ui.ecran==="admin" || PROG.choixDeck || !decksValides().length) return false;
+  if(S && (S.mode!=="ia" || S.tuto || S.vainqueur!==null)) return false;
+  return true;
 }
+async function tickDisponibilite(){
+  if(FOND.enCours) return;
+  if(!disponiblePourInvitation()){ if(FOND.actif && !FOND.reponse) arreterFond(); return; }
+  FOND.enCours = true; FOND.actif = true;
+  let r = null;
+  try { r = await rpc("chercher_adversaire", {p_occupe:true}); } catch(e) { r = null; }
+  FOND.enCours = false;
+  if(!FOND.actif || !disponiblePourInvitation()) return;
+  const avant = FOND.prop;
+  FOND.prop = r && r.proposition ? {pseudo:r.proposition, fin:Date.now() + Math.max(5, 30 - (r.proposition_s || 0)) * 1000} : null;
+  if(FOND.prop && !avant) jouerSon("notification");
+  majBanniereFond();
+}
+setInterval(tickDisponibilite, 3000);
+document.addEventListener("visibilitychange", () => { if(document.hidden && FOND.actif) arreterFond(); });
+function demarrerFond(){ tickDisponibilite(); }
 function arreterFond(quitter = true){
   const etait = FOND.actif; FOND.actif = false; FOND.prop = null;
   if(etait && quitter) rpc("quitter_file").catch(() => {});
@@ -12527,10 +12550,11 @@ function majBanniereFond(){
   const p = FOND.actif && FOND.prop && FOND.prop.fin > Date.now() ? FOND.prop : null;
   if(!p){ if(b) b.remove(); return; }
   if(!b){ b = document.createElement("div"); b.id = "banniere-fond"; b.setAttribute("role", "alert"); document.body.appendChild(b); }
-  const monTour = S && S.mode==="ia" && S.courant===0 && !ui.aiEnCours && S.vainqueur===null;
+  const enPartie = !!(S && S.mode==="ia");
+  const peut = !enPartie || (S.courant===0 && !ui.aiEnCours && S.vainqueur===null);
   const reste = Math.max(0, Math.ceil((p.fin - Date.now()) / 1000));
-  b.innerHTML = `<span class="ico-defi" aria-hidden="true">⚔</span><span><b>${esc(p.pseudo)}</b> veut vous affronter ! <small>${reste} s</small></span>
-    <button type="button" class="btn" data-act="fond-accepter" ${monTour && !FOND.reponse ? "" : "disabled"}>${monTour ? "Mettre ma partie en pause et jouer" : "Attendez votre tour…"}</button>
+  b.innerHTML = `<span class="ico-defi" aria-hidden="true">⚔</span><span><b data-sans-trad>${esc(p.pseudo)}</b> veut vous affronter ! <small>${reste} s</small></span>
+    <button type="button" class="btn" data-act="fond-accepter" ${peut && !FOND.reponse ? "" : "disabled"}>${!enPartie ? "Jouer !" : peut ? "Mettre ma partie en pause et jouer" : "Attendez votre tour…"}</button>
     <button type="button" class="btn second" data-act="fond-refuser" ${FOND.reponse ? "disabled" : ""}>Non merci</button>`;
 }
 setInterval(() => { if(FOND.prop) majBanniereFond(); }, 1000);
@@ -12541,13 +12565,12 @@ document.addEventListener("click", e => {
   FOND.reponse = true; majBanniereFond();
   const ok = bt.dataset.act==="fond-accepter";
   rpc("repondre_proposition", {p_ok:ok}).then(r => {
-    FOND.reponse = false;
-    arreterFond(false);
-    if(!ok) return erreur("Vous restez contre l’ordinateur. La recherche d’adversaire est arrêtée.");
+    FOND.reponse = false; FOND.prop = null; FOND.actif = false; majBanniereFond();
+    if(!ok) return;
     if(!r || !r.code) return erreur((r && r.erreur) || "La proposition a expiré.");
-    mettreEnPause();
+    if(S && S.mode==="ia") mettreEnPause();
     EN.adversaireFile = r.adversaire || null;
-    S = null; ui.ecran = "jeu"; render(); actionEnLigne("en-ligne"); creerPartie(r.code);
+    S = null; PROG.choixDeck = null; ui.ecran = "jeu"; render(); actionEnLigne("en-ligne"); creerPartie(r.code);
   }, err => { FOND.reponse = false; majBanniereFond(); erreur(err.message); });
 }, true);
 // ----- Partie contre l’ordinateur en pause (gardée 6 heures, même après un rechargement)
