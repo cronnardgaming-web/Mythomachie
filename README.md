@@ -322,3 +322,32 @@ Exécuter `supabase-classement-saison.sql` une fois (SQL Editor, puis Run), apr�
 - À la fin de chaque saison, les joueurs classés en 1 contre 1 qui ont terminé au moins une partie classée pendant la saison reçoivent de l’or par la boîte aux lettres : 1er 200, 2e 100, 3e 50, 4e à 10e 25, 11e à 100e 10. Puis toutes les cotes (1 contre 1 et 2 contre 2) repartent à 1200.
 - La clôture se fait toute seule à la première visite d’un joueur après la fin de la saison. Les saisons déjà terminées avant l’installation sont closes sans récompense.
 - Pour changer les gains : voir la ligne d’exemple en bas du script (réglage « gains_classement »).
+
+## Invitations à jouer
+Exécuter `supabase-invitations.sql` une fois (SQL Editor, puis Run), après `supabase-jouer-entre-joueurs.sql`. Il peut être relancé sans risque.
+Tout joueur connecté, sur l’accueil, dans les menus ou en partie contre l’ordinateur, est disponible : quand quelqu’un cherche un adversaire et que personne d’autre ne cherche, il reçoit « X veut vous affronter ! » (« Jouer ! » ou « Non merci »). Il cesse d’être disponible dès que l’onglet du jeu n’est plus affiché.
+
+## Avatar du podium en 2 contre 2
+
+Exécutez `supabase-heros-classement-2v2.sql` dans Supabase (SQL Editor), après `supabase-classement-saison.sql`. Le podium du 2 contre 2 affiche alors le dieu favori de chaque joueur, comme en 1 contre 1.
+
+Dieu retenu, dans les deux modes : le plus joué (panthéon et palier de dévotion). En cas d'égalité, c'est le meilleur taux de victoire avec ce dieu, puis le plus de dégâts infligés, puis le plus de cartes achetées. Aucun changement dans `index.html`.
+
+## Animations : booster, pouvoir divin, récompenses
+
+- **Ouverture de booster** : le sachet se déchire selon un tracé irrégulier, différent à chaque ouverture, parmi 4 types (bande en haut, coin arraché, biais, déchirure qui plonge). Bord de papier blanc, fibres, lueur et miettes de papier.
+- **Pouvoir divin** : activation sur tout l'écran, pour les deux joueurs (flash, onde de choc, rayons, tremblement du plateau, bannière avec le portrait du dieu et le nom du pouvoir). En « animations réduites », pas de tremblement ni de rayons.
+- **Gains de quêtes et cadeaux** : onde dorée et « +N or » au bouton, pièces (ou gouttes d'encre) qui volent jusqu'à la bourse.
+- **Carte ou illustration gagnée** (saison, trophées, boîte aux lettres, cadeaux automatiques) : après « Réclamer », elle part du bouton, tournoie sur elle-même et se pose au milieu de l'écran, avec le halo de sa rareté.
+
+Aucun script Supabase à exécuter pour ces animations.
+
+## Traduction automatique en anglais
+
+Tout ce qui est écrit en français dans l'admin est traduit automatiquement en anglais : cartes, divinités, pouvoirs, saisons, boosters, illustrations, indices, messages, notes de mise à jour, paliers de cadeaux automatiques, texte du don et de la bêta.
+
+- **Quand** : quelques secondes après chaque enregistrement dans l'admin, juste avant l'export de config.json, et à l'envoi d'un message, d'une note ou des paliers (si le champ anglais est vide).
+- **Service** : MyMemory, gratuit, sans clé. Le jeu envoie l'adresse e-mail du compte admin, ce qui porte le quota à environ 50 000 caractères par jour. Si le quota est atteint, l'admin l'indique et la suite est traduite plus tard (bouton « Traduire maintenant »).
+- **Vérification** : la page Admin › Traductions marque « 🌐 Automatique » chaque traduction faite par la machine. Une traduction corrigée à la main n'est plus jamais écrasée. Les variables comme `{pseudo}` sont conservées.
+
+Aucun script Supabase à exécuter.

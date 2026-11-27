@@ -2256,6 +2256,77 @@ body.compact .emplacement-booster .booster{width:96px}
 .ob-actions .btn{margin:0}
 .ob-titre{position:absolute;left:0;right:0;top:5vh;margin:0;text-align:center;font-family:Cinzel,serif;font-size:22px;color:#f3d791;text-shadow:0 2px 6px rgba(0,0,0,.8)}
 
+/* Déchirure du sachet : bord de papier, fibres, lueur et miettes */
+.ob-bord{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:5}
+.ob-bord path{fill:none;stroke-linejoin:round;stroke-linecap:round}
+.ob-bord .ombre{stroke:rgba(38,26,12,.5);stroke-width:6}
+.ob-bord .papier{stroke:#f8f2e4;stroke-width:3.8}
+.ob-bord .fibres{stroke:#fff;stroke-width:1.3;stroke-dasharray:1 2.2;opacity:0}
+.ob-bord .lueur{stroke:#ffe9a6;stroke-width:22;filter:blur(7px);opacity:0}
+.ob-miette{position:fixed;z-index:6;pointer-events:none;border-radius:1px;box-shadow:0 1px 2px rgba(0,0,0,.45)}
+
+/* Pouvoir divin : plein écran */
+.fx-divin{position:fixed;inset:0;z-index:70;pointer-events:none;overflow:hidden}
+.fd-voile{position:absolute;inset:0;opacity:0;background:radial-gradient(circle at var(--x) var(--y), transparent 0, color-mix(in srgb, var(--dc) 22%, transparent) 30%, rgba(3,2,8,.78) 100%)}
+.fd-flash{position:absolute;inset:0;opacity:0;mix-blend-mode:screen;background:radial-gradient(circle at var(--x) var(--y), #fff 0, color-mix(in srgb, var(--dc) 55%, #fff) 25%, color-mix(in srgb, var(--dc) 70%, transparent) 65%, color-mix(in srgb, var(--dc) 35%, transparent) 100%)}
+.fd-onde{position:absolute;left:var(--x);top:var(--y);border-radius:50%;opacity:0;border:7px solid color-mix(in srgb, var(--dc) 55%, #fff);
+  box-shadow:0 0 50px 14px color-mix(in srgb, var(--dc) 75%, transparent), inset 0 0 50px 8px color-mix(in srgb, var(--dc) 60%, transparent)}
+.fd-onde.deux{border-width:3px}
+.fd-rayons{position:absolute;left:50%;top:50%;width:170vmax;height:170vmax;opacity:0;mix-blend-mode:screen;
+  background:repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--dc) 45%, transparent) 0 4deg, transparent 4deg 18deg);
+  -webkit-mask:radial-gradient(closest-side, #000 8%, transparent 70%);mask:radial-gradient(closest-side, #000 8%, transparent 70%)}
+.fd-banniere{position:absolute;left:50%;top:50%;opacity:0;display:flex;align-items:center;gap:18px;padding:14px 38px 14px 14px;border-radius:999px;white-space:nowrap;max-width:94vw;
+  background:linear-gradient(90deg, rgba(12,9,22,.94), rgba(26,18,38,.88));border:2px solid color-mix(in srgb, var(--dc) 65%, #f3d27a);
+  box-shadow:0 0 60px color-mix(in srgb, var(--dc) 70%, transparent), 0 12px 40px rgba(0,0,0,.65), inset 0 0 22px color-mix(in srgb, var(--dc) 30%, transparent)}
+.fd-portrait{flex:0 0 auto;width:96px;height:96px;border-radius:50%;overflow:hidden;display:grid;place-items:center;font-size:50px;color:#fff;background:#1a1426;
+  border:3px solid color-mix(in srgb, var(--dc) 60%, #fff);box-shadow:0 0 30px var(--dc)}
+.fd-portrait img{width:100%;height:100%;object-fit:cover}
+.fd-texte{display:flex;flex-direction:column;min-width:0}
+.fd-sur{font-family:Cinzel,serif;font-size:13px;letter-spacing:.32em;text-transform:uppercase;color:color-mix(in srgb, var(--dc) 45%, #fff)}
+.fd-nom{font-family:Cinzel,serif;font-size:clamp(24px,4.2vw,46px);line-height:1.1;color:#fff4d6;text-shadow:0 0 18px var(--dc), 0 2px 0 rgba(0,0,0,.6);overflow:hidden;text-overflow:ellipsis}
+.fd-dieu{font-size:15px;color:#d9cbb0}
+@media (max-width:600px), (max-height:500px){ .fd-portrait{width:62px;height:62px;font-size:32px} .fd-banniere{gap:12px;padding:10px 22px 10px 10px} .fd-sur{font-size:11px} }
+
+/* Gains : onde, texte « +N », pièces et gouttes qui volent jusqu’à la bourse */
+.fx-gain-anneau{position:fixed;z-index:95;width:90px;height:90px;border-radius:50%;pointer-events:none;border:3px solid #f6d77c;box-shadow:0 0 22px rgba(246,215,124,.8), inset 0 0 14px rgba(246,215,124,.6)}
+.fx-gain-texte{position:fixed;z-index:96;pointer-events:none;white-space:nowrap;font-family:Cinzel,serif;font-weight:700;font-size:22px;color:#ffe9a8;
+  text-shadow:0 0 10px rgba(255,190,60,.9), 0 2px 0 #5a3a08, 0 3px 6px rgba(0,0,0,.6)}
+.fx-jeton-gain{position:fixed;z-index:96;pointer-events:none;width:18px;height:18px;border-radius:50%}
+.fx-jeton-gain.piece{background:radial-gradient(circle at 35% 30%, #fff6c8 0, #f5cf55 35%, #c08a18 75%, #8a5c08 100%);box-shadow:0 0 8px rgba(255,200,80,.9), inset 0 0 0 2px rgba(120,80,8,.5)}
+.fx-jeton-gain.goutte{width:14px;height:18px;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;background:radial-gradient(circle at 35% 30%, #d9ecff 0, #5a8fd8 45%, #1d3f7a 100%);box-shadow:0 0 8px rgba(110,170,255,.9)}
+.fx-jeton-gain.paquet{width:22px;height:30px;border-radius:3px;background:linear-gradient(160deg,#f5e3b0,#c9a45a 50%,#7a5a20);box-shadow:0 0 10px rgba(255,210,120,.9)}
+
+/* Carte ou illustration gagnée : zoom au centre en tournoyant */
+.gain-carte{position:fixed;inset:0;z-index:92;display:block}
+.gc-fond{position:absolute;inset:0;opacity:0;background:radial-gradient(60% 55% at 50% 45%, rgba(48,36,16,.6), rgba(4,6,12,.94));backdrop-filter:blur(3px)}
+.gc-rayons{position:absolute;left:calc(50% - 75vmax);top:calc(50% - 40px - 75vmax);width:150vmax;height:150vmax;opacity:0;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg, rgba(255,220,140,.22) 0 5deg, transparent 5deg 20deg);
+  -webkit-mask:radial-gradient(closest-side, #000 5%, transparent 55%);mask:radial-gradient(closest-side, #000 5%, transparent 55%);animation:gc-tourne 24s linear infinite}
+@keyframes gc-tourne{to{rotate:360deg}}
+.rarete-epique .gc-rayons{background:repeating-conic-gradient(from 0deg, rgba(190,140,255,.28) 0 5deg, transparent 5deg 20deg)}
+.rarete-legendaire .gc-rayons{background:repeating-conic-gradient(from 0deg, rgba(255,205,96,.38) 0 5deg, transparent 5deg 20deg)}
+.gc-carte{position:absolute;perspective:1100px}
+.gc-interieur{position:relative;width:100%;height:100%;transform-style:preserve-3d;transform:rotateY(180deg)}
+.gc-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:10px}
+.gc-dos{display:grid;place-items:center;transform:rotateY(180deg);border:2px solid #f0cf7f;
+  background:radial-gradient(circle at 50% 40%, #6b4f1e, #2a1d0a 80%);box-shadow:0 14px 30px -10px rgba(0,0,0,.8), inset 0 0 0 5px rgba(0,0,0,.25)}
+.gc-dos span{font-family:Cinzel,serif;font-size:54px;color:rgba(255,236,190,.8);text-shadow:0 2px 8px rgba(0,0,0,.7)}
+.gc-avant{display:flex;justify-content:center}
+.gc-avant .carte{--w:var(--l, 220px);width:var(--w)}
+.gain-carte.posee .gc-avant .carte{box-shadow:0 0 26px 6px rgba(255,226,150,.65)}
+.gain-carte.rarete-epique.posee .gc-avant .carte{box-shadow:0 0 30px 8px rgba(168,110,255,.8)}
+.gain-carte.rarete-legendaire.posee .gc-avant .carte{box-shadow:0 0 38px 10px rgba(255,205,96,.95);animation:eclat-leg 1.6s ease-out 1}
+.gc-texte{position:absolute;left:0;right:0;bottom:max(4vh, 16px);display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0;text-align:center;padding:0 12px}
+.gc-titre{margin:0;font-family:Cinzel,serif;font-size:24px;color:#f3d791;text-shadow:0 2px 6px rgba(0,0,0,.8)}
+.gc-nom{margin:0 0 8px;color:#e9dfc9;font-size:16px}
+.gc-texte .btn{margin:0}
+
+/* Traductions automatiques */
+.trad-auto-etat{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2)}
+.trad-auto-etat.encours{color:#2f6db3}
+.trad-auto-etat.erreur{color:#b3402f}
+.trad-etat.auto{background:#e7f1fb;color:#2f5f93;border-radius:999px;padding:2px 8px;font-size:12px}
+
 /* =====================================================================
    ADMINISTRATION RÉORGANISÉE : menu à icônes, tableau de bord ; COLLECTION : recyclage groupé
    ===================================================================== */
@@ -3045,7 +3116,7 @@ ajouterTraductions("en", {
   "Ticket de partie inconnu.":"Unknown game ticket.", "Ticket introuvable.":"Ticket not found.", "Trop de demandes en attente.":"Too many pending requests.",
   "Trop de parties commencées en une heure : patientez un peu.":"Too many games started in an hour: please wait a little.", "Trophée inconnu.":"Unknown trophy.",
   "Valeurs invalides : l’or et l’encre doivent être des nombres entiers positifs.":"Invalid values: gold and ink must be positive whole numbers.", "Version du jeu obsolète : rechargez la page.":"Outdated game version: reload the page.",
-  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Changer ▾":"Change ▾", "Changer de deck":"Change deck", "Aucun deck complet :":"No complete deck:", "construire un deck":"build a deck", "Choisir votre deck":"Choose your deck", "Ce deck sert pour « Jouer », contre un joueur comme contre l’ordinateur en attendant.":"This deck is used for “Play”, against a player and against the computer while you wait.", "Avec :":"With:", "1 contre 1 · saison":"1 vs 1 · season", "1 contre 1 · depuis toujours":"1 vs 1 · all time", "cote de la saison":"season rating", "au classement":"in the ranking", "pas encore classé":"not ranked yet", "jours avant la fin de la saison":"days until the season ends", "Aucune saison en cours.":"No season in progress.", "Jouer une partie classée":"Play a ranked game", "Jouer !":"Play!", "Cote":"Rating", "Rang":"Rank", "Joueur":"Player", "Classement de la saison":"Season ranking", "Récompenses de fin de saison":"End-of-season rewards", "Pour les joueurs ayant terminé au moins une partie classée pendant la saison. À la fin de la saison, toutes les cotes repartent à 1200.":"For players who finished at least one ranked game during the season. At the end of the season, all ratings go back to 1200.", "Place libre":"Free spot", "(vous)":"(you)", "La suite du classement":"The rest of the ranking", "Récompense":"Reward", "Fin de saison aujourd’hui":"Season ends today", "Fin de saison demain":"Season ends tomorrow", "Pas encore classé cette saison : jouez une partie en ligne.":"Not ranked yet this season: play an online game.", "Personne n’est encore classé cette saison. Soyez le premier sur le podium !":"Nobody is ranked yet this season. Be the first on the podium!", "Personne n’est encore classé en 2 contre 2 : soyez le premier sur le podium !":"Nobody is ranked in 2 vs 2 yet: be the first on the podium!", "Terminez au moins une partie classée cette saison pour recevoir une récompense.":"Finish at least one ranked game this season to earn a reward.", "Champions de la saison":"Champions of the season", "Actuellement :":"Currently:", "J’ai compris":"Got it", "Partie perdue pendant votre absence":"Game lost while you were away", "Cote :":"Rating:", "Vous n’êtes pas revenu à temps dans votre partie contre":"You did not come back in time to your game against", "Vous n’avez plus joué pendant plusieurs tours dans votre partie contre":"You stopped playing for several turns in your game against", "Défaite : vous n’êtes pas revenu à temps et votre adversaire a été déclaré vainqueur.":"Defeat: you did not come back in time and your opponent was declared the winner.", "Votre partie vous attend !":"Your game is waiting for you!", "C’est à vous de jouer.":"It’s your turn.", "Revenir dans la partie":"Back to the game", "Connexion…":"Connecting…", "Votre adversaire doit aussi être connecté pour reprendre.":"Your opponent must also be online to resume.", "Vous êtes l’hôte : la partie reprend dès que vous revenez.":"You are the host: the game resumes as soon as you return.", "Cette partie n’est plus disponible.":"This game is no longer available.", "Cette partie est terminée ou n’est plus disponible.":"This game is over or no longer available.", "Contre":"Against", "Affichée":"Displayed", "Pas encore obtenue.":"Not obtained yet.", "À trouver dans :":"Found in:", "Afficher cette illustration":"Display this artwork", "Illustration d’origine.":"Original artwork.", "Comment l’obtenir :":"How to get it:", "1 contre 1":"1 vs 1", "victoires contre l’ordinateur":"wins against the computer", "victoires contre un joueur":"wins against a player", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
+  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Changer ▾":"Change ▾", "Changer de deck":"Change deck", "Aucun deck complet :":"No complete deck:", "construire un deck":"build a deck", "Choisir votre deck":"Choose your deck", "Ce deck sert pour « Jouer », contre un joueur comme contre l’ordinateur en attendant.":"This deck is used for “Play”, against a player and against the computer while you wait.", "Avec :":"With:", "Pouvoir divin":"Divine power", "Nouvelle carte !":"New card!", "Nouvelle illustration !":"New artwork!", "Génial !":"Awesome!", "Suivante":"Next", "paquet":"pack", "paquets":"packs", "1 contre 1 · saison":"1 vs 1 · season", "1 contre 1 · depuis toujours":"1 vs 1 · all time", "cote de la saison":"season rating", "au classement":"in the ranking", "pas encore classé":"not ranked yet", "jours avant la fin de la saison":"days until the season ends", "Aucune saison en cours.":"No season in progress.", "Jouer une partie classée":"Play a ranked game", "Jouer !":"Play!", "Cote":"Rating", "Rang":"Rank", "Joueur":"Player", "Classement de la saison":"Season ranking", "Récompenses de fin de saison":"End-of-season rewards", "Pour les joueurs ayant terminé au moins une partie classée pendant la saison. À la fin de la saison, toutes les cotes repartent à 1200.":"For players who finished at least one ranked game during the season. At the end of the season, all ratings go back to 1200.", "Place libre":"Free spot", "(vous)":"(you)", "La suite du classement":"The rest of the ranking", "Récompense":"Reward", "Fin de saison aujourd’hui":"Season ends today", "Fin de saison demain":"Season ends tomorrow", "Pas encore classé cette saison : jouez une partie en ligne.":"Not ranked yet this season: play an online game.", "Personne n’est encore classé cette saison. Soyez le premier sur le podium !":"Nobody is ranked yet this season. Be the first on the podium!", "Personne n’est encore classé en 2 contre 2 : soyez le premier sur le podium !":"Nobody is ranked in 2 vs 2 yet: be the first on the podium!", "Terminez au moins une partie classée cette saison pour recevoir une récompense.":"Finish at least one ranked game this season to earn a reward.", "Champions de la saison":"Champions of the season", "Actuellement :":"Currently:", "J’ai compris":"Got it", "Partie perdue pendant votre absence":"Game lost while you were away", "Cote :":"Rating:", "Vous n’êtes pas revenu à temps dans votre partie contre":"You did not come back in time to your game against", "Vous n’avez plus joué pendant plusieurs tours dans votre partie contre":"You stopped playing for several turns in your game against", "Défaite : vous n’êtes pas revenu à temps et votre adversaire a été déclaré vainqueur.":"Defeat: you did not come back in time and your opponent was declared the winner.", "Votre partie vous attend !":"Your game is waiting for you!", "C’est à vous de jouer.":"It’s your turn.", "Revenir dans la partie":"Back to the game", "Connexion…":"Connecting…", "Votre adversaire doit aussi être connecté pour reprendre.":"Your opponent must also be online to resume.", "Vous êtes l’hôte : la partie reprend dès que vous revenez.":"You are the host: the game resumes as soon as you return.", "Cette partie n’est plus disponible.":"This game is no longer available.", "Cette partie est terminée ou n’est plus disponible.":"This game is over or no longer available.", "Contre":"Against", "Affichée":"Displayed", "Pas encore obtenue.":"Not obtained yet.", "À trouver dans :":"Found in:", "Afficher cette illustration":"Display this artwork", "Illustration d’origine.":"Original artwork.", "Comment l’obtenir :":"How to get it:", "1 contre 1":"1 vs 1", "victoires contre l’ordinateur":"wins against the computer", "victoires contre un joueur":"wins against a player", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
   "Vous avez déjà le nombre maximum d’exemplaires.":"You already have the maximum number of copies.", "Vous avez déjà remplacé une quête aujourd’hui.":"You have already replaced a quest today.",
   "Vous ne pouvez défier que vos amis.":"You can only challenge your friends.", "Vous ne pouvez inviter que vos amis.":"You can only invite your friends.",
   "Vous n’avez pas de paquet offert de ce type.":"You have no free pack of this type.", "Vous n’êtes pas dans ce salon.":"You are not in this lobby.",
@@ -3373,6 +3444,7 @@ function sauvegarderAvantChangement(ancienne){
 function lireSecours(){ try { return JSON.parse(localStorage.getItem(CLE_SECOURS)); } catch(e) { return null; } }
 function sauver(){
   if(typeof marquerModifie==="function" && ui && ui.ecran==="admin") marquerModifie();
+  if(typeof planifierTraductionAuto==="function" && ui && ui.ecran==="admin") planifierTraductionAuto();
   try { localStorage.setItem(CLE_STOCKAGE, JSON.stringify(CONFIG)); return true; }
   catch(e) {
     // Seule une mémoire réellement pleine est signalée ; un stockage indisponible (navigation privée stricte) n’empêche pas de jouer
@@ -5033,12 +5105,13 @@ function actionAdmin(act, id, el){
     return renderAdmin();
   }
   switch(act){
-    case "admin": ui.ecran = "admin"; break;
+    case "admin": ui.ecran = "admin"; planifierTraductionAuto(1500); break;
     case "admin-quitter": ui.ecran = "jeu"; S = null; break;
     case "onglet": adm.onglet = id; adm.reset = false; break;
     case "trad-filtre": adm.tradFiltre = id; break;
     case "trad-accepter-un": { const p = propositionTraduction(id); if(p){ fixerTraduction(id, p); sauver(); } break; }
     case "trad-suppr": fixerTraduction(id, ""); sauver(); break;
+    case "trad-auto": TRAD_AUTO.pauseJusque = 0; traduireContenuManquant(); break;
     case "trad-accepter": {
       const t = (CONFIG.traductions && CONFIG.traductions.en) || {}; let n = 0;
       for(const [, l] of textesContenu()) for(const [fr] of l) if(!t[fr]){ const p = propositionTraduction(fr); if(p){ fixerTraduction(fr, p); n++; } }
@@ -5142,11 +5215,13 @@ document.addEventListener("input", e => {
   if(el.dataset.adm==="tri"){ adm.tri = el.value; return renderAdmin(); }
   if(el.dataset.adm==="trad-recherche"){ adm.tradRecherche = el.value; return renderAdmin(); }
   if(el.dataset.trad!=null){
+    if(CONFIG.traductions && CONFIG.traductions.auto_en) delete CONFIG.traductions.auto_en[el.dataset.trad];
     fixerTraduction(el.dataset.trad, el.value); sauver();
     const cel = el.closest(".trad-ligne") && el.closest(".trad-ligne").querySelector(".trad-cellule");
     if(cel) cel.innerHTML = el.value.trim() ? `<span class="trad-etat ok">✓ Traduit</span>` : propositionTraduction(el.dataset.trad) ? `<span class="trad-etat prop">Proposition</span>` : `<span class="trad-etat manque">À traduire</span>`;
     return;
   }
+  if(el.dataset.chemin && /_en$/.test(el.dataset.chemin) && CONFIG.traductions && CONFIG.traductions.auto_champs) delete CONFIG.traductions.auto_champs[el.dataset.chemin.replace(/_en$/, "").replace(/\.message$/, ".message").replace(/\.texte$/, ".texte")];
   if(el.dataset.chemin){
     // Nombres et dates : on enregistre sans réafficher pendant la saisie (le curseur et le calendrier restent en place) ;
     // l’affichage se met à jour quand on quitte le champ
@@ -5257,6 +5332,10 @@ async function versDataURL(url){
   }
 }
 async function telechargerConfig(){
+  if(nbATraduire()){
+    erreur("Traduction automatique en anglais avant l’export…");
+    try { await traduireContenuManquant(); } catch(e) {}
+  }
   if(typeof marquerExporte==="function") marquerExporte();
   erreur("Préparation du fichier config.json…");
   const cfg = copie(CONFIG);
@@ -5795,6 +5874,7 @@ document.addEventListener("click", e => {
   const el = e.target.closest("[data-act]");
   if(!el) return;
   const act = el.dataset.act, id = el.dataset.id;
+  DERNIER_CLIC = {act, r:el.getBoundingClientRect(), t:Date.now()};
   if(act==="mode-ia" || act==="mode-duo"){
     nouvellePartie(act==="mode-ia" ? "ia" : "duo");
     Object.assign(ui, {attaquant:null, armeEnAttente:null, choixPierre:null, aiEnCours:false, couvert: act==="mode-duo"});
@@ -6279,10 +6359,10 @@ async function chargerProgression(){
   if(compteEtat()!=="complet" || PROG.recuperation) return ouvrirPorte();
   await entrerJeu();
 }
-async function action(fn, succes){
+async function action(fn, succes, fete){
   if(PROG.occupe) return;
   PROG.occupe = true; render();
-  try { const r = await fn(); await rafraichir(); if(succes) erreur(typeof succes==="function" ? succes(r) : succes); }
+  try { const r = await fn(); await rafraichir(); if(succes) erreur(typeof succes==="function" ? succes(r) : succes); if(fete) setTimeout(() => { try { celebrerGain(r); } catch(e) {} }, 30); }
   catch(e) { erreur(e.message); }
   finally { PROG.occupe = false; render(); }
 }
@@ -6642,7 +6722,7 @@ function actionProg(act, id){
       if(g===-1) throw new Error("La quête du jour n’est pas encore terminée.");
       if(g===-2) throw new Error("La quête du jour a déjà été récompensée.");
       await chargerQuete(); return g;
-    }, g => `+${g} or : quête du jour réussie !`); return true;
+    }, g => `+${g} or : quête du jour réussie !`, true); return true;
     case "col-sel": PROG.zoomV = undefined; PROG.zoomVersion = null; PROG.sel = id; PROG.zoom = true; PROG.zoomAnim = true; break;
     case "zoom-rien": return true;
     case "zoom-fermer": PROG.zoom = false; break;
@@ -6710,14 +6790,14 @@ function actionProg(act, id){
     }
     case "prog-classement": ui.ecran = "classement"; PROG.classement = null; break;
     case "prog-saison": ui.ecran = "saison"; chargerSaison().then(() => { if(ui.ecran==="saison") renderProg(); }); break;
-    case "saison-quete": action(async () => { const r = await rpc("reclamer_quete_saison", {p_quete:id}); if(r && r.erreur) throw new Error(r.erreur); await Promise.all([chargerSaison(), rafraichir()]); return r; }, r => `+${texteRecompenseSaison(r)} !`); return true;
-    case "saison-palier": action(async () => { const r = await rpc("reclamer_palier_saison", {p_index:Number(id)}); if(r && r.erreur) throw new Error(r.erreur); await Promise.all([chargerSaison(), chargerPaquetsOfferts(), rafraichir()]); return r; }, r => `Récompense obtenue : ${texteRecompenseSaison(r)} !`); return true;
-    case "quete-jour-reclamer": action(async () => { const r = await rpc("reclamer_quete_jour", {p_id:id}); if(r && r.erreur) throw new Error(r.erreur); await chargerQuete(); await rafraichir(); return r.gain; }, g => `+${g} or : quête réussie !`); return true;
+    case "saison-quete": action(async () => { const r = await rpc("reclamer_quete_saison", {p_quete:id}); if(r && r.erreur) throw new Error(r.erreur); await Promise.all([chargerSaison(), rafraichir()]); return r; }, r => `+${texteRecompenseSaison(r)} !`, true); return true;
+    case "saison-palier": action(async () => { const r = await rpc("reclamer_palier_saison", {p_index:Number(id)}); if(r && r.erreur) throw new Error(r.erreur); await Promise.all([chargerSaison(), chargerPaquetsOfferts(), rafraichir()]); return r; }, r => `Récompense obtenue : ${texteRecompenseSaison(r)} !`, true); return true;
+    case "quete-jour-reclamer": action(async () => { const r = await rpc("reclamer_quete_jour", {p_id:id}); if(r && r.erreur) throw new Error(r.erreur); await chargerQuete(); await rafraichir(); return r.gain; }, g => `+${g} or : quête réussie !`, true); return true;
     case "quete-remplacer": action(async () => { const r = await rpc("remplacer_quete", {p_id:id}); if(r && r.erreur) throw new Error(r.erreur); await chargerQuete(); }, "Quête remplacée."); return true;
     case "trophee-reclamer": {
       const [t, p] = String(id).split("|");
       action(async () => { const r = await rpc("reclamer_trophee", {p_trophee:t, p_palier:Number(p)}); if(r && r.erreur) throw new Error(r.erreur); await Promise.all([chargerTrophees(), chargerPaquetsOfferts(), rafraichir()]); return r; },
-             r => r.or ? `+${r.or} or !` : `${(r.paquets || []).map(NOM_PAQUET).join(" et ")} offert${(r.paquets || []).length>1 ? "s" : ""} : à ouvrir dans la boutique !`);
+             r => r.or ? `+${r.or} or !` : `${(r.paquets || []).map(NOM_PAQUET).join(" et ")} offert${(r.paquets || []).length>1 ? "s" : ""} : à ouvrir dans la boutique !`, true);
       return true;
     }
     case "paquet-offert": {
@@ -8320,6 +8400,7 @@ function animerEvenement2(ev, niveau){
       const r = rectDe(`.medaillon[data-joueur="${ev.j}"]`); if(!r) return;
       const c = centre(r);
       eclat(c, "pouvoir");
+      try { cinematiquePouvoir(ev, c, niveau); } catch(e) {}
       if(niveau>=2) for(let k=0; k<10; k++){
         const ray = document.createElement("span"); ray.className = "fx-rayon";
         ray.style.left = c.x + "px"; ray.style.top = c.y + "px"; calqueFx().appendChild(ray);
@@ -8799,7 +8880,7 @@ function htmlAdminVariantes(id){
         <div class="vignette-variante">${htmlCarte({id, v:vid, uid:"apv-" + vid})}</div>
         <div class="variante-champs">
           <div class="champs">${champTexte("Nom de la variante", `variantes.${vid}.nom`, v.nom || "")}${champTexte("Mention d’édition (ex. Bêta 2026)", `variantes.${vid}.edition`, v.edition || "")}${champSelect("Cadre", `variantes.${vid}.cadre`, v.cadre || "dore", CADRES)}</div>
-          <div class="champs">${champTexte("Comment l’obtenir (indice montré aux joueurs qui ne l’ont pas)", `variantes.${vid}.indice`, v.indice || "")}${champTexte("Le même indice en anglais (facultatif)", `variantes.${vid}.indice_en`, v.indice_en || "")}</div>
+          <div class="champs">${champTexte("Comment l’obtenir (indice montré aux joueurs qui ne l’ont pas)", `variantes.${vid}.indice`, v.indice || "")}${champTexte("Le même indice en anglais (laissez vide : traduit automatiquement)", `variantes.${vid}.indice_en`, v.indice_en || "")}</div>
           <p class="aide">Exemple : « Jouez 200 parties pendant la bêta ». Le joueur le voit dans sa collection, en ouvrant la carte et en sélectionnant cette illustration.</p>
           <input type="file" accept="image/*" data-image="variante:${vid}" hidden>
           <div class="adm-actions">
@@ -10482,6 +10563,7 @@ function actionSociale(act, id, el){
         if(r && r.erreur) return erreur(r.erreur);
         await Promise.all([chargerBoite(), rafraichir(), chargerPaquetsOfferts()]); renderProg();   // rafraichir() recharge la collection et les illustrations
         erreur(`Cadeau récupéré : ${texteRecompenseSaison(r)} !`);
+        try { celebrerGain(r); } catch(e) {}
       }, e => erreur(e.message)); return false;
     case "boite-supprimer": rpc("supprimer_message", {p_id:Number(id)}).then(async r => { if(r && r.erreur) return erreur(r.erreur); await chargerBoite(); renderProg(); }, e => erreur(e.message)); return false;
   }
@@ -10506,7 +10588,7 @@ function admMessages(){
     </fieldset>
     <label class="champ"><span>Titre</span><input type="text" data-msg="titre" maxlength="120" value="${esc(M.titre)}"></label>
     <label class="champ"><span>Message (une ligne commençant par « - » devient une puce, **texte** en gras)</span><textarea data-msg="texte" rows="6">${esc(M.texte)}</textarea></label>
-    <details class="version-anglaise" ${M.titre_en || M.texte_en ? "open" : ""}><summary>🌐 Version anglaise (facultative)</summary>
+    <details class="version-anglaise" ${M.titre_en || M.texte_en ? "open" : ""}><summary>🌐 Version anglaise (laissez vide : traduite automatiquement)</summary>
       <label class="champ"><span>Title</span><input type="text" lang="en" data-msg="titre_en" maxlength="120" value="${esc(M.titre_en || "")}"></label>
       <label class="champ"><span>Message</span><textarea lang="en" data-msg="texte_en" rows="5">${esc(M.texte_en || "")}</textarea></label>
       <p class="aide">Vide : les joueurs anglophones voient le texte français.</p></details>
@@ -10530,7 +10612,7 @@ function admNotes(){
       <div class="champs"><label class="champ"><span>Version</span><input type="text" data-note="version" maxlength="20" value="${esc(E.version || "")}" placeholder="1.5"></label>
         <label class="champ"><span>Titre</span><input type="text" data-note="titre" maxlength="120" value="${esc(E.titre || "")}"></label></div>
       <label class="champ"><span>Texte (une ligne commençant par « - » devient une puce, **texte** en gras)</span><textarea data-note="texte" rows="10">${esc(E.texte || "")}</textarea></label>
-      <details class="version-anglaise" ${E.titre_en || E.texte_en ? "open" : ""}><summary>🌐 Version anglaise (facultative)</summary>
+      <details class="version-anglaise" ${E.titre_en || E.texte_en ? "open" : ""}><summary>🌐 Version anglaise (laissez vide : traduite automatiquement)</summary>
         <label class="champ"><span>Title</span><input type="text" lang="en" data-note="titre_en" maxlength="120" value="${esc(E.titre_en || "")}"></label>
         <label class="champ"><span>Text</span><textarea lang="en" data-note="texte_en" rows="8">${esc(E.texte_en || "")}</textarea></label>
         <p class="aide">Vide : les joueurs anglophones voient le texte français. Nécessite le script supabase-langues.sql.</p></details>
@@ -10563,15 +10645,19 @@ function actionCommunication(act, id){
       if(M.carte) cadeau.cartes = [M.carte]; if(M.paquet) cadeau.paquets = [M.paquet]; if(M.variante) cadeau.variantes = [M.variante];
       const qui = M.dest==="tous" ? "tous les joueurs" : `${M.choix.length} joueur${M.choix.length>1 ? "s" : ""}`;
       if(!confirm(`Envoyer « ${M.titre} »${Object.keys(cadeau).length ? ` avec ${texteRecompenseSaison(cadeau)}` : ""} à ${qui} ?`)) return;
+      erreur("Traduction automatique en anglais…");
+      completerAnglais(M, [["titre", "titre_en"], ["texte", "texte_en"]]).then(errTrad => {
+      if(errTrad) erreur(`Envoi sans version anglaise : ${errTrad}.`);
       const base = {p_dest:M.dest==="tous" ? null : M.choix, p_titre:M.titre, p_texte:M.texte, p_cadeau:Object.keys(cadeau).length ? cadeau : null};
       const avecEn = (M.titre_en || "").trim() || (M.texte_en || "").trim();
-      rpc("admin_envoyer_message", avecEn ? {...base, p_titre_en:M.titre_en || "", p_texte_en:M.texte_en || ""} : base).catch(err => {
+      return rpc("admin_envoyer_message", avecEn ? {...base, p_titre_en:M.titre_en || "", p_texte_en:M.texte_en || ""} : base).catch(err => {
         if(avecEn && /function|does not exist|schema cache/i.test(err.message)) throw new Error("Exécutez d’abord le script supabase-langues.sql dans Supabase pour envoyer la version anglaise.");
         throw err;
       }).then(n => {
         erreur(`Message envoyé à ${n} joueur${n>1 ? "s" : ""}.`);
         adm.msg = {dest:"tous", choix:[], filtre:"", titre:"", texte:"", or:0, encre:0, carte:"", paquet:"", variante:""}; renderAdmin();
       }, e => erreur(/function|does not exist|schema cache/i.test(e.message) ? "Exécutez d’abord le script supabase-social.sql dans Supabase." : e.message));
+      });
       return;
     }
     case "msg-joueur": adm.msg = {...adm.msg, dest:"selection", choix:[id]}; adm.onglet = "messages"; PROG.fiche = null; break;
@@ -10580,7 +10666,7 @@ function actionCommunication(act, id){
     case "note-annuler": adm.noteEdit = null; break;
     case "note-enregistrer": {
       const E = adm.noteEdit; if(!E || !(E.titre || "").trim()) return erreur("Donnez un titre à la note.");
-      rpc("admin_maj_note", {p:{id:E.id ?? null, version:E.version, titre:E.titre, texte:E.texte, titre_en:E.titre_en || "", texte_en:E.texte_en || "", publie:!!E.publie}}).then(() => { adm.noteEdit = null; adm.notes = null; SOC.notes = null; erreur("Note enregistrée."); renderAdmin(); },
+      completerAnglais(E, [["titre", "titre_en"], ["texte", "texte_en"]]).then(errTrad => { if(errTrad) erreur(`Note enregistrée sans version anglaise : ${errTrad}.`); return rpc("admin_maj_note", {p:{id:E.id ?? null, version:E.version, titre:E.titre, texte:E.texte, titre_en:E.titre_en || "", texte_en:E.texte_en || "", publie:!!E.publie}}); }).then(() => { adm.noteEdit = null; adm.notes = null; SOC.notes = null; erreur("Note enregistrée."); renderAdmin(); },
         e => erreur(/function|does not exist|schema cache/i.test(e.message) ? "Exécutez d’abord le script supabase-social.sql dans Supabase." : e.message));
       return;
     }
@@ -11090,7 +11176,7 @@ function admCadeauxAuto(){
         <label class="case"><input type="checkbox" data-palier="${n}.actif" ${p.actif===false ? "" : "checked"}> Actif</label>
       </div>
       <label class="champ"><span>Texte (une ligne commençant par « - » devient une puce, **texte** en gras)</span><textarea rows="3" data-palier="${n}.texte">${esc(p.texte || "")}</textarea></label>
-      <details class="version-anglaise" ${p.titre_en || p.texte_en ? "open" : ""}><summary>🌐 Version anglaise (facultative)</summary>
+      <details class="version-anglaise" ${p.titre_en || p.texte_en ? "open" : ""}><summary>🌐 Version anglaise (laissez vide : traduite automatiquement)</summary>
         <label class="champ"><span>Title</span><input type="text" lang="en" maxlength="120" data-palier="${n}.titre_en" value="${esc(p.titre_en || "")}"></label>
         <label class="champ"><span>Text</span><textarea lang="en" rows="3" data-palier="${n}.texte_en">${esc(p.texte_en || "")}</textarea></label>
         <p class="aide">Vide : les joueurs anglophones voient le texte français. Nécessite le script supabase-langues.sql.</p></details>
@@ -11145,7 +11231,8 @@ function actionCadeauxAuto(act, id){
     case "pauto-enregistrer":
       if(P.some(p => !(p.seuil>0) || !(p.titre || "").trim())) return erreur("Chaque palier doit avoir un objectif et un titre.");
       if(P.some(p => p.condition==="travaux" && !p.saison)) return erreur("Choisissez la saison des paliers « travaux de saison ».");
-      rpc("admin_maj_paliers_parties", {p:P.map(({envois, eligibles, ...p}) => p)}).then(n => { erreur(`${n} palier${n>1 ? "s" : ""} enregistré${n>1 ? "s" : ""}.`); adm.paliersAuto = null; chargerPaliersAuto(); }, erreurSql);
+      Promise.all(P.map(p => completerAnglais(p, [["titre", "titre_en"], ["texte", "texte_en"]]))).then(errs => { const e1 = errs.find(Boolean); if(e1) erreur(`Paliers enregistrés sans version anglaise : ${e1}.`);
+        return rpc("admin_maj_paliers_parties", {p:P.map(({envois, eligibles, ...p}) => p)}); }).then(n => { erreur(`${n} palier${n>1 ? "s" : ""} enregistré${n>1 ? "s" : ""}.`); adm.paliersAuto = null; chargerPaliersAuto(); }, erreurSql);
       return;
     case "pauto-appliquer":
       if(!confirm("Envoyer maintenant les messages des paliers actifs à tous les joueurs qui les ont déjà atteints ? (Aucun joueur ne reçoit deux fois le même palier.)")) return;
@@ -11218,15 +11305,10 @@ function ouvrirBoosterAnime({id, source, appel, titre, faction, apres}){
     const ordre = cartes.map((t, i) => ({t, i})).sort((a, b) => RANG_TIRAGE(a.t) - RANG_TIRAGE(b.t) || a.i - b.i).map(x => x.t);
     PROG.paquet = {cartes:ordre, faction, titre, reveles:new Set(), anim:new Set(), anime:true, nouvelles:new Set(ordre.filter(c => !avant[c]))};
     rafraichir().then(() => { if(apres) apres(); render(); }).catch(() => {});
-    // 2. Le haut du sachet se déchire
+    // 2. Le sachet se déchire : un tracé irrégulier, différent à chaque ouverture
     await new Promise(r => setTimeout(r, ms(150)));
     jouerSon("paquet_ouvrir", {fixe:true});
-    const haut = boite.querySelector(".ob-haut");
-    const eclat = document.createElement("span"); eclat.className = "ob-eclat"; boite.appendChild(eclat);
-    eclat.animate([{opacity:0, transform:"scaleX(.2)"}, {opacity:1, transform:"scaleX(1)", offset:0.3}, {opacity:0, transform:"scaleX(1.3)"}], {duration:ms(600), fill:"forwards"});
-    boite.animate([{transform:"translate(0,0)"}, {transform:"translate(-3px,1px)"}, {transform:"translate(3px,-1px)"}, {transform:"translate(0,0)"}], {duration:ms(220), iterations:2});
-    await haut.animate([{transform:"translate(0,0) rotate(0)", opacity:1}, {transform:`translate(${L*0.55}px,${-H*0.35}px) rotate(24deg)`, opacity:0}],
-                       {duration:ms(650), easing:"cubic-bezier(.3,.6,.4,1)", fill:"forwards"}).finished;
+    await dechirerBooster(boite, L, H, ms);
     // 3. Les cartes sortent une à une, les plus rares en dernier
     const n = ordre.length, ecart = 14, larg = Math.min(150, (innerWidth - 40 - ecart*(n-1)) / n), haut2 = larg * 1.4;
     const yLigne = innerHeight * 0.5 - haut2/2, xDebut = (innerWidth - (n*larg + (n-1)*ecart)) / 2;
@@ -11272,6 +11354,391 @@ function ouvrirBoosterAnime({id, source, appel, titre, faction, apres}){
       else { PROG.paquet = null; await couche.animate([{opacity:1}, {opacity:0}], {duration:ms(250), fill:"forwards"}).finished; fermer(); }
     });
   }).catch(e => fermer(e && e.message || "L’ouverture du paquet a échoué."));
+}
+
+
+/* ============================================================
+   OUVERTURE DE BOOSTER : la déchirure du sachet
+   Quatre tracés (bande, coin, biais, dérive), irréguliers et
+   différents à chaque ouverture ; bord de papier blanc, fibres,
+   lueur qui s’échappe de l’ouverture et miettes de papier.
+   ============================================================ */
+const TYPES_DECHIRURE = ["bande", "coin", "biais", "derive"];
+function traceDechirure(L, H, type){
+  const R = Math.random, miroir = R() < .5;
+  let A, B;
+  if(type==="coin"){ A = [-2, H*(.2 + R()*.1)]; B = [L*(.48 + R()*.24), -2]; }
+  else if(type==="biais"){ A = [-2, H*(.075 + R()*.03)]; B = [L + 2, H*(.17 + R()*.06)]; }
+  else { A = [-2, H*(.1 + R()*.04)]; B = [L + 2, H*(.1 + R()*.04)]; }
+  // Déplacement des milieux : grands écarts d’abord, puis de plus en plus fins (dents du papier)
+  let pts = [A, B];
+  const amp0 = type==="derive" ? H*.03 : type==="coin" ? H*.028 : H*.02;
+  for(let k = 0, amp = amp0; k<6; k++, amp *= (k<4 ? .5 : .75)){
+    const n = [pts[0]];
+    for(let i = 1; i<pts.length; i++){
+      const p = pts[i-1], q = pts[i], dx = q[0] - p[0], dy = q[1] - p[1], l = Math.hypot(dx, dy) || 1, d = (R()*2 - 1)*amp;
+      n.push([(p[0] + q[0])/2 - dy/l*d, (p[1] + q[1])/2 + dx/l*d], q);
+    }
+    pts = n;
+  }
+  // Dérive : la déchirure plonge au milieu, comme quand le papier part de travers
+  if(type==="derive"){ const b = H*(.035 + R()*.04); pts = pts.map(([x, y], i) => [x, y + Math.sin(Math.PI*i/(pts.length - 1))*b]); }
+  pts[0] = A.slice(); pts[pts.length - 1] = B.slice();
+  if(miroir) pts = pts.map(([x, y]) => [L - x, y]);
+  const S = pts[0], E = pts[pts.length - 1];
+  let haut, bas;
+  if(type==="coin"){
+    const opp = S[0] < 0 ? L + 2 : -2;
+    haut = [...pts, [S[0], -2]];
+    bas = [...pts, [opp, -2], [opp, H + 2], [S[0], H + 2]];
+  } else {
+    haut = [...pts, [E[0], -2], [S[0], -2]];
+    bas = [...pts, [E[0], H + 2], [S[0], H + 2]];
+  }
+  return {type, ligne:pts, haut, bas, S, E};
+}
+async function dechirerBooster(boite, L, H, ms){
+  const R = Math.random, type = TYPES_DECHIRURE[Math.floor(R()*TYPES_DECHIRURE.length)];
+  const t = traceDechirure(L, H, type);
+  const poly = l => `polygon(${l.map(p => `${p[0].toFixed(1)}px ${p[1].toFixed(1)}px`).join(",")})`;
+  const d = "M" + t.ligne.map(p => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" L");
+  const pH = boite.querySelector(".ob-haut"), pB = boite.querySelector(".ob-bas");
+  boite.dataset.dechirure = type;
+  pH.style.clipPath = poly(t.haut); pB.style.clipPath = poly(t.bas);
+  const svg = lueur => `<svg class="ob-bord" viewBox="0 0 ${L} ${H}" width="${L}" height="${H}" aria-hidden="true">${lueur ? `<path class="lueur" d="${d}"/>` : ""}<path class="ombre" d="${d}"/><path class="papier" d="${d}"/><path class="fibres" d="${d}"/></svg>`;
+  pH.insertAdjacentHTML("beforeend", svg(false)); pB.insertAdjacentHTML("beforeend", svg(true));
+  // Le bord blanc apparaît le long du tracé, du point de départ vers l’autre bout
+  const traits = boite.querySelectorAll(".ob-bord .ombre, .ob-bord .papier");
+  let long = 400; try { long = boite.querySelector(".ob-bord .papier").getTotalLength() || long; } catch(e) {}
+  traits.forEach(p => { p.style.strokeDasharray = long; p.style.strokeDashoffset = long; });
+  const sgn = t.S[0] < t.E[0] ? 1 : -1;
+  pH.style.transformOrigin = `${t.E[0]}px ${t.E[1]}px`;
+  const tension = ms(300);
+  traits.forEach(p => p.animate([{strokeDashoffset:long}, {strokeDashoffset:0}], {duration:tension, easing:"cubic-bezier(.5,0,.8,.6)", fill:"forwards"}));
+  boite.querySelectorAll(".ob-bord .fibres").forEach(p => p.animate([{opacity:0}, {opacity:0, offset:.6}, {opacity:.85}], {duration:tension, fill:"forwards"}));
+  const lueur = boite.querySelector(".ob-bord .lueur");
+  if(lueur) lueur.animate([{opacity:0}, {opacity:.25, offset:.5}, {opacity:1, offset:.85}, {opacity:.7}], {duration:tension + ms(700), fill:"forwards"});
+  const a0 = sgn*(4 + R()*4);
+  boite.animate([{transform:"translate(0,0)"}, {transform:"translate(-2px,1px)"}, {transform:"translate(2px,-1px)"}, {transform:"translate(-1px,0)"}, {transform:"translate(0,0)"}], {duration:ms(260)});
+  await pH.animate([{transform:"translate(0,0) rotate(0)"}, {transform:`translate(0,${-H*.012}px) rotate(${a0}deg)`}], {duration:tension, easing:"cubic-bezier(.6,0,.9,.5)", fill:"forwards"}).finished;
+  // Miettes de papier arrachées au point de départ
+  const rb = boite.getBoundingClientRect(), sx = rb.left + Math.max(0, Math.min(L, t.S[0])), sy = rb.top + Math.max(0, t.S[1]);
+  const couleurs = ["#f6efdf", "#efe6d2", "#e4d8bd", getComputedStyle(boite.querySelector(".booster")).getPropertyValue("--bc") || "#c9a45a"];
+  for(let k = 0; k<12; k++){
+    const m = document.createElement("span"); m.className = "ob-miette";
+    m.style.cssText = `left:${sx}px;top:${sy}px;background:${couleurs[k % couleurs.length]};width:${3 + R()*6}px;height:${2 + R()*4}px`;
+    boite.parentElement.appendChild(m);
+    const ang = (sgn>0 ? Math.PI : 0) + (R() - .5)*2.2, v = 30 + R()*70;
+    m.animate([{transform:"translate(-50%,-50%) rotate(0)", opacity:1},
+      {transform:`translate(${Math.cos(ang)*v}px,${Math.sin(ang)*v*.6 - 25}px) rotate(${R()*360}deg)`, opacity:1, offset:.45},
+      {transform:`translate(${Math.cos(ang)*v*1.4}px,${Math.sin(ang)*v*.6 + 60 + R()*60}px) rotate(${R()*720}deg)`, opacity:0}],
+      {duration:ms(700 + R()*400), easing:"cubic-bezier(.2,.7,.4,1)", fill:"forwards"}).finished.then(() => m.remove(), () => m.remove());
+  }
+  // Le morceau arraché s’envole, le sachet encaisse le choc
+  pB.animate([{transform:"translate(0,0)"}, {transform:"translate(0,2px)"}, {transform:"translate(0,0)"}], {duration:ms(240)});
+  const tx = sgn*L*(.45 + R()*.3), ty = -H*(.28 + R()*.2), a1 = sgn*(26 + R()*30);
+  await pH.animate([{transform:`translate(0,${-H*.012}px) rotate(${a0}deg)`, opacity:1},
+    {transform:`translate(${tx*.35}px,${ty*.5}px) rotate(${a0 + (a1 - a0)*.45}deg)`, opacity:1, offset:.35},
+    {transform:`translate(${tx}px,${ty}px) rotate(${a1}deg)`, opacity:0}], {duration:ms(560), easing:"cubic-bezier(.25,.6,.4,1)", fill:"forwards"}).finished;
+}
+
+/* ============================================================
+   POUVOIR DIVIN : activation sur tout l’écran
+   Flash, onde de choc, voile, tremblement et bannière du pouvoir
+   ============================================================ */
+function cinematiquePouvoir(ev, c, niveau){
+  const j = S && S.joueurs && S.joueurs[ev.j]; if(!j) return;
+  const h = heroDe(j) || {}, f = FACTIONS[j.heros] || {}, coul = f.couleur || "#e9c46a";
+  const rayon = Math.hypot(Math.max(c.x, innerWidth - c.x), Math.max(c.y, innerHeight - c.y)) * 1.05;
+  const couche = document.createElement("div");
+  couche.className = "fx-divin"; couche.setAttribute("aria-hidden", "true");
+  couche.style.cssText = `--dc:${coul};--x:${c.x}px;--y:${c.y}px`;
+  const nomPouvoir = traduireNom((h.pouvoir && h.pouvoir.nom) || ""), nomDieu = traduireNom(h.nom || "");
+  couche.innerHTML = `<span class="fd-voile"></span><span class="fd-flash"></span>
+    <span class="fd-onde" style="width:${rayon*2}px;height:${rayon*2}px"></span>${niveau>=2 ? `<span class="fd-onde deux" style="width:${rayon*2}px;height:${rayon*2}px"></span>` : ""}
+    ${niveau>=2 ? `<span class="fd-rayons"></span>` : ""}
+    <div class="fd-banniere"><span class="fd-portrait">${h.image ? `<img src="${esc(h.image)}" alt="">` : `<span>${esc(f.sym || "✦")}</span>`}</span>
+      <span class="fd-texte"><span class="fd-sur">${esc(T("Pouvoir divin"))}</span><b class="fd-nom">${esc(nomPouvoir)}</b><span class="fd-dieu">${esc(nomDieu)}</span></span></div>`;
+  document.body.appendChild(couche);
+  const a = (sel, k, o) => { const e = couche.querySelector(sel); return e ? e.animate(k, o) : null; };
+  a(".fd-flash", [{opacity:0}, {opacity:.92, offset:.12}, {opacity:0}], {duration:300, easing:"ease-out", fill:"both"});
+  a(".fd-voile", [{opacity:0}, {opacity:1, offset:.15}, {opacity:1, offset:.8}, {opacity:0}], {duration:1000, fill:"both"});
+  const onde = [{transform:"translate(-50%,-50%) scale(0)", opacity:1}, {transform:"translate(-50%,-50%) scale(1)", opacity:0}];
+  a(".fd-onde", onde, {duration:520, easing:"cubic-bezier(.15,.7,.3,1)", fill:"both"});
+  a(".fd-onde.deux", onde, {duration:520, delay:110, easing:"cubic-bezier(.15,.7,.3,1)", fill:"both"});
+  a(".fd-rayons", [{transform:"translate(-50%,-50%) rotate(0) scale(.4)", opacity:0}, {transform:"translate(-50%,-50%) rotate(25deg) scale(1)", opacity:.9, offset:.25}, {transform:"translate(-50%,-50%) rotate(70deg) scale(1.15)", opacity:0}], {duration:1000, easing:"ease-out", fill:"both"});
+  a(".fd-banniere", [{transform:"translate(-50%,-50%) scale(2)", opacity:0, filter:"blur(10px)"},
+    {transform:"translate(-50%,-50%) scale(.94)", opacity:1, filter:"blur(0)", offset:.16},
+    {transform:"translate(-50%,-50%) scale(1)", opacity:1, offset:.26},
+    {transform:"translate(-50%,-50%) scale(1.04)", opacity:1, offset:.82},
+    {transform:"translate(-50%,-50%) scale(1.12)", opacity:0}], {duration:1000, easing:"ease-out", fill:"both"});
+  // Tout le plateau tremble sous le choc
+  if(niveau>=2){
+    const app = document.getElementById("app");
+    if(app){
+      const k = []; for(let i = 0; i<=12; i++){ const amp = (1 - i/12)*14; k.push(i===12 ? {translate:"0 0", rotate:"0deg"} : {translate:`${((Math.random()*2 - 1)*amp).toFixed(1)}px ${((Math.random()*2 - 1)*amp*.7).toFixed(1)}px`, rotate:`${((Math.random()*2 - 1)*amp*.06).toFixed(2)}deg`}); }
+      app.animate(k, {duration:460, easing:"linear"});
+    }
+  }
+  setTimeout(() => couche.remove(), 1000*FX_LENT + 300);
+}
+
+/* ============================================================
+   RÉCOMPENSES : pièces qui volent jusqu’à la bourse, et carte
+   ou illustration gagnée qui tournoie jusqu’au milieu de l’écran
+   ============================================================ */
+let DERNIER_CLIC = null;
+function pointSource(){
+  const d = DERNIER_CLIC;
+  return d && Date.now() - d.t < 30000 && d.r.width ? {x:d.r.left + d.r.width/2, y:d.r.top + d.r.height/2} : {x:innerWidth/2, y:innerHeight*.6};
+}
+function normaliserGain(r){
+  if(typeof r==="number") return {or:r, encre:0, cartes:[], variantes:[], paquets:[]};
+  if(!r || typeof r!=="object") return {or:0, encre:0, cartes:[], variantes:[], paquets:[]};
+  return {or:Number(r.or || r.gain || 0) || 0, encre:Number(r.encre || 0) || 0, cartes:Array.isArray(r.cartes) ? r.cartes : [], variantes:Array.isArray(r.variantes) ? r.variantes : [], paquets:Array.isArray(r.paquets) ? r.paquets : []};
+}
+function cibleBourse(sel){
+  const e = document.querySelector(sel);
+  if(e){ const r = e.getBoundingClientRect(); if(r.width) return {el:e, x:r.left + r.width/2, y:r.top + r.height/2}; }
+  return {el:null, x:innerWidth - 60, y:24};
+}
+function volerJetons(p, sel, classe, n){
+  const c = cibleBourse(sel);
+  for(let i = 0; i<n; i++){
+    const e = document.createElement("span"); e.className = "fx-jeton-gain " + classe; e.setAttribute("aria-hidden", "true");
+    e.style.left = p.x + "px"; e.style.top = p.y + "px";
+    document.body.appendChild(e);
+    const ang = Math.random()*Math.PI*2, r = 34 + Math.random()*46;
+    const ex = Math.cos(ang)*r, ey = Math.sin(ang)*r - 20;
+    e.animate([{transform:"translate(-50%,-50%) scale(.3)", opacity:0},
+      {transform:`translate(calc(-50% + ${ex}px),calc(-50% + ${ey}px)) scale(1.15)`, opacity:1, offset:.32},
+      {transform:`translate(calc(-50% + ${ex}px),calc(-50% + ${ey}px)) scale(1)`, opacity:1, offset:.45},
+      {transform:`translate(calc(-50% + ${c.x - p.x}px),calc(-50% + ${c.y - p.y}px)) scale(.55)`, opacity:.95}],
+      {duration:560, delay:i*38, easing:"cubic-bezier(.45,0,.3,1)", fill:"both"})
+      .finished.then(() => e.remove(), () => e.remove());
+  }
+  const arrivee = (560 + (n - 1)*38) * FX_LENT;
+  setTimeout(() => {
+    const el = document.querySelector(sel);
+    if(el) el.animate([{transform:"scale(1)", filter:"brightness(1)"}, {transform:"scale(1.35)", filter:"brightness(1.8)"}, {transform:"scale(1)", filter:"brightness(1)"}], {duration:220, easing:"ease-out"});
+    if(classe==="piece") jouerSon("or", {immediat:true});
+  }, arrivee - 120);
+}
+function celebrerGain(brut){
+  const g = normaliserGain(brut), niv = niveauAnim(), p = pointSource();
+  const items = [...g.cartes.filter(id => CARTES[id]).map(id => ({id})), ...g.variantes.map(v => ({v}))];
+  if(niv>0 && (g.or || g.encre || g.paquets.length)){
+    // Une onde dorée et le gain qui s’envole au point cliqué
+    const an = document.createElement("span"); an.className = "fx-gain-anneau"; an.setAttribute("aria-hidden", "true");
+    an.style.left = p.x + "px"; an.style.top = p.y + "px"; document.body.appendChild(an);
+    an.animate([{transform:"translate(-50%,-50%) scale(.2)", opacity:1}, {transform:"translate(-50%,-50%) scale(1.6)", opacity:0}], {duration:420, easing:"cubic-bezier(.2,.7,.3,1)", fill:"both"})
+      .finished.then(() => an.remove(), () => an.remove());
+    const morceaux = [g.or ? `+${nf(g.or)} ${T("or")}` : "", g.encre ? `+${nf(g.encre)} ${T("encre")}` : "", g.paquets.length ? `+${g.paquets.length} ${T(g.paquets.length>1 ? "paquets" : "paquet")}` : ""].filter(Boolean);
+    const tx = document.createElement("span"); tx.className = "fx-gain-texte"; tx.setAttribute("aria-hidden", "true"); tx.textContent = morceaux.join("  ");
+    tx.style.left = p.x + "px"; tx.style.top = p.y + "px"; document.body.appendChild(tx);
+    tx.animate([{transform:"translate(-50%,-50%) scale(.5)", opacity:0}, {transform:"translate(-50%,-120%) scale(1.15)", opacity:1, offset:.25}, {transform:"translate(-50%,-170%) scale(1)", opacity:1, offset:.7}, {transform:"translate(-50%,-220%) scale(1)", opacity:0}],
+      {duration:900, easing:"ease-out", fill:"both"}).finished.then(() => tx.remove(), () => tx.remove());
+    if(g.or) volerJetons(p, ".bourse .res.or", "piece", Math.max(5, Math.min(14, 4 + Math.round(g.or/12))));
+    if(g.encre) volerJetons(p, ".bourse .res.encre", "goutte", Math.max(4, Math.min(10, 3 + Math.round(g.encre/30))));
+    if(g.paquets.length) volerJetons(p, '[data-act="prog-boutique"]', "paquet", Math.min(3, g.paquets.length));
+  }
+  if(items.length) setTimeout(() => presenterCartesGagnees(items), niv>0 && (g.or || g.encre) ? 350 : 0);
+}
+function presenterCartesGagnees(items){
+  const file = items.slice();
+  const suivant = () => {
+    const it = file.shift(); if(!it) return;
+    let id = it.id, v = null, titre = "Nouvelle carte !";
+    if(it.v){
+      const x = CONFIG.variantes && CONFIG.variantes[it.v];
+      if(!x || !CARTES[x.carte]) return suivant();
+      id = x.carte; v = it.v; titre = "Nouvelle illustration !";
+    }
+    const d = CARTES[id]; if(!d) return suivant();
+    const niv = niveauAnim(), p = pointSource();
+    const larg = Math.round(Math.max(140, Math.min(250, innerWidth*.6, (innerHeight - 190)/1.4))), haut = Math.round(larg*1.4);
+    const rar = d.rarete || "commune";
+    const couche = document.createElement("div");
+    couche.className = `gain-carte rarete-${rar}`; couche.setAttribute("role", "dialog"); couche.setAttribute("aria-modal", "true"); couche.setAttribute("aria-label", titre);
+    const nomV = v && CONFIG.variantes[v].nom ? ` · ${traduireNom(CONFIG.variantes[v].nom)}` : "";
+    couche.innerHTML = `<div class="gc-fond"></div><div class="gc-rayons" aria-hidden="true"></div>
+      <div class="gc-carte" style="width:${larg}px;height:${haut}px;--l:${larg}px"><div class="gc-interieur">
+        <div class="gc-face gc-dos" aria-hidden="true"><span>✦</span></div>
+        <div class="gc-face gc-avant">${htmlCarte({id, v, uid:"gain-" + id})}</div></div></div>
+      <div class="gc-texte"><p class="gc-titre">${esc(titre)}</p><p class="gc-nom"><span data-sans-trad>${esc(traduireNom(d.nom) + nomV)}</span></p>
+        <button type="button" class="btn" data-gc="ok">${file.length ? "Suivante" : "Génial !"}</button></div>`;
+    document.body.appendChild(couche);
+    const carte = couche.querySelector(".gc-carte"), inter = couche.querySelector(".gc-interieur"), texte = couche.querySelector(".gc-texte");
+    let pret = niv===0;
+    const fermer = async () => {
+      if(!pret) return; pret = false;
+      if(niv>0) await couche.animate([{opacity:1}, {opacity:0}], {duration:180, fill:"forwards"}).finished.catch(() => {});
+      couche.remove(); suivant();
+    };
+    couche.addEventListener("click", e => { if(e.target.closest("[data-gc]") || !e.target.closest(".gc-carte")) fermer(); });
+    couche.addEventListener("keydown", e => { if(e.key==="Escape" || e.key==="Enter"){ e.preventDefault(); fermer(); } });
+    if(niv===0){ inter.style.transform = "none"; texte.style.opacity = 1; couche.querySelector("[data-gc]").focus(); return; }
+    jouerSon("recompense", {fixe:true});
+    couche.querySelector(".gc-fond").animate([{opacity:0}, {opacity:1}], {duration:220, fill:"forwards"});
+    // Départ du bouton « Réclamer », arrivée au centre en tournoyant sur l’axe vertical
+    const cx = innerWidth/2, cy = innerHeight/2 - 40;
+    carte.style.left = (cx - larg/2) + "px"; carte.style.top = (cy - haut/2) + "px";
+    const tours = 1440 + (niv>=2 ? 0 : -720);
+    carte.animate([{transform:`translate(${p.x - cx}px,${p.y - cy}px) scale(.12)`, opacity:0},
+      {transform:`translate(${(p.x - cx)*.4}px,${(p.y - cy)*.4 - 30}px) scale(.7)`, opacity:1, offset:.35},
+      {transform:"translate(0,0) scale(1.08)", opacity:1, offset:.82}, {transform:"translate(0,0) scale(1)", opacity:1}],
+      {duration:760, easing:"cubic-bezier(.2,.75,.25,1)", fill:"both"});
+    inter.animate([{transform:"rotateY(180deg)"}, {transform:`rotateY(${tours}deg)`}], {duration:760, easing:"cubic-bezier(.25,.6,.2,1)", fill:"both"}).finished.then(() => {
+      inter.style.transform = `rotateY(${tours}deg)`;
+      couche.classList.add("posee");
+      jouerSon(rar==="legendaire" ? "carte_revelee_legendaire" : rar==="epique" ? "carte_revelee_epique" : "carte_revelee_rare", {fixe:true});
+      couche.querySelector(".gc-rayons").animate([{opacity:0, transform:"scale(.6)"}, {opacity:1, transform:"scale(1)"}], {duration:400, fill:"forwards"});
+      texte.animate([{opacity:0, transform:"translateY(12px)"}, {opacity:1, transform:"translateY(0)"}], {duration:220, fill:"forwards"});
+      pret = true; const b = couche.querySelector("[data-gc]"); if(b) b.focus();
+    }, () => { pret = true; });
+  };
+  suivant();
+}
+
+/* ============================================================
+   TRADUCTION AUTOMATIQUE : tout le contenu saisi en français
+   dans l’admin est traduit en anglais, sans rien saisir.
+   Service : MyMemory (gratuit ; 50 000 caractères par jour avec
+   l’adresse de l’admin). Les traductions restent modifiables ;
+   une traduction modifiée à la main n’est plus jamais écrasée.
+   ============================================================ */
+const TRAD_AUTO = {encours:null, minuterie:null, pauseJusque:0, derniere:"", erreur:""};
+const SERVICE_TRAD = "https://api.mymemory.translated.net/get";
+function decoderEntites(s){ const t = document.createElement("textarea"); t.innerHTML = String(s || ""); return t.value; }
+// Découpe en morceaux de 450 caractères au plus, aux fins de phrase (le service refuse les textes trop longs)
+function morceauxTraduction(s){
+  const res = [];
+  for(const para of String(s).split(/(\n+)/)){
+    if(/^\n+$/.test(para) || !para.trim()){ res.push({sep:para}); continue; }
+    const phrases = para.match(/[^.!?…]+[.!?…]*\s*/g) || [para];
+    let cur = "";
+    for(const ph of phrases){
+      if((cur + ph).length > 450 && cur){ res.push({t:cur}); cur = ""; }
+      if(ph.length > 450){ for(let i = 0; i<ph.length; i += 450) res.push({t:ph.slice(i, i + 450)}); }
+      else cur += ph;
+    }
+    if(cur) res.push({t:cur});
+  }
+  return res;
+}
+async function traduireMachine(fr){
+  const src = String(fr || ""); if(!src.trim()) return "";
+  // Les variables comme {pseudo} ne doivent pas être traduites
+  const jetons = [];
+  const prot = src.replace(/\{[^{}\n]{1,40}\}/g, m => { jetons.push(m); return `ZQX${jetons.length - 1}`; });
+  const sortie = [];
+  for(const m of morceauxTraduction(prot)){
+    if(m.sep!=null){ sortie.push(m.sep); continue; }
+    const brut = m.t, debut = brut.match(/^\s*/)[0], fin = brut.match(/\s*$/)[0], coeur = brut.trim();
+    if(!/[A-Za-zÀ-ÿ]/.test(coeur)){ sortie.push(brut); continue; }
+    const u = new URL(SERVICE_TRAD);
+    u.searchParams.set("q", coeur); u.searchParams.set("langpair", "fr|en");
+    const email = PROG.user && PROG.user.email; if(email) u.searchParams.set("de", email);
+    let r;
+    try { r = await fetch(u.href); } catch(e) { throw new Error("le service de traduction est injoignable (connexion ?)"); }
+    if(!r.ok) throw new Error(`le service de traduction a répondu ${r.status}`);
+    const dj = await r.json().catch(() => null);
+    const tx = dj && dj.responseData && dj.responseData.translatedText;
+    if(!dj || dj.quotaFinished || /MYMEMORY WARNING|QUOTA|LIMIT/i.test(String(tx || "")) || Number(dj.responseStatus) === 429)
+      throw new Error("quota de traduction du jour atteint : la suite sera traduite demain");
+    if(!tx || Number(dj.responseStatus) !== 200) throw new Error(`le service de traduction a refusé « ${coeur.slice(0, 40)} »`);
+    sortie.push(debut + decoderEntites(tx) + fin);
+  }
+  return sortie.join("").replace(/ZQX\s?(\d+)/gi, (x, k) => jetons[Number(k)] ?? x).replace(/(\w)'(\w)/g, "$1’$2");
+}
+// Noms (cartes, divinités, pouvoirs, saisons…) : majuscules à l’anglaise
+const PETITS_MOTS_EN = new Set(["a", "an", "the", "of", "and", "or", "in", "on", "at", "to", "for", "with", "from", "by", "as"]);
+function titreAnglais(s){
+  return String(s).split(" ").map((m, i) => !m ? m : (i>0 && PETITS_MOTS_EN.has(m.toLowerCase())) ? m.toLowerCase() : m.charAt(0).toUpperCase() + m.slice(1)).join(" ");
+}
+const estNomTraduit = (ctx, groupe) => groupe==="Cartes" || /^(Divinité|Pouvoir de|Nom de la saison|Travail \d|Booster spécial|Illustration alternative|Panthéon$)/.test(ctx || "");
+function miseEnFormeTraduction(en, fr, ctx, groupe){
+  let r = String(en || "").trim();
+  if(!r) return r;
+  if(estNomTraduit(ctx, groupe) && r.length < 60 && !/[.!?]$/.test(fr.trim())) r = titreAnglais(r.replace(/[.]$/, ""));
+  else if(/^[a-zà-ÿ]/.test(fr.trim()) && !/^I\b/.test(r)) r = r.charAt(0).toLowerCase() + r.slice(1);
+  return r;
+}
+// Champs français / anglais rangés côte à côte dans config.json
+function champsJumeauxConfig(){
+  const l = [];
+  for(const [vid, v] of Object.entries(CONFIG.variantes || {})) if(v) l.push([v, "indice", "indice_en", `variantes.${vid}.indice`]);
+  if(CONFIG.don) l.push([CONFIG.don, "message", "message_en", "don.message"]);
+  if(CONFIG.beta) l.push([CONFIG.beta, "texte", "texte_en", "beta.texte"]);
+  return l;
+}
+function texteAAutoTraduire(){
+  const t = (CONFIG.traductions && CONFIG.traductions.en) || {};
+  const textes = textesContenu().flatMap(([g, l]) => l.map(([fr, ctx]) => ({fr, ctx, g}))).filter(x => !t[x.fr]);
+  const ch = (CONFIG.traductions && CONFIG.traductions.auto_champs) || {};
+  const champs = champsJumeauxConfig().filter(([o, f, e, id]) => String(o[f] || "").trim() && (!String(o[e] || "").trim() || (ch[id] && ch[id]!==o[f])));
+  return {textes, champs};
+}
+function nbATraduire(){ const a = texteAAutoTraduire(); return a.textes.length + a.champs.length; }
+function planifierTraductionAuto(delai = 4000){
+  if(typeof accesAdmin==="function" && !accesAdmin()) return;
+  if(Date.now() < TRAD_AUTO.pauseJusque) return;
+  clearTimeout(TRAD_AUTO.minuterie);
+  TRAD_AUTO.minuterie = setTimeout(() => { traduireContenuManquant({auto:true}).catch(() => {}); }, delai);
+}
+async function traduireContenuManquant({auto} = {}){
+  if(TRAD_AUTO.encours) return TRAD_AUTO.encours;
+  TRAD_AUTO.encours = (async () => {
+    CONFIG.traductions = CONFIG.traductions || {};
+    const tr = CONFIG.traductions.en = CONFIG.traductions.en || {};
+    const marques = CONFIG.traductions.auto_en = CONFIG.traductions.auto_en || {};
+    const champsAuto = CONFIG.traductions.auto_champs = CONFIG.traductions.auto_champs || {};
+    let n = 0, err = "", change = false;
+    // Une traduction automatique dont le texte français a disparu ne sert plus
+    const presents = new Set(textesContenu().flatMap(([, l]) => l.map(([fr]) => fr)));
+    for(const fr of Object.keys(marques)) if(!presents.has(fr)){ delete marques[fr]; delete tr[fr]; change = true; }
+    const {textes, champs} = texteAAutoTraduire();
+    TRAD_AUTO.total = textes.length + champs.length; TRAD_AUTO.fait = 0;
+    if(TRAD_AUTO.total && ui.ecran==="admin" && adm.onglet==="traductions") renderAdmin();
+    for(const x of textes){
+      let en = "", machine = false;
+      if(typeof PROPOSITIONS_EN!=="undefined" && PROPOSITIONS_EN[x.fr]) en = PROPOSITIONS_EN[x.fr];
+      else { const p = propositionTraduction(x.fr); if(p) en = p; }
+      if(!en){
+        try { en = miseEnFormeTraduction(await traduireMachine(x.fr), x.fr, x.ctx, x.g); machine = true; }
+        catch(e) { err = e.message; break; }
+      }
+      if(en && en.trim()){ tr[x.fr] = en.trim(); if(machine) marques[x.fr] = 1; else delete marques[x.fr]; n++; change = true; }
+      TRAD_AUTO.fait++;
+    }
+    if(!err) for(const [o, f, e, id] of champs){
+      try { o[e] = await traduireMachine(o[f]); champsAuto[id] = o[f]; n++; change = true; }
+      catch(er) { err = er.message; break; }
+      TRAD_AUTO.fait++;
+    }
+    if(change){ majTraductionsConfig(); try { localStorage.setItem(CLE_STOCKAGE, JSON.stringify(CONFIG)); } catch(e) {} if(typeof marquerModifie==="function") marquerModifie(); }
+    TRAD_AUTO.erreur = err; TRAD_AUTO.derniere = new Date().toLocaleTimeString(LOC());
+    if(err) TRAD_AUTO.pauseJusque = Date.now() + 10*60*1000;
+    if(n && ui.ecran==="admin"){ erreur(`🌐 ${n} texte${n>1 ? "s" : ""} traduit${n>1 ? "s" : ""} automatiquement en anglais.${err ? ` Arrêt : ${err}.` : ""}`); renderAdmin(); }
+    else if(err && (!auto || ui.ecran==="admin")){ erreur(`Traduction automatique impossible : ${err}.`); if(ui.ecran==="admin") renderAdmin(); }
+    return {n, err};
+  })().finally(() => { TRAD_AUTO.encours = null; TRAD_AUTO.total = 0; });
+  return TRAD_AUTO.encours;
+}
+// Contenu envoyé au serveur (messages, notes, paliers) : anglais rempli à l’envoi s’il est vide
+async function completerAnglais(o, paires){
+  for(const [f, e] of paires){
+    if(!String(o[f] || "").trim() || String(o[e] || "").trim()) continue;
+    try { o[e] = await traduireMachine(o[f]); }
+    catch(er) { return er.message; }
+  }
+  return "";
+}
+function etatTraductionAuto(){
+  if(TRAD_AUTO.encours) return `<span class="trad-auto-etat encours">🌐 Traduction automatique en cours… ${TRAD_AUTO.fait || 0} / ${TRAD_AUTO.total || "…"}</span>`;
+  const n = nbATraduire();
+  return `<span class="trad-auto-etat ${TRAD_AUTO.erreur ? "erreur" : ""}">🌐 Traduction automatique : ${n ? `${n} texte${n>1 ? "s" : ""} à traduire` : "tout est traduit"}${TRAD_AUTO.erreur ? ` · dernière erreur : ${esc(TRAD_AUTO.erreur)}` : ""}</span>
+    ${n ? `<button type="button" class="btn" data-act="trad-auto">Traduire maintenant</button>` : ""}`;
 }
 
 /* ----- Collection : recycler tous les exemplaires en trop ----- */
@@ -11328,7 +11795,8 @@ function admAccueil(){
   const afaire = [
     nonExporte() && !window.claude ? [`Des changements n’ont pas encore été exportés dans config.json : les joueurs ne les voient pas.`, "config-telecharger", "Exporter config.json"] : null,
     absentes ? [`${absentes} carte${absentes>1 ? "s" : ""} manque${absentes>1 ? "nt" : ""} au catalogue du serveur (absentes des paquets et des statistiques).`, "srv-catalogue", "Envoyer le catalogue"] : null,
-    alertes ? [`${alertes} alerte${alertes>1 ? "s" : ""} de surveillance à examiner.`, "onglet:surveillance", "Voir les alertes"] : null
+    alertes ? [`${alertes} alerte${alertes>1 ? "s" : ""} de surveillance à examiner.`, "onglet:surveillance", "Voir les alertes"] : null,
+    !TRAD_AUTO.encours && nbATraduire() ? [`${nbATraduire()} texte${nbATraduire()>1 ? "s" : ""} pas encore traduit${nbATraduire()>1 ? "s" : ""} en anglais${TRAD_AUTO.erreur ? ` (${TRAD_AUTO.erreur})` : ""}.`, "trad-auto", "Traduire maintenant"] : null
   ].filter(Boolean);
   const chiffre = (v, l) => `<div class="tuile"><b>${v}</b><span>${l}</span></div>`;
   const raccourci = (act, ico, t, d) => `<button type="button" class="raccourci-adm" data-act="${act.startsWith("onglet:") ? "onglet" : act}" ${act.startsWith("onglet:") ? `data-id="${act.slice(7)}"` : ""}><span class="ico-raccourci" aria-hidden="true">${ico}</span><b>${t}</b><span>${d}</span></button>`;
@@ -11498,7 +11966,7 @@ function actionMode2v2(act, id){
       }
       lancer2v2(cartes, {...PROG.prep2v2}); return false;
     }
-    case "quete2v2": action(async () => { const r = await rpc("reclamer_quete_2v2", {p_id:id}); if(r && r.erreur) throw new Error(r.erreur); await Promise.all([chargerQuetes2v2(), rafraichir()]); return r; }, r => `+${r.or} or !`); return false;
+    case "quete2v2": action(async () => { const r = await rpc("reclamer_quete_2v2", {p_id:id}); if(r && r.erreur) throw new Error(r.erreur); await Promise.all([chargerQuetes2v2(), rafraichir()]); return r; }, r => `+${r.or} or !`, true); return false;
   }
   return null;
 }
@@ -12183,11 +12651,13 @@ function admTraductions(){
   const filtre = adm.tradFiltre || "tous", rech = (adm.tradRecherche || "").toLowerCase();
   const garde = ([fr]) => (filtre==="tous" || (filtre==="faits" ? !!t[fr] : filtre==="props" ? !t[fr] && !!propositionTraduction(fr) : !t[fr] && !propositionTraduction(fr)))
     && (!rech || fr.toLowerCase().includes(rech) || (t[fr] || "").toLowerCase().includes(rech));
-  const etat = fr => t[fr] ? `<span class="trad-etat ok">✓ Traduit</span>` : propositionTraduction(fr) ? `<button type="button" class="btn-discret trad-etat prop" data-act="trad-accepter-un" data-id="${esc(fr)}">Accepter la proposition</button>` : `<span class="trad-etat manque">À traduire</span>`;
+  const auto = (CONFIG.traductions && CONFIG.traductions.auto_en) || {};
+  const etat = fr => t[fr] && auto[fr] ? `<span class="trad-etat auto" title="Traduction automatique : vérifiez-la, ou corrigez-la directement dans le champ">🌐 Automatique</span>` : t[fr] ? `<span class="trad-etat ok">✓ Traduit</span>` : propositionTraduction(fr) ? `<button type="button" class="btn-discret trad-etat prop" data-act="trad-accepter-un" data-id="${esc(fr)}">Accepter la proposition</button>` : `<span class="trad-etat manque">À traduire</span>`;
   const orphelins = Object.keys(t).filter(fr => !tous.some(([x]) => x===fr));
   return `<div class="adm-page adm-traductions"><h2>Traductions (anglais)</h2>
-    <p class="aide">Le jeu s’affiche en anglais pour les joueurs qui choisissent « English ». Écrivez ici le texte anglais de vos cartes, divinités, saisons et boosters.
-      Un champ vide affiche en grisé ma proposition : acceptez-la, corrigez-la, ou laissez vide pour garder le texte français. Comme le reste, exportez config.json pour publier.</p>
+    <p class="aide">Le jeu s’affiche en anglais pour les joueurs qui choisissent « English ». Tout ce que vous écrivez en français dans l’admin (cartes, divinités, saisons, boosters, illustrations, indices…) est <b>traduit automatiquement</b> en anglais quelques secondes après l’enregistrement, puis juste avant l’export de config.json.
+      Les traductions automatiques sont marquées « 🌐 Automatique » : corrigez-les si besoin, une traduction modifiée à la main n’est plus jamais écrasée. Comme le reste, exportez config.json pour publier.</p>
+    <div class="trad-resume">${etatTraductionAuto()}</div>
     <div class="trad-resume"><b>${faits} / ${tous.length}</b> textes traduits · ${props} proposition${props>1 ? "s" : ""} en attente
       ${props ? `<button type="button" class="btn" data-act="trad-accepter">Accepter toutes les propositions (${props})</button>` : ""}</div>
     <div class="trad-outils">
@@ -12254,7 +12724,7 @@ function admDon(){
     <div class="champs">${champTexte("Lien PayPal (https://www.paypal.biz/…, https://paypal.me/… ou https://www.paypal.com/donate/…)", "don.url", brut)}</div>
     <p class="${brut && !ok ? "don-invalide" : "aide"}">${!brut ? "Aucun lien : le bouton est masqué." : ok ? `✓ Lien valide. <a href="${esc(ok)}" target="_blank" rel="noopener noreferrer">Tester le lien</a>` : "Ce lien n’est pas un lien PayPal en https : le bouton reste masqué."}</p>
     <label class="champ"><span>Message affiché avant le paiement (facultatif ; vide = texte par défaut)</span><textarea data-chemin="don.message" rows="4" placeholder="${esc(TEXTE_DON)}">${esc(d.message || "")}</textarea></label>
-    <label class="champ"><span>🌐 Version anglaise du message (facultative)</span><textarea lang="en" data-chemin="don.message_en" rows="4">${esc(d.message_en || "")}</textarea></label>
+    <label class="champ"><span>🌐 Version anglaise du message (laissez vide : traduite automatiquement)</span><textarea lang="en" data-chemin="don.message_en" rows="4">${esc(d.message_en || "")}</textarea></label>
     <h3>Où trouver le lien ?</h3>
     <ol class="aide"><li>Connectez-vous à PayPal, puis ouvrez <b>paypal.com/donate/buttons</b> (« Créer un bouton Faire un don »).</li>
       <li>Suivez les étapes, puis copiez le <b>lien</b> proposé à la fin (il commence par https://www.paypal.com/donate/?hosted_button_id=…).</li>
@@ -12279,7 +12749,7 @@ function admBeta(){
     <p class="aide">Pendant la bêta, un bandeau apparaît en haut de l’accueil des joueurs, et un tampon « Bêta » sur le logo. Décochez la case à la sortie de la bêta, puis exportez config.json.</p>
     <label class="case"><input type="checkbox" data-beta-actif ${betaActive() ? "checked" : ""}> Afficher la mention « Bêta test »</label>
     <label class="champ"><span>Texte du bandeau (facultatif ; vide = texte par défaut)</span><textarea data-chemin="beta.texte" rows="3" placeholder="${esc(TEXTE_BETA)}">${esc(b.texte || "")}</textarea></label>
-    <label class="champ"><span>🌐 Version anglaise (facultative)</span><textarea lang="en" data-chemin="beta.texte_en" rows="3">${esc(b.texte_en || "")}</textarea></label>
+    <label class="champ"><span>🌐 Version anglaise (laissez vide : traduite automatiquement)</span><textarea lang="en" data-chemin="beta.texte_en" rows="3">${esc(b.texte_en || "")}</textarea></label>
     <h3>Aperçu</h3><div class="apercu-beta">${htmlBandeauBeta() || `<p class="aide">Mention masquée.</p>`}</div>
   </div>`;
 }
