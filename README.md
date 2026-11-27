@@ -351,3 +351,15 @@ Tout ce qui est écrit en français dans l'admin est traduit automatiquement en 
 - **Vérification** : la page Admin › Traductions marque « 🌐 Automatique » chaque traduction faite par la machine. Une traduction corrigée à la main n'est plus jamais écrasée. Les variables comme `{pseudo}` sont conservées.
 
 Aucun script Supabase à exécuter.
+
+## Admin › Animations (banc d'essai)
+
+Une page de l'admin (menu « Le jeu » › Animations) pour déclencher chaque animation sans jouer :
+
+- **Niveau des animations** sur l'appareil : complètes, réduites ou aucune (le même réglage que les joueurs).
+- **Ouverture de booster** : choix du paquet (classique, panthéon, booster spécial), du tracé de déchirure et du contenu (tirage normal, avec une épique, une légendaire ou une illustration alternative).
+- **Pouvoir divin** de chaque divinité, palier de dévotion compris.
+- **Récompenses** : gain de quête, or et encre, paquet offert, carte gagnée, illustration gagnée, ou tout à la fois.
+- **Partie de test** contre l'ordinateur : panthéons, divinité, pouvoir chargé, or, puissance, créatures déjà en jeu de chaque côté, cartes choisies dans la main. Elle n'est jamais enregistrée (ni or, ni quêtes, ni statistiques, ni classement). Un bandeau en haut de l'écran ramène à la page Animations.
+
+Rien n'est envoyé au serveur. Aucun script Supabase à exécuter.

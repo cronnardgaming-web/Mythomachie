@@ -2321,6 +2321,21 @@ body.compact .emplacement-booster .booster{width:96px}
 .gc-nom{margin:0 0 8px;color:#e9dfc9;font-size:16px}
 .gc-texte .btn{margin:0}
 
+
+/* Admin › Animations */
+.adm-animations fieldset{margin:0 0 14px}
+.adm-animations .ligne-anim{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 14px;margin:6px 0}
+.adm-animations .ligne-anim .champ{margin:0;min-width:200px;flex:0 1 auto}
+.adm-animations .ligne-anim .champ.court{min-width:0;width:120px}
+.adm-animations .ligne-anim .btn{margin:0}
+.adm-animations .ligne-anim .aide{margin:0;flex:1;min-width:200px}
+.adm-animations .case{display:inline-flex;align-items:center;gap:6px;padding-bottom:8px}
+.pastilles-main{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+.pastille-main{display:inline-flex;align-items:center;gap:4px;padding:3px 4px 3px 10px;border-radius:999px;background:var(--panel-2, #ece6d8);border:1px solid var(--line, #d6cdb8);font-size:13px}
+.pastille-main .btn-discret{padding:0 6px;min-height:0}
+#bandeau-test{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:80;display:flex;align-items:center;gap:12px;padding:6px 8px 6px 16px;border-radius:999px;
+  background:rgba(25,20,35,.92);color:#f3e6c8;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.45);border:1px solid rgba(243,215,145,.5)}
+#bandeau-test .btn{margin:0;padding:4px 12px;min-height:0;font-size:13px;background:#f3d791;color:#2a1d0a;border-color:#f3d791}
 /* Traductions automatiques */
 .trad-auto-etat{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2)}
 .trad-auto-etat.encours{color:#2f6db3}
@@ -4718,14 +4733,14 @@ function renderAdmin(){
     cle = actif.dataset.chemin ? `[data-chemin="${actif.dataset.chemin}"]` : actif.dataset.adm ? `[data-adm="${actif.dataset.adm}"]` : null;
     try { pos = actif.selectionStart; } catch(e) { pos = null; }
   }
-  const pages = {accueil:admAccueil, cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => PROG.fiche ? admFicheJoueur() : admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons, messages:admMessages, notes:admNotes, bruitages:admBruitages, "cadeaux-auto":admCadeauxAuto, traductions:admTraductions, don:admDon, beta:admBeta, achats:admAchats};
+  const pages = {accueil:admAccueil, cartes:admCartes, regles:admRegles, heros:admHeros, factions:admFactions, donnees:admDonnees, serveur:admServeur, stats:() => admStats("resume"), "stats-heros":() => admStats("heros"), "stats-cartes":() => admStats("cartes"), "stats-joueurs":() => PROG.fiche ? admFicheJoueur() : admStats("joueurs"), musiques:admMusiques, surveillance:admSurveillance, boosters:admBoosters, saisons:admSaisons, messages:admMessages, notes:admNotes, bruitages:admBruitages, "cadeaux-auto":admCadeauxAuto, traductions:admTraductions, animations:admAnimations, don:admDon, beta:admBeta, achats:admAchats};
   // Mémoriser la position des listes et de la page avant de réafficher
   const defil = {}; app.querySelectorAll(".adm-items, .adm-menu, .grille-choix").forEach((el, k) => { defil[el.className + k] = el.scrollTop; });
   const yPage = window.scrollY;
   const nbAlertes = PROG.surv && PROG.surv.alertes ? PROG.surv.alertes.filter(a => !a.traite).length : 0;
   const groupes = [
     ["Accueil", [["accueil","Tableau de bord"]]],
-    ["Le jeu", [["cartes","Cartes"],["heros","Héros et divinités"],["factions","Panthéons"],["regles","Règles"],["traductions","Traductions"]]],
+    ["Le jeu", [["cartes","Cartes"],["heros","Héros et divinités"],["factions","Panthéons"],["regles","Règles"],["traductions","Traductions"],["animations","Animations"]]],
     ["Récompenses", [["boosters","Boosters"],["saisons","Saisons"], ...(PROG.actif ? [["cadeaux-auto","Cadeaux automatiques"]] : [])]],
     ...(PROG.actif ? [["Joueurs", [["stats-joueurs","Liste des joueurs"],["messages","Boîte aux lettres"],["surveillance","Surveillance", nbAlertes]]],
                       ["Statistiques", [["stats","Vue d’ensemble"],["stats-heros","Héros"],["stats-cartes","Cartes"]]]] : []),
@@ -5054,6 +5069,7 @@ function idUnique(prefixe){
 }
 
 function actionAdmin(act, id, el){
+  if(act.startsWith("anim-")){ actionAnimations(act, id); return; }
   if(act.startsWith("srv-")){ actionServeur(act); return; }
   if(act.startsWith("mus-")){ actionMusiques(act, id); return; }
   if(act.startsWith("variante-") || act.startsWith("booster-") || act==="carte-promo" || act==="carte-date-effacer"){ actionVariantes(act, id); return; }
@@ -6369,6 +6385,7 @@ async function action(fn, succes, fete){
 
 // ----- Fin de partie : or et quête
 async function verifierRecompense(){
+  if(S && S.test) return;   // partie de test de l’admin : rien n’est enregistré
   if(S && est2v2()) return verifierRecompense2v2();
   if(!PROG.pret || !S || S.vainqueur===null || !S.idPartie || S.tuto || est2v2()) return;
   if(PROG.recompensees.has(S.idPartie)) return;
@@ -11364,6 +11381,7 @@ function ouvrirBoosterAnime({id, source, appel, titre, faction, apres}){
    lueur qui s’échappe de l’ouverture et miettes de papier.
    ============================================================ */
 const TYPES_DECHIRURE = ["bande", "coin", "biais", "derive"];
+let TYPE_DECHIRURE_FORCE = null;   // banc d’essai de l’admin : impose un tracé pour la prochaine ouverture
 function traceDechirure(L, H, type){
   const R = Math.random, miroir = R() < .5;
   let A, B;
@@ -11398,7 +11416,8 @@ function traceDechirure(L, H, type){
   return {type, ligne:pts, haut, bas, S, E};
 }
 async function dechirerBooster(boite, L, H, ms){
-  const R = Math.random, type = TYPES_DECHIRURE[Math.floor(R()*TYPES_DECHIRURE.length)];
+  const R = Math.random, type = TYPE_DECHIRURE_FORCE || TYPES_DECHIRURE[Math.floor(R()*TYPES_DECHIRURE.length)];
+  TYPE_DECHIRURE_FORCE = null;
   const t = traceDechirure(L, H, type);
   const poly = l => `polygon(${l.map(p => `${p[0].toFixed(1)}px ${p[1].toFixed(1)}px`).join(",")})`;
   const d = "M" + t.ligne.map(p => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" L");
@@ -11446,8 +11465,8 @@ async function dechirerBooster(boite, L, H, ms){
    POUVOIR DIVIN : activation sur tout l’écran
    Flash, onde de choc, voile, tremblement et bannière du pouvoir
    ============================================================ */
-function cinematiquePouvoir(ev, c, niveau){
-  const j = S && S.joueurs && S.joueurs[ev.j]; if(!j) return;
+function cinematiquePouvoir(ev, c, niveau, impose){
+  const j = impose || (S && S.joueurs && S.joueurs[ev.j]); if(!j) return;
   const h = heroDe(j) || {}, f = FACTIONS[j.heros] || {}, coul = f.couleur || "#e9c46a";
   const rayon = Math.hypot(Math.max(c.x, innerWidth - c.x), Math.max(c.y, innerHeight - c.y)) * 1.05;
   const couche = document.createElement("div");
@@ -11741,6 +11760,182 @@ function etatTraductionAuto(){
     ${n ? `<button type="button" class="btn" data-act="trad-auto">Traduire maintenant</button>` : ""}`;
 }
 
+
+/* ============================================================
+   ADMIN › ANIMATIONS : banc d’essai de toutes les animations
+   Rien n’est envoyé au serveur ni enregistré (sauf la partie de
+   test, qui se joue normalement mais n’est jamais comptée).
+   ============================================================ */
+adm.anim = adm.anim || {pack:"", dechirure:"hasard", contenu:"normal", heros:"", carte:"", variante:"", or:15,
+  moi:"", palier:1, adv:"", pouvoir:true, orDepart:20, puissance:10, creaAdv:3, creaMoi:2, main:[], ajout:""};
+function listeHerosAnim(){
+  const l = [];
+  for(const f of Object.keys(FACTIONS)) for(const p of [0, 1, 2]){
+    const h = heroDe({heros:f, palier:p}); if(!h || !h.nom) continue;
+    const cle = cleHeros(f, p); if(l.some(x => x[0]===cle)) continue;
+    l.push([cle, `${h.nom} (${FACTIONS[f].nom}, ${p===0 ? "départ" : p===1 ? "dévotion ★" : "dévotion ★★"}) · ${(h.pouvoir && h.pouvoir.nom) || "pouvoir"}`, f, p]);
+  }
+  return l;
+}
+function admAnimations(){
+  const A = adm.anim, niv = reglageAnimations();
+  const fac = Object.entries(FACTIONS);
+  if(!A.moi) A.moi = fac[0] ? fac[0][0] : ""; if(!A.adv) A.adv = fac[1] ? fac[1][0] : A.moi;
+  const heros = listeHerosAnim(); if(!A.heros && heros[0]) A.heros = heros[0][0];
+  const cartes = trierCartes(Object.keys(CARTES).filter(k => estCollectionnableAdmin(CARTES[k])));
+  const variantes = Object.entries(CONFIG.variantes || {}).filter(([, v]) => v && CARTES[v.carte]);
+  const opt = (v, l, sel) => `<option value="${esc(v)}" ${String(sel)===String(v) ? "selected" : ""}>${esc(l)}</option>`;
+  const nomCarte = k => `${CARTES[k].nom} (${(FACTIONS[CARTES[k].faction] || {}).nom || "neutre"}, ${CARTES[k].rarete || "commune"})`;
+  const paquets = [["", "Paquet classique"], ...fac.map(([k, f]) => [k, `Paquet ${f.m}`]), ...Object.entries(CONFIG.boosters || {}).map(([b, x]) => ["b:" + b, x.nom || "Booster spécial"])];
+  return `<div class="adm-page adm-animations"><h2>Animations</h2>
+    <p class="aide">Déclenchez chaque animation sans jouer de partie. Rien n’est envoyé au serveur : aucune carte, aucun or, aucune statistique.</p>
+    <fieldset><legend>Réglage des animations (sur cet appareil)</legend>
+      <div class="ligne-anim"><label class="champ"><span>Niveau</span><select data-anim="niveau">${opt("completes", "Complètes", niv)}${opt("reduites", "Réduites", niv)}${opt("aucune", "Aucune", niv)}</select></label>
+      <p class="aide">C’est le même réglage que celui des joueurs : testez les trois niveaux.</p></div>
+    </fieldset>
+    <fieldset><legend>Ouverture de booster</legend>
+      <div class="ligne-anim">
+        <label class="champ"><span>Paquet</span><select data-anim="pack">${paquets.map(([v, l]) => opt(v, l, A.pack)).join("")}</select></label>
+        <label class="champ"><span>Déchirure</span><select data-anim="dechirure">${[["hasard","Au hasard"],["bande","Bande en haut"],["coin","Coin arraché"],["biais","En biais"],["derive","Qui plonge au milieu"]].map(([v, l]) => opt(v, l, A.dechirure)).join("")}</select></label>
+        <label class="champ"><span>Contenu</span><select data-anim="contenu">${[["normal","Tirage normal"],["epique","Avec une épique"],["legendaire","Avec une légendaire"],["illustration","Avec une illustration alternative"]].map(([v, l]) => opt(v, l, A.contenu)).join("")}</select></label>
+        <button type="button" class="btn" data-act="anim-booster">Ouvrir le paquet</button>
+      </div>
+    </fieldset>
+    <fieldset><legend>Pouvoir divin</legend>
+      <div class="ligne-anim">
+        <label class="champ"><span>Divinité</span><select data-anim="heros">${heros.map(([c, l]) => opt(c, l, A.heros)).join("")}</select></label>
+        <button type="button" class="btn" data-act="anim-pouvoir">Déclencher le pouvoir</button>
+      </div>
+    </fieldset>
+    <fieldset><legend>Récompenses</legend>
+      <div class="ligne-anim">
+        <label class="champ court"><span>Or</span><input type="number" min="1" max="9999" data-anim="or" value="${A.or}"></label>
+        <button type="button" class="btn second" data-act="anim-gain" data-id="or">Gain de quête</button>
+        <button type="button" class="btn second" data-act="anim-gain" data-id="encre">Or et encre</button>
+        <button type="button" class="btn second" data-act="anim-gain" data-id="paquet">Paquet offert</button>
+      </div>
+      <div class="ligne-anim">
+        <label class="champ"><span>Carte gagnée</span><select data-anim="carte"><option value="">Au hasard</option>${cartes.map(k => opt(k, nomCarte(k), A.carte)).join("")}</select></label>
+        <button type="button" class="btn" data-act="anim-carte">Réclamer la carte</button>
+      </div>
+      <div class="ligne-anim">
+        <label class="champ"><span>Illustration gagnée</span><select data-anim="variante" ${variantes.length ? "" : "disabled"}>${variantes.length ? variantes.map(([v, x]) => opt(v, `${x.nom || "Illustration"} (${CARTES[x.carte].nom})`, A.variante)).join("") : `<option>Aucune illustration alternative</option>`}</select></label>
+        <button type="button" class="btn" data-act="anim-variante" ${variantes.length ? "" : "disabled"}>Réclamer l’illustration</button>
+        <button type="button" class="btn second" data-act="anim-carte" data-id="tout">Carte + illustration + or</button>
+      </div>
+    </fieldset>
+    <fieldset><legend>Partie de test (animations en jeu)</legend>
+      <p class="aide">Une partie contre l’ordinateur, prête pour tester les attaques, les sorts, les combos, les morts, le pouvoir divin et la fin de partie. Elle n’est jamais enregistrée : ni or, ni quêtes, ni statistiques, ni classement.</p>
+      <div class="ligne-anim">
+        <label class="champ"><span>Mon panthéon</span><select data-anim="moi">${fac.map(([k, f]) => opt(k, f.nom, A.moi)).join("")}</select></label>
+        <label class="champ"><span>Ma divinité</span><select data-anim="palier">${[0, 1, 2].map(p => { const h = heroDe({heros:A.moi, palier:p}); return opt(p, h && h.nom ? h.nom : `Palier ${p}`, A.palier); }).join("")}</select></label>
+        <label class="champ"><span>Adversaire</span><select data-anim="adv">${fac.map(([k, f]) => opt(k, f.nom, A.adv)).join("")}</select></label>
+      </div>
+      <div class="ligne-anim">
+        <label class="case"><input type="checkbox" data-anim="pouvoir" ${A.pouvoir ? "checked" : ""}> Pouvoir divin chargé</label>
+        <label class="champ court"><span>Or</span><input type="number" min="0" max="99" data-anim="orDepart" value="${A.orDepart}"></label>
+        <label class="champ court"><span>Puissance</span><input type="number" min="0" max="99" data-anim="puissance" value="${A.puissance}"></label>
+        <label class="champ court"><span>Mes créatures</span><input type="number" min="0" max="${REGLES.plateauMax || 5}" data-anim="creaMoi" value="${A.creaMoi}"></label>
+        <label class="champ court"><span>Créatures adverses</span><input type="number" min="0" max="${REGLES.plateauMax || 5}" data-anim="creaAdv" value="${A.creaAdv}"></label>
+      </div>
+      <div class="ligne-anim">
+        <label class="champ"><span>Cartes à mettre dans ma main</span><select data-anim="ajout"><option value="">Choisir une carte…</option>${cartes.map(k => opt(k, nomCarte(k), A.ajout)).join("")}</select></label>
+        <button type="button" class="btn second" data-act="anim-main-ajouter" ${A.ajout ? "" : "disabled"}>Ajouter</button>
+      </div>
+      ${A.main.length ? `<div class="pastilles-main">${A.main.map((k, i) => `<span class="pastille-main">${esc(CARTES[k] ? CARTES[k].nom : k)}<button type="button" class="btn-discret" data-act="anim-main-retirer" data-id="${i}" aria-label="Retirer">✕</button></span>`).join("")}</div>` : ""}
+      <button type="button" class="btn" data-act="anim-test">Lancer la partie de test</button>
+    </fieldset>
+  </div>`;
+}
+function tirageTest(A){
+  const f = A.pack && FACTIONS[A.pack] ? A.pack : null;
+  const pool = Object.keys(CARTES).filter(k => estCollectionnableAdmin(CARTES[k]) && !CARTES[k].promo && (!f || CARTES[k].faction===f));
+  const de = r => pool.filter(k => (CARTES[k].rarete || "commune")===r);
+  const hasard = l => l.length ? l[Math.floor(Math.random()*l.length)] : pool[Math.floor(Math.random()*pool.length)];
+  const t = [];
+  for(let i = 0; i<(PROG.eco ? PROG.eco.cartes_paquet : 5) - 1; i++) t.push(hasard(Math.random()<.75 ? de("commune") : de("rare")));
+  if(A.contenu==="epique") t.push(hasard(de("epique")));
+  else if(A.contenu==="legendaire") t.push(hasard(de("legendaire")));
+  else if(A.contenu==="illustration"){ const v = Object.entries(CONFIG.variantes || {}).filter(([, x]) => x && CARTES[x.carte]); t.push(v.length ? "v:" + (A.variante && CONFIG.variantes[A.variante] ? A.variante : v[Math.floor(Math.random()*v.length)][0]) : hasard(de("rare"))); }
+  else t.push(hasard(Math.random()<.8 ? de("rare") : de("epique")));
+  return t.filter(Boolean);
+}
+function actionAnimations(act, id){
+  const A = adm.anim;
+  if(act==="anim-booster"){
+    if(PROG.occupe) return;
+    if(!niveauAnim()) return erreur("Les animations sont désactivées : choisissez « Complètes » ou « Réduites ».");
+    const f = A.pack && FACTIONS[A.pack] ? A.pack : null, bid = String(A.pack).startsWith("b:") ? A.pack.slice(2) : null, bs = bid && CONFIG.boosters ? CONFIG.boosters[bid] : null;
+    TYPE_DECHIRURE_FORCE = A.dechirure==="hasard" ? null : A.dechirure;
+    const cartes = tirageTest(A);
+    ouvrirBoosterAnime({id:A.pack || "", source:null, faction:f, titre:`${bs ? (bs.nom || "Booster spécial") : f ? `Paquet ${FACTIONS[f].m}` : "Paquet classique"} (test)`,
+      appel:async () => cartes});
+    return;
+  }
+  if(act==="anim-pouvoir"){
+    if(!niveauAnim()) return erreur("Les animations sont désactivées : choisissez « Complètes » ou « Réduites ».");
+    const h = listeHerosAnim().find(x => x[0]===A.heros); if(!h) return;
+    cinematiquePouvoir({j:0}, pointSource(), niveauAnim(), {heros:h[2], palier:h[3]});
+    jouerSon("pouvoir", {fixe:true});
+    return;
+  }
+  if(act==="anim-gain"){
+    const n = Math.max(1, Number(A.or) || 15);
+    celebrerGain(id==="encre" ? {or:n, encre:Math.round(n/2)} : id==="paquet" ? {paquets:["classique"]} : {or:n});
+    return;
+  }
+  const auHasard = () => { const l = Object.keys(CARTES).filter(k => estCollectionnableAdmin(CARTES[k])); return l[Math.floor(Math.random()*l.length)]; };
+  if(act==="anim-carte"){
+    const carte = A.carte || auHasard();
+    if(id==="tout"){ const v = Object.keys(CONFIG.variantes || {}).find(x => CONFIG.variantes[x] && CARTES[CONFIG.variantes[x].carte]); celebrerGain({or:Math.max(1, Number(A.or) || 50), cartes:[carte], variantes:v ? [A.variante || v] : []}); }
+    else celebrerGain({cartes:[carte]});
+    return;
+  }
+  if(act==="anim-variante"){ if(A.variante || Object.keys(CONFIG.variantes || {})[0]) celebrerGain({variantes:[A.variante || Object.keys(CONFIG.variantes)[0]]}); return; }
+  if(act==="anim-main-ajouter"){ if(A.ajout && A.main.length < 10){ A.main.push(A.ajout); A.ajout = ""; } return renderAdmin(); }
+  if(act==="anim-main-retirer"){ A.main.splice(Number(id), 1); return renderAdmin(); }
+  if(act==="anim-test"){ lancerPartieTest(); return; }
+}
+// Partie de test : jamais enregistrée, plateau préparé
+function lancerPartieTest(){
+  const A = adm.anim, moi = A.moi, adv = A.adv;
+  const d1 = deckDuPantheon(moi), d2 = deckDuPantheon(adv);
+  if(!d1 || !d2) return erreur("Ces panthéons n’ont pas assez de cartes pour composer un deck.");
+  nouvellePartie("ia", [d1, d2], [null, null]);
+  S.test = true; S.courant = 0;
+  const j = S.joueurs[0], o = S.joueurs[1], max = REGLES.plateauMax || 5;
+  j.nom = "Admin (test)"; j.palier = Number(A.palier) || 0;
+  j.or = Math.max(0, Number(A.orDepart) || 0); j.combat = Math.max(0, Number(A.puissance) || 0);
+  if(A.pouvoir){ if(est2v2()) S.jauge[j.eq] = REGLES.seuilPouvoir; else j.morts = REGLES.seuilPouvoir; }
+  const creas = f => Object.keys(CARTES).filter(k => CARTES[k].type==="creature" && CARTES[k].faction===f && !CARTES[k].jeton && estCollectionnableAdmin(CARTES[k]));
+  const poser = (jj, f, n) => { const l = creas(f); for(let i = 0; i<Math.min(max, n) && l.length; i++){ const c = creature(inst(l[Math.floor(Math.random()*l.length)])); c.peutAttaquer = true; jj.plateau.push(c); } };
+  poser(j, moi, Number(A.creaMoi) || 0); poser(o, adv, Number(A.creaAdv) || 0);
+  for(const k of A.main) if(CARTES[k]) j.main.push(inst(k));
+  log("Partie de test : rien n’est enregistré.");
+  ui.ecran = "jeu"; Object.assign(ui, {attaquant:null, armeEnAttente:null, choixPierre:null, aiEnCours:false, couvert:false});
+  render();
+  afficherBandeauTest();
+}
+function afficherBandeauTest(){
+  let b = document.getElementById("bandeau-test");
+  if(!b){
+    b = document.createElement("div"); b.id = "bandeau-test"; b.setAttribute("role", "status");
+    b.innerHTML = `<span>🧪 Partie de test : rien n’est enregistré</span><button type="button" class="btn second" data-test-retour>Retour aux animations</button>`;
+    document.body.appendChild(b);
+    b.querySelector("[data-test-retour]").addEventListener("click", () => {
+      S = null; ui.ecran = "admin"; adm.onglet = "animations"; b.remove(); render();
+    });
+  }
+  const verif = setInterval(() => { if(!S || !S.test){ b.remove(); clearInterval(verif); } }, 1000);
+}
+document.addEventListener("change", e => {
+  const el = e.target; if(!el || !el.dataset || !el.dataset.anim || ui.ecran!=="admin") return;
+  const A = adm.anim, k = el.dataset.anim;
+  if(k==="niveau"){ try { localStorage.setItem("animations", el.value); } catch(er) {} erreur(`Animations : ${el.options[el.selectedIndex].text.toLowerCase()}.`); return renderAdmin(); }
+  A[k] = el.type==="checkbox" ? el.checked : el.type==="number" ? Number(el.value) : el.value;
+  if(k==="moi" || k==="ajout") renderAdmin();
+});
+
 /* ----- Collection : recycler tous les exemplaires en trop ----- */
 function surplusCollection(){
   const prix = (PROG.eco && PROG.eco.encre_recyclage) || {commune:5, rare:20, epique:100, legendaire:400};
@@ -11777,7 +11972,7 @@ async function recyclerToutSurplus(){
 }
 
 /* ----- Administration : tableau de bord ----- */
-const ICONES_ADMIN = {accueil:"🏠", achats:"💶", beta:"🧪", don:"❤", traductions:"🌐", cartes:"🃏", heros:"👑", factions:"🏛", regles:"📜", boosters:"🎁", saisons:"🗓", "cadeaux-auto":"🎀",
+const ICONES_ADMIN = {animations:"🎬", accueil:"🏠", achats:"💶", beta:"🧪", don:"❤", traductions:"🌐", cartes:"🃏", heros:"👑", factions:"🏛", regles:"📜", boosters:"🎁", saisons:"🗓", "cadeaux-auto":"🎀",
   "stats-joueurs":"👥", messages:"✉", surveillance:"🛡", stats:"📊", "stats-heros":"⚔", "stats-cartes":"📈", musiques:"🎵", bruitages:"🔊",
   notes:"📰", donnees:"💾", serveur:"🖥"};
 const marquerModifie = () => { try { localStorage.setItem("config-modifiee", String(Date.now())); } catch(e) {} };
