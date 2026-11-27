@@ -2322,6 +2322,176 @@ body.compact .emplacement-booster .booster{width:96px}
 .gc-texte .btn{margin:0}
 
 
+
+/* ===== Écran VS ===== */
+#ecran-vs{position:fixed;inset:0;z-index:74;pointer-events:none;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;align-items:center}
+.vs-fond{position:absolute;inset:0;background:radial-gradient(70% 90% at 50% 50%, rgba(20,14,30,.55), rgba(4,4,10,.9))}
+.vs-camp{position:relative;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3vh;padding:4vh 6vw}
+.vs-camp.gauche{background:linear-gradient(100deg, color-mix(in srgb, var(--fc) 55%, #0b0814) 0, color-mix(in srgb, var(--fc) 25%, #0b0814) 70%, transparent 100%);clip-path:polygon(0 0,100% 0,88% 100%,0 100%)}
+.vs-camp.droite{background:linear-gradient(260deg, color-mix(in srgb, var(--fc) 55%, #0b0814) 0, color-mix(in srgb, var(--fc) 25%, #0b0814) 70%, transparent 100%);clip-path:polygon(12% 0,100% 0,100% 100%,0 100%)}
+.vs-joueur{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.vs-portrait{width:min(30vh,22vw);height:min(30vh,22vw);border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#1a1426;color:#fff;
+  border:4px solid color-mix(in srgb, var(--fc) 55%, #f3d791);box-shadow:0 0 50px color-mix(in srgb, var(--fc) 80%, transparent), 0 10px 30px rgba(0,0,0,.6)}
+.vs-portrait img{width:100%;height:100%;object-fit:cover}
+.vs-portrait .sym{font-size:min(14vh,10vw)}
+.vs-camp:has(.vs-joueur + .vs-joueur) .vs-portrait{width:min(19vh,16vw);height:min(19vh,16vw)}
+.vs-camp:has(.vs-joueur + .vs-joueur) .vs-portrait .sym{font-size:min(9vh,7vw)}
+.vs-nom{font-family:Cinzel,serif;font-weight:700;font-size:clamp(18px,2.6vw,32px);color:#fff4d6;text-shadow:0 2px 8px rgba(0,0,0,.8)}
+.vs-dieu{font-size:clamp(13px,1.4vw,17px);color:#e6d6b0;letter-spacing:.08em}
+.vs-cote{font-size:13px;color:#f3d791;background:rgba(0,0,0,.35);border:1px solid rgba(243,215,145,.4);border-radius:999px;padding:1px 10px}
+.vs-centre{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center}
+.vs-mot{font-family:"Cinzel Decorative",Cinzel,serif;font-size:clamp(70px,13vw,170px);line-height:1;color:#fff1c2;
+  text-shadow:0 0 30px rgba(255,190,70,.95), 0 0 80px rgba(255,120,40,.7), 0 6px 0 #6a3a08}
+.vs-eclair{position:absolute;left:50%;top:50%;width:60vmin;height:60vmin;margin:-30vmin 0 0 -30vmin;border-radius:50%;
+  background:radial-gradient(circle, #fff 0, rgba(255,230,160,.9) 18%, rgba(255,160,60,.35) 45%, transparent 70%);mix-blend-mode:screen}
+.vs-sous{margin-top:6px;font-family:Cinzel,serif;font-size:clamp(13px,1.5vw,18px);letter-spacing:.3em;text-transform:uppercase;color:#f3d791;text-shadow:0 2px 6px #000}
+@media (max-height:500px){ .vs-camp{gap:1.5vh;padding:2vh 4vw} .vs-cote{font-size:11px} }
+
+/* ===== Bannière de tour avec portrait ===== */
+#banniere .bt-ligne{display:flex;align-items:center;gap:18px}
+#banniere .bt-ligne, #banniere .bt-textes, #banniere .bt-portrait .sym{padding:0;background:none;font-size:inherit;text-shadow:none}
+#banniere .bt-portrait .sym{color:#fff;line-height:1}
+#banniere .bt-textes{display:flex;flex-direction:column;align-items:center;gap:2px}
+#banniere .bt-portrait{flex:0 0 auto;box-sizing:border-box;aspect-ratio:1;width:clamp(54px,7vw,84px);height:auto;border-radius:50%;overflow:hidden;display:grid;place-items:center;font-size:clamp(28px,3.5vw,42px);
+  background:#1a1426;color:#fff;border:3px solid color-mix(in srgb, var(--fc) 55%, var(--or));box-shadow:0 0 24px color-mix(in srgb, var(--fc) 70%, transparent);padding:0}
+#banniere .bt-portrait img{width:100%;height:100%;object-fit:cover}
+#banniere .banniere-bande{position:relative;overflow:hidden}
+#banniere.montre .banniere-bande::after{content:"";position:absolute;top:0;bottom:0;left:-30%;width:25%;pointer-events:none;
+  background:linear-gradient(100deg, transparent, rgba(255,240,200,.55), transparent);animation:bt-balayage 1.1s .25s ease-out both}
+@keyframes bt-balayage{from{transform:translateX(0)}to{transform:translateX(560%)}}
+#banniere.montre .bt-portrait{animation:bt-portrait .7s cubic-bezier(.2,.8,.3,1.3) both}
+@keyframes bt-portrait{from{transform:scale(.3) rotate(-30deg);opacity:0}to{transform:none;opacity:1}}
+
+/* ===== Morts par panthéon ===== */
+.fx-part{position:fixed;pointer-events:none;z-index:31}
+.fx-part.glace{width:0;height:0;border-style:solid;border-color:transparent transparent rgba(205,236,255,.95) transparent;filter:drop-shadow(0 0 4px rgba(160,215,255,.9))}
+.fx-part.sable{border-radius:50%;background:#d9b46a;box-shadow:0 0 2px rgba(120,80,20,.6)}
+.fx-part.lotus{border-radius:50% 50% 50% 50% / 80% 80% 20% 20%;background:radial-gradient(circle at 50% 30%, hsl(var(--h) 90% 92%), hsl(var(--h) 75% 70%) 60%, hsl(var(--h) 60% 55%));box-shadow:0 0 8px hsl(var(--h) 90% 75% / .8)}
+.fx-fissures{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
+.fx-fissures path{fill:none;stroke:#2b2520;stroke-width:2.2;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 1px #fff)}
+
+/* ===== Entrées par rareté ===== */
+.arrivee-epique{animation:arrivee-epique .62s cubic-bezier(.5,0,.75,.4) both !important}
+@keyframes arrivee-epique{0%{opacity:0;transform:translateY(-90px) scale(1.25)}70%{opacity:1;transform:translateY(4px) scale(1.04,.94)}85%{transform:translateY(-3px) scale(.98,1.03)}100%{opacity:1;transform:none}}
+.arrivee-legendaire{animation:arrivee-legendaire 1s cubic-bezier(.4,0,.6,1) both !important}
+@keyframes arrivee-legendaire{0%{opacity:0;transform:translateY(-140px) scale(1.4);filter:brightness(3)}45%{opacity:1;transform:translateY(6px) scale(1.06,.92);filter:brightness(2.2)}60%{transform:translateY(-4px) scale(.98,1.03);filter:brightness(1.6)}100%{opacity:1;transform:none;filter:none}}
+.fx-colonne{position:fixed;top:0;z-index:30;pointer-events:none;transform-origin:50% 100%;
+  background:linear-gradient(90deg, transparent, rgba(255,226,140,.5) 25%, rgba(255,250,220,.95) 50%, rgba(255,226,140,.5) 75%, transparent);
+  -webkit-mask:linear-gradient(180deg, transparent, #000 30%);mask:linear-gradient(180deg, transparent, #000 30%);mix-blend-mode:screen}
+
+/* ===== Gros dégâts ===== */
+.flottant.degat.fort{scale:1.35}
+.flottant.degat.enorme{scale:1.75;text-shadow:0 0 10px rgba(255,90,40,.9), 0 2px 0 #000}
+.flottant.degat.titan{scale:2.3;color:#ff3b1f;text-shadow:0 0 14px rgba(255,60,0,1), 0 0 30px rgba(255,120,0,.8), 0 3px 0 #000}
+
+/* ===== Tension : 10 PV ou moins ===== */
+.medaillon.en-danger, .demo-medaillon.en-danger{animation:battement 1.05s ease-in-out infinite}
+.medaillon.en-danger.touche{animation:secousse .76s ease, battement 1.05s ease-in-out infinite}
+@keyframes battement{0%,100%{scale:1;filter:drop-shadow(0 0 0 rgba(220,30,30,0))}12%{scale:1.07;filter:drop-shadow(0 0 14px rgba(230,30,30,.95))}24%{scale:1}36%{scale:1.04;filter:drop-shadow(0 0 9px rgba(230,30,30,.7))}55%{scale:1;filter:drop-shadow(0 0 0 rgba(220,30,30,0))}}
+#vignette-danger{position:fixed;inset:0;z-index:24;pointer-events:none;opacity:0;transition:opacity .6s;
+  background:radial-gradient(ellipse at center, transparent 55%, rgba(170,10,10,.38) 85%, rgba(120,0,0,.6) 100%)}
+#vignette-danger.actif{opacity:1;animation:vignette-battement 1.05s ease-in-out infinite}
+@keyframes vignette-battement{0%,100%{opacity:.55}12%{opacity:1}24%{opacity:.6}36%{opacity:.85}55%{opacity:.55}}
+
+/* ===== Jauge de pouvoir presque pleine : crépitement ===== */
+.crepitement{position:absolute;inset:-8px;border-radius:50%;pointer-events:none;z-index:2}
+.crepitement::before{content:"";position:absolute;inset:0;border-radius:50%;border:2px dashed rgba(170,220,255,.9);filter:drop-shadow(0 0 6px rgba(120,190,255,.95));animation:crepite-tour 1.6s linear infinite, crepite-flash .23s steps(2) infinite}
+.crepitement i{position:absolute;left:50%;top:50%;width:2px;height:26%;background:linear-gradient(#fff, rgba(140,200,255,0));border-radius:2px;transform-origin:50% 0;filter:drop-shadow(0 0 4px #9fd2ff);opacity:0;animation:crepite-eclair 1.3s infinite}
+.crepitement i:nth-child(1){--r:20deg;animation-delay:.1s}.crepitement i:nth-child(2){--r:150deg;animation-delay:.55s}.crepitement i:nth-child(3){--r:260deg;animation-delay:.95s}
+@keyframes crepite-tour{to{transform:rotate(360deg)}}
+@keyframes crepite-flash{0%{opacity:.55}100%{opacity:1}}
+@keyframes crepite-eclair{0%,100%{opacity:0;transform:rotate(var(--r)) translateY(46%) scaleY(.4)}6%{opacity:1;transform:rotate(var(--r)) translateY(40%) scaleY(1) skewX(14deg)}12%{opacity:0;transform:rotate(calc(var(--r) + 8deg)) translateY(40%) scaleY(.9) skewX(-10deg)}}
+
+/* ===== Coup fatal ===== */
+.fx-fatal{position:fixed;inset:0;z-index:72;pointer-events:none;
+  background:radial-gradient(circle at var(--x, 50%) var(--y, 40%), rgba(255,255,255,.75) 0, rgba(255,220,160,.25) 8%, transparent 22%, rgba(0,0,0,.55) 70%, rgba(0,0,0,.8) 100%)}
+
+/* ===== Scènes de fin ===== */
+#couche.fin-cine{background:transparent}
+#scene-fin{position:fixed;inset:0;z-index:19;pointer-events:none;overflow:hidden}
+#scene-fin.demo{z-index:85}
+#scene-fin .sf-fond{position:absolute;inset:0;animation:sf-entree .8s ease-out both}
+#scene-fin.victoire .sf-fond{background:radial-gradient(60% 60% at 50% 22%, rgba(120,84,20,.85), rgba(14,10,6,.92) 75%)}
+#scene-fin.egalite .sf-fond{background:radial-gradient(60% 60% at 50% 22%, rgba(70,70,90,.85), rgba(10,10,16,.92) 75%)}
+#scene-fin.defaite .sf-fond{background:radial-gradient(60% 60% at 50% 22%, rgba(60,14,14,.85), rgba(6,4,6,.95) 75%)}
+@keyframes sf-entree{from{opacity:0}to{opacity:1}}
+#scene-fin .sf-rayons{position:absolute;left:calc(50% - 80vmax);top:calc(22% - 80vmax);width:160vmax;height:160vmax;opacity:.75;
+  background:repeating-conic-gradient(from 0deg, rgba(255,214,120,.24) 0 5deg, transparent 5deg 18deg);
+  -webkit-mask:radial-gradient(closest-side, #000 6%, transparent 60%);mask:radial-gradient(closest-side, #000 6%, transparent 60%);animation:gc-tourne 40s linear infinite}
+#scene-fin.egalite .sf-rayons{background:repeating-conic-gradient(from 0deg, rgba(200,200,230,.18) 0 5deg, transparent 5deg 18deg)}
+#scene-fin .sf-heros{position:absolute;left:50%;top:4vh;transform:translateX(-50%)}
+#scene-fin .sf-portrait{display:grid;place-items:center;width:min(26vh,30vw);height:min(26vh,30vw);border-radius:50%;overflow:hidden;background:#1a1426;color:#fff;font-size:min(13vh,15vw);
+  border:4px solid color-mix(in srgb, var(--fc) 50%, #f3d791)}
+#scene-fin .sf-portrait img{width:100%;height:100%;object-fit:cover}
+#scene-fin.victoire .sf-portrait{animation:sf-triomphe 1.1s cubic-bezier(.2,.8,.3,1.2) both, sf-halo 2.4s 1.1s ease-in-out infinite}
+@keyframes sf-triomphe{0%{transform:translateY(40px) scale(.6);opacity:0;box-shadow:0 0 0 rgba(255,200,90,0)}60%{transform:translateY(-8px) scale(1.08);opacity:1}100%{transform:none;opacity:1;box-shadow:0 0 60px rgba(255,200,90,.9)}}
+@keyframes sf-halo{0%,100%{box-shadow:0 0 40px rgba(255,200,90,.7)}50%{box-shadow:0 0 90px rgba(255,214,120,1)}}
+#scene-fin.defaite .sf-portrait{animation:sf-extinction 2.2s ease-in both}
+@keyframes sf-extinction{0%{filter:none;opacity:1}40%{filter:grayscale(.6) brightness(.8)}100%{filter:grayscale(1) brightness(.32);opacity:.85}}
+#scene-fin.egalite .sf-portrait{animation:sf-entree .8s ease-out both;filter:grayscale(.4)}
+#scene-fin .sf-pluie i{position:absolute;top:-10px;border-radius:50%;animation-name:sf-chute;animation-timing-function:linear;animation-iteration-count:infinite}
+#scene-fin .sf-pluie .lumiere{width:var(--s);height:var(--s);background:#ffe7a6;box-shadow:0 0 8px 2px rgba(255,210,110,.9)}
+#scene-fin .sf-pluie .cendre{width:4px;height:4px;background:rgba(160,150,140,.7);animation-name:sf-cendre}
+@keyframes sf-chute{from{transform:translateY(0);opacity:0}10%{opacity:1}to{transform:translateY(110vh);opacity:.2}}
+@keyframes sf-cendre{from{transform:translate(0,0);opacity:0}15%{opacity:.8}to{transform:translate(60px,110vh);opacity:0}}
+#scene-fin .sf-fissures{position:absolute;inset:0;width:100%;height:100%}
+#scene-fin .sf-fissures path{fill:none;stroke:rgba(240,230,220,.75);stroke-width:2.5;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 3px rgba(255,80,60,.6));
+  stroke-dasharray:1400;stroke-dashoffset:1400;animation:sf-fissure .7s cubic-bezier(.3,.6,.3,1) forwards}
+@keyframes sf-fissure{to{stroke-dashoffset:0}}
+#scene-fin.demo .sf-demo-titre{position:absolute;left:0;right:0;top:46%;text-align:center;font-family:"Cinzel Decorative",Cinzel,serif;font-size:clamp(40px,7vw,80px);color:#f3d791;text-shadow:0 3px 0 #000, 0 0 30px rgba(255,200,90,.6);animation:sf-entree .6s .4s both}
+#scene-fin.demo.defaite .sf-demo-titre{color:#e6c9c0}
+.boite.fin-victoire{box-shadow:0 0 0 2px color-mix(in srgb, var(--or) 70%, transparent), 0 0 60px rgba(255,200,90,.45), 0 20px 60px rgba(0,0,0,.6)}
+.boite.fin-victoire h2{animation:fin-titre .8s .3s cubic-bezier(.2,.8,.3,1.4) both}
+.boite.fin-defaite h2{animation:fin-titre-def .9s .3s ease-out both}
+@keyframes fin-titre{from{transform:scale(1.8);opacity:0;filter:blur(6px)}to{transform:none;opacity:1;filter:none}}
+@keyframes fin-titre-def{from{transform:translateY(-14px);opacity:0;letter-spacing:.3em}to{transform:none;opacity:1}}
+
+/* ===== Cote et rang après une partie classée ===== */
+.cote-roule{display:inline-block;min-width:3.2em;font-variant-numeric:tabular-nums}
+.cote-roule.arrivee-cote{animation:cote-pop .5s cubic-bezier(.2,.8,.3,1.5)}
+@keyframes cote-pop{0%{transform:scale(1)}40%{transform:scale(1.35);color:var(--or)}100%{transform:none}}
+.delta-roule.pop, .rang-gagne.pop, .rang-top.pop{display:inline-block;animation:cote-pop .55s cubic-bezier(.2,.8,.3,1.5)}
+.ligne-rang{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0}
+.rang-gagne{color:#2e8a4a;font-weight:700}
+.rang-top{font-family:Cinzel,serif;font-weight:700;color:#2b1a04;background:linear-gradient(135deg,#f9e29a,#d9a63a);border-radius:999px;padding:2px 12px;box-shadow:0 0 16px rgba(255,200,90,.7)}
+
+/* ===== Enveloppe ===== */
+.fx-enveloppe{position:fixed;z-index:96;width:120px;height:78px;pointer-events:none;perspective:500px}
+.env-corps{position:absolute;inset:0;border-radius:6px;background:linear-gradient(160deg,#f3e2b8,#d8b876);box-shadow:0 10px 24px rgba(0,0,0,.45);z-index:2;
+  clip-path:polygon(0 0,50% 52%,100% 0,100% 100%,0 100%)}
+.env-rabat{position:absolute;left:0;right:0;top:0;height:56%;transform-origin:50% 0;z-index:3;background:linear-gradient(180deg,#e9d39d,#cfa95e);clip-path:polygon(0 0,100% 0,50% 100%);backface-visibility:visible}
+.env-sceau{position:absolute;left:50%;top:52%;z-index:4;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;color:#ffe9c0;background:radial-gradient(circle,#c0392b,#7a1f16);box-shadow:0 2px 4px rgba(0,0,0,.4);transform:translate(-50%,-50%)}
+.env-lettre{position:absolute;left:50%;top:8%;width:84%;height:86%;z-index:1;border-radius:3px;background:#fffaf0;box-shadow:0 2px 6px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:6px;padding:10px 10px 0}
+.env-lettre i{display:block;height:3px;border-radius:2px;background:#d9cdb4}
+.env-lettre i:nth-child(2){width:80%}.env-lettre i:nth-child(3){width:60%}
+
+/* ===== Accueil vivant ===== */
+#ambiance-accueil{position:fixed;inset:0;z-index:21;pointer-events:none;overflow:hidden}
+#ambiance-accueil i{position:absolute;bottom:-12px;width:var(--s);height:var(--s);border-radius:50%;
+  background:color-mix(in srgb, var(--ac) 55%, #fff3cf);box-shadow:0 0 calc(var(--s)*2) color-mix(in srgb, var(--ac) 70%, #ffd27a);animation:braise linear infinite}
+@keyframes braise{0%{transform:translate(0,0);opacity:0}10%{opacity:1}50%{transform:translate(calc(var(--dx)*.6),-55vh)}90%{opacity:.8}100%{transform:translate(var(--dx),-110vh);opacity:0}}
+
+/* ===== Banc d’essai : scénettes ===== */
+#demo-anim{position:fixed;inset:0;z-index:27;display:grid;place-items:center;background:rgba(10,8,16,.55);cursor:pointer}
+#demo-anim.sans-fond{background:transparent}
+#demo-anim .demo-scene{display:flex;flex-direction:column;align-items:center;gap:14px}
+#demo-anim .demo-aide{position:absolute;bottom:16px;left:0;right:0;text-align:center;color:#e6dcc6;font-size:13px;margin:0}
+.demo-pose .carte{--w:190px;width:var(--w)}
+.demo-carte .carte{--w:170px;width:var(--w)}
+.fx-carte.demo-carte{position:fixed;margin:0}
+.demo-medaillon{position:relative;width:140px;height:140px;border-radius:50%}
+.demo-medaillon .demo-portrait{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;overflow:hidden;background:#1a1426;color:#fff;font-size:64px;border:4px solid color-mix(in srgb, var(--fc) 55%, #f3d791)}
+.demo-medaillon .demo-portrait img{width:100%;height:100%;object-fit:cover}
+.demo-medaillon .demo-pv{position:absolute;left:50%;bottom:-10px;transform:translateX(-50%);background:#b3261e;color:#fff;border-radius:8px;padding:2px 10px;font-weight:700}
+.demo-medaillon .flottant{position:absolute;left:50%;top:10%}
+.demo-legende{color:#e6dcc6;margin:0}
+.demo-panneau{min-width:320px;padding:18px 24px;border-radius:14px;background:var(--zone, #f3ecdc);border:1px solid var(--line, #d6cdb8);box-shadow:0 20px 50px rgba(0,0,0,.5);text-align:center}
+.demo-panneau h3{margin:0 0 8px;font-family:Cinzel,serif}
+.demo-panneau .progres-hall-saison{display:flex;flex-direction:row;align-items:center;gap:12px;min-width:320px}
+.demo-panneau .progres-hall-saison .barre{flex:1}
+@media (prefers-reduced-motion: reduce){ #ambiance-accueil{display:none} .medaillon.en-danger{animation:none} }
+.demo-panneau .progres-hall-saison .barre{height:10px;background:rgba(0,0,0,.15)}
+
 /* Admin › Animations */
 .adm-animations fieldset{margin:0 0 14px}
 .adm-animations .ligne-anim{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 14px;margin:6px 0}
@@ -3131,7 +3301,7 @@ ajouterTraductions("en", {
   "Ticket de partie inconnu.":"Unknown game ticket.", "Ticket introuvable.":"Ticket not found.", "Trop de demandes en attente.":"Too many pending requests.",
   "Trop de parties commencées en une heure : patientez un peu.":"Too many games started in an hour: please wait a little.", "Trophée inconnu.":"Unknown trophy.",
   "Valeurs invalides : l’or et l’encre doivent être des nombres entiers positifs.":"Invalid values: gold and ink must be positive whole numbers.", "Version du jeu obsolète : rechargez la page.":"Outdated game version: reload the page.",
-  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Changer ▾":"Change ▾", "Changer de deck":"Change deck", "Aucun deck complet :":"No complete deck:", "construire un deck":"build a deck", "Choisir votre deck":"Choose your deck", "Ce deck sert pour « Jouer », contre un joueur comme contre l’ordinateur en attendant.":"This deck is used for “Play”, against a player and against the computer while you wait.", "Avec :":"With:", "Pouvoir divin":"Divine power", "Nouvelle carte !":"New card!", "Nouvelle illustration !":"New artwork!", "Génial !":"Awesome!", "Suivante":"Next", "paquet":"pack", "paquets":"packs", "1 contre 1 · saison":"1 vs 1 · season", "1 contre 1 · depuis toujours":"1 vs 1 · all time", "cote de la saison":"season rating", "au classement":"in the ranking", "pas encore classé":"not ranked yet", "jours avant la fin de la saison":"days until the season ends", "Aucune saison en cours.":"No season in progress.", "Jouer une partie classée":"Play a ranked game", "Jouer !":"Play!", "Cote":"Rating", "Rang":"Rank", "Joueur":"Player", "Classement de la saison":"Season ranking", "Récompenses de fin de saison":"End-of-season rewards", "Pour les joueurs ayant terminé au moins une partie classée pendant la saison. À la fin de la saison, toutes les cotes repartent à 1200.":"For players who finished at least one ranked game during the season. At the end of the season, all ratings go back to 1200.", "Place libre":"Free spot", "(vous)":"(you)", "La suite du classement":"The rest of the ranking", "Récompense":"Reward", "Fin de saison aujourd’hui":"Season ends today", "Fin de saison demain":"Season ends tomorrow", "Pas encore classé cette saison : jouez une partie en ligne.":"Not ranked yet this season: play an online game.", "Personne n’est encore classé cette saison. Soyez le premier sur le podium !":"Nobody is ranked yet this season. Be the first on the podium!", "Personne n’est encore classé en 2 contre 2 : soyez le premier sur le podium !":"Nobody is ranked in 2 vs 2 yet: be the first on the podium!", "Terminez au moins une partie classée cette saison pour recevoir une récompense.":"Finish at least one ranked game this season to earn a reward.", "Champions de la saison":"Champions of the season", "Actuellement :":"Currently:", "J’ai compris":"Got it", "Partie perdue pendant votre absence":"Game lost while you were away", "Cote :":"Rating:", "Vous n’êtes pas revenu à temps dans votre partie contre":"You did not come back in time to your game against", "Vous n’avez plus joué pendant plusieurs tours dans votre partie contre":"You stopped playing for several turns in your game against", "Défaite : vous n’êtes pas revenu à temps et votre adversaire a été déclaré vainqueur.":"Defeat: you did not come back in time and your opponent was declared the winner.", "Votre partie vous attend !":"Your game is waiting for you!", "C’est à vous de jouer.":"It’s your turn.", "Revenir dans la partie":"Back to the game", "Connexion…":"Connecting…", "Votre adversaire doit aussi être connecté pour reprendre.":"Your opponent must also be online to resume.", "Vous êtes l’hôte : la partie reprend dès que vous revenez.":"You are the host: the game resumes as soon as you return.", "Cette partie n’est plus disponible.":"This game is no longer available.", "Cette partie est terminée ou n’est plus disponible.":"This game is over or no longer available.", "Contre":"Against", "Affichée":"Displayed", "Pas encore obtenue.":"Not obtained yet.", "À trouver dans :":"Found in:", "Afficher cette illustration":"Display this artwork", "Illustration d’origine.":"Original artwork.", "Comment l’obtenir :":"How to get it:", "1 contre 1":"1 vs 1", "victoires contre l’ordinateur":"wins against the computer", "victoires contre un joueur":"wins against a player", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
+  "Votre adversaire est toujours présent.":"Your opponent is still here.", "Changer ▾":"Change ▾", "Changer de deck":"Change deck", "Aucun deck complet :":"No complete deck:", "construire un deck":"build a deck", "Choisir votre deck":"Choose your deck", "Ce deck sert pour « Jouer », contre un joueur comme contre l’ordinateur en attendant.":"This deck is used for “Play”, against a player and against the computer while you wait.", "Avec :":"With:", "Pouvoir divin":"Divine power", "Cote":"Rating", "Ordinateur · Expert":"Computer · Expert", "Travail accompli !":"Labour complete!", "Top 10 !":"Top 10!", "Classement :":"Rating:", "Nouvelle carte !":"New card!", "Nouvelle illustration !":"New artwork!", "Génial !":"Awesome!", "Suivante":"Next", "paquet":"pack", "paquets":"packs", "1 contre 1 · saison":"1 vs 1 · season", "1 contre 1 · depuis toujours":"1 vs 1 · all time", "cote de la saison":"season rating", "au classement":"in the ranking", "pas encore classé":"not ranked yet", "jours avant la fin de la saison":"days until the season ends", "Aucune saison en cours.":"No season in progress.", "Jouer une partie classée":"Play a ranked game", "Jouer !":"Play!", "Cote":"Rating", "Rang":"Rank", "Joueur":"Player", "Classement de la saison":"Season ranking", "Récompenses de fin de saison":"End-of-season rewards", "Pour les joueurs ayant terminé au moins une partie classée pendant la saison. À la fin de la saison, toutes les cotes repartent à 1200.":"For players who finished at least one ranked game during the season. At the end of the season, all ratings go back to 1200.", "Place libre":"Free spot", "(vous)":"(you)", "La suite du classement":"The rest of the ranking", "Récompense":"Reward", "Fin de saison aujourd’hui":"Season ends today", "Fin de saison demain":"Season ends tomorrow", "Pas encore classé cette saison : jouez une partie en ligne.":"Not ranked yet this season: play an online game.", "Personne n’est encore classé cette saison. Soyez le premier sur le podium !":"Nobody is ranked yet this season. Be the first on the podium!", "Personne n’est encore classé en 2 contre 2 : soyez le premier sur le podium !":"Nobody is ranked in 2 vs 2 yet: be the first on the podium!", "Terminez au moins une partie classée cette saison pour recevoir une récompense.":"Finish at least one ranked game this season to earn a reward.", "Champions de la saison":"Champions of the season", "Actuellement :":"Currently:", "J’ai compris":"Got it", "Partie perdue pendant votre absence":"Game lost while you were away", "Cote :":"Rating:", "Vous n’êtes pas revenu à temps dans votre partie contre":"You did not come back in time to your game against", "Vous n’avez plus joué pendant plusieurs tours dans votre partie contre":"You stopped playing for several turns in your game against", "Défaite : vous n’êtes pas revenu à temps et votre adversaire a été déclaré vainqueur.":"Defeat: you did not come back in time and your opponent was declared the winner.", "Votre partie vous attend !":"Your game is waiting for you!", "C’est à vous de jouer.":"It’s your turn.", "Revenir dans la partie":"Back to the game", "Connexion…":"Connecting…", "Votre adversaire doit aussi être connecté pour reprendre.":"Your opponent must also be online to resume.", "Vous êtes l’hôte : la partie reprend dès que vous revenez.":"You are the host: the game resumes as soon as you return.", "Cette partie n’est plus disponible.":"This game is no longer available.", "Cette partie est terminée ou n’est plus disponible.":"This game is over or no longer available.", "Contre":"Against", "Affichée":"Displayed", "Pas encore obtenue.":"Not obtained yet.", "À trouver dans :":"Found in:", "Afficher cette illustration":"Display this artwork", "Illustration d’origine.":"Original artwork.", "Comment l’obtenir :":"How to get it:", "1 contre 1":"1 vs 1", "victoires contre l’ordinateur":"wins against the computer", "victoires contre un joueur":"wins against a player", "Vous avez déjà 9 decks : supprimez-en un pour en créer un nouveau.":"You already have 9 decks: delete one to create a new one.",
   "Vous avez déjà le nombre maximum d’exemplaires.":"You already have the maximum number of copies.", "Vous avez déjà remplacé une quête aujourd’hui.":"You have already replaced a quest today.",
   "Vous ne pouvez défier que vos amis.":"You can only challenge your friends.", "Vous ne pouvez inviter que vos amis.":"You can only invite your friends.",
   "Vous n’avez pas de paquet offert de ce type.":"You have no free pack of this type.", "Vous n’êtes pas dans ce salon.":"You are not in this lobby.",
@@ -4421,6 +4591,7 @@ function render(){
   const app = document.getElementById("app");
   if(typeof memoriserPartieLigne==="function") memoriserPartieLigne();
   document.body.classList.toggle("en-partie", !!S && ui.ecran==="jeu");
+  queueMicrotask(apresRendu);
   if(typeof majBanniereDefi==="function" && S && ui.ecran==="jeu") majBanniereDefi();
   if(typeof majCompact==="function") majCompact();
   if(typeof prevoirAjustement==="function") prevoirAjustement();
@@ -4520,15 +4691,22 @@ function flottant(el, d){
 }
 function flottantImmediat(el, d){
   const s = document.createElement("span");
-  s.className = "flottant " + (d<0 ? "degat" : "soin");
+  s.className = "flottant " + (d<0 ? "degat " + classeDegats(d) : "soin");
   s.textContent = (d>0 ? "+" : "") + d;
   el.appendChild(s);
   setTimeout(() => s.remove(), 1200*FX_LENT);
 }
-function banniereTour(texte, sousTexte, adverse){
+function banniereTour(texte, sousTexte, adverse, qui){
+  queueMicrotask(() => banniereTourMaintenant(texte, sousTexte, adverse, qui));
+}
+function banniereTourMaintenant(texte, sousTexte, adverse, qui){
+  const reste = VS_FIN - Date.now();
+  if(reste > 0){ clearTimeout(banniereTour.d); banniereTour.d = setTimeout(() => banniereTourMaintenant(texte, sousTexte, adverse, qui), reste); return; }
   const b = document.getElementById("banniere");
   if(!b) return;
-  b.innerHTML = `<span class="banniere-bande"><b>${esc(texte)}</b>${sousTexte ? `<small>${esc(sousTexte)}</small>` : ""}</span>`;
+  const j = typeof qui==="number" ? (S && S.joueurs[qui]) : qui;
+  const portrait = j && j.heros && niveauAnim() ? htmlPortraitHeros(j, "bt-portrait") : "";
+  b.innerHTML = `<span class="banniere-bande"><span class="bt-ligne">${portrait}<span class="bt-textes"><b>${esc(texte)}</b>${sousTexte ? `<small>${esc(sousTexte)}</small>` : ""}</span></span></span>`;
   b.classList.toggle("adverse", !!adverse);
   b.classList.remove("montre"); void b.offsetWidth; b.classList.add("montre");
   clearTimeout(banniereTour.t); banniereTour.t = setTimeout(() => b.classList.remove("montre"), 1600*FX_LENT);
@@ -4541,12 +4719,12 @@ function animerChangements(){
   const sousTexte = `Tour ${est2v2() ? Math.ceil(S.tour/4) : S.tour}`;
   const tourAdverse = S.vainqueur===null && apres.courant!==vue() && S.mode!=="duo";
   const qui = est2v2() ? (apres.courant===2 ? "Tour de votre allié" : `Tour de ${S.joueurs[apres.courant].nom}`) : S.mode==="ia" ? "Tour de l’ordinateur" : "Tour de l’adversaire";
-  if(!avant || avant.id!==apres.id){ if(monTour) banniereTour(texteTour, sousTexte); else if(tourAdverse) banniereTour(qui, sousTexte, true); return; }
+  if(!avant || avant.id!==apres.id){ if(monTour) banniereTour(texteTour, sousTexte, false, apres.courant); else if(tourAdverse) banniereTour(qui, sousTexte, true, apres.courant); return; }
   for(const [uid, v] of Object.entries(apres.crea)){
     const el = document.querySelector(`.crea[data-id="${uid}"]`);
     if(!el) continue;
-    if(!(uid in avant.crea)) el.classList.add("arrivee");
-    else if(v!==avant.crea[uid]) flottant(el, v - avant.crea[uid]);
+    if(!(uid in avant.crea)){ el.classList.add("arrivee"); const idc = idDeUid(uid); try { entreeRarete(el, idc && CARTES[idc] ? CARTES[idc].rarete : "", niveauAnim()); } catch(e) {} }
+    else if(v!==avant.crea[uid]){ flottant(el, v - avant.crea[uid]); if(v < avant.crea[uid]) chocDegats(v - avant.crea[uid], false); }
   }
   apres.pv.forEach((pv, i) => {
     const d = pv - avant.pv[i];
@@ -4554,10 +4732,10 @@ function animerChangements(){
     const el = document.querySelector(`.medaillon[data-joueur="${i}"]`);
     if(!el) return;
     flottant(el, d);
-    if(d<0){ el.classList.remove("touche"); void el.offsetWidth; el.classList.add("touche"); }
+    if(d<0){ el.classList.remove("touche"); void el.offsetWidth; el.classList.add("touche"); chocDegats(d, true); }
   });
-  if(monTour && (apres.courant!==avant.courant || (avant.couvert && !apres.couvert))) banniereTour(texteTour, sousTexte);
-  else if(tourAdverse && apres.courant!==avant.courant) banniereTour(qui, sousTexte, true);
+  if(monTour && (apres.courant!==avant.courant || (avant.couvert && !apres.couvert))) banniereTour(texteTour, sousTexte, false, apres.courant);
+  else if(tourAdverse && apres.courant!==avant.courant) banniereTour(qui, sousTexte, true, apres.courant);
 }
 
 function renderCouche(){
@@ -4590,7 +4768,7 @@ function renderCouche(){
   } else if(S.vainqueur!==null && niveauAnim()>0 && ui.finVue!==S.idPartie){
     // Laisse le temps de voir le médaillon du vaincu voler en éclats
     const id = S.idPartie;
-    if(!ui.finAttente){ ui.finAttente = true; setTimeout(() => { ui.finAttente = false; ui.finVue = id; if(S && S.idPartie===id) renderCouche(); }, 1300*FX_LENT); }
+    if(!ui.finAttente){ ui.finAttente = true; setTimeout(() => { ui.finAttente = false; ui.finVue = id; if(S && S.idPartie===id) renderCouche(); }, (niveauAnim()>=2 ? 1900 : 1300)*FX_LENT); }
   } else if(S.vainqueur!==null && est2v2()){
     h = htmlFin2v2();
   } else if(S.vainqueur!==null && S.tuto){
@@ -4603,7 +4781,7 @@ function renderCouche(){
       ? `<p class="attente">En attente d’une revanche lancée par votre adversaire…</p><div class="actions"><button type="button" class="btn second" data-act="nouvelle">Quitter</button></div>`
       : `<div class="actions"><button type="button" class="btn" data-act="rejouer">${enLigne() ? "Proposer une revanche" : "Rejouer"}</button>
          <button type="button" class="btn second" data-act="nouvelle">${enLigne() ? "Quitter" : "Changer de mode"}</button></div>`;
-    h = `<div class="boite" role="dialog" aria-label="Fin de partie">
+    h = `<div class="boite" data-fin role="dialog" aria-label="Fin de partie">
       <h2>${titre}</h2><p>${S.abandon ? (S.abandon.joueur===vue() ? (S.abandon.raison==="inactif" ? "Défaite par inactivité : vous n’avez pas joué pendant plusieurs tours." : S.abandon.raison==="absence" ? "Défaite : vous n’êtes pas revenu à temps et votre adversaire a été déclaré vainqueur." : "Vous avez abandonné la partie.") : `${esc(S.joueurs[S.abandon.joueur].nom)} ${S.abandon.raison==="inactif" ? "n’a plus joué : victoire par inactivité de l’adversaire." : "a quitté la partie : victoire par abandon."}`) + " " : ""}Partie terminée au tour ${tourAffiche()}.</p>${htmlGainFin()}${actions}</div>`;
   } else if(ui.couvert){
     const n = S.joueurs[S.courant].nom;
@@ -4647,6 +4825,7 @@ function renderCouche(){
   couche.innerHTML = h;
   couche.classList.toggle("accueil", !S && ui.ecran==="jeu");
   couche.classList.toggle("couche-hall", !!couche.querySelector(".hall"));
+  queueMicrotask(apresRendu);
 }
 
 function apresAction(){
@@ -5662,6 +5841,7 @@ function nommerJoueurs(){
   S.joueurs[0].nom = "Hôte"; S.joueurs[1].nom = "Invité";
   S.joueurs[0].pseudo = (PROG.profil && PROG.profil.pseudo) || null;
   S.joueurs[1].pseudo = typeof EN.pseudoInvite==="string" ? EN.pseudoInvite.slice(0, 20) : null;
+  S.joueurs[0].cote = (PROG.profil && PROG.profil.elo) || null; S.joueurs[1].cote = EN.coteInvite || null;
 }
 function demarrerHote(inviteId){
   EN.inviteId = inviteId;
@@ -6114,7 +6294,7 @@ if(!window.claude && SUPA.url){
       rejoindre: p => {
         if(!p.id) return;
         if(!EN.inviteId && !EN.verifInvite){
-          EN.verifInvite = true; EN.pseudoInvite = p.pseudo || null;
+          EN.verifInvite = true; EN.pseudoInvite = p.pseudo || null; EN.coteInvite = Number.isFinite(Number(p.cote)) && Number(p.cote)>0 ? Math.round(Number(p.cote)) : null;
           EN.variantesInvite = p.variantes && typeof p.variantes==="object" ? Object.fromEntries(Object.entries(p.variantes).slice(0, 200).filter(([k, v]) => typeof v==="string")) : null;
           (async () => {
             let ok = true;
@@ -6238,10 +6418,10 @@ if(!window.claude && SUPA.url){
     if(!ok) return echec("Le serveur de jeu ne répond pas. Réessayez dans un instant.");
     const monPseudo = (PROG.profil && PROG.profil.pseudo) || null;
     const mesVariantes = typeof prefVariantes==="function" && PROG.pret ? prefVariantes() : {};
-    emettre("rejoindre", {id:EN.monId, deck:monDeck, pseudo:monPseudo, variantes:mesVariantes});
+    emettre("rejoindre", {id:EN.monId, deck:monDeck, pseudo:monPseudo, variantes:mesVariantes, cote:PROG.profil && PROG.profil.elo});
     minuteurs.push(setInterval(() => {
       if(EN.role!=="invite") return;
-      if(!repondu) emettre("rejoindre", {id:EN.monId, deck:monDeck, pseudo:monPseudo, variantes:mesVariantes});
+      if(!repondu) emettre("rejoindre", {id:EN.monId, deck:monDeck, pseudo:monPseudo, variantes:mesVariantes, cote:PROG.profil && PROG.profil.elo});
       else if(EN.enAttente) emettre("ordres", {id:EN.monId, ordres:EN.ordres.filter(o => o.seq > ((S && S.seqTraite) || 0))});
     }, 2500));
     setTimeout(() => {
@@ -6416,10 +6596,23 @@ async function verifierRecompense(){
     }
     await rafraichir();
     if(S && S.mode==="enligne" && PROG.profil && eloAvant!=null && PROG.profil.elo!=null) PROG.dernierGain.elo = {cote:PROG.profil.elo, delta:PROG.profil.elo - eloAvant};
+    if(PROG.dernierGain.elo){
+      try {
+        const rc = await rpc("classement", {p_limite:1}), rang = rc && rc.moi && rc.moi.rang;
+        if(rang){ PROG.dernierGain.elo.rang = rang; if(PROG.rangDebut && PROG.rangDebut.id===cle) PROG.dernierGain.elo.rangAvant = PROG.rangDebut.rang; }
+      } catch(e) {}
+    }
     PROG.classement = null;
     chargerMesStats(true);
   } catch(e) { PROG.dernierGain = {cle, gain:0, erreur:messageServeur(e.message)}; }
   if(S && S.idPartie===cle) renderCouche();
+}
+function htmlRangGagne(e){
+  if(!e || !e.rang) return "";
+  const gagne = e.rangAvant && e.rang < e.rangAvant ? e.rangAvant - e.rang : 0;
+  const top = e.rang<=10 && (!e.rangAvant || e.rangAvant>10);
+  if(!gagne && !top) return "";
+  return `<p class="ligne-rang">${gagne ? `<span class="rang-gagne">▲ ${gagne} place${gagne>1 ? "s" : ""} · ${rangTexte(e.rang)}</span>` : ""}${top ? `<span class="rang-top">${esc(T("Top 10 !"))}</span>` : ""}</p>`;
 }
 function htmlGainFin(){
   if(PROG.actif && S && S.mode==="duo") return `<p class="aide">Les parties à deux sur le même écran ne comptent pas pour les quêtes, les trophées et les récompenses.</p>`;
@@ -6428,7 +6621,7 @@ function htmlGainFin(){
   if(!g || g.cle!==S.idPartie) return `<p class="attente">Calcul des récompenses…</p>`;
   if(g.erreur) return `<p class="avertissement">Pas de récompense : ${esc(String(g.erreur).replace(/\.+$/, ""))}.</p>`;
   const lElo = g.conteste ? `<p class="avertissement">Résultat contesté : les points de classement de cette partie sont annulés, l’administrateur est prévenu.</p>`
-    : g.elo ? `<p class="ligne-elo">Classement : <b>${nf(g.elo.cote)}</b> <span class="${g.elo.delta>=0 ? "elo-gain" : "elo-perte"}">(${g.elo.delta>=0 ? "+" : ""}${g.elo.delta})</span></p>` : "";
+    : g.elo ? `<p class="ligne-elo">Classement : <b class="cote-roule" data-cle="${esc(String(g.cle))}" data-de="${g.elo.cote - g.elo.delta}" data-a="${g.elo.cote}">${nf(g.elo.cote)}</b> <span class="delta-roule ${g.elo.delta>=0 ? "elo-gain" : "elo-perte"}">(${g.elo.delta>=0 ? "+" : ""}${g.elo.delta})</span></p>${htmlRangGagne(g.elo)}` : "";
   const st = S.stats ? S.stats[vue()] : null;
   const pl = (n, un, plusieurs) => `${nf(n)} ${(n || 0) > 1 ? plusieurs : un}`;
   const resume = st ? `<p class="aide">Dans cette partie : ${pl(st.degats, "dégât infligé", "dégâts infligés")}, ${pl(st.soins || 0, "point de vie soigné", "points de vie soignés")}, ${pl(st.creatures, "créature jouée", "créatures jouées")}, ${pl(st.achats, "carte achetée", "cartes achetées")}.</p>` : "";
@@ -8216,8 +8409,11 @@ function animerEvenement(ev){
       const clone = document.createElement("div"); clone.className = "fx-carte";
       clone.style.width = av.r.width + "px"; clone.style.marginLeft = -av.r.width/2 + "px"; clone.style.marginTop = -av.r.height/2 + "px";
       clone.innerHTML = av.html;
-      voler(clone, centre(av.r), centre(rp), 600, 0, {e0:1, e2:rp.width/av.r.width, o2:1});
-      setTimeout(() => pulser(pile.closest(".pile")), (600)*FX_LENT);
+      const idA = ev.src==="base" ? REGLES.carteBase : idDeUid(ev.src), prix = idA && CARTES[idA] ? CARTES[idA].prix || 0 : 0;
+      const bourse = moi ? document.querySelector(".ressource.or .jeton") : document.querySelector(`.medaillon[data-joueur="${ev.j}"]`), rb = bourse && bourse.getBoundingClientRect();
+      if(prix && rb) for(let k = 0; k<Math.min(5, prix); k++) voler(icoVolante("or", 22), centre(rb), centre(av.r), 380, k*55, {e0:.8, e2:.6, o2:0});
+      voler(clone, centre(av.r), centre(rp), 600, prix ? 220 : 0, {e0:1, e2:rp.width/av.r.width, o2:1});
+      setTimeout(() => pulser(pile.closest(".pile")), (600 + (prix ? 220 : 0))*FX_LENT);
       break;
     }
     case "attaque": {
@@ -8282,6 +8478,13 @@ function jouerEffets(){
       animerEvenement(ev);
     } catch(e) {}
   });
+  const fin = nouveaux.find(e => e.t==="fin");
+  if(fin && niveau>=2){
+    let idx = fin.perdant;
+    if(est2v2()){ const k = S.joueurs.findIndex(j => j.eq===fin.perdant && j.pv<=0); idx = k>=0 ? k : S.joueurs.findIndex(j => j.eq===fin.perdant); }
+    const m = document.querySelector(`.medaillon[data-joueur="${idx}"]`);
+    try { coupFatal(m ? centre(m.getBoundingClientRect()) : null); } catch(e) {}
+  }
 }
 
 /* ============================================================
@@ -8372,6 +8575,8 @@ function animerEvenement2(ev, niveau){
       const cl = cloneCarte(ev.uid); if(!cl) return;
       calqueFx().appendChild(cl.el);
       cl.el.style.transform = `translate(${cl.c.x}px,${cl.c.y}px)`;
+      const idMort = idDeUid(ev.uid);
+      if(mortThematique(cl.el, cl.r, idMort && CARTES[idMort] ? CARTES[idMort].faction : null, niveau)) break;
       cl.el.animate([{transform:`translate(${cl.c.x}px,${cl.c.y}px) scale(1)`, opacity:1, filter:"none"},
         {transform:`translate(${cl.c.x}px,${cl.c.y + 8}px) scale(.85)`, opacity:0, filter:"grayscale(1) blur(3px)"}], {duration:550, delay:280, easing:"ease-in", fill:"both"})
         .finished.then(() => cl.el.remove(), () => cl.el.remove());
@@ -9474,7 +9679,7 @@ function clic2v2(act, id){
 }
 function htmlFin2v2(){
   const gagne = S.equipeGagnante===S.joueurs[siege2()].eq;
-  return `<div class="boite" role="dialog" aria-label="Fin de partie">
+  return `<div class="boite" data-fin role="dialog" aria-label="Fin de partie">
     <h2>${gagne ? "Victoire de votre équipe !" : "Défaite"}</h2>
     <p>${gagne ? "Les deux héros adverses sont tombés." : "Votre héros et celui de votre allié sont tombés."} Partie terminée au tour ${Math.ceil(S.tour/4)}.</p>
     ${htmlGain2v2()}
@@ -11490,7 +11695,7 @@ function cinematiquePouvoir(ev, c, niveau, impose){
     {transform:"translate(-50%,-50%) scale(.94)", opacity:1, filter:"blur(0)", offset:.16},
     {transform:"translate(-50%,-50%) scale(1)", opacity:1, offset:.26},
     {transform:"translate(-50%,-50%) scale(1.04)", opacity:1, offset:.82},
-    {transform:"translate(-50%,-50%) scale(1.12)", opacity:0}], {duration:1000, easing:"ease-out", fill:"both"});
+    {transform:"translate(-50%,-50%) scale(1.12)", opacity:0}], {duration:1000, fill:"both"});
   // Tout le plateau tremble sous le choc
   if(niveau>=2){
     const app = document.getElementById("app");
@@ -11824,6 +12029,7 @@ function admAnimations(){
         <button type="button" class="btn second" data-act="anim-carte" data-id="tout">Carte + illustration + or</button>
       </div>
     </fieldset>
+    ${htmlBancCombat()}
     <fieldset><legend>Partie de test (animations en jeu)</legend>
       <p class="aide">Une partie contre l’ordinateur, prête pour tester les attaques, les sorts, les combos, les morts, le pouvoir divin et la fin de partie. Elle n’est jamais enregistrée : ni or, ni quêtes, ni statistiques, ni classement.</p>
       <div class="ligne-anim">
@@ -11861,6 +12067,7 @@ function tirageTest(A){
   return t.filter(Boolean);
 }
 function actionAnimations(act, id){
+  if(["anim-vs","anim-banniere","anim-mort","anim-entree","anim-degats","anim-danger","anim-jauge","anim-achat","anim-fin","anim-cote","anim-saison","anim-enveloppe","anim-ambiance"].includes(act)) return actionBancCombat(act, id);
   const A = adm.anim;
   if(act==="anim-booster"){
     if(PROG.occupe) return;
@@ -11934,6 +12141,498 @@ document.addEventListener("change", e => {
   if(k==="niveau"){ try { localStorage.setItem("animations", el.value); } catch(er) {} erreur(`Animations : ${el.options[el.selectedIndex].text.toLowerCase()}.`); return renderAdmin(); }
   A[k] = el.type==="checkbox" ? el.checked : el.type==="number" ? Number(el.value) : el.value;
   if(k==="moi" || k==="ajout") renderAdmin();
+});
+
+
+/* ============================================================
+   PEPS : écran VS, morts par panthéon, entrées par rareté,
+   gros dégâts, tension, bannière de tour, jauge qui crépite,
+   coup fatal, scènes de fin, cote, saison, enveloppe, ambiance
+   ============================================================ */
+const nomJoueurAffiche = (j, i) => {
+  if(!j) return "";
+  if(S && S.mode==="ia" && i===0 && PROG.profil && PROG.profil.pseudo) return PROG.profil.pseudo;
+  return j.pseudo || j.nom || "";
+};
+function htmlPortraitHeros(j, classe){
+  const h = heroDe(j) || {}, f = FACTIONS[j.heros] || {};
+  return `<span class="${classe}" style="--fc:${f.couleur || "#c9a45a"}">${h.image ? `<img src="${esc(h.image)}" alt="">` : `<span class="sym">${esc(f.sym || "✦")}</span>`}</span>`;
+}
+function secouerPlateau(amp, duree = 380){
+  const app = document.getElementById("app"); if(!app || !amp) return;
+  const k = [];
+  for(let i = 0; i<=10; i++){
+    const a = (1 - i/10)*amp;
+    k.push(i===10 ? {translate:"0 0", rotate:"0deg"} : {translate:`${((Math.random()*2 - 1)*a).toFixed(1)}px ${((Math.random()*2 - 1)*a*.7).toFixed(1)}px`, rotate:`${((Math.random()*2 - 1)*a*.05).toFixed(2)}deg`});
+  }
+  app.animate(k, {duration:duree, easing:"linear"});
+}
+const idDeUid = uid => {
+  if(!S || !uid) return null;
+  for(const j of S.joueurs) for(const z of [j.plateau, j.defausse, j.main, j.joues, j.bannies, j.deck]) { const c = (z || []).find(x => x && x.uid===uid); if(c) return c.id; }
+  const m = (S.marche || []).find(x => x && x.uid===uid); return m ? m.id : null;
+};
+
+/* ----- 1. Écran VS ----- */
+let VS_VU = null, VS_FIN = 0;
+function camp(i){ const j = S.joueurs[i]; return {heros:j.heros, palier:j.palier, nom:nomJoueurAffiche(j, i), cote:j.cote, image:(heroDe(j) || {}).image}; }
+function afficherVS(gauche, droite, sousTitre){
+  const niv = niveauAnim(); if(!niv) return;
+  const ancien = document.getElementById("ecran-vs"); if(ancien) ancien.remove();
+  const bloc = (l, cote) => `<div class="vs-camp ${cote}" style="--fc:${(FACTIONS[l[0].heros] || {}).couleur || "#c9a45a"}">
+      ${l.map(p => { const h = heroDe(p) || {}; return `<div class="vs-joueur">${htmlPortraitHeros(p, "vs-portrait")}
+        <span class="vs-nom" data-sans-trad>${esc(/^Ordinateur|^Adversaire|^Allié|^Joueur/.test(p.nom || "") ? T(p.nom) : p.nom || "")}</span><span class="vs-dieu">${esc(traduireNom(h.nom || ""))}</span>${p.cote ? `<span class="vs-cote">${esc(T("Cote"))} ${nf(p.cote)}</span>` : ""}</div>`; }).join("")}</div>`;
+  const e = document.createElement("div"); e.id = "ecran-vs"; e.setAttribute("aria-hidden", "true");
+  e.innerHTML = `<div class="vs-fond"></div>${bloc(gauche, "gauche")}${bloc(droite, "droite")}<div class="vs-centre"><span class="vs-eclair"></span><b class="vs-mot">VS</b>${sousTitre ? `<span class="vs-sous">${esc(sousTitre)}</span>` : ""}</div>`;
+  document.body.appendChild(e);
+  const D = 1150;                        // durée totale (doublée par le ralenti global : ≈ 2,3 s)
+  VS_FIN = Date.now() + D*FX_LENT;
+  const g = e.querySelector(".vs-camp.gauche"), d = e.querySelector(".vs-camp.droite"), mot = e.querySelector(".vs-mot");
+  e.querySelector(".vs-fond").animate([{opacity:0}, {opacity:1, offset:.12}, {opacity:1, offset:.82}, {opacity:0}], {duration:D, fill:"both"});
+  const entre = "cubic-bezier(.2,.8,.3,1)", sort = "cubic-bezier(.6,0,.9,.4)";
+  g.animate([{transform:"translateX(-110%)", easing:entre}, {transform:"translateX(3%)", offset:.2}, {transform:"translateX(0)", offset:.27}, {transform:"translateX(0)", offset:.8, easing:sort}, {transform:"translateX(-115%)"}], {duration:D, fill:"both"});
+  d.animate([{transform:"translateX(110%)", easing:entre}, {transform:"translateX(-3%)", offset:.2}, {transform:"translateX(0)", offset:.27}, {transform:"translateX(0)", offset:.8, easing:sort}, {transform:"translateX(115%)"}], {duration:D, fill:"both"});
+  mot.animate([{transform:"scale(3)", opacity:0}, {transform:"scale(3)", opacity:0, offset:.2}, {transform:"scale(.9)", opacity:1, offset:.28}, {transform:"scale(1)", opacity:1, offset:.34}, {transform:"scale(1.05)", opacity:1, offset:.8}, {transform:"scale(1.4)", opacity:0}], {duration:D, fill:"both"});
+  e.querySelector(".vs-eclair").animate([{opacity:0, transform:"scale(.2)"}, {opacity:0, offset:.2}, {opacity:1, transform:"scale(1)", offset:.24}, {opacity:0, transform:"scale(1.8)", offset:.45}, {opacity:0}], {duration:D, fill:"both"});
+  const sous = e.querySelector(".vs-sous"); if(sous) sous.animate([{opacity:0}, {opacity:0, offset:.3}, {opacity:1, offset:.38}, {opacity:1, offset:.8}, {opacity:0}], {duration:D, fill:"both"});
+  if(niv>=2) setTimeout(() => secouerPlateau(10, 300), D*.24*FX_LENT);
+  setTimeout(() => jouerSon("combo", {fixe:true}), D*.22*FX_LENT);
+  setTimeout(() => e.remove(), D*FX_LENT + 100);
+}
+function vsDePartie(){
+  if(est2v2()){
+    const moi = siege2(), eq = S.joueurs[moi].eq;
+    const nous = S.joueurs.map((j, i) => i).filter(i => S.joueurs[i].eq===eq).sort((a, b) => (a===moi ? -1 : b===moi ? 1 : 0));
+    const eux = S.joueurs.map((j, i) => i).filter(i => S.joueurs[i].eq!==eq);
+    return afficherVS(nous.map(camp), eux.map(camp), T("2 contre 2"));
+  }
+  const me = S.mode==="duo" ? 0 : vue();
+  const sous = S.mode==="ia" ? (S.niveauIA==="expert" ? T("Ordinateur · Expert") : T("Contre l’ordinateur")) : S.mode==="enligne" ? T("En ligne") : T("Deux joueurs sur cet écran");
+  afficherVS([camp(me)], [camp(1 - me)], sous);
+  if(S.mode==="enligne" && PROG.actif){ const id = S.idPartie; rpc("classement", {p_limite:1}).then(r => { if(r && r.moi && r.moi.rang) PROG.rangDebut = {id, rang:r.moi.rang}; }, () => {}); }
+}
+
+/* ----- 2. Morts aux couleurs du panthéon ----- */
+function particule(classe, x, y, css){
+  const p = document.createElement("span"); p.className = "fx-part " + classe; p.style.left = x + "px"; p.style.top = y + "px";
+  if(css) p.style.cssText += css; calqueFx().appendChild(p); return p;
+}
+function mortThematique(el, r, faction, niveau){
+  // el : copie de la carte déjà posée sur le calque d’effets ; r : son rectangle à l’écran
+  const c = {x:r.left + r.width/2, y:r.top + r.height/2}, R = Math.random, fin = () => el.remove();
+  if(niveau<2 || !["nor", "egy", "gre", "hin"].includes(faction)) return false;
+  const dans = () => ({x:r.left + R()*r.width, y:r.top + R()*r.height});
+  if(faction==="nor"){
+    // Éclats de glace : la carte gèle, puis vole en morceaux
+    el.animate([{filter:"none", opacity:1}, {filter:"brightness(1.6) saturate(.2) hue-rotate(170deg)", opacity:1, offset:.35}, {filter:"brightness(2.2) saturate(0)", opacity:0}], {duration:520, delay:200, fill:"both"}).finished.then(fin, fin);
+    for(let k = 0; k<16; k++){
+      const p = dans(), a = Math.atan2(p.y - c.y, p.x - c.x) + (R() - .5)*.6, v = 60 + R()*110, t = 6 + R()*14;
+      const e = particule("glace", p.x, p.y, `border-left-width:${t*.45}px;border-right-width:${t*.45}px;border-bottom-width:${t*1.6}px`);
+      e.animate([{transform:"translate(-50%,-50%) rotate(0) scale(.4)", opacity:0}, {transform:"translate(-50%,-50%) rotate(0) scale(1)", opacity:1, offset:.38},
+        {transform:`translate(calc(-50% + ${Math.cos(a)*v}px),calc(-50% + ${Math.sin(a)*v + 40}px)) rotate(${(R() - .5)*540}deg) scale(.8)`, opacity:0}],
+        {duration:620, delay:200, easing:"cubic-bezier(.2,.7,.4,1)", fill:"both"}).finished.then(() => e.remove(), () => e.remove());
+    }
+    eclat(c, "impact", 380);
+  } else if(faction==="egy"){
+    // Sable : la carte s’effrite de haut en bas, les grains tombent
+    el.animate([{clipPath:"inset(0 0 0 0)", filter:"sepia(0)", opacity:1}, {clipPath:"inset(0 0 0 0)", filter:"sepia(.9) brightness(1.1)", opacity:1, offset:.25}, {clipPath:"inset(100% 0 0 0)", filter:"sepia(1) brightness(1.2)", opacity:.6}], {duration:760, delay:180, easing:"ease-in", fill:"both"}).finished.then(fin, fin);
+    for(let k = 0; k<46; k++){
+      const x = r.left + R()*r.width, y = r.top + (k/46)*r.height, s = 2 + R()*3.5;
+      const e = particule("sable", x, y, `width:${s}px;height:${s}px`);
+      const dx = (R() - .5)*60 + 20, dy = 50 + R()*90;
+      e.animate([{transform:"translate(-50%,-50%)", opacity:0}, {transform:"translate(-50%,-50%)", opacity:1, offset:.1}, {transform:`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`, opacity:0}],
+        {duration:600 + R()*300, delay:180 + (k/46)*560, easing:"cubic-bezier(.4,0,.8,.6)", fill:"both"}).finished.then(() => e.remove(), () => e.remove());
+    }
+  } else if(faction==="gre"){
+    // Marbre : la carte se fissure, puis se brise en trois blocs qui tombent
+    const svg = `<svg class="fx-fissures" viewBox="0 0 100 140" preserveAspectRatio="none"><path d="M48 0 L52 30 L40 52 L58 80 L46 104 L54 140 M52 30 L80 44 L100 40 M40 52 L14 70 L0 66 M58 80 L84 96"/></svg>`;
+    el.insertAdjacentHTML("beforeend", svg);
+    const f = el.querySelector(".fx-fissures path"); if(f){ f.style.strokeDasharray = 400; f.animate([{strokeDashoffset:400}, {strokeDashoffset:0}], {duration:260, delay:120, fill:"both"}); }
+    const morceaux = ["polygon(0 0,48% 0,52% 21%,40% 37%,14% 50%,0 47%)", "polygon(48% 0,100% 0,100% 29%,80% 31%,52% 21%)", "polygon(0 47%,14% 50%,40% 37%,52% 21%,80% 31%,100% 29%,100% 100%,0 100%)"];
+    const base = el.style.transform || "";
+    morceaux.forEach((cp, k) => {
+      const m = k===2 ? el : el.cloneNode(true);
+      if(k<2) calqueFx().appendChild(m);
+      m.style.clipPath = cp;
+      const dx = (k===0 ? -1 : k===1 ? 1 : 0)*(30 + R()*30), rot = (k===0 ? -1 : k===1 ? 1 : (R() - .5))*(20 + R()*25);
+      m.animate([{transform:base, opacity:1}, {transform:base, opacity:1, offset:.38}, {transform:`${base} translate(${dx}px, 120px) rotate(${rot}deg)`, opacity:0}],
+        {duration:820, delay:150, easing:"cubic-bezier(.5,0,.9,.5)", fill:"both"}).finished.then(() => m.remove(), () => m.remove());
+    });
+    setTimeout(() => eclat({x:c.x, y:c.y + r.height*.3}, "poussiere"), 520*FX_LENT);
+  } else if(faction==="hin"){
+    // Lotus : la carte s’illumine et s’envole en pétales
+    el.animate([{filter:"none", opacity:1}, {filter:"brightness(1.4) saturate(1.3)", opacity:1, offset:.3}, {filter:"brightness(2) blur(2px)", opacity:0}], {duration:620, delay:180, fill:"both"}).finished.then(fin, fin);
+    for(let k = 0; k<20; k++){
+      const p = dans(), s = 8 + R()*8, dx = (R() - .5)*120, dy = -(60 + R()*120), sp = (R() - .5)*720;
+      const e = particule("lotus", p.x, p.y, `width:${s}px;height:${s*1.6}px;--h:${330 + R()*30}`);
+      e.animate([{transform:"translate(-50%,-50%) rotate(0) scale(.3)", opacity:0}, {transform:`translate(calc(-50% + ${dx*.3}px),calc(-50% + ${dy*.3}px)) rotate(${sp*.3}deg) scale(1)`, opacity:1, offset:.3},
+        {transform:`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) rotate(${sp}deg) scale(.9)`, opacity:0}], {duration:1000 + R()*400, delay:200 + R()*200, easing:"cubic-bezier(.2,.6,.4,1)", fill:"both"})
+        .finished.then(() => e.remove(), () => e.remove());
+    }
+    eclat(c, "soin", 220);
+  }
+  return true;
+}
+
+/* ----- 3. Entrée des créatures selon leur rareté ----- */
+function entreeRarete(el, rar, niveau){
+  if(!el || !niveau) return;
+  if(rar==="epique"){
+    el.classList.add("arrivee-epique");
+    setTimeout(() => { const r = el.getBoundingClientRect(); eclat({x:r.left + r.width/2, y:r.bottom - 6}, "impact"); if(niveau>=2) secouerPlateau(4, 220); }, 260*FX_LENT);
+  } else if(rar==="legendaire"){
+    el.classList.add("arrivee-legendaire");
+    if(niveau>=2){
+      const r = el.getBoundingClientRect(), col = document.createElement("span");
+      col.className = "fx-colonne"; col.style.left = (r.left + r.width/2) + "px"; col.style.width = (r.width*1.5) + "px"; col.style.height = (r.bottom + 20) + "px";
+      calqueFx().appendChild(col);
+      col.animate([{opacity:0, transform:"translateX(-50%) scaleX(.2)"}, {opacity:1, transform:"translateX(-50%) scaleX(1)", offset:.25}, {opacity:.9, transform:"translateX(-50%) scaleX(.85)", offset:.6}, {opacity:0, transform:"translateX(-50%) scaleX(.1)"}],
+        {duration:900, easing:"ease-out", fill:"both"}).finished.then(() => col.remove(), () => col.remove());
+      setTimeout(() => { eclat({x:r.left + r.width/2, y:r.top + r.height/2}, "pouvoir"); secouerPlateau(11, 420); }, 300*FX_LENT);
+    }
+  }
+}
+
+/* ----- 4. Gros chiffres de dégâts et tremblement proportionnel ----- */
+const classeDegats = d => d<=-10 ? "titan" : d<=-6 ? "enorme" : d<=-3 ? "fort" : "";
+function chocDegats(d, hero){
+  if(niveauAnim()<2 || d>-3) return;
+  secouerPlateau(Math.min(16, (hero ? 3 : 1) + (-d)*(hero ? 1.1 : .7)), 260 + Math.min(260, -d*18));
+}
+
+/* ----- 5. Tension (≤ 10 PV) et jauge de pouvoir presque pleine ----- */
+function majTensionCombat(){
+  const vign = document.getElementById("vignette-danger");
+  if(!S || ui.ecran!=="jeu" || S.vainqueur!==null || !niveauAnim()){ if(vign) vign.classList.remove("actif"); return; }
+  let moiDanger = false;
+  S.joueurs.forEach((j, i) => {
+    const m = document.querySelector(`.medaillon[data-joueur="${i}"]`); if(!m) return;
+    const danger = j.pv>0 && j.pv<=10 && !j.esprit;
+    m.classList.toggle("en-danger", danger);
+    if(danger && i===vue()) moiDanger = true;
+    // Jauge de pouvoir à 70 % ou plus : le médaillon crépite
+    const seuil = est2v2() ? (S.r2 && S.r2.seuilJauge) || 10 : REGLES.seuilPouvoir || 10;
+    const jauge = est2v2() ? (S.jauge || [])[j.eq] || 0 : j.morts || 0;
+    const proche = !j.esprit && !pouvoirPret(j) && jauge >= Math.ceil(seuil*.7);
+    if(proche && !m.querySelector(".crepitement")) m.insertAdjacentHTML("beforeend", `<span class="crepitement" aria-hidden="true"><i></i><i></i><i></i></span>`);
+    if(!proche){ const c = m.querySelector(".crepitement"); if(c) c.remove(); }
+  });
+  if(moiDanger && !vign){ const v = document.createElement("div"); v.id = "vignette-danger"; v.setAttribute("aria-hidden", "true"); document.body.appendChild(v); requestAnimationFrame(() => v.classList.add("actif")); }
+  else if(vign) vign.classList.toggle("actif", moiDanger);
+}
+
+/* ----- 6. Coup fatal au ralenti ----- */
+function coupFatal(point){
+  if(niveauAnim()<2) return;
+  // Ralenti : toutes les animations en cours tournent à 30 % pendant un court instant
+  const anims = document.getAnimations ? document.getAnimations() : [];
+  anims.forEach(a => { try { a.playbackRate = .3; } catch(e) {} });
+  setTimeout(() => anims.forEach(a => { try { a.playbackRate = 1; } catch(e) {} }), 950);
+  // Zoom de caméra sur le coup (sans toucher au zoom du plateau, porté par transform)
+  const app = document.getElementById("app");
+  if(app && point){
+    const r = app.getBoundingClientRect(), O = {x:r.left + r.width/2, y:r.top}, k = 1.22;
+    const t = `${((point.x - O.x)*(1 - k)).toFixed(1)}px ${((point.y - O.y)*(1 - k)).toFixed(1)}px`;
+    app.animate([{scale:"1", translate:"0 0", filter:"none"}, {scale:String(k), translate:t, filter:"saturate(1.3) contrast(1.1)", offset:.3}, {scale:String(k), translate:t, filter:"saturate(1.3) contrast(1.1)", offset:.7}, {scale:"1", translate:"0 0", filter:"none"}],
+      {duration:800, easing:"cubic-bezier(.3,.7,.3,1)"});
+  }
+  const flash = document.createElement("div"); flash.className = "fx-fatal"; flash.setAttribute("aria-hidden", "true");
+  if(point){ flash.style.setProperty("--x", point.x + "px"); flash.style.setProperty("--y", point.y + "px"); }
+  document.body.appendChild(flash);
+  flash.animate([{opacity:0}, {opacity:1, offset:.15}, {opacity:.85, offset:.6}, {opacity:0}], {duration:900, fill:"both"}).finished.then(() => flash.remove(), () => flash.remove());
+}
+
+/* ----- 7. Scènes de victoire et de défaite ----- */
+function issueFin(){
+  if(!S || S.vainqueur===null) return null;
+  if(S.vainqueur==="egalite") return "egalite";
+  if(est2v2()) return S.equipeGagnante===S.joueurs[siege2()].eq ? "victoire" : "defaite";
+  if(S.mode==="duo") return "victoire";
+  return S.vainqueur===S.joueurs[vue()].nom ? "victoire" : "defaite";
+}
+function htmlSceneFin(issue, j){
+  const R = Math.random;
+  const pluie = issue==="defaite" ? Array.from({length:22}, () => `<i class="cendre" style="left:${(R()*100).toFixed(1)}%;animation-delay:${(-R()*6).toFixed(2)}s;animation-duration:${(5 + R()*4).toFixed(2)}s"></i>`).join("")
+    : Array.from({length:36}, () => `<i class="lumiere" style="left:${(R()*100).toFixed(1)}%;animation-delay:${(-R()*4).toFixed(2)}s;animation-duration:${(2.6 + R()*2.4).toFixed(2)}s;--s:${(3 + R()*5).toFixed(1)}px"></i>`).join("");
+  const fissures = issue==="defaite" ? `<svg class="sf-fissures" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">${
+      Array.from({length:9}, (x, k) => { let px = 500, py = 300, d = `M${px} ${py}`; const ang = k/9*Math.PI*2 + R()*.3;
+        for(let s = 0; s<7; s++){ px += Math.cos(ang + (R() - .5)*.8)*(70 + R()*60); py += Math.sin(ang + (R() - .5)*.8)*(70 + R()*60); d += ` L${px.toFixed(0)} ${py.toFixed(0)}`; }
+        return `<path d="${d}" style="animation-delay:${(.15 + k*.04).toFixed(2)}s"/>`; }).join("")}</svg>` : "";
+  return `<div class="sf-fond"></div>${issue!=="defaite" ? `<div class="sf-rayons"></div>` : ""}${fissures}
+    <div class="sf-heros">${j ? htmlPortraitHeros(j, "sf-portrait") : ""}</div><div class="sf-pluie">${pluie}</div>`;
+}
+function afficherSceneFin(issue, j, demo){
+  let sc = document.getElementById("scene-fin");
+  if(sc) sc.remove();
+  sc = document.createElement("div"); sc.id = "scene-fin"; sc.className = issue + (demo ? " demo" : ""); sc.setAttribute("aria-hidden", "true");
+  sc.innerHTML = htmlSceneFin(issue, j) + (demo ? `<div class="sf-demo-titre">${esc(T(issue==="victoire" ? "Victoire !" : issue==="defaite" ? "Défaite" : "Égalité"))}</div>` : "");
+  document.body.appendChild(sc);
+  if(demo){ jouerSon(issue==="victoire" ? "victoire" : "defaite", {fixe:true}); sc.style.pointerEvents = "auto"; sc.addEventListener("click", () => sc.remove()); setTimeout(() => sc.remove(), 7000); }
+  return sc;
+}
+let SCENE_FIN_ID = null;
+function majSceneFin(){
+  const couche = document.getElementById("couche"), boite = couche && couche.querySelector(".boite[data-fin]");
+  const sc = document.getElementById("scene-fin");
+  if(!boite || !S || S.tuto || !niveauAnim()){
+    if(sc && !sc.classList.contains("demo")) sc.remove();
+    if(couche) couche.classList.remove("fin-cine");
+    if(!boite) SCENE_FIN_ID = null;
+    return;
+  }
+  couche.classList.add("fin-cine");
+  const issue = issueFin(); if(!issue) return;
+  boite.classList.add("fin-" + issue);
+  if(SCENE_FIN_ID===S.idPartie && sc) return;
+  SCENE_FIN_ID = S.idPartie;
+  let j = S.joueurs[est2v2() ? siege2() : vue()];
+  if(S.mode==="duo" && issue==="victoire") j = S.joueurs.find(x => x.nom===S.vainqueur) || j;
+  afficherSceneFin(issue, j);
+}
+
+/* ----- 8. Cote après une partie classée ----- */
+let COTE_ANIMEE = null;
+function animerCote(racine){
+  racine = racine || document.getElementById("couche");
+  const b = racine && racine.querySelector(".cote-roule"); if(!b) return;
+  const cle = b.dataset.cle; const de = Number(b.dataset.de), a = Number(b.dataset.a);
+  if(COTE_ANIMEE===cle || !niveauAnim() || de===a){ b.textContent = nf(a); return; }
+  COTE_ANIMEE = cle;
+  const t0 = performance.now(), D = 1400;
+  b.textContent = nf(de);
+  const pas = t => {
+    const el = racine.querySelector(".cote-roule"); if(!el) return;
+    const x = Math.min(1, (t - t0)/D), e = 1 - Math.pow(1 - x, 3);
+    el.textContent = nf(Math.round(de + (a - de)*e));
+    if(x<1) requestAnimationFrame(pas);
+    else { el.classList.add("arrivee-cote"); racine.querySelectorAll(".delta-roule, .rang-gagne, .rang-top").forEach(x => x.classList.add("pop")); jouerSon(a>de ? "or" : "chute", {fixe:true}); }
+  };
+  requestAnimationFrame(pas);
+}
+
+/* ----- 9. Travail de saison accompli : la barre se remplit puis éclate ----- */
+function animerProgresSaison(){
+  const s = PROG.saison, span = document.querySelector(".progres-hall-saison .barre span");
+  if(!s || !span || s.a_venir) return;
+  const cle = "saison-vue-" + s.id, total = (s.travaux || []).length || 12;
+  let avant = null; try { avant = localStorage.getItem(cle); } catch(e) {}
+  try { localStorage.setItem(cle, String(s.finis)); } catch(e) {}
+  if(avant===null || !niveauAnim()) return;
+  const v = Number(avant); if(!(v < s.finis)) return;
+  progresSaisonAnime(span, v/total, s.finis/total);
+}
+function progresSaisonAnime(span, de, a){
+  span.animate([{width:(de*100).toFixed(1) + "%"}, {width:(de*100).toFixed(1) + "%", offset:.25}, {width:(a*100).toFixed(1) + "%"}], {duration:900, easing:"cubic-bezier(.3,.6,.2,1)", fill:"backwards"});
+  setTimeout(() => {
+    const r = span.getBoundingClientRect(), p = {x:r.right, y:r.top + r.height/2};
+    eclat(p, "pouvoir");
+    for(let k = 0; k<14; k++){
+      const e = document.createElement("span"); e.className = "fx-jeton-gain piece"; e.style.left = p.x + "px"; e.style.top = p.y + "px"; e.style.width = e.style.height = "9px"; document.body.appendChild(e);
+      const ang = Math.random()*Math.PI*2, v = 30 + Math.random()*60;
+      e.animate([{transform:"translate(-50%,-50%) scale(.4)", opacity:1}, {transform:`translate(calc(-50% + ${Math.cos(ang)*v}px),calc(-50% + ${Math.sin(ang)*v}px)) scale(1)`, opacity:0}], {duration:520, easing:"cubic-bezier(.2,.7,.3,1)", fill:"both"}).finished.then(() => e.remove(), () => e.remove());
+    }
+    const bulle = document.createElement("span"); bulle.className = "fx-gain-texte"; bulle.textContent = T("Travail accompli !"); bulle.style.left = p.x + "px"; bulle.style.top = (p.y - 6) + "px"; document.body.appendChild(bulle);
+    bulle.animate([{transform:"translate(-50%,-50%) scale(.5)", opacity:0}, {transform:"translate(-50%,-150%) scale(1.1)", opacity:1, offset:.25}, {transform:"translate(-50%,-200%) scale(1)", opacity:1, offset:.75}, {transform:"translate(-50%,-240%)", opacity:0}], {duration:1100, fill:"both"}).finished.then(() => bulle.remove(), () => bulle.remove());
+    jouerSon("recompense", {fixe:true});
+  }, 900*FX_LENT);
+}
+
+/* ----- 10. Enveloppe qui s’ouvre (message avec cadeau) ----- */
+function ouvrirEnveloppe(p){
+  if(!niveauAnim()) return;
+  const e = document.createElement("div"); e.className = "fx-enveloppe"; e.setAttribute("aria-hidden", "true");
+  e.style.left = p.x + "px"; e.style.top = p.y + "px";
+  e.innerHTML = `<span class="env-lettre"><i></i><i></i><i></i></span><span class="env-corps"></span><span class="env-rabat"></span><span class="env-sceau">✦</span>`;
+  document.body.appendChild(e);
+  e.animate([{transform:"translate(-50%,-50%) scale(.3)", opacity:0}, {transform:"translate(-50%,-50%) scale(1.1)", opacity:1, offset:.18}, {transform:"translate(-50%,-50%) scale(1)", opacity:1, offset:.26}, {transform:"translate(-50%,-50%) scale(1)", opacity:1, offset:.82}, {transform:"translate(-50%,-60%) scale(.9)", opacity:0}], {duration:1150, fill:"both"}).finished.then(() => e.remove(), () => e.remove());
+  e.querySelector(".env-sceau").animate([{transform:"translate(-50%,-50%) scale(1)", opacity:1}, {transform:"translate(-50%,-50%) scale(1)", opacity:1, offset:.22}, {transform:"translate(-50%,-50%) scale(1.6)", opacity:0, offset:.32}, {opacity:0}], {duration:1150, fill:"both"});
+  e.querySelector(".env-rabat").animate([{transform:"rotateX(0deg)"}, {transform:"rotateX(0deg)", offset:.28}, {transform:"rotateX(180deg)", offset:.46}, {transform:"rotateX(180deg)"}], {duration:1150, fill:"both"});
+  e.querySelector(".env-lettre").animate([{transform:"translate(-50%,0)"}, {transform:"translate(-50%,0)", offset:.44}, {transform:"translate(-50%,-62%)", offset:.66}, {transform:"translate(-50%,-62%)"}], {duration:1150, easing:"cubic-bezier(.3,.7,.3,1)", fill:"both"});
+  setTimeout(() => jouerSon("carte_revelee_rare", {fixe:true}), 500*FX_LENT);
+}
+document.addEventListener("toggle", e => {
+  const d = e.target;
+  if(!d || !d.matches || !d.matches("details.message") || !d.open || !d.querySelector('[data-act="boite-recuperer"]')) return;
+  const r = d.querySelector("summary").getBoundingClientRect();
+  ouvrirEnveloppe({x:Math.min(innerWidth - 80, r.left + r.width/2), y:r.top + r.height/2 + 40});
+}, true);
+
+/* ----- 11. Accueil vivant : braises et poussières aux couleurs de la saison ----- */
+function majAmbiance(force){
+  let a = document.getElementById("ambiance-accueil");
+  const couche = document.getElementById("couche");
+  const montrer = force || (!S && ui.ecran==="jeu" && PROG.actif && niveauAnim()>=2 && couche && couche.classList.contains("accueil") && !couche.querySelector(".boite"));
+  if(!montrer){ if(a && !a.dataset.demo) a.remove(); return; }
+  if(a) return;
+  a = document.createElement("div"); a.id = "ambiance-accueil"; a.setAttribute("aria-hidden", "true");
+  if(force) a.dataset.demo = "1";
+  const coul = PROG.saison ? couleurSaison(PROG.saison) : "#e3b04b", R = Math.random;
+  a.style.setProperty("--ac", coul);
+  a.innerHTML = Array.from({length:22}, (x, k) => `<i style="left:${(R()*100).toFixed(1)}%;--s:${(2 + R()*4).toFixed(1)}px;--dx:${((R() - .5)*120).toFixed(0)}px;animation-duration:${(11 + R()*12).toFixed(1)}s;animation-delay:${(-R()*20).toFixed(1)}s;opacity:${(.35 + R()*.45).toFixed(2)}"></i>`).join("");
+  document.body.appendChild(a);
+  if(force) setTimeout(() => a.remove(), 9000);
+}
+
+/* ----- Après chaque affichage ----- */
+function apresRendu(){
+  try { majTensionCombat(); } catch(e) {}
+  try { majSceneFin(); } catch(e) {}
+  try { animerCote(); } catch(e) {}
+  try { majAmbiance(); } catch(e) {}
+  try { if(!S && ui.ecran==="jeu") animerProgresSaison(); } catch(e) {}
+  try {
+    if(S && ui.ecran==="jeu" && VS_VU!==S.idPartie){
+      VS_VU = S.idPartie;
+      const debut = S.vainqueur===null && (S.tour || 0) <= 1 && !S.tuto && !(S.evt || []).some(e => ["carte", "achat", "attaque", "frappe"].includes(e.t));
+      if(debut) vsDePartie();
+    }
+  } catch(e) {}
+}
+
+
+/* ----- Banc d’essai : animations de combat et des menus ----- */
+adm.anim2 = adm.anim2 || {faction:"", rarete:"legendaire", degats:5};
+function scenetteDemo(html, duree = 5000, sansFond){
+  const ancien = document.getElementById("demo-anim"); if(ancien) ancien.remove();
+  const d = document.createElement("div"); d.id = "demo-anim"; if(sansFond) d.classList.add("sans-fond");
+  d.innerHTML = `<div class="demo-scene">${html}</div><p class="demo-aide">${esc("Cliquez pour fermer")}</p>`;
+  document.body.appendChild(d);
+  d.addEventListener("click", () => d.remove());
+  setTimeout(() => d.remove(), duree);
+  return d.querySelector(".demo-scene");
+}
+function htmlBancCombat(){
+  const B = adm.anim2, fac = Object.entries(FACTIONS);
+  if(!B.faction && fac[0]) B.faction = fac[0][0];
+  const opt = (v, l, sel) => `<option value="${esc(v)}" ${String(sel)===String(v) ? "selected" : ""}>${esc(l)}</option>`;
+  return `<fieldset><legend>Combat</legend>
+      <div class="ligne-anim">
+        <button type="button" class="btn" data-act="anim-vs" data-id="1">Écran VS (1 contre 1)</button>
+        <button type="button" class="btn second" data-act="anim-vs" data-id="2">Écran VS (2 contre 2)</button>
+        <button type="button" class="btn second" data-act="anim-banniere">Bannière de tour</button>
+      </div>
+      <div class="ligne-anim">
+        <label class="champ"><span>Mort d’une créature</span><select data-anim2="faction">${fac.map(([k, f]) => opt(k, f.nom, B.faction)).join("")}</select></label>
+        <button type="button" class="btn" data-act="anim-mort">Détruire la créature</button>
+        <label class="champ"><span>Entrée en jeu</span><select data-anim2="rarete">${[["commune","Commune"],["rare","Rare"],["epique","Épique"],["legendaire","Légendaire"]].map(([v, l]) => opt(v, l, B.rarete)).join("")}</select></label>
+        <button type="button" class="btn" data-act="anim-entree">Poser la carte</button>
+      </div>
+      <div class="ligne-anim">
+        <label class="champ court"><span>Dégâts</span><input type="number" min="1" max="40" data-anim2="degats" value="${B.degats}"></label>
+        <button type="button" class="btn" data-act="anim-degats">Infliger les dégâts</button>
+        <button type="button" class="btn second" data-act="anim-danger">Tension (10 PV ou moins)</button>
+        <button type="button" class="btn second" data-act="anim-jauge">Jauge presque pleine</button>
+        <button type="button" class="btn second" data-act="anim-achat">Achat au marché</button>
+      </div>
+      <div class="ligne-anim">
+        <button type="button" class="btn" data-act="anim-fin" data-id="victoire">Coup fatal + victoire</button>
+        <button type="button" class="btn second" data-act="anim-fin" data-id="defaite">Coup fatal + défaite</button>
+        <button type="button" class="btn second" data-act="anim-fin" data-id="egalite">Égalité</button>
+      </div>
+    </fieldset>
+    <fieldset><legend>Menus</legend>
+      <div class="ligne-anim">
+        <button type="button" class="btn second" data-act="anim-cote" data-id="gain">Cote : gain et top 10</button>
+        <button type="button" class="btn second" data-act="anim-cote" data-id="perte">Cote : perte</button>
+        <button type="button" class="btn second" data-act="anim-saison">Travail de saison accompli</button>
+        <button type="button" class="btn second" data-act="anim-enveloppe">Enveloppe qui s’ouvre</button>
+        <button type="button" class="btn second" data-act="anim-ambiance">Accueil vivant</button>
+      </div>
+    </fieldset>`;
+}
+function herosDemo(){ const h = listeHerosAnim().find(x => x[0]===adm.anim.heros) || listeHerosAnim()[0]; return h ? {heros:h[2], palier:h[3]} : {heros:Object.keys(FACTIONS)[0], palier:1}; }
+function carteDemo(filtre){
+  const l = Object.keys(CARTES).filter(k => estCollectionnableAdmin(CARTES[k]) && filtre(CARTES[k]));
+  return l.length ? l[Math.floor(Math.random()*l.length)] : Object.keys(CARTES).find(k => estCollectionnableAdmin(CARTES[k]));
+}
+function actionBancCombat(act, id){
+  const B = adm.anim2, niv = niveauAnim();
+  if(!niv) return erreur("Les animations sont désactivées : choisissez « Complètes » ou « Réduites ».");
+  const fac = Object.keys(FACTIONS), h = herosDemo();
+  const autre = fac.find(f => f!==h.heros) || h.heros;
+  const nom = (PROG.profil && PROG.profil.pseudo) || "Admin";
+  switch(act){
+    case "anim-vs": {
+      const p = (f, pal, n, cote) => ({heros:f, palier:pal, nom:n, cote});
+      if(id==="2") afficherVS([p(h.heros, h.palier, nom, 1287), p(fac[2] || autre, 1, "Allié", 1240)], [p(autre, 2, "Adversaire 1", 1310), p(fac[3] || autre, 0, "Adversaire 2", 1198)], T("2 contre 2"));
+      else afficherVS([p(h.heros, h.palier, nom, 1287)], [p(autre, 1, "Adversaire", 1302)], T("Partie classée"));
+      return;
+    }
+    case "anim-banniere": banniereTour("À vous de jouer", "Tour 3", false, h); return;
+    case "anim-mort": {
+      const k = carteDemo(d => d.type==="creature" && d.faction===B.faction);
+      const el = document.createElement("div"); el.className = "fx-carte demo-carte";
+      const L = 170; el.style.width = L + "px"; el.style.left = (innerWidth/2 - L/2) + "px"; el.style.top = (innerHeight/2 - L*.7) + "px";
+      el.innerHTML = htmlCarte({id:k, uid:"demo-mort"}); calqueFx().appendChild(el);
+      setTimeout(() => {
+        const r = el.getBoundingClientRect();
+        jouerSon("mort", {fixe:true});
+        if(!mortThematique(el, r, B.faction, niv)) el.animate([{opacity:1}, {opacity:0, filter:"grayscale(1) blur(3px)"}], {duration:550, fill:"both"}).finished.then(() => el.remove(), () => el.remove());
+      }, 500);
+      return;
+    }
+    case "anim-entree": {
+      const k = carteDemo(d => d.type==="creature" && (d.rarete || "commune")===B.rarete) || carteDemo(d => d.type==="creature");
+      const sc = scenetteDemo(`<div class="demo-pose">${htmlCarte({id:k, uid:"demo-entree"})}</div>`, 4500);
+      const el = sc.querySelector(".demo-pose");
+      el.classList.add("arrivee"); entreeRarete(el, B.rarete, niv);
+      jouerSon(B.rarete==="legendaire" ? "carte_revelee_legendaire" : B.rarete==="epique" ? "carte_revelee_epique" : "carte", {fixe:true});
+      return;
+    }
+    case "anim-degats": {
+      const sc = scenetteDemo(`<div class="demo-medaillon">${htmlPortraitHeros(h, "demo-portrait")}</div>`, 3500), m = sc.querySelector(".demo-medaillon");
+      const n = Math.max(1, Math.min(40, Number(B.degats) || 5));
+      setTimeout(() => { m.classList.add("touche"); flottantImmediat(m, -n); chocDegats(-n, true); eclat(centre(m.getBoundingClientRect()), "impact"); jouerSon("degats", {fixe:true}); }, 300);
+      return;
+    }
+    case "anim-danger": {
+      const sc = scenetteDemo(`<div class="demo-medaillon en-danger">${htmlPortraitHeros(h, "demo-portrait")}<b class="demo-pv">7</b></div>`, 5000, true);
+      let v = document.getElementById("vignette-danger");
+      if(!v){ v = document.createElement("div"); v.id = "vignette-danger"; v.setAttribute("aria-hidden", "true"); document.body.appendChild(v); }
+      requestAnimationFrame(() => v.classList.add("actif"));
+      setTimeout(() => { if(!S || ui.ecran!=="jeu") v.classList.remove("actif"); }, 5000);
+      return;
+    }
+    case "anim-jauge": scenetteDemo(`<div class="demo-medaillon">${htmlPortraitHeros(h, "demo-portrait")}<span class="crepitement" aria-hidden="true"><i></i><i></i><i></i></span></div><p class="demo-legende">${esc("Jauge de pouvoir : 8 / 10")}</p>`, 5000); return;
+    case "anim-achat": {
+      const k = carteDemo(d => d.prix>=3), L = 150;
+      const de = {x:innerWidth*.75, y:innerHeight*.35}, a = {x:innerWidth*.2, y:innerHeight*.78}, bourse = {x:innerWidth*.25, y:innerHeight*.85};
+      for(let i = 0; i<Math.min(5, CARTES[k].prix || 3); i++) voler(icoVolante("or", 24), bourse, de, 420, i*70, {e0:1, e2:.6, o2:0});
+      setTimeout(() => {
+        const cl = document.createElement("div"); cl.className = "fx-carte"; cl.style.width = L + "px"; cl.style.marginLeft = -L/2 + "px"; cl.style.marginTop = -L*.7 + "px";
+        cl.innerHTML = htmlCarte({id:k, uid:"demo-achat"});
+        voler(cl, de, a, 600, 0, {e0:1, e2:.45, o2:1});
+        jouerSon("achat", {fixe:true});
+      }, 500*FX_LENT);
+      return;
+    }
+    case "anim-fin": {
+      const p = {x:innerWidth/2, y:innerHeight*.35};
+      eclat(p, "impact"); jouerSon("chute", {fixe:true});
+      if(niv>=2 && id!=="egalite") coupFatal(p);
+      setTimeout(() => afficherSceneFin(id, id==="defaite" ? h : h, true), (id==="egalite" ? 200 : 1100)*FX_LENT);
+      return;
+    }
+    case "anim-cote": {
+      const gain = id!=="perte";
+      const sc = scenetteDemo(`<div class="demo-panneau"><h3>${esc(T(gain ? "Victoire !" : "Défaite"))}</h3><p class="ligne-elo">${esc(T("Classement :"))} <b class="cote-roule" data-cle="demo-${Date.now()}" data-de="${gain ? 1269 : 1287}" data-a="${gain ? 1287 : 1271}">${gain ? 1269 : 1287}</b>
+        <span class="delta-roule ${gain ? "elo-gain" : "elo-perte"}">(${gain ? "+18" : "−16"})</span></p>
+        ${gain ? `<p class="ligne-rang"><span class="rang-gagne">▲ 3 places · ${rangTexte(9)}</span><span class="rang-top">${esc(T("Top 10 !"))}</span></p>` : ""}</div>`, 6000);
+      setTimeout(() => animerCote(sc), 300);
+      return;
+    }
+    case "anim-saison": {
+      const sc = scenetteDemo(`<div class="demo-panneau"><h3>${esc(T("Saison en cours"))}</h3><div class="progres-hall-saison"><span class="barre"><span style="width:${(7/12*100).toFixed(1)}%"></span></span><span>7 / 12</span></div></div>`, 5000);
+      progresSaisonAnime(sc.querySelector(".barre span"), 6/12, 7/12);
+      return;
+    }
+    case "anim-enveloppe": ouvrirEnveloppe({x:innerWidth/2, y:innerHeight/2}); return;
+    case "anim-ambiance": { const a = document.getElementById("ambiance-accueil"); if(a) a.remove(); majAmbiance(true); erreur("Braises de l’accueil pendant quelques secondes."); return; }
+  }
+}
+document.addEventListener("change", e => {
+  const el = e.target; if(!el || !el.dataset || !el.dataset.anim2 || ui.ecran!=="admin") return;
+  adm.anim2[el.dataset.anim2] = el.type==="number" ? Number(el.value) : el.value;
 });
 
 /* ----- Collection : recycler tous les exemplaires en trop ----- */
