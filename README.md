@@ -363,3 +363,35 @@ Une page de l'admin (menu « Le jeu » › Animations) pour déclencher chaque a
 - **Partie de test** contre l'ordinateur : panthéons, divinité, pouvoir chargé, or, puissance, créatures déjà en jeu de chaque côté, cartes choisies dans la main. Elle n'est jamais enregistrée (ni or, ni quêtes, ni statistiques, ni classement). Un bandeau en haut de l'écran ramène à la page Animations.
 
 Rien n'est envoyé au serveur. Aucun script Supabase à exécuter.
+
+## Animations de combat et des menus
+
+**En combat**
+- **Écran VS** au lancement de chaque partie (contre l'ordinateur, à deux, en ligne, en 2 contre 2) : portraits des dieux, pseudos et cotes en ligne. La cote de l'invité est transmise à l'hôte au moment où il rejoint la partie.
+- **Bannière de tour** avec le portrait du joueur dont c'est le tour et un reflet qui la balaie.
+- **Morts aux couleurs du panthéon** : éclats de glace (Nordiques), sable qui s'effrite (Égyptiens), marbre qui se fissure et se brise (Grecs), pétales de lotus (Hindous).
+- **Entrée selon la rareté** : une épique tombe avec un petit choc, une légendaire arrive dans une colonne de lumière et fait trembler le plateau.
+- **Dégâts** : chiffres d'autant plus gros que le coup est fort (à partir de 3, 6 et 10), plateau qui tremble en proportion.
+- **Tension** : sous 10 PV, le portrait bat comme un cœur, et les bords de l'écran rougissent pour votre propre héros.
+- **Jauge de pouvoir à 70 % ou plus** : le médaillon crépite.
+- **Achat au marché** : les pièces partent de la bourse vers la carte, puis la carte s'envole vers la défausse.
+- **Coup fatal** : ralenti et zoom sur le coup, puis une scène de victoire (pluie de lumière, portrait triomphant) ou de défaite (écran qui se fissure, portrait qui s'éteint).
+
+**Hors combat**
+- **Cote après une partie classée** : le chiffre défile, le gain ou la perte apparaît, avec les places gagnées et « Top 10 ! » à l'entrée dans les dix premiers.
+- **Travail de saison accompli** : sur l'accueil, la barre se remplit puis éclate.
+- **Boîte aux lettres** : une enveloppe s'ouvre quand on lit un message avec un cadeau.
+- **Accueil vivant** : braises aux couleurs de la saison (en animations complètes seulement).
+
+Tout se teste dans Admin › Animations (rubriques « Combat » et « Menus »). Aucun script Supabase à exécuter.
+
+## Bruitages des nouvelles animations
+
+Admin › Bruitages contient 24 nouveaux emplacements, rangés dans « Combat : nouvelles animations » et « Menus : nouvelles animations » : écran VS, bannière de tour, morts par panthéon, entrées épique et légendaire, gros dégâts, battement de cœur, jauge qui crépite, coup fatal, pouvoir par panthéon, pièces, carte qui tournoie, enveloppe, travail de saison, cote qui monte ou baisse, top 10.
+
+- Chaque emplacement donne une idée de son et une durée conseillée.
+- Plusieurs fichiers par emplacement : le jeu en tire un au hasard à chaque fois.
+- Emplacement vide : certains utilisent un son existant (indiqué sous l'emplacement, par exemple les morts par panthéon utilisent « Créature détruite »), les autres restent silencieux.
+- Pour écouter chaque son avec son animation : Admin › Animations.
+
+Après l'ajout des fichiers, exportez config.json. Aucun script Supabase à exécuter.

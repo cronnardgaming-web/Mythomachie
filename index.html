@@ -4705,6 +4705,7 @@ function banniereTourMaintenant(texte, sousTexte, adverse, qui){
   const b = document.getElementById("banniere");
   if(!b) return;
   const j = typeof qui==="number" ? (S && S.joueurs[qui]) : qui;
+  jouerSon("banniere_tour");
   const portrait = j && j.heros && niveauAnim() ? htmlPortraitHeros(j, "bt-portrait") : "";
   b.innerHTML = `<span class="banniere-bande"><span class="bt-ligne">${portrait}<span class="bt-textes"><b>${esc(texte)}</b>${sousTexte ? `<small>${esc(sousTexte)}</small>` : ""}</span></span></span>`;
   b.classList.toggle("adverse", !!adverse);
@@ -11149,9 +11150,36 @@ const EVENEMENTS_SONS = [
   ["carte_revelee_legendaire", "Grands moments", "Carte légendaire révélée", "Chœur majestueux, 1,5 s"],
   ["recompense", "Menus", "Récompense obtenue", "Courte fanfare, 1 à 1,5 s (quêtes, trophées, saison, cadeaux)"],
   ["notification", "Menus", "Notification", "Discrète (défi, message reçu), 0,4 s"],
-  ["clic", "Menus", "Clic dans les menus", "Clic sourd de bronze, moins de 0,1 s (très fréquent : très doux)"]
+  ["clic", "Menus", "Clic dans les menus", "Clic sourd de bronze, moins de 0,1 s (très fréquent : très doux)"],
+  // Nouvelles animations (Admin › Animations pour les voir avec le son)
+  ["vs", "Combat : nouvelles animations", "Écran VS (le « VS » qui s’abat)", "Choc métallique très grave + souffle, comme deux boucliers qui s’entrechoquent, 0,8 à 1,2 s"],
+  ["banniere_tour", "Combat : nouvelles animations", "Bannière de tour", "Souffle court qui balaie (whoosh) avec un léger tintement, 0,4 s (fréquent : doux)"],
+  ["mort_nor", "Combat : nouvelles animations", "Mort nordique (glace)", "Glace qui craque puis éclate en morceaux, tintements cristallins, 0,6 s"],
+  ["mort_egy", "Combat : nouvelles animations", "Mort égyptienne (sable)", "Sable qui s’écoule, souffle sec du désert, 0,8 s"],
+  ["mort_gre", "Combat : nouvelles animations", "Mort grecque (marbre)", "Pierre qui se fissure puis blocs qui tombent, 0,7 s"],
+  ["mort_hin", "Combat : nouvelles animations", "Mort hindoue (lotus)", "Clochettes et souffle léger qui s’élève, 0,8 s"],
+  ["entree_epique", "Combat : nouvelles animations", "Entrée d’une créature épique", "Impact sourd au sol + éclat brillant, 0,5 s"],
+  ["entree_legendaire", "Combat : nouvelles animations", "Entrée d’une créature légendaire", "Montée de chœur + grondement qui fait trembler, 1 à 1,5 s"],
+  ["gros_coup", "Combat : nouvelles animations", "Gros dégâts (6 ou plus)", "Impact lourd avec basse profonde, en plus du son de dégâts, 0,4 s"],
+  ["coeur", "Combat : nouvelles animations", "Tension : passage sous 10 PV", "Deux battements de cœur graves, 0,8 s (une fois, à l’entrée dans la zone)"],
+  ["jauge_crepite", "Combat : nouvelles animations", "Jauge de pouvoir presque pleine", "Crépitement électrique, étincelles, 0,5 s (une fois, au passage des 70 %)"],
+  ["coup_fatal", "Combat : nouvelles animations", "Coup fatal (ralenti)", "Son ralenti et étouffé : battement + souffle grave qui descend, 1 s"],
+  ["pouvoir_gre", "Combat : nouvelles animations", "Pouvoir grec", "Tonnerre et chœur, 1 à 1,5 s (sinon : Pouvoir de la divinité)"],
+  ["pouvoir_nor", "Combat : nouvelles animations", "Pouvoir nordique", "Cor de guerre et tambours, 1 à 1,5 s (sinon : Pouvoir de la divinité)"],
+  ["pouvoir_egy", "Combat : nouvelles animations", "Pouvoir égyptien", "Sistre et vent du désert, 1 à 1,5 s (sinon : Pouvoir de la divinité)"],
+  ["pouvoir_hin", "Combat : nouvelles animations", "Pouvoir hindou", "Gong, conque et clochettes, 1 à 1,5 s (sinon : Pouvoir de la divinité)"],
+  ["pieces", "Menus : nouvelles animations", "Pièces qui arrivent dans la bourse", "Petite cascade de pièces, 0,4 s"],
+  ["carte_tournoie", "Menus : nouvelles animations", "Carte gagnée qui tournoie", "Souffle qui tourne de plus en plus vite (whoosh), 0,8 s"],
+  ["enveloppe", "Menus : nouvelles animations", "Enveloppe qui s’ouvre", "Sceau de cire qui craque + papier qu’on déplie, 0,6 s"],
+  ["saison_travail", "Menus : nouvelles animations", "Travail de saison accompli", "Montée rapide + éclat de cuivres, 1 s"],
+  ["cote_monte", "Menus : nouvelles animations", "Cote qui monte", "Tic-tic qui accélère et monte, puis petit « ding », 1,2 s"],
+  ["cote_baisse", "Menus : nouvelles animations", "Cote qui baisse", "Tic-tic qui ralentit et descend, 1,2 s (sobre)"],
+  ["top10", "Menus : nouvelles animations", "Entrée dans le top 10", "Courte fanfare triomphante, 1,5 s"]
 ];
-const SON_FALLBACK = {carte_revelee_rare:"carte_revelee", carte_revelee_epique:"carte_revelee", carte_revelee_legendaire:"carte_revelee_epique", combo_egy:"combo", combo_hin:"combo", combo_nor:"combo", combo_gre:"combo"};
+const SON_FALLBACK = {mort_nor:"creature_detruite", mort_egy:"creature_detruite", mort_gre:"creature_detruite", mort_hin:"creature_detruite",
+  pouvoir_gre:"pouvoir", pouvoir_nor:"pouvoir", pouvoir_egy:"pouvoir", pouvoir_hin:"pouvoir", entree_legendaire:"carte_revelee_epique",
+  pieces:"or", enveloppe:"carte_revelee_rare", saison_travail:"recompense", top10:"recompense",
+  carte_revelee_rare:"carte_revelee", carte_revelee_epique:"carte_revelee", carte_revelee_legendaire:"carte_revelee_epique", combo_egy:"combo", combo_hin:"combo", combo_nor:"combo", combo_gre:"combo"};
 const SONS = {ctx:null, cache:new Map(), file:[], enCours:false, dernier:{}, sortie:null, attente:[]};
 // Volume : nouveau réglage par défaut, bien plus discret (les anciens réglages sont abandonnés)
 function prefsBruitages(){
@@ -11165,7 +11193,9 @@ const POIDS_SONS = {
   fin_tour:[0.6, 2], a_vous:[0.7, 3], soin:[0.7, 3], attaque:[0.8, 4], degats_heros:[0.85, 5], creature_detruite:[0.8, 5], resistance:[0.75, 4],
   eclair:[0.8, 4], onde:[0.85, 5], bannir:[0.7, 3], sacrifice:[0.75, 4], combo:[0.75, 4], pouvoir:[0.9, 6], chute:[0.9, 6], resurrection:[0.9, 6],
   victoire:[1, 9], defaite:[1, 9], debut_partie:[0.8, 7], paquet_ouvrir:[0.8, 5], carte_revelee:[0.7, 4], carte_revelee_rare:[0.75, 5],
-  carte_revelee_epique:[0.85, 6], carte_revelee_legendaire:[1, 8], recompense:[0.85, 6], notification:[0.6, 5]
+  carte_revelee_epique:[0.85, 6], carte_revelee_legendaire:[1, 8], recompense:[0.85, 6], notification:[0.6, 5],
+  vs:[0.95, 8], banniere_tour:[0.5, 2], entree_epique:[0.8, 5], entree_legendaire:[0.95, 7], gros_coup:[0.9, 6], coeur:[0.8, 6], jauge_crepite:[0.7, 4],
+  coup_fatal:[0.95, 8], pieces:[0.6, 3], carte_tournoie:[0.7, 4], enveloppe:[0.7, 4], saison_travail:[0.85, 6], cote_monte:[0.7, 5], cote_baisse:[0.6, 5], top10:[0.9, 7]
 };
 const poidsSon = cle => POIDS_SONS[cle] || POIDS_SONS[cle.replace(/_(egy|hin|nor|gre)$/, "")] || [0.7, 3];
 // Durée maximale avant de passer au son suivant (un son long ne bloque pas la partie)
@@ -11268,9 +11298,9 @@ function cleSonEvenement(ev, moi){
   switch(ev.t){
     case "carte": return "carte"; case "pioche": return "pioche"; case "achat": return "achat"; case "or": return "or"; case "puissance": return "puissance";
     case "melange": return "melange"; case "defausse": return "fin_tour"; case "attaque": case "frappe": return ev.cible==="face" ? "degats_heros" : "attaque";
-    case "mort": return "creature_detruite"; case "soin": return "soin"; case "arme": return "equipement"; case "bouclier": return "resistance";
+    case "mort": { const id = typeof idDeUid==="function" ? idDeUid(ev.uid) : null, f = id && CARTES[id] && CARTES[id].faction; return ["gre","nor","egy","hin"].includes(f) ? "mort_" + f : "creature_detruite"; } case "soin": return "soin"; case "arme": return "equipement"; case "bouclier": return "resistance";
     case "eclair": return "eclair"; case "onde": return "onde"; case "bannir": return "bannir"; case "sacrifice": return "sacrifice";
-    case "combo": return "combo_" + (ev.faction || ""); case "pouvoir": return "pouvoir"; case "chute": return "chute"; case "resurrection": return "resurrection";
+    case "combo": return "combo_" + (ev.faction || ""); case "pouvoir": { const f = S && S.joueurs[ev.j] && S.joueurs[ev.j].heros; return ["gre","nor","egy","hin"].includes(f) ? "pouvoir_" + f : "pouvoir"; } case "chute": return "chute"; case "resurrection": return "resurrection";
     case "fin": return ev.perdant===moi ? "defaite" : "victoire";
     case "fin_temps": return "degats_heros";
   }
@@ -11285,7 +11315,7 @@ function sonsEvenements(evts){
   if(evts.some(e => e.j===moi) && S.courant===moi) SONS.file = SONS.file.filter(x => poidsSon(x.cle)[1] >= 5);
   // Les 3 sons les plus importants, dans l’ordre des actions
   const gardes = new Set([...cles].sort((a, b) => poidsSon(b)[1] - poidsSon(a)[1]).slice(0, 3));
-  cles.filter(k => gardes.has(k)).forEach(k => jouerSon(k, {fixe:["victoire","defaite","pouvoir","chute","resurrection"].includes(k)}));
+  cles.filter(k => gardes.has(k)).forEach(k => jouerSon(k, {fixe:["victoire","defaite","pouvoir","chute","resurrection"].includes(k.replace(/_(egy|hin|nor|gre)$/, ""))}));
   if(S.mode==="enligne" && evts.some(e => e.t==="defausse") && S.courant===moi && S.vainqueur===null) jouerSon("a_vous");
 }
 
@@ -11319,10 +11349,10 @@ function admBruitages(){
     <h2>Bruitages</h2>
     <p class="aide">Déposez un ou plusieurs fichiers par événement (MP3 ou OGG, mono, 150 Ko maximum chacun). Avec plusieurs fichiers, le jeu en choisit un au hasard, et fait légèrement varier la hauteur à chaque lecture. Les combos sans son propre utilisent le son « Combo » s’il existe ; les cartes rares, épiques et légendaires reprennent le son de rareté inférieure.
       ${nb} événement${nb>1 ? "s" : ""} sur ${EVENEMENTS_SONS.length} ont un son · ${tailleTexte(total)} au total dans config.json. Après vos changements, exportez config.json.</p>
-    ${groupes.map(g => `<h3>${esc(g)}</h3><div class="liste-sons">${EVENEMENTS_SONS.filter(e => e[1]===g).map(([k, , libelle, conseil]) => {
+    ${groupes.map(g => `<h3>${esc(g)}</h3>${/nouvelles animations/.test(g) ? `<p class="aide">Pour entendre chaque son avec son animation : Admin › Animations.</p>` : ""}<div class="liste-sons">${EVENEMENTS_SONS.filter(e => e[1]===g).map(([k, , libelle, conseil]) => {
       const c = B[k] || {}, f = c.fichiers || [];
       return `<div class="ligne-son ${f.length ? "avec" : ""}">
-        <div class="titre-son"><b>${esc(libelle)}</b><span class="aide">${esc(conseil)}</span></div>
+        <div class="titre-son"><b>${esc(libelle)}</b><span class="aide">${esc(conseil)}</span>${!f.length && SON_FALLBACK[k] ? `<span class="aide secours-son">Sans fichier : « ${esc((EVENEMENTS_SONS.find(e => e[0]===SON_FALLBACK[k]) || [, , SON_FALLBACK[k]])[2])} » est joué.</span>` : ""}</div>
         <div class="fichiers-son">${f.map((x, n) => `<span class="puce-son"><button type="button" class="pm" data-act="son-ecouter" data-id="${k}|${n}" aria-label="Écouter le fichier ${n+1}">▶</button>${String(x).startsWith("data:") ? tailleTexte(tailleDataUrl(x)) : esc(String(x).split("/").pop())}<button type="button" class="pm" data-act="son-retirer" data-id="${k}|${n}" aria-label="Retirer le fichier ${n+1}">✕</button></span>`).join("") || `<span class="aide">aucun son</span>`}</div>
         <div class="commandes-son">
           <input type="file" accept="audio/*" multiple hidden data-son-fichier="${k}">
@@ -11745,7 +11775,7 @@ function volerJetons(p, sel, classe, n){
   setTimeout(() => {
     const el = document.querySelector(sel);
     if(el) el.animate([{transform:"scale(1)", filter:"brightness(1)"}, {transform:"scale(1.35)", filter:"brightness(1.8)"}, {transform:"scale(1)", filter:"brightness(1)"}], {duration:220, easing:"ease-out"});
-    if(classe==="piece") jouerSon("or", {immediat:true});
+    if(classe==="piece") jouerSon("pieces", {immediat:true});
   }, arrivee - 120);
 }
 function celebrerGain(brut){
@@ -11802,7 +11832,7 @@ function presenterCartesGagnees(items){
     couche.addEventListener("click", e => { if(e.target.closest("[data-gc]") || !e.target.closest(".gc-carte")) fermer(); });
     couche.addEventListener("keydown", e => { if(e.key==="Escape" || e.key==="Enter"){ e.preventDefault(); fermer(); } });
     if(niv===0){ inter.style.transform = "none"; texte.style.opacity = 1; couche.querySelector("[data-gc]").focus(); return; }
-    jouerSon("recompense", {fixe:true});
+    jouerSon("recompense", {fixe:true}); jouerSon("carte_tournoie", {fixe:true});
     couche.querySelector(".gc-fond").animate([{opacity:0}, {opacity:1}], {duration:220, fill:"forwards"});
     // Départ du bouton « Réclamer », arrivée au centre en tournoyant sur l’axe vertical
     const cx = innerWidth/2, cy = innerHeight/2 - 40;
@@ -12083,7 +12113,7 @@ function actionAnimations(act, id){
     if(!niveauAnim()) return erreur("Les animations sont désactivées : choisissez « Complètes » ou « Réduites ».");
     const h = listeHerosAnim().find(x => x[0]===A.heros); if(!h) return;
     cinematiquePouvoir({j:0}, pointSource(), niveauAnim(), {heros:h[2], palier:h[3]});
-    jouerSon("pouvoir", {fixe:true});
+    jouerSon(["gre","nor","egy","hin"].includes(h[2]) ? "pouvoir_" + h[2] : "pouvoir", {fixe:true});
     return;
   }
   if(act==="anim-gain"){
@@ -12196,7 +12226,7 @@ function afficherVS(gauche, droite, sousTitre){
   e.querySelector(".vs-eclair").animate([{opacity:0, transform:"scale(.2)"}, {opacity:0, offset:.2}, {opacity:1, transform:"scale(1)", offset:.24}, {opacity:0, transform:"scale(1.8)", offset:.45}, {opacity:0}], {duration:D, fill:"both"});
   const sous = e.querySelector(".vs-sous"); if(sous) sous.animate([{opacity:0}, {opacity:0, offset:.3}, {opacity:1, offset:.38}, {opacity:1, offset:.8}, {opacity:0}], {duration:D, fill:"both"});
   if(niv>=2) setTimeout(() => secouerPlateau(10, 300), D*.24*FX_LENT);
-  setTimeout(() => jouerSon("combo", {fixe:true}), D*.22*FX_LENT);
+  setTimeout(() => jouerSon("vs", {fixe:true}), D*.22*FX_LENT);
   setTimeout(() => e.remove(), D*FX_LENT + 100);
 }
 function vsDePartie(){
@@ -12278,10 +12308,10 @@ function mortThematique(el, r, faction, niveau){
 function entreeRarete(el, rar, niveau){
   if(!el || !niveau) return;
   if(rar==="epique"){
-    el.classList.add("arrivee-epique");
+    el.classList.add("arrivee-epique"); jouerSon("entree_epique", {fixe:true});
     setTimeout(() => { const r = el.getBoundingClientRect(); eclat({x:r.left + r.width/2, y:r.bottom - 6}, "impact"); if(niveau>=2) secouerPlateau(4, 220); }, 260*FX_LENT);
   } else if(rar==="legendaire"){
-    el.classList.add("arrivee-legendaire");
+    el.classList.add("arrivee-legendaire"); jouerSon("entree_legendaire", {fixe:true});
     if(niveau>=2){
       const r = el.getBoundingClientRect(), col = document.createElement("span");
       col.className = "fx-colonne"; col.style.left = (r.left + r.width/2) + "px"; col.style.width = (r.width*1.5) + "px"; col.style.height = (r.bottom + 20) + "px";
@@ -12296,6 +12326,7 @@ function entreeRarete(el, rar, niveau){
 /* ----- 4. Gros chiffres de dégâts et tremblement proportionnel ----- */
 const classeDegats = d => d<=-10 ? "titan" : d<=-6 ? "enorme" : d<=-3 ? "fort" : "";
 function chocDegats(d, hero){
+  if(d<=-6) jouerSon("gros_coup", {fixe:true});
   if(niveauAnim()<2 || d>-3) return;
   secouerPlateau(Math.min(16, (hero ? 3 : 1) + (-d)*(hero ? 1.1 : .7)), 260 + Math.min(260, -d*18));
 }
@@ -12315,14 +12346,22 @@ function majTensionCombat(){
     const jauge = est2v2() ? (S.jauge || [])[j.eq] || 0 : j.morts || 0;
     const proche = !j.esprit && !pouvoirPret(j) && jauge >= Math.ceil(seuil*.7);
     if(proche && !m.querySelector(".crepitement")) m.insertAdjacentHTML("beforeend", `<span class="crepitement" aria-hidden="true"><i></i><i></i><i></i></span>`);
+    const cleJauge = S.idPartie + ":" + (est2v2() ? "e" + j.eq : i);
+    SONS.jauges = SONS.jauges || {};
+    if(proche && !SONS.jauges[cleJauge]){ SONS.jauges[cleJauge] = 1; jouerSon("jauge_crepite"); }
+    if(!proche) delete SONS.jauges[cleJauge];
     if(!proche){ const c = m.querySelector(".crepitement"); if(c) c.remove(); }
   });
+  const cleCoeur = S.idPartie + ":" + vue();
+  if(moiDanger && SONS.dangerPartie!==cleCoeur){ SONS.dangerPartie = cleCoeur; jouerSon("coeur", {fixe:true}); }
+  if(!moiDanger && SONS.dangerPartie===cleCoeur) SONS.dangerPartie = null;
   if(moiDanger && !vign){ const v = document.createElement("div"); v.id = "vignette-danger"; v.setAttribute("aria-hidden", "true"); document.body.appendChild(v); requestAnimationFrame(() => v.classList.add("actif")); }
   else if(vign) vign.classList.toggle("actif", moiDanger);
 }
 
 /* ----- 6. Coup fatal au ralenti ----- */
 function coupFatal(point){
+  jouerSon("coup_fatal", {fixe:true});
   if(niveauAnim()<2) return;
   // Ralenti : toutes les animations en cours tournent à 30 % pendant un court instant
   const anims = document.getAnimations ? document.getAnimations() : [];
@@ -12398,6 +12437,7 @@ function animerCote(racine){
   const cle = b.dataset.cle; const de = Number(b.dataset.de), a = Number(b.dataset.a);
   if(COTE_ANIMEE===cle || !niveauAnim() || de===a){ b.textContent = nf(a); return; }
   COTE_ANIMEE = cle;
+  jouerSon(a>de ? "cote_monte" : "cote_baisse", {fixe:true});
   const t0 = performance.now(), D = 1400;
   b.textContent = nf(de);
   const pas = t => {
@@ -12405,7 +12445,7 @@ function animerCote(racine){
     const x = Math.min(1, (t - t0)/D), e = 1 - Math.pow(1 - x, 3);
     el.textContent = nf(Math.round(de + (a - de)*e));
     if(x<1) requestAnimationFrame(pas);
-    else { el.classList.add("arrivee-cote"); racine.querySelectorAll(".delta-roule, .rang-gagne, .rang-top").forEach(x => x.classList.add("pop")); jouerSon(a>de ? "or" : "chute", {fixe:true}); }
+    else { el.classList.add("arrivee-cote"); racine.querySelectorAll(".delta-roule, .rang-gagne, .rang-top").forEach(x => x.classList.add("pop")); if(racine.querySelector(".rang-top")) jouerSon("top10", {fixe:true}); }
   };
   requestAnimationFrame(pas);
 }
@@ -12433,7 +12473,7 @@ function progresSaisonAnime(span, de, a){
     }
     const bulle = document.createElement("span"); bulle.className = "fx-gain-texte"; bulle.textContent = T("Travail accompli !"); bulle.style.left = p.x + "px"; bulle.style.top = (p.y - 6) + "px"; document.body.appendChild(bulle);
     bulle.animate([{transform:"translate(-50%,-50%) scale(.5)", opacity:0}, {transform:"translate(-50%,-150%) scale(1.1)", opacity:1, offset:.25}, {transform:"translate(-50%,-200%) scale(1)", opacity:1, offset:.75}, {transform:"translate(-50%,-240%)", opacity:0}], {duration:1100, fill:"both"}).finished.then(() => bulle.remove(), () => bulle.remove());
-    jouerSon("recompense", {fixe:true});
+    jouerSon("saison_travail", {fixe:true});
   }, 900*FX_LENT);
 }
 
@@ -12448,7 +12488,7 @@ function ouvrirEnveloppe(p){
   e.querySelector(".env-sceau").animate([{transform:"translate(-50%,-50%) scale(1)", opacity:1}, {transform:"translate(-50%,-50%) scale(1)", opacity:1, offset:.22}, {transform:"translate(-50%,-50%) scale(1.6)", opacity:0, offset:.32}, {opacity:0}], {duration:1150, fill:"both"});
   e.querySelector(".env-rabat").animate([{transform:"rotateX(0deg)"}, {transform:"rotateX(0deg)", offset:.28}, {transform:"rotateX(180deg)", offset:.46}, {transform:"rotateX(180deg)"}], {duration:1150, fill:"both"});
   e.querySelector(".env-lettre").animate([{transform:"translate(-50%,0)"}, {transform:"translate(-50%,0)", offset:.44}, {transform:"translate(-50%,-62%)", offset:.66}, {transform:"translate(-50%,-62%)"}], {duration:1150, easing:"cubic-bezier(.3,.7,.3,1)", fill:"both"});
-  setTimeout(() => jouerSon("carte_revelee_rare", {fixe:true}), 500*FX_LENT);
+  setTimeout(() => jouerSon("enveloppe", {fixe:true}), 500*FX_LENT);
 }
 document.addEventListener("toggle", e => {
   const d = e.target;
@@ -12566,7 +12606,7 @@ function actionBancCombat(act, id){
       el.innerHTML = htmlCarte({id:k, uid:"demo-mort"}); calqueFx().appendChild(el);
       setTimeout(() => {
         const r = el.getBoundingClientRect();
-        jouerSon("mort", {fixe:true});
+        jouerSon(["gre","nor","egy","hin"].includes(B.faction) ? "mort_" + B.faction : "creature_detruite", {fixe:true});
         if(!mortThematique(el, r, B.faction, niv)) el.animate([{opacity:1}, {opacity:0, filter:"grayscale(1) blur(3px)"}], {duration:550, fill:"both"}).finished.then(() => el.remove(), () => el.remove());
       }, 500);
       return;
@@ -12576,24 +12616,24 @@ function actionBancCombat(act, id){
       const sc = scenetteDemo(`<div class="demo-pose">${htmlCarte({id:k, uid:"demo-entree"})}</div>`, 4500);
       const el = sc.querySelector(".demo-pose");
       el.classList.add("arrivee"); entreeRarete(el, B.rarete, niv);
-      jouerSon(B.rarete==="legendaire" ? "carte_revelee_legendaire" : B.rarete==="epique" ? "carte_revelee_epique" : "carte", {fixe:true});
+      jouerSon("carte", {fixe:true});
       return;
     }
     case "anim-degats": {
       const sc = scenetteDemo(`<div class="demo-medaillon">${htmlPortraitHeros(h, "demo-portrait")}</div>`, 3500), m = sc.querySelector(".demo-medaillon");
       const n = Math.max(1, Math.min(40, Number(B.degats) || 5));
-      setTimeout(() => { m.classList.add("touche"); flottantImmediat(m, -n); chocDegats(-n, true); eclat(centre(m.getBoundingClientRect()), "impact"); jouerSon("degats", {fixe:true}); }, 300);
+      setTimeout(() => { m.classList.add("touche"); flottantImmediat(m, -n); chocDegats(-n, true); eclat(centre(m.getBoundingClientRect()), "impact"); jouerSon("degats_heros", {fixe:true}); }, 300);
       return;
     }
     case "anim-danger": {
       const sc = scenetteDemo(`<div class="demo-medaillon en-danger">${htmlPortraitHeros(h, "demo-portrait")}<b class="demo-pv">7</b></div>`, 5000, true);
       let v = document.getElementById("vignette-danger");
       if(!v){ v = document.createElement("div"); v.id = "vignette-danger"; v.setAttribute("aria-hidden", "true"); document.body.appendChild(v); }
-      requestAnimationFrame(() => v.classList.add("actif"));
+      requestAnimationFrame(() => v.classList.add("actif")); jouerSon("coeur", {fixe:true});
       setTimeout(() => { if(!S || ui.ecran!=="jeu") v.classList.remove("actif"); }, 5000);
       return;
     }
-    case "anim-jauge": scenetteDemo(`<div class="demo-medaillon">${htmlPortraitHeros(h, "demo-portrait")}<span class="crepitement" aria-hidden="true"><i></i><i></i><i></i></span></div><p class="demo-legende">${esc("Jauge de pouvoir : 8 / 10")}</p>`, 5000); return;
+    case "anim-jauge": jouerSon("jauge_crepite"); scenetteDemo(`<div class="demo-medaillon">${htmlPortraitHeros(h, "demo-portrait")}<span class="crepitement" aria-hidden="true"><i></i><i></i><i></i></span></div><p class="demo-legende">${esc("Jauge de pouvoir : 8 / 10")}</p>`, 5000); return;
     case "anim-achat": {
       const k = carteDemo(d => d.prix>=3), L = 150;
       const de = {x:innerWidth*.75, y:innerHeight*.35}, a = {x:innerWidth*.2, y:innerHeight*.78}, bourse = {x:innerWidth*.25, y:innerHeight*.85};
@@ -12608,7 +12648,7 @@ function actionBancCombat(act, id){
     }
     case "anim-fin": {
       const p = {x:innerWidth/2, y:innerHeight*.35};
-      eclat(p, "impact"); jouerSon("chute", {fixe:true});
+      eclat(p, "impact"); if(id==="egalite") jouerSon("chute", {fixe:true});
       if(niv>=2 && id!=="egalite") coupFatal(p);
       setTimeout(() => afficherSceneFin(id, id==="defaite" ? h : h, true), (id==="egalite" ? 200 : 1100)*FX_LENT);
       return;
