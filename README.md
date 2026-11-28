@@ -395,3 +395,7 @@ Admin › Bruitages contient 24 nouveaux emplacements, rangés dans « Combat : 
 - Pour écouter chaque son avec son animation : Admin › Animations.
 
 Après l'ajout des fichiers, exportez config.json. Aucun script Supabase à exécuter.
+
+### Taille des bruitages
+
+Jusqu'à 1 Mo par fichier (MP3, OGG, WAV ou M4A). Sur le site, chaque son est envoyé dans le stockage Supabase (dossier `sons/` du stockage `images`), et config.json ne garde que son adresse : le jeu reste léger à charger. Le stockage est celui des images, déjà créé par `supabase-images.sql`.

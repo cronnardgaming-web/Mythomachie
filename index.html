@@ -11347,7 +11347,7 @@ function admBruitages(){
   const groupes = [...new Set(EVENEMENTS_SONS.map(e => e[1]))];
   return `<div class="adm-page adm-bruitages">
     <h2>Bruitages</h2>
-    <p class="aide">Déposez un ou plusieurs fichiers par événement (MP3 ou OGG, mono, 150 Ko maximum chacun). Avec plusieurs fichiers, le jeu en choisit un au hasard, et fait légèrement varier la hauteur à chaque lecture. Les combos sans son propre utilisent le son « Combo » s’il existe ; les cartes rares, épiques et légendaires reprennent le son de rareté inférieure.
+    <p class="aide">Déposez un ou plusieurs fichiers par événement (MP3, OGG, WAV ou M4A, 1 Mo maximum chacun). Sur le site, les sons sont rangés dans le stockage Supabase, comme les images : config.json ne garde que leur adresse. Avec plusieurs fichiers, le jeu en choisit un au hasard, et fait légèrement varier la hauteur à chaque lecture. Les combos sans son propre utilisent le son « Combo » s’il existe ; les cartes rares, épiques et légendaires reprennent le son de rareté inférieure.
       ${nb} événement${nb>1 ? "s" : ""} sur ${EVENEMENTS_SONS.length} ont un son · ${tailleTexte(total)} au total dans config.json. Après vos changements, exportez config.json.</p>
     ${groupes.map(g => `<h3>${esc(g)}</h3>${/nouvelles animations/.test(g) ? `<p class="aide">Pour entendre chaque son avec son animation : Admin › Animations.</p>` : ""}<div class="liste-sons">${EVENEMENTS_SONS.filter(e => e[1]===g).map(([k, , libelle, conseil]) => {
       const c = B[k] || {}, f = c.fichiers || [];
@@ -11382,8 +11382,21 @@ document.addEventListener("change", async e => {
     let ajoutes = 0;
     for(const f of e.target.files){
       if(!/^audio\//.test(f.type) && !/\.(mp3|ogg|wav|m4a)$/i.test(f.name)){ erreur(`« ${f.name} » n’est pas un fichier son.`); continue; }
-      if(f.size > 150 * 1024){ erreur(`« ${f.name} » pèse ${tailleTexte(f.size)} : 150 Ko maximum. Raccourcissez-le, passez-le en mono ou en MP3 à 96 kb/s.`); continue; }
-      const url = await new Promise(ok => { const lr = new FileReader(); lr.onload = () => ok(lr.result); lr.readAsDataURL(f); });
+      if(f.size > 1024 * 1024){ erreur(`« ${f.name} » pèse ${tailleTexte(f.size)} : 1 Mo maximum. Raccourcissez-le ou passez-le en MP3.`); continue; }
+      let url = null;
+      // Sur le site : le son va dans le stockage Supabase (comme les images), config.json ne garde que son adresse
+      try {
+        if(ASSETS){ url = (await ASSETS.upload(f)).url; }
+        else if(surSiteAdmin()){
+          const ext = (f.name.match(/\.(mp3|ogg|wav|m4a)$/i) || [, "mp3"])[1].toLowerCase();
+          const nom = `sons/${k}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${ext}`;
+          const st = sbc().storage.from("images");
+          const { error } = await st.upload(nom, f, {contentType:f.type || (ext==="ogg" ? "audio/ogg" : ext==="wav" ? "audio/wav" : ext==="m4a" ? "audio/mp4" : "audio/mpeg"), cacheControl:"31536000", upsert:false});
+          if(error) throw new Error(/bucket not found/i.test(error.message) ? "le stockage n’est pas encore créé : exécutez supabase-images.sql dans Supabase" : error.message);
+          url = st.getPublicUrl(nom).data.publicUrl;
+        }
+      } catch(er) { erreur(`« ${f.name} » : envoi impossible (${er.message}).`); continue; }
+      if(!url) url = await new Promise(ok => { const lr = new FileReader(); lr.onload = () => ok(lr.result); lr.readAsDataURL(f); });
       c.fichiers.push(url); ajoutes++;
     }
     e.target.value = "";
