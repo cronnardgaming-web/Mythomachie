@@ -399,3 +399,9 @@ Après l'ajout des fichiers, exportez config.json. Aucun script Supabase à exé
 ### Taille des bruitages
 
 Jusqu'à 1 Mo par fichier (MP3, OGG, WAV ou M4A). Sur le site, chaque son est envoyé dans le stockage Supabase (dossier `sons/` du stockage `images`), et config.json ne garde que son adresse : le jeu reste léger à charger. Le stockage est celui des images, déjà créé par `supabase-images.sql`.
+
+### Sons calés sur l'image
+
+- **Écran VS, pose d'une créature épique ou légendaire** : le jeu repère le moment le plus fort du son (l'impact) et le fait tomber pile sur le « VS » qui s'abat, ou sur la carte qui touche le terrain. Sans son dédié, la pose joue le son « Jouer une carte » au moment du choc.
+- **Victoire et défaite** : joués à l'apparition de l'écran de fin, plus au moment du coup fatal.
+- **Vitesse par son** (Admin › Bruitages, réglage « Vit. ») : en dessous de 1, le son est plus lent, plus grave et plus long. La mort égyptienne est réglée à 0,6 par défaut.

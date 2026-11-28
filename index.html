@@ -2367,6 +2367,13 @@ body.compact .emplacement-booster .booster{width:96px}
 .fx-part.glace{width:0;height:0;border-style:solid;border-color:transparent transparent rgba(205,236,255,.95) transparent;filter:drop-shadow(0 0 4px rgba(160,215,255,.9))}
 .fx-part.sable{border-radius:50%;background:#d9b46a;box-shadow:0 0 2px rgba(120,80,20,.6)}
 .fx-part.lotus{border-radius:50% 50% 50% 50% / 80% 80% 20% 20%;background:radial-gradient(circle at 50% 30%, hsl(var(--h) 90% 92%), hsl(var(--h) 75% 70%) 60%, hsl(var(--h) 60% 55%));box-shadow:0 0 8px hsl(var(--h) 90% 75% / .8)}
+.fx-givre{position:absolute;inset:0;z-index:4;pointer-events:none;border-radius:inherit;overflow:hidden;
+  background:linear-gradient(135deg, rgba(235,248,255,.6), rgba(150,205,245,.28) 45%, rgba(235,248,255,.65)), repeating-linear-gradient(120deg, rgba(255,255,255,.18) 0 2px, transparent 2px 9px);mix-blend-mode:screen}
+.fx-givre svg{position:absolute;inset:0;width:100%;height:100%}
+.fx-givre path{fill:none;stroke:#fff;stroke-width:1.8;stroke-linejoin:round;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 2px #8fd0ff)}
+.fx-part.paillette{border-radius:1px;background:#f2fbff;box-shadow:0 0 6px 2px rgba(150,215,255,.9);transform:rotate(45deg)}
+.fx-part.brume-glace{border-radius:50%;background:radial-gradient(circle, rgba(235,248,255,.85) 0, rgba(170,215,250,.45) 35%, transparent 70%)}
+.fx-part.halo-lotus{border-radius:50%;background:radial-gradient(circle, rgba(255,236,245,.9) 0, rgba(255,170,205,.5) 35%, rgba(255,140,190,0) 70%);mix-blend-mode:screen}
 .fx-fissures{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
 .fx-fissures path{fill:none;stroke:#2b2520;stroke-width:2.2;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 1px #fff)}
 
@@ -11177,8 +11184,8 @@ const EVENEMENTS_SONS = [
   ["top10", "Menus : nouvelles animations", "Entrée dans le top 10", "Courte fanfare triomphante, 1,5 s"]
 ];
 const SON_FALLBACK = {mort_nor:"creature_detruite", mort_egy:"creature_detruite", mort_gre:"creature_detruite", mort_hin:"creature_detruite",
-  pouvoir_gre:"pouvoir", pouvoir_nor:"pouvoir", pouvoir_egy:"pouvoir", pouvoir_hin:"pouvoir", entree_legendaire:"carte_revelee_epique",
-  pieces:"or", enveloppe:"carte_revelee_rare", saison_travail:"recompense", top10:"recompense",
+  pouvoir_gre:"pouvoir", pouvoir_nor:"pouvoir", pouvoir_egy:"pouvoir", pouvoir_hin:"pouvoir", entree_legendaire:"carte",
+  pieces:"or", enveloppe:"carte_revelee_rare", entree_epique:"carte", saison_travail:"recompense", top10:"recompense",
   carte_revelee_rare:"carte_revelee", carte_revelee_epique:"carte_revelee", carte_revelee_legendaire:"carte_revelee_epique", combo_egy:"combo", combo_hin:"combo", combo_nor:"combo", combo_gre:"combo"};
 const SONS = {ctx:null, cache:new Map(), file:[], enCours:false, dernier:{}, sortie:null, attente:[]};
 // Volume : nouveau réglage par défaut, bien plus discret (les anciens réglages sont abandonnés)
@@ -11201,6 +11208,30 @@ const poidsSon = cle => POIDS_SONS[cle] || POIDS_SONS[cle.replace(/_(egy|hin|nor
 // Durée maximale avant de passer au son suivant (un son long ne bloque pas la partie)
 const DUREE_MAX = {or:0.35, puissance:0.35, pioche:0.35, clic:0.15, carte:0.5, achat:0.6, victoire:3.5, defaite:3.5, carte_revelee_legendaire:2};
 const confSon = cle => { const b = CONFIG.bruitages || {}; let c = b[cle]; if((!c || !(c.fichiers || []).length) && SON_FALLBACK[cle]) c = b[SON_FALLBACK[cle]] || (SON_FALLBACK[SON_FALLBACK[cle]] && b[SON_FALLBACK[SON_FALLBACK[cle]]]); return c && (c.fichiers || []).length ? c : null; };
+// Vitesse de lecture par défaut (plus lent = plus grave et plus long) ; réglable dans Admin › Bruitages
+const VITESSE_SON = {mort_egy:0.6};
+const vitesseSon = (cle, conf) => Math.max(0.5, Math.min(1.5, Number((conf && conf.vitesse) ?? VITESSE_SON[cle] ?? 1) || 1));
+// Instant du pic (l’impact) du premier fichier d’un son, en millisecondes à la vitesse de lecture
+async function picSon(cle){
+  const conf = confSon(cle); if(!conf) return null;
+  const src = conf.fichiers[0];
+  SONS.pics = SONS.pics || {};
+  if(!(src in SONS.pics)){
+    const t = await tamponSon(src); if(!t) return null;
+    const d = t.getChannelData(0); let im = 0, m = 0;
+    for(let i = 0; i<d.length; i += 4){ const v = Math.abs(d[i]); if(v>m){ m = v; im = i; } }
+    SONS.pics[src] = im / t.sampleRate * 1000;
+  }
+  return SONS.pics[src] / vitesseSon(cle, conf);
+}
+// Joue un son pour que son impact tombe dans « dans » millisecondes ; renvoie le retard à donner à l’image si le son démarre trop tard
+async function jouerSonCale(cle, dans, attenteMax = 150){
+  if(!confSon(cle)) return 0;
+  const pic = await Promise.race([picSon(cle), new Promise(ok => setTimeout(() => ok(null), attenteMax))]);
+  const p = pic==null ? 0 : pic;
+  if(p <= dans){ setTimeout(() => jouerSon(cle, {immediat:true, fixe:true}), dans - p); return 0; }
+  jouerSon(cle, {immediat:true, fixe:true}); return p - dans;
+}
 const aDesBruitages = () => Object.values(CONFIG.bruitages || {}).some(c => c && (c.fichiers || []).length);
 function contexteAudio(){
   if(SONS.ctx) return SONS.ctx;
@@ -11232,12 +11263,12 @@ async function lireSon(cle, opts = {}){
   const src = conf.fichiers[Math.floor(Math.random() * conf.fichiers.length)];
   const gain = Math.max(0, Math.min(1.5, p.volume * (conf.volume ?? 1) * poidsSon(cle)[0] * (opts.gain ?? 1)));
   const c = contexteAudio();
-  if(!c){ try { const a = new Audio(src); a.volume = Math.min(1, gain); a.play().catch(() => {}); } catch(e) {} return 0.4; }
+  if(!c){ try { const a = new Audio(src); a.volume = Math.min(1, gain); a.playbackRate = vitesseSon(cle, conf); a.play().catch(() => {}); } catch(e) {} return 0.4; }
   const tampon = await tamponSon(src); if(!tampon) return 0;
-  const s = c.createBufferSource(), g = c.createGain(), vitesse = opts.fixe ? 1 : 1 + (Math.random() - 0.5) * 0.06;
+  const s = c.createBufferSource(), g = c.createGain(), vitesse = vitesseSon(cle, conf) * (opts.fixe ? 1 : 1 + (Math.random() - 0.5) * 0.06);
   s.buffer = tampon; s.playbackRate.value = vitesse; g.gain.value = gain;
   s.connect(g).connect(SONS.sortie || c.destination); s.start();
-  return Math.min(tampon.duration / vitesse, DUREE_MAX[cle] ?? 1.1);
+  return Math.min(tampon.duration / vitesse, (DUREE_MAX[cle] ?? 1.1) / Math.min(1, vitesse));
 }
 // File d’attente : un son à la fois, chacun attend la fin du précédent
 async function deroulerFile(){
@@ -11296,12 +11327,14 @@ function sonsDirects(ev){
 // ----- Branchement sur les événements de la partie : au plus 3 sons par action, sans doublon
 function cleSonEvenement(ev, moi){
   switch(ev.t){
-    case "carte": return "carte"; case "pioche": return "pioche"; case "achat": return "achat"; case "or": return "or"; case "puissance": return "puissance";
+    case "carte": { const id = typeof idDeUid==="function" ? idDeUid(ev.uid) : null, d = id && CARTES[id];
+      // Créature épique ou légendaire : le son est joué au moment où elle touche le terrain (entreeRarete)
+      return d && d.type==="creature" && (d.rarete==="legendaire" || d.rarete==="epique") && niveauAnim() ? null : "carte"; } case "pioche": return "pioche"; case "achat": return "achat"; case "or": return "or"; case "puissance": return "puissance";
     case "melange": return "melange"; case "defausse": return "fin_tour"; case "attaque": case "frappe": return ev.cible==="face" ? "degats_heros" : "attaque";
     case "mort": { const id = typeof idDeUid==="function" ? idDeUid(ev.uid) : null, f = id && CARTES[id] && CARTES[id].faction; return ["gre","nor","egy","hin"].includes(f) ? "mort_" + f : "creature_detruite"; } case "soin": return "soin"; case "arme": return "equipement"; case "bouclier": return "resistance";
     case "eclair": return "eclair"; case "onde": return "onde"; case "bannir": return "bannir"; case "sacrifice": return "sacrifice";
     case "combo": return "combo_" + (ev.faction || ""); case "pouvoir": { const f = S && S.joueurs[ev.j] && S.joueurs[ev.j].heros; return ["gre","nor","egy","hin"].includes(f) ? "pouvoir_" + f : "pouvoir"; } case "chute": return "chute"; case "resurrection": return "resurrection";
-    case "fin": return ev.perdant===moi ? "defaite" : "victoire";
+    case "fin": return S && S.tuto ? (ev.perdant===moi ? "defaite" : "victoire") : null;   // hors tutoriel : joué à l’apparition de l’écran de fin
     case "fin_temps": return "degats_heros";
   }
   return null;
@@ -11358,6 +11391,7 @@ function admBruitages(){
           <input type="file" accept="audio/*" multiple hidden data-son-fichier="${k}">
           <button type="button" class="btn second" data-act="son-ajouter" data-id="${k}">Ajouter</button>
           ${f.length ? `<label class="volume-son" title="Volume de cet événement"><span>Vol.</span><input type="range" min="0.1" max="1.5" step="0.05" value="${c.volume ?? 1}" data-son-volume="${k}"></label>
+            <label class="volume-son" title="Vitesse : plus lent = plus grave et plus long"><span>Vit. ${String(vitesseSon(k, c)).replace(".", ",")}</span><input type="range" min="0.5" max="1.5" step="0.05" value="${vitesseSon(k, c)}" data-son-vitesse="${k}"></label>
             <button type="button" class="btn-discret" data-act="son-tester" data-id="${k}">Tester</button>` : ""}
         </div></div>`; }).join("")}</div>`).join("")}
   </div>`;
@@ -11402,6 +11436,8 @@ document.addEventListener("change", async e => {
     e.target.value = "";
     if(ajoutes){ sauver(); renderAdmin(); erreur(`${ajoutes} son${ajoutes>1 ? "s" : ""} ajouté${ajoutes>1 ? "s" : ""}.`); }
   }
+  const kvit = e.target.dataset && e.target.dataset.sonVitesse;
+  if(kvit){ CONFIG.bruitages = CONFIG.bruitages || {}; CONFIG.bruitages[kvit] = CONFIG.bruitages[kvit] || {fichiers:[], volume:1}; CONFIG.bruitages[kvit].vitesse = Number(e.target.value); sauver(); renderAdmin(); lireSon(kvit, {fixe:true}); }
   const kv = e.target.dataset && e.target.dataset.sonVolume;
   if(kv && CONFIG.bruitages && CONFIG.bruitages[kv]){ CONFIG.bruitages[kv].volume = Number(e.target.value); sauver(); lireSon(kv, {}); }
 });
@@ -12221,6 +12257,12 @@ let VS_VU = null, VS_FIN = 0;
 function camp(i){ const j = S.joueurs[i]; return {heros:j.heros, palier:j.palier, nom:nomJoueurAffiche(j, i), cote:j.cote, image:(heroDe(j) || {}).image}; }
 function afficherVS(gauche, droite, sousTitre){
   const niv = niveauAnim(); if(!niv) return;
+  // Le « VS » s’abat à 28 % de l’animation : l’impact du son est calé sur cet instant
+  const D0 = 1150, impact = D0*.28*FX_LENT;
+  VS_FIN = Date.now() + D0*FX_LENT + 400;
+  jouerSonCale("vs", impact).then(retard => { if(retard>0){ VS_FIN += retard; setTimeout(() => afficherVSMaintenant(gauche, droite, sousTitre, niv), retard); } else afficherVSMaintenant(gauche, droite, sousTitre, niv); });
+}
+function afficherVSMaintenant(gauche, droite, sousTitre, niv){
   const ancien = document.getElementById("ecran-vs"); if(ancien) ancien.remove();
   const bloc = (l, cote) => `<div class="vs-camp ${cote}" style="--fc:${(FACTIONS[l[0].heros] || {}).couleur || "#c9a45a"}">
       ${l.map(p => { const h = heroDe(p) || {}; return `<div class="vs-joueur">${htmlPortraitHeros(p, "vs-portrait")}
@@ -12229,7 +12271,7 @@ function afficherVS(gauche, droite, sousTitre){
   e.innerHTML = `<div class="vs-fond"></div>${bloc(gauche, "gauche")}${bloc(droite, "droite")}<div class="vs-centre"><span class="vs-eclair"></span><b class="vs-mot">VS</b>${sousTitre ? `<span class="vs-sous">${esc(sousTitre)}</span>` : ""}</div>`;
   document.body.appendChild(e);
   const D = 1150;                        // durée totale (doublée par le ralenti global : ≈ 2,3 s)
-  VS_FIN = Date.now() + D*FX_LENT;
+  VS_FIN = Math.max(VS_FIN, Date.now() + D*FX_LENT);
   const g = e.querySelector(".vs-camp.gauche"), d = e.querySelector(".vs-camp.droite"), mot = e.querySelector(".vs-mot");
   e.querySelector(".vs-fond").animate([{opacity:0}, {opacity:1, offset:.12}, {opacity:1, offset:.82}, {opacity:0}], {duration:D, fill:"both"});
   const entre = "cubic-bezier(.2,.8,.3,1)", sort = "cubic-bezier(.6,0,.9,.4)";
@@ -12239,7 +12281,6 @@ function afficherVS(gauche, droite, sousTitre){
   e.querySelector(".vs-eclair").animate([{opacity:0, transform:"scale(.2)"}, {opacity:0, offset:.2}, {opacity:1, transform:"scale(1)", offset:.24}, {opacity:0, transform:"scale(1.8)", offset:.45}, {opacity:0}], {duration:D, fill:"both"});
   const sous = e.querySelector(".vs-sous"); if(sous) sous.animate([{opacity:0}, {opacity:0, offset:.3}, {opacity:1, offset:.38}, {opacity:1, offset:.8}, {opacity:0}], {duration:D, fill:"both"});
   if(niv>=2) setTimeout(() => secouerPlateau(10, 300), D*.24*FX_LENT);
-  setTimeout(() => jouerSon("vs", {fixe:true}), D*.22*FX_LENT);
   setTimeout(() => e.remove(), D*FX_LENT + 100);
 }
 function vsDePartie(){
@@ -12266,16 +12307,48 @@ function mortThematique(el, r, faction, niveau){
   if(niveau<2 || !["nor", "egy", "gre", "hin"].includes(faction)) return false;
   const dans = () => ({x:r.left + R()*r.width, y:r.top + R()*r.height});
   if(faction==="nor"){
-    // Éclats de glace : la carte gèle, puis vole en morceaux
-    el.animate([{filter:"none", opacity:1}, {filter:"brightness(1.6) saturate(.2) hue-rotate(170deg)", opacity:1, offset:.35}, {filter:"brightness(2.2) saturate(0)", opacity:0}], {duration:520, delay:200, fill:"both"}).finished.then(fin, fin);
-    for(let k = 0; k<16; k++){
-      const p = dans(), a = Math.atan2(p.y - c.y, p.x - c.x) + (R() - .5)*.6, v = 60 + R()*110, t = 6 + R()*14;
-      const e = particule("glace", p.x, p.y, `border-left-width:${t*.45}px;border-right-width:${t*.45}px;border-bottom-width:${t*1.6}px`);
-      e.animate([{transform:"translate(-50%,-50%) rotate(0) scale(.4)", opacity:0}, {transform:"translate(-50%,-50%) rotate(0) scale(1)", opacity:1, offset:.38},
-        {transform:`translate(calc(-50% + ${Math.cos(a)*v}px),calc(-50% + ${Math.sin(a)*v + 40}px)) rotate(${(R() - .5)*540}deg) scale(.8)`, opacity:0}],
-        {duration:620, delay:200, easing:"cubic-bezier(.2,.7,.4,1)", fill:"both"}).finished.then(() => e.remove(), () => e.remove());
-    }
-    eclat(c, "impact", 380);
+    // 1. Le givre gagne la carte et la fissure depuis le centre
+    const base = el.style.transform || "", gel = 300;
+    const ox = 42 + R()*16, oy = 40 + R()*20;
+    const fentes = Array.from({length:9}, (x, k) => { const a = k/9*Math.PI*2 + (R() - .5)*.5; let px = ox, py = oy, d = `M${ox.toFixed(1)} ${oy.toFixed(1)}`;
+      for(let n = 0; n<4; n++){ px += Math.cos(a + (R() - .5)*.7)*(9 + R()*9); py += Math.sin(a + (R() - .5)*.7)*(12 + R()*12); d += ` L${px.toFixed(1)} ${py.toFixed(1)}`; } return d; }).join(" ");
+    el.insertAdjacentHTML("beforeend", `<span class="fx-givre"><svg viewBox="0 0 100 140" preserveAspectRatio="none"><path d="${fentes}"/></svg></span>`);
+    const givre = el.querySelector(".fx-givre"), trait = givre.querySelector("path");
+    givre.animate([{opacity:0}, {opacity:1}], {duration:200, delay:60, fill:"both"});
+    trait.style.strokeDasharray = 600; trait.animate([{strokeDashoffset:600}, {strokeDashoffset:0}], {duration:200, delay:140, easing:"ease-out", fill:"both"});
+    el.animate([{filter:"none", transform:base}, {filter:"saturate(.4) brightness(1.2) hue-rotate(175deg)", transform:base, offset:.6}, {filter:"saturate(.3) brightness(1.35) hue-rotate(180deg)", transform:base + " scale(1.03)"}], {duration:gel, fill:"both"});
+    // 2. La carte éclate : chaque éclat est un vrai morceau de la carte, qui part en tournoyant
+    const coins = [[0, 0], [100, 0], [100, 100], [0, 100]], angle = ([x, y]) => Math.atan2((y - oy*100/140)*1.4, x - ox);
+    const nb = 11, angles = Array.from({length:nb}, (x, k) => -Math.PI + (k + .2 + R()*.6)*(2*Math.PI/nb));
+    const bord = a => { const dx = Math.cos(a), dy = Math.sin(a)/1.4, cy = oy*100/140; let t = Infinity;
+      if(dx>0) t = Math.min(t, (100 - ox)/dx); if(dx<0) t = Math.min(t, -ox/dx); if(dy>0) t = Math.min(t, (100 - cy)/dy); if(dy<0) t = Math.min(t, -cy/dy);
+      return [ox + dx*t, cy + dy*t]; };
+    setTimeout(() => {
+      el.style.opacity = "0";
+      eclat(c, "impact");
+      angles.forEach((a0, k) => {
+        const a1 = angles[(k + 1) % nb] + (k===nb - 1 ? 2*Math.PI : 0);
+        const pts = [[ox, oy*100/140], bord(a0), ...coins.filter(p => { let q = angle(p); if(q < a0) q += 2*Math.PI; return q > a0 && q < a1; }).sort((p, q) => { let x = angle(p), y = angle(q); if(x<a0) x += 2*Math.PI; if(y<a0) y += 2*Math.PI; return x - y; }), bord(a1)];
+        const m = el.cloneNode(true); m.style.opacity = "1"; m.style.clipPath = `polygon(${pts.map(([x, y]) => `${x.toFixed(1)}% ${y.toFixed(1)}%`).join(",")})`;
+        calqueFx().appendChild(m);
+        const am = (a0 + a1)/2, v = 50 + R()*70, dx = Math.cos(am)*v, dy = Math.sin(am)*v, rot = (R() - .5)*160;
+        m.animate([{transform:base + " scale(1.03)", opacity:1, filter:"saturate(.3) brightness(1.35) hue-rotate(180deg)"},
+          {transform:`${base} translate(${dx*.55}px,${dy*.55 - 12}px) rotate(${rot*.4}deg) scale(1)`, opacity:1, filter:"saturate(.25) brightness(1.6) hue-rotate(180deg)", offset:.35},
+          {transform:`${base} translate(${dx}px,${dy + 70}px) rotate(${rot}deg) scale(.85)`, opacity:0, filter:"saturate(.2) brightness(2) hue-rotate(180deg)"}],
+          {duration:700 + R()*200, easing:"cubic-bezier(.15,.65,.35,1)", fill:"both"}).finished.then(() => m.remove(), () => m.remove());
+      });
+      // Poudreuse et paillettes de glace
+      const brume = particule("brume-glace", c.x, c.y, `width:${r.width*1.6}px;height:${r.width*1.6}px`);
+      brume.animate([{transform:"translate(-50%,-50%) scale(.4)", opacity:.9}, {transform:"translate(-50%,-50%) scale(1.3)", opacity:0}], {duration:700, easing:"ease-out", fill:"both"}).finished.then(() => brume.remove(), () => brume.remove());
+      for(let k = 0; k<26; k++){
+        const p = dans(), a = Math.atan2(p.y - c.y, p.x - c.x) + (R() - .5)*.8, v = 40 + R()*120, t = 3 + R()*6;
+        const e = particule(k%3 ? "paillette" : "glace", p.x, p.y, k%3 ? `width:${t*.6}px;height:${t*.6}px` : `border-left-width:${t*.4}px;border-right-width:${t*.4}px;border-bottom-width:${t*1.5}px`);
+        e.animate([{transform:"translate(-50%,-50%) rotate(0) scale(.3)", opacity:0}, {transform:`translate(calc(-50% + ${Math.cos(a)*v*.4}px),calc(-50% + ${Math.sin(a)*v*.4}px)) rotate(${(R() - .5)*200}deg) scale(1)`, opacity:1, offset:.25},
+          {transform:`translate(calc(-50% + ${Math.cos(a)*v}px),calc(-50% + ${Math.sin(a)*v + 50}px)) rotate(${(R() - .5)*500}deg) scale(.6)`, opacity:0}],
+          {duration:700 + R()*400, easing:"cubic-bezier(.2,.7,.4,1)", fill:"both"}).finished.then(() => e.remove(), () => e.remove());
+      }
+      setTimeout(fin, 1200*FX_LENT);
+    }, gel*FX_LENT);
   } else if(faction==="egy"){
     // Sable : la carte s’effrite de haut en bas, les grains tombent
     el.animate([{clipPath:"inset(0 0 0 0)", filter:"sepia(0)", opacity:1}, {clipPath:"inset(0 0 0 0)", filter:"sepia(.9) brightness(1.1)", opacity:1, offset:.25}, {clipPath:"inset(100% 0 0 0)", filter:"sepia(1) brightness(1.2)", opacity:.6}], {duration:760, delay:180, easing:"ease-in", fill:"both"}).finished.then(fin, fin);
@@ -12312,7 +12385,8 @@ function mortThematique(el, r, faction, niveau){
         {transform:`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) rotate(${sp}deg) scale(.9)`, opacity:0}], {duration:1000 + R()*400, delay:200 + R()*200, easing:"cubic-bezier(.2,.6,.4,1)", fill:"both"})
         .finished.then(() => e.remove(), () => e.remove());
     }
-    eclat(c, "soin", 220);
+    const halo = particule("halo-lotus", c.x, c.y, `width:${r.width*1.4}px;height:${r.width*1.4}px`);
+    halo.animate([{transform:"translate(-50%,-50%) scale(.3)", opacity:0}, {transform:"translate(-50%,-50%) scale(.9)", opacity:.9, offset:.35}, {transform:"translate(-50%,-50%) scale(1.5)", opacity:0}], {duration:900, delay:180, easing:"ease-out", fill:"both"}).finished.then(() => halo.remove(), () => halo.remove());
   }
   return true;
 }
@@ -12321,17 +12395,19 @@ function mortThematique(el, r, faction, niveau){
 function entreeRarete(el, rar, niveau){
   if(!el || !niveau) return;
   if(rar==="epique"){
-    el.classList.add("arrivee-epique"); jouerSon("entree_epique", {fixe:true});
-    setTimeout(() => { const r = el.getBoundingClientRect(); eclat({x:r.left + r.width/2, y:r.bottom - 6}, "impact"); if(niveau>=2) secouerPlateau(4, 220); }, 260*FX_LENT);
+    // La carte touche le terrain à 70 % de son animation CSS de 0,62 s
+    el.classList.add("arrivee-epique"); jouerSonCale("entree_epique", 430);
+    setTimeout(() => { const r = el.getBoundingClientRect(); eclat({x:r.left + r.width/2, y:r.bottom - 6}, "impact"); if(niveau>=2) secouerPlateau(4, 220); }, 430);
   } else if(rar==="legendaire"){
-    el.classList.add("arrivee-legendaire"); jouerSon("entree_legendaire", {fixe:true});
+    // La carte touche le terrain à 45 % de son animation CSS d’une seconde : BOOM, son et tremblement ensemble
+    el.classList.add("arrivee-legendaire"); jouerSonCale("entree_legendaire", 450);
     if(niveau>=2){
       const r = el.getBoundingClientRect(), col = document.createElement("span");
       col.className = "fx-colonne"; col.style.left = (r.left + r.width/2) + "px"; col.style.width = (r.width*1.5) + "px"; col.style.height = (r.bottom + 20) + "px";
       calqueFx().appendChild(col);
       col.animate([{opacity:0, transform:"translateX(-50%) scaleX(.2)"}, {opacity:1, transform:"translateX(-50%) scaleX(1)", offset:.25}, {opacity:.9, transform:"translateX(-50%) scaleX(.85)", offset:.6}, {opacity:0, transform:"translateX(-50%) scaleX(.1)"}],
         {duration:900, easing:"ease-out", fill:"both"}).finished.then(() => col.remove(), () => col.remove());
-      setTimeout(() => { eclat({x:r.left + r.width/2, y:r.top + r.height/2}, "pouvoir"); secouerPlateau(11, 420); }, 300*FX_LENT);
+      setTimeout(() => { eclat({x:r.left + r.width/2, y:r.top + r.height/2}, "pouvoir"); secouerPlateau(11, 420); }, 450);
     }
   }
 }
@@ -12527,7 +12603,16 @@ function majAmbiance(force){
 }
 
 /* ----- Après chaque affichage ----- */
+let FIN_SONNEE = null;
+function sonFinDePartie(){
+  if(!S || S.tuto || S.vainqueur===null || FIN_SONNEE===S.idPartie) return;
+  if(!document.querySelector("#couche .boite[data-fin]")) return;
+  FIN_SONNEE = S.idPartie;
+  const issue = issueFin();
+  if(issue==="victoire" || issue==="defaite") jouerSon(issue, {immediat:true, fixe:true});
+}
 function apresRendu(){
+  try { sonFinDePartie(); } catch(e) {}
   try { majTensionCombat(); } catch(e) {}
   try { majSceneFin(); } catch(e) {}
   try { animerCote(); } catch(e) {}
