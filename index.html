@@ -5441,6 +5441,29 @@ document.addEventListener("input", e => {
     renderAdmin();
   }
 });
+// Musique envoyée depuis l’ordinateur : rangée dans le stockage Supabase, son adresse remplit le champ
+document.addEventListener("change", async e => {
+  const ch = e.target.dataset && e.target.dataset.musiqueFichier; if(!ch) return;
+  const f = e.target.files && e.target.files[0]; e.target.value = ""; if(!f) return;
+  if(!/^audio\//.test(f.type) && !/\.(mp3|ogg|m4a|wav|aac)$/i.test(f.name)) return erreur(`« ${f.name} » n’est pas un fichier audio.`);
+  if(f.size > 50 * 1024 * 1024) return erreur(`« ${f.name} » pèse ${tailleTexte(f.size)} : 50 Mo maximum. Réenregistrez-le en MP3 à 128 kb/s (environ 1 Mo par minute).`);
+  let url = null;
+  try {
+    erreur(`Envoi de « ${f.name} » (${tailleTexte(f.size)})…`);
+    if(ASSETS) url = (await ASSETS.upload(f)).url;
+    else if(surSiteAdmin()){
+      const ext = (f.name.match(/\.(mp3|ogg|m4a|wav|aac)$/i) || [, "mp3"])[1].toLowerCase();
+      const base = f.name.replace(/\.[^.]+$/, "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 50) || "musique";
+      const nom = `musiques/${base}-${Date.now()}.${ext}`;
+      const st = sbc().storage.from("images");
+      const { error } = await st.upload(nom, f, {contentType:f.type || (ext==="m4a" ? "audio/mp4" : ext==="ogg" ? "audio/ogg" : ext==="wav" ? "audio/wav" : "audio/mpeg"), cacheControl:"31536000", upsert:false});
+      if(error) throw new Error(/bucket not found/i.test(error.message) ? "le stockage n’est pas encore créé : exécutez supabase-images.sql dans Supabase" : /exceeded|too large|maximum allowed size/i.test(error.message) ? "fichier trop lourd pour votre stockage Supabase (limite réglable dans Storage › Settings)" : error.message);
+      url = st.getPublicUrl(nom).data.publicUrl;
+    } else return erreur("L’envoi de fichiers fonctionne sur votre site, connecté avec le compte admin.");
+  } catch(er) { return erreur(`Envoi impossible : ${er.message}.`); }
+  majChemin(ch, url, false); sauver(); renderAdmin();
+  erreur(`« ${f.name} » est en ligne. Pensez à exporter config.json.`);
+});
 // Budget et aperçu de la carte mis à jour à chaque chiffre, sans redessiner le formulaire
 function majBudgetDirect(){
   if(adm.onglet!=="cartes" || !adm.sel || !CARTES[adm.sel]) return;
@@ -8253,11 +8276,14 @@ function admMusiques(){
   const ligne = (label, ch, val, suppr) => `<div class="ligne-musique">
       <label class="champ"><span>${label}</span><input type="text" data-chemin="${ch}" value="${esc(val || "")}" placeholder="musiques/nom-du-fichier.mp3"></label>
       <button type="button" class="btn second" data-act="mus-ecouter" data-id="${esc(val || "")}" ${val ? "" : "disabled"}>${MUSIQUE.ecoute && MUSIQUE.ecoute.chemin===val ? "Arrêter" : "Écouter"}</button>
+      <input type="file" accept="audio/*" hidden data-musique-fichier="${ch}">
+      <button type="button" class="btn second" data-act="mus-envoyer" data-id="${ch}" title="Envoie le fichier dans le stockage Supabase (jusqu’à 50 Mo) : plus besoin de passer par GitHub">Envoyer un fichier</button>
       ${suppr!=null ? `<button type="button" class="btn second" data-act="mus-retirer" data-id="${suppr}">Retirer</button>` : ""}
       ${val ? etat(val) : ""}</div>`;
   return `<div class="adm-page">
     <h2>Musiques</h2>
     <p class="aide">Déposez vos fichiers audio (MP3 de préférence) dans un dossier <b>musiques</b> de votre dépôt GitHub, à côté de index.html, puis indiquez ici leur chemin, par exemple <code>musiques/menu.mp3</code>. Évitez les espaces et les accents dans les noms de fichiers. Une adresse web complète (https://…) fonctionne aussi.</p>
+    <p class="aide"><b>Plus simple :</b> le bouton « Envoyer un fichier » range la musique dans le stockage Supabase (jusqu’à 50 Mo par fichier) et remplit l’adresse tout seul. Pas besoin de GitHub, qui refuse les fichiers de plus de 25 Mo envoyés depuis son site.</p>
     <p class="aide">Après vos changements, exportez config.json (onglet Sauvegarde) et déposez-le sur GitHub.</p>
     <h3>Menus</h3>
     ${ligne("Musique des menus (jouée en boucle)", "musiques.menu", m.menu, null)}
@@ -8280,6 +8306,7 @@ async function actionMusiques(act, id){
   const m = CONFIG.musiques || (CONFIG.musiques = {menu:"", duel:[]});
   switch(act){
     case "mus-ajouter": m.duel = [...(m.duel || []), ""]; sauver(); break;
+    case "mus-envoyer": { const i = document.querySelector(`[data-musique-fichier="${id}"]`); if(i) i.click(); return; }
     case "mus-credit-ajouter": { if(!CONFIG.credits) CONFIG.credits = {musiques:[]}; CONFIG.credits.musiques.push({titre:"", artiste:""}); sauver(); break; }
     case "mus-credit-retirer": { CONFIG.credits.musiques.splice(Number(id), 1); sauver(); break; }
     case "mus-retirer": m.duel.splice(Number(id), 1); sauver(); break;
